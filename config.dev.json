@@ -1,0 +1,7 @@
+{
+	"git_url": "https://github.com/Theodor-Springmann-Stiftung/KGPZ.git",
+	"git_branch": "main",
+	"webhook_endpoint": "/webhook",
+	"webhook_secret": "secret",
+	"debug": true
+}
