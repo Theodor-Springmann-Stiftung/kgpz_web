@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -19,6 +20,8 @@ var InvalidStateError = errors.New("The GitProvider is not in a valid state. Fix
 // In case of success in either case it updates the commit hash and date and closes the repo again.
 // The Files are opened  and serialized by the FSProvider, which operates on the same file path.
 type GitProvider struct {
+	mu sync.Mutex
+
 	URL    string
 	Path   string
 	Branch string
@@ -34,6 +37,9 @@ func NewGitProvider(url string, path string, branch string) *GitProvider {
 }
 
 func (g *GitProvider) Pull() error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	branch := plumbing.NewBranchReferenceName(g.Branch)
 	repo, err := git.PlainOpen(g.Path)
 	if err != nil {
@@ -65,6 +71,9 @@ func (g *GitProvider) Pull() error {
 }
 
 func (g *GitProvider) Clone() error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	branch := plumbing.NewBranchReferenceName(g.Branch)
 
 	repo, err := git.PlainClone(g.Path, false, &git.CloneOptions{
@@ -118,7 +127,11 @@ func (g *GitProvider) setValues(repo *git.Repository) error {
 	return err
 }
 
+// WARNING: this expects the repo to be in a certain state and is intended to be used in tests.
 func (g *GitProvider) Read() error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	repo, err := git.PlainOpen(g.Path)
 	if err != nil {
 		return err
@@ -138,6 +151,9 @@ func (g *GitProvider) Read() error {
 }
 
 func (g *GitProvider) Validate() error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	if g.Commit == "" || g.Date.IsZero() {
 		return InvalidStateError
 	}
