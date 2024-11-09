@@ -5,6 +5,7 @@ go 1.23.2
 require (
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/yalue/merged_fs v1.3.0
 )
 
 require (
