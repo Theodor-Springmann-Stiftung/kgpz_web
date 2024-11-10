@@ -15,22 +15,12 @@ type Works struct {
 }
 
 type Work struct {
-	ID       string     `xml:"id,attr"`
+	XMLName  xml.Name   `xml:"werk"`
 	URLs     []URL      `xml:"url"`
 	Citation []string   `xml:"zitation"`
 	Akteur   []AgentRef `xml:"akteur"`
+	Identifier
 	AnnotationNote
-}
-
-type AgentRef struct {
-	Ref      string `xml:"ref,attr"`
-	Category string `xml:"Kat,attr"`
-	Value    string `xml:",chardata"`
-}
-
-type URL struct {
-	Address string `xml:"address,attr"`
-	Value   string `xml:",chardata"`
 }
 
 func (w Works) Append(data Works) Works {

@@ -15,26 +15,30 @@ type Issues struct {
 }
 
 type Issue struct {
-	ID          string       `xml:"id,attr"`
+	XMLName     xml.Name     `xml:"stueck"`
 	Number      IssueNumber  `xml:"nummer"`
 	Datum       KGPZDate     `xml:"datum"`
 	Von         string       `xml:"von"`
 	Bis         string       `xml:"bis"`
 	Additionals []Additional `xml:"beilage"`
+	Identifier
+	AnnotationNote
 }
 
 type IssueNumber struct {
-	XMLName   xml.Name `xml:"nummer"`
-	Value     string   `xml:",chardata"`
-	Corrected string   `xml:"korrigiert,attr"`
+	XMLName xml.Name `xml:"nummer"`
+	Value
+	Corrected string `xml:"korrigiert,attr"`
 }
 
 type KGPZDate struct {
-	When      string `xml:"when,attr"`
-	NotBefore string `xml:"notBefore,attr"`
-	NotAfter  string `xml:"notAfter,attr"`
-	From      string `xml:"from,attr"`
-	To        string `xml:"to,attr"`
+	XMLName   xml.Name `xml:"datum"`
+	When      string   `xml:"when,attr"`
+	NotBefore string   `xml:"notBefore,attr"`
+	NotAfter  string   `xml:"notAfter,attr"`
+	From      string   `xml:"from,attr"`
+	To        string   `xml:"to,attr"`
+	Value
 }
 
 type Additional struct {

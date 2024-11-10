@@ -1,48 +1,55 @@
 package providers
 
-import (
-	"encoding/xml"
-	"fmt"
-	"io"
-	"os"
-	"sync"
-)
+import "encoding/xml"
 
-type KGPZXML[T any] interface {
-	Append(data T) T
-	fmt.Stringer
+type AgentRef struct {
+	XMLName xml.Name `xml:"akteur"`
+	Reference
 }
 
-type XMLProvider[T KGPZXML[T]] struct {
-	mu    sync.Mutex
-	paths []string
-	Items T
+type URL struct {
+	XMLName xml.Name `xml:"url"`
+	Address string   `xml:"address,attr"`
+	Value
 }
 
-func (p *XMLProvider[T]) Load() error {
-	var wg sync.WaitGroup
-	for _, path := range p.paths {
-		wg.Add(1)
-		go func(path string) {
-			defer wg.Done()
-			var data T
-			if err := UnmarshalFile(path, &data); err != nil {
-				fmt.Println(err)
-				return
-			}
-			p.mu.Lock()
-			p.Items = p.Items.Append(data)
-			p.mu.Unlock()
-		}(path)
-	}
-	wg.Wait()
-	return nil
+type AdditionalRef struct {
+	XMLName xml.Name `xml:"beilage"`
+	Reference
+	Datum string `xml:"datum,attr"`
+	Nr    string `xml:"nr,attr"`
+	Von   string `xml:"von,attr"`
+	Bis   string `xml:"bis,attr"`
 }
 
-func (a *XMLProvider[T]) String() string {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	return fmt.Sprintf("Items: %s", a.Items)
+type IssueRef struct {
+	XMLName xml.Name `xml:"stueck"`
+	Reference
+	Datum string `xml:"datum,attr"`
+	Nr    string `xml:"nr,attr"`
+	Von   string `xml:"von,attr"`
+	Bis   string `xml:"bis,attr"`
+}
+
+type PlaceRef struct {
+	XMLName xml.Name `xml:"ort"`
+	Reference
+}
+
+type CategoryRef struct {
+	XMLName xml.Name `xml:"kategorie"`
+	Reference
+}
+
+type WorkRef struct {
+	XMLName xml.Name `xml:"werk"`
+	Reference
+	Page string `xml:"s,attr"`
+}
+
+type PieceRef struct {
+	XMLName xml.Name `xml:"beitrag"`
+	Reference
 }
 
 type AnnotationNote struct {
@@ -50,16 +57,17 @@ type AnnotationNote struct {
 	Notes       []string `xml:"vermerk"`
 }
 
-func UnmarshalFile[T any](filename string, data *T) error {
-	xmlFile, err := os.Open(filename)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	fmt.Println("Successfully opened " + filename)
-	defer xmlFile.Close()
-	byteValue, _ := io.ReadAll(xmlFile)
-	xml.Unmarshal(byteValue, data)
+type Identifier struct {
+	ID string `xml:"id,attr"`
+}
 
-	return nil
+type Reference struct {
+	Ref      string `xml:"ref,attr"`
+	Category string `xml:"kat,attr"`
+	Unsicher bool   `xml:"unsicher,attr"`
+	Value
+}
+
+type Value struct {
+	Value string `xml:",chardata"`
 }

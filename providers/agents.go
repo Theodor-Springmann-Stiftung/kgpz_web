@@ -11,11 +11,11 @@ type AgentProvider struct {
 
 type Agent struct {
 	XMLName  xml.Name `xml:"akteur"`
-	ID       string   `xml:"id,attr"`
 	Names    []string `xml:"name"`
 	SortName string   `xml:"sortiername"`
 	Life     string   `xml:"lebensdaten"`
 	GND      string   `xml:"gnd"`
+	Identifier
 	AnnotationNote
 }
 

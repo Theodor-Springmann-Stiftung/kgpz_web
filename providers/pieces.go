@@ -15,7 +15,7 @@ type Pieces struct {
 }
 
 type Piece struct {
-	ID            string          `xml:"id,attr"`
+	XMLName       xml.Name        `xml:"beitrag"`
 	IssueRefs     []IssueRef      `xml:"stueck"`
 	PlaceRefs     []PlaceRef      `xml:"ort"`
 	CategoryRefs  []CategoryRef   `xml:"kategorie"`
@@ -25,48 +25,8 @@ type Piece struct {
 	AdditionalRef []AdditionalRef `xml:"beilage"`
 	Incipit       []string        `xml:"incipit"`
 	Title         []string        `xml:"titel"`
+	Identifier
 	AnnotationNote
-}
-
-type AdditionalRef struct {
-	Datum string `xml:"datum,attr"`
-	Nr    string `xml:"nr,attr"`
-	Von   string `xml:"von,attr"`
-	Bis   string `xml:"bis,attr"`
-	Value string `xml:",chardata"`
-}
-
-type IssueRef struct {
-	Datum    string `xml:"datum,attr"`
-	Nr       string `xml:"nr,attr"`
-	Von      string `xml:"von,attr"`
-	Bis      string `xml:"bis,attr"`
-	Value    string `xml:",chardata"`
-	Category string `xml:"kat,attr"`
-}
-
-type PlaceRef struct {
-	Ref      string `xml:"ref,attr"`
-	Value    string `xml:",chardata"`
-	Category string `xml:"kat,attr"`
-}
-
-type CategoryRef struct {
-	Ref   string `xml:"ref,attr"`
-	Value string `xml:",chardata"`
-}
-
-type WorkRef struct {
-	Ref      string `xml:"ref,attr"`
-	Value    string `xml:",chardata"`
-	Category string `xml:"kat,attr"`
-	Page     string `xml:"s,attr"`
-}
-
-type PieceRef struct {
-	Ref      string `xml:"ref,attr"`
-	Category string `xml:"kat,attr"`
-	Value    string `xml:",chardata"`
 }
 
 func (p Pieces) Append(data Pieces) Pieces {

@@ -15,10 +15,11 @@ type Places struct {
 }
 
 type Place struct {
-	ID       string   `xml:"id,attr"`
+	XMLName  xml.Name `xml:"ort"`
 	Names    []string `xml:"name"`
 	SortName string   `xml:"sortiername"`
 	Geo      string   `xml:"geonames"`
+	Identifier
 	AnnotationNote
 }
 

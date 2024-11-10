@@ -15,9 +15,10 @@ type Categories struct {
 }
 
 type Category struct {
-	ID       string   `xml:"id,attr"`
+	XMLName  xml.Name `xml:"kategorie"`
 	Names    []string `xml:"name"`
 	SortName string   `xml:"sortiername"`
+	Identifier
 	AnnotationNote
 }
 
