@@ -3,4 +3,5 @@ data_git/
 cache_geo/
 cache_gnd/
 config.json
+out.log
 kgpz_web
