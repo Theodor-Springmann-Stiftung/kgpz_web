@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 
 	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
@@ -14,9 +15,19 @@ import (
 //		- Setup GitHub webhook if set
 // 3. Serialize XML DATA
 
+const (
+	AGENTS_PATH     = "XML/akteure.xml"
+	PLACES_PATH     = "XML/orte.xml"
+	WORKS_PATH      = "XML/werke.xml"
+	CATEGORIES_PATH = "XML/kategorien.xml"
+)
+
 type KGPZ struct {
 	Config *providers.ConfigProvider
 	Repo   *providers.GitProvider
+	Agents *providers.AgentProvider
+	Places *providers.PlaceProvider
+	Works  *providers.WorkProvider
 }
 
 func NewKGPZ(config *providers.ConfigProvider) *KGPZ {
@@ -63,7 +74,58 @@ func (k *KGPZ) InitRepo() {
 			helpers.LogOnDebug(gp, "GitProvider")
 		}
 	}
+}
 
+func (k *KGPZ) InitAgents() {
+	ap := providers.NewAgentProvider([]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)})
+	if ap != nil {
+		if err := ap.Load(); err != nil {
+			helpers.LogOnErr(ap, err, "Error loading agents")
+		}
+
+		if k.IsDebug() {
+			helpers.LogOnDebug(ap, "AgentProvider")
+		}
+	}
+}
+
+func (k *KGPZ) InitPlaces() {
+	pp := providers.NewPlaceProvider([]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)})
+	if pp != nil {
+		if err := pp.Load(); err != nil {
+			helpers.LogOnErr(pp, err, "Error loading places")
+		}
+
+		if k.IsDebug() {
+			helpers.LogOnDebug(pp, "PlaceProvider")
+		}
+	}
+}
+
+func (k *KGPZ) InitWorks() {
+	wp := providers.NewWorkProvider([]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)})
+	if wp != nil {
+		if err := wp.Load(); err != nil {
+			helpers.LogOnErr(wp, err, "Error loading works")
+		}
+
+		if k.IsDebug() {
+			helpers.LogOnDebug(wp, "WorkProvider")
+		}
+	}
+}
+
+func (k *KGPZ) InitCategories() {
+	cp := providers.NewCategoryProvider([]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)})
+	if cp != nil {
+		if err := cp.Load(); err != nil {
+			helpers.LogOnErr(cp, err, "Error loading categories")
+		}
+
+		if k.IsDebug() {
+			helpers.LogOnDebug(cp, "CategoryProvider")
+		}
+	}
 }
 
 func main() {
@@ -74,5 +136,8 @@ func main() {
 
 	kgpz := NewKGPZ(cfg)
 	kgpz.InitRepo()
-
+	kgpz.InitAgents()
+	kgpz.InitPlaces()
+	kgpz.InitWorks()
+	kgpz.InitCategories()
 }
