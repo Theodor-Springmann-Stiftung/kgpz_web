@@ -106,8 +106,9 @@ func (k *KGPZ) InitRepo() {
 
 // This panics if the data cant be read, and there is no data read
 func (k *KGPZ) Serialize() {
-	// TODO: maybe dont panic if a webhook can be setup, we need to check the requirements only when starting the server
-
+	// TODO: maybe dont panic.
+	// We need to check the requirements only when starting the server
+	// We can serve an error page
 	new := Library{}
 
 	wg := sync.WaitGroup{}
@@ -115,103 +116,54 @@ func (k *KGPZ) Serialize() {
 
 	go func() {
 		defer wg.Done()
-		agents := k.InitAgents()
-		if agents == nil && k.Agents != nil {
-			helpers.LogOnErr(&k.Agents, nil, "Error initializing agents, keeping old state")
-			new.Agents = k.Agents
-			return
-		} else if agents == nil {
-			helpers.Panic(nil, "Error initializing agents")
-			return
-		}
-		new.Agents = agents
+		new.Agents = k.InitAgents()
 	}()
 
 	go func() {
 		defer wg.Done()
-		places := k.InitPlaces()
-		if places == nil && k.Places != nil {
-			helpers.LogOnErr(&k.Places, nil, "Error initializing places, keeping old state")
-			new.Places = k.Places
-			return
-		} else if places == nil {
-			helpers.Panic(nil, "Error initializing places")
-			return
-		}
-		new.Places = places
+		new.Places = k.InitPlaces()
 	}()
 
 	go func() {
 		defer wg.Done()
-		works := k.InitWorks()
-		if works == nil && k.Works != nil {
-			helpers.LogOnErr(&k.Works, nil, "Error initializing works, keeping old state")
-			new.Works = k.Works
-			return
-		} else if works == nil {
-			helpers.Panic(nil, "Error initializing works")
-			return
-		}
-		new.Works = works
+		new.Works = k.InitWorks()
 	}()
 
 	go func() {
 		defer wg.Done()
-		categories := k.InitCategories()
-		if categories == nil && k.Categories != nil {
-			helpers.LogOnErr(&k.Categories, nil, "Error initializing categories, keeping old state")
-			new.Categories = k.Categories
-			return
-		} else if categories == nil {
-			helpers.Panic(nil, "Error initializing categories")
-			return
-		}
-		new.Categories = categories
+		new.Categories = k.InitCategories()
 	}()
 
 	go func() {
 		defer wg.Done()
-		issues := k.InitIssues()
-		if issues == nil && k.Issues != nil {
-			helpers.LogOnErr(&k.Issues, nil, "Error initializing issues, keeping old state")
-			new.Issues = k.Issues
-			return
-		} else if issues == nil {
-			helpers.Panic(nil, "Error initializing issues")
-			return
-		}
-		new.Issues = issues
+		new.Issues = k.InitIssues()
 	}()
 
 	go func() {
 		defer wg.Done()
-		pieces := k.InitPieces()
-		if pieces == nil && k.Pieces != nil {
-			helpers.LogOnErr(&k.Pieces, nil, "Error initializing pieces, keeping old state")
-			new.Pieces = k.Pieces
-			return
-		} else if pieces == nil {
-			helpers.Panic(nil, "Error initializing pieces")
-			return
-		}
-		new.Pieces = pieces
+		new.Pieces = k.InitPieces()
 	}()
 
 	wg.Wait()
 
 	k.lmu.Lock()
+	defer k.lmu.Unlock()
 	k.Library = new
-	k.lmu.Unlock()
 }
 
+// TODO: on error, we need to log the error, and use stale data to recover gracefully
+// If Repo != nil we can try the last commit; if k != nil we can try the last data
 func (k *KGPZ) InitAgents() *providers.AgentProvider {
 	ap := providers.NewAgentProvider([]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)})
 	if err := ap.Load(); err != nil {
 		helpers.LogOnErr(&ap, err, "Error loading agents")
-		return nil
+		k.lmu.Lock()
+		ap.Items = k.Agents.Items
+		k.lmu.Unlock()
+		// TODO: mark as stale
 	}
 
-	if k.IsDebug() {
+	if k.Config.LogData {
 		helpers.LogOnDebug(&ap, "AgentProvider")
 	}
 
@@ -222,10 +174,13 @@ func (k *KGPZ) InitPlaces() *providers.PlaceProvider {
 	pp := providers.NewPlaceProvider([]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)})
 	if err := pp.Load(); err != nil {
 		helpers.LogOnErr(&pp, err, "Error loading places")
-		return nil
+		k.lmu.Lock()
+		pp.Items = k.Places.Items
+		k.lmu.Unlock()
+		// TODO: mark as stale
 	}
 
-	if k.IsDebug() {
+	if k.Config.LogData {
 		helpers.LogOnDebug(&pp, "PlaceProvider")
 	}
 
@@ -236,10 +191,13 @@ func (k *KGPZ) InitWorks() *providers.WorkProvider {
 	wp := providers.NewWorkProvider([]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)})
 	if err := wp.Load(); err != nil {
 		helpers.LogOnErr(&wp, err, "Error loading works")
-		return nil
+		k.lmu.Lock()
+		wp.Items = k.Works.Items
+		k.lmu.Unlock()
+		// TODO: mark as stale
 	}
 
-	if k.IsDebug() {
+	if k.Config.LogData {
 		helpers.LogOnDebug(&wp, "WorkProvider")
 	}
 
@@ -250,10 +208,12 @@ func (k *KGPZ) InitCategories() *providers.CategoryProvider {
 	cp := providers.NewCategoryProvider([]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)})
 	if err := cp.Load(); err != nil {
 		helpers.LogOnErr(&cp, err, "Error loading categories")
-		return nil
+		k.lmu.Lock()
+		cp.Items = k.Categories.Items
+		k.lmu.Unlock()
 	}
 
-	if k.IsDebug() {
+	if k.Config.LogData {
 		helpers.LogOnDebug(&cp, "CategoryProvider")
 	}
 
@@ -263,17 +223,18 @@ func (k *KGPZ) InitCategories() *providers.CategoryProvider {
 func (k *KGPZ) InitIssues() *providers.IssueProvider {
 	files, err := getXMLFiles(filepath.Join(k.Config.FolderPath, ISSUES_DIR))
 
-	if err != nil {
-		helpers.MaybePanic(err, "Error getting issues files")
-	}
+	helpers.MaybePanic(err, "Error getting issues files")
 
 	cp := providers.NewIssueProvider(*files)
 	if err := cp.Load(); err != nil {
 		helpers.LogOnErr(&cp, err, "Error loading issues")
-		return nil
+		k.lmu.Lock()
+		cp.Items = k.Issues.Items
+		k.lmu.Unlock()
+		// TODO: mark as stale
 	}
 
-	if k.IsDebug() {
+	if k.Config.LogData {
 		helpers.LogOnDebug(&cp, "IssueProvider")
 	}
 
@@ -283,17 +244,18 @@ func (k *KGPZ) InitIssues() *providers.IssueProvider {
 func (k *KGPZ) InitPieces() *providers.PieceProvider {
 	files, err := getXMLFiles(filepath.Join(k.Config.FolderPath, PIECES_DIR))
 
-	if err != nil {
-		helpers.MaybePanic(err, "Error getting pieces files")
-		return nil
-	}
+	helpers.MaybePanic(err, "Error getting pieces files")
 
 	cp := providers.NewPieceProvider(*files)
 	if err := cp.Load(); err != nil {
 		helpers.LogOnErr(&cp, err, "Error loading pieces")
+		k.lmu.Lock()
+		cp.Items = k.Pieces.Items
+		k.lmu.Unlock()
+		// TODO: mark as stale
 	}
 
-	if k.IsDebug() {
+	if k.Config.LogData {
 		helpers.LogOnDebug(&cp, "PieceProvider")
 	}
 
@@ -324,10 +286,10 @@ func main() {
 	kgpz.InitRepo()
 	kgpz.Serialize()
 
-	Cleanup(kgpz)
+	EnsureCleanup(kgpz)
 }
 
-func Cleanup(k *KGPZ) {
+func EnsureCleanup(k *KGPZ) {
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 
@@ -335,7 +297,8 @@ func Cleanup(k *KGPZ) {
 
 	go func() {
 		_ = <-sigs
-		// INFO: here we can add a cleanup functions
+		fmt.Println("Received signal. Cleaning up.")
+		// INFO: here we add cleanup functions
 		k.Shutdown()
 		done <- true
 	}()

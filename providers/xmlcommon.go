@@ -2,6 +2,16 @@ package providers
 
 import "encoding/xml"
 
+type KGPZDate struct {
+	XMLName   xml.Name `xml:"datum"`
+	When      string   `xml:"when,attr"`
+	NotBefore string   `xml:"notBefore,attr"`
+	NotAfter  string   `xml:"notAfter,attr"`
+	From      string   `xml:"from,attr"`
+	To        string   `xml:"to,attr"`
+	Value
+}
+
 type AgentRef struct {
 	XMLName xml.Name `xml:"akteur"`
 	Reference

@@ -31,16 +31,6 @@ type IssueNumber struct {
 	Corrected string `xml:"korrigiert,attr"`
 }
 
-type KGPZDate struct {
-	XMLName   xml.Name `xml:"datum"`
-	When      string   `xml:"when,attr"`
-	NotBefore string   `xml:"notBefore,attr"`
-	NotAfter  string   `xml:"notAfter,attr"`
-	From      string   `xml:"from,attr"`
-	To        string   `xml:"to,attr"`
-	Value
-}
-
 type Additional struct {
 	XMLName xml.Name `xml:"beilage"`
 	Nummer  string   `xml:"nummer,attr"`

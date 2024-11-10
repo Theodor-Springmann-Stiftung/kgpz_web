@@ -33,6 +33,7 @@ type Config struct {
 	WebHookEndpoint string `json:"webhook_endpoint" envconfig:"WEBHOOK_ENDPOINT"`
 	WebHookSecret   string `json:"webhook_secret" envconfig:"WEBHOOK_SECRET"`
 	Debug           bool   `json:"debug" envconfig:"DEBUG"`
+	LogData         bool   `json:"log_data" envconfig:"LOG_DATA"`
 }
 
 func NewConfigProvider(files []string) *ConfigProvider {
