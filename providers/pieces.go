@@ -23,6 +23,7 @@ type Piece struct {
 	WorkRefs      []WorkRef       `xml:"werk"`
 	PieceRefs     []PieceRef      `xml:"beitrag"`
 	AdditionalRef []AdditionalRef `xml:"beilage"`
+	Datum         []KGPZDate      `xml:"datum"`
 	Incipit       []string        `xml:"incipit"`
 	Title         []string        `xml:"titel"`
 	Identifier

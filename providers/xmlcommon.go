@@ -16,10 +16,11 @@ type URL struct {
 type AdditionalRef struct {
 	XMLName xml.Name `xml:"beilage"`
 	Reference
-	Datum string `xml:"datum,attr"`
-	Nr    string `xml:"nr,attr"`
-	Von   string `xml:"von,attr"`
-	Bis   string `xml:"bis,attr"`
+	Datum        string `xml:"datum,attr"`
+	Nr           string `xml:"nr,attr"`
+	AdditionalNo string `xml:"beilage,attr"`
+	Von          string `xml:"von,attr"`
+	Bis          string `xml:"bis,attr"`
 }
 
 type IssueRef struct {
@@ -49,6 +50,7 @@ type WorkRef struct {
 
 type PieceRef struct {
 	XMLName xml.Name `xml:"beitrag"`
+	Page    string   `xml:"s,attr"`
 	Reference
 }
 

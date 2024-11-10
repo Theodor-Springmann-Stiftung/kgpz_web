@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"sync"
+	"syscall"
 
 	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
@@ -32,7 +34,6 @@ const (
 )
 
 type Library struct {
-	smu        sync.Mutex
 	Agents     *providers.AgentProvider
 	Places     *providers.PlaceProvider
 	Works      *providers.WorkProvider
@@ -42,6 +43,7 @@ type Library struct {
 }
 
 type KGPZ struct {
+	lmu    sync.Mutex
 	Config *providers.ConfigProvider
 	Repo   *providers.GitProvider
 	Library
@@ -64,6 +66,8 @@ func (k *KGPZ) IsDebug() bool {
 }
 
 func (k *KGPZ) Pull() {
+	// TODO: what happens if the application quits mid-pull?
+	// We need to make sure to exit gracefully
 	go func(k *KGPZ) {
 		if k.Repo == nil {
 			return
@@ -102,63 +106,102 @@ func (k *KGPZ) InitRepo() {
 
 // This panics if the data cant be read, and there is no data read
 func (k *KGPZ) Serialize() {
-	k.smu.Lock()
-	defer k.smu.Unlock()
 	// TODO: maybe dont panic if a webhook can be setup, we need to check the requirements only when starting the server
-	// TODO: do this in parallel goroutines using a waitgroup
-	agents := k.InitAgents()
-	if agents == nil && k.Agents != nil {
-		helpers.LogOnErr(&k.Agents, nil, "Error initializing agents, keeping old state")
-	} else if agents == nil {
-		helpers.Panic(nil, "Error initializing agents")
-	} else {
-		k.Agents = agents
-	}
 
-	places := k.InitPlaces()
-	if places == nil && k.Places != nil {
-		helpers.LogOnErr(&k.Places, nil, "Error initializing places, keeping old state")
-	} else if places == nil {
-		helpers.Panic(nil, "Error initializing places")
-	} else {
-		k.Places = places
-	}
+	new := Library{}
 
-	works := k.InitWorks()
-	if works == nil && k.Works != nil {
-		helpers.LogOnErr(&k.Works, nil, "Error initializing works, keeping old state")
-	} else if works == nil {
-		helpers.Panic(nil, "Error initializing works")
-	} else {
-		k.Works = works
-	}
+	wg := sync.WaitGroup{}
+	wg.Add(6)
 
-	categories := k.InitCategories()
-	if categories == nil && k.Categories != nil {
-		helpers.LogOnErr(&k.Categories, nil, "Error initializing categories, keeping old state")
-	} else if categories == nil {
-		helpers.Panic(nil, "Error initializing categories")
-	} else {
-		k.Categories = categories
-	}
+	go func() {
+		defer wg.Done()
+		agents := k.InitAgents()
+		if agents == nil && k.Agents != nil {
+			helpers.LogOnErr(&k.Agents, nil, "Error initializing agents, keeping old state")
+			new.Agents = k.Agents
+			return
+		} else if agents == nil {
+			helpers.Panic(nil, "Error initializing agents")
+			return
+		}
+		new.Agents = agents
+	}()
 
-	issues := k.InitIssues()
-	if issues == nil && k.Issues != nil {
-		helpers.LogOnErr(&k.Issues, nil, "Error initializing issues, keeping old state")
-	} else if issues == nil {
-		helpers.Panic(nil, "Error initializing issues")
-	} else {
-		k.Issues = issues
-	}
+	go func() {
+		defer wg.Done()
+		places := k.InitPlaces()
+		if places == nil && k.Places != nil {
+			helpers.LogOnErr(&k.Places, nil, "Error initializing places, keeping old state")
+			new.Places = k.Places
+			return
+		} else if places == nil {
+			helpers.Panic(nil, "Error initializing places")
+			return
+		}
+		new.Places = places
+	}()
 
-	pieces := k.InitPieces()
-	if pieces == nil && k.Pieces != nil {
-		helpers.LogOnErr(&k.Pieces, nil, "Error initializing pieces, keeping old state")
-	} else if pieces == nil {
-		helpers.Panic(nil, "Error initializing pieces")
-	} else {
-		k.Pieces = pieces
-	}
+	go func() {
+		defer wg.Done()
+		works := k.InitWorks()
+		if works == nil && k.Works != nil {
+			helpers.LogOnErr(&k.Works, nil, "Error initializing works, keeping old state")
+			new.Works = k.Works
+			return
+		} else if works == nil {
+			helpers.Panic(nil, "Error initializing works")
+			return
+		}
+		new.Works = works
+	}()
+
+	go func() {
+		defer wg.Done()
+		categories := k.InitCategories()
+		if categories == nil && k.Categories != nil {
+			helpers.LogOnErr(&k.Categories, nil, "Error initializing categories, keeping old state")
+			new.Categories = k.Categories
+			return
+		} else if categories == nil {
+			helpers.Panic(nil, "Error initializing categories")
+			return
+		}
+		new.Categories = categories
+	}()
+
+	go func() {
+		defer wg.Done()
+		issues := k.InitIssues()
+		if issues == nil && k.Issues != nil {
+			helpers.LogOnErr(&k.Issues, nil, "Error initializing issues, keeping old state")
+			new.Issues = k.Issues
+			return
+		} else if issues == nil {
+			helpers.Panic(nil, "Error initializing issues")
+			return
+		}
+		new.Issues = issues
+	}()
+
+	go func() {
+		defer wg.Done()
+		pieces := k.InitPieces()
+		if pieces == nil && k.Pieces != nil {
+			helpers.LogOnErr(&k.Pieces, nil, "Error initializing pieces, keeping old state")
+			new.Pieces = k.Pieces
+			return
+		} else if pieces == nil {
+			helpers.Panic(nil, "Error initializing pieces")
+			return
+		}
+		new.Pieces = pieces
+	}()
+
+	wg.Wait()
+
+	k.lmu.Lock()
+	k.Library = new
+	k.lmu.Unlock()
 }
 
 func (k *KGPZ) InitAgents() *providers.AgentProvider {
@@ -257,6 +300,10 @@ func (k *KGPZ) InitPieces() *providers.PieceProvider {
 	return cp
 }
 
+func (k *KGPZ) Shutdown() {
+	k.Repo.Wait()
+}
+
 func getXMLFiles(path string) (*[]string, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil, err
@@ -276,4 +323,23 @@ func main() {
 	kgpz := NewKGPZ(cfg)
 	kgpz.InitRepo()
 	kgpz.Serialize()
+
+	Cleanup(kgpz)
+}
+
+func Cleanup(k *KGPZ) {
+	sigs := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		_ = <-sigs
+		// INFO: here we can add a cleanup functions
+		k.Shutdown()
+		done <- true
+	}()
+
+	<-done
+	fmt.Println("Cleanup finished. Exiting.")
 }

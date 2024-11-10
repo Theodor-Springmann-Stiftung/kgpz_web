@@ -20,22 +20,16 @@ type XMLProvider[T KGPZXML[T]] struct {
 }
 
 func (p *XMLProvider[T]) Load() error {
-	var wg sync.WaitGroup
 	for _, path := range p.paths {
-		wg.Add(1)
-		go func(path string) {
-			defer wg.Done()
-			var data T
-			if err := UnmarshalFile(path, &data); err != nil {
-				fmt.Println(err)
-				return
-			}
-			p.mu.Lock()
-			p.Items = p.Items.Append(data)
-			p.mu.Unlock()
-		}(path)
+		var data T
+		if err := UnmarshalFile(path, &data); err != nil {
+			fmt.Println(err)
+			return err
+		}
+		p.mu.Lock()
+		p.Items = p.Items.Append(data)
+		p.mu.Unlock()
 	}
-	wg.Wait()
 	return nil
 }
 

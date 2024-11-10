@@ -88,25 +88,28 @@ func (g *GitProvider) Pull() (error, bool) {
 		return err, false
 	}
 
-	if err := wt.Checkout(&git.CheckoutOptions{
-		Branch: branch,
-		Force:  true,
-	}); err != nil {
-		return err, false
-	}
-
 	if err := wt.Pull(&git.PullOptions{
 		RemoteName:    "origin",
 		ReferenceName: branch,
 		Progress:      os.Stdout,
-	}); err != nil && err != git.NoErrAlreadyUpToDate {
+	}); err != nil {
+		if err == git.NoErrAlreadyUpToDate {
+			return nil, false
+		}
 		return err, false
-	} else if err == git.NoErrAlreadyUpToDate {
-		return nil, false
 	}
 	defer wt.Clean(&git.CleanOptions{Dir: true})
 
-	return g.setValues(repo), true
+	oldCommit := g.Commit
+	if err := g.setValues(repo); err != nil {
+		return err, false
+	}
+
+	if oldCommit == g.Commit {
+		return nil, false
+	}
+
+	return nil, true
 }
 
 func (g *GitProvider) Clone() error {
@@ -231,6 +234,11 @@ func (g *GitProvider) ValidateBranch(repo *git.Repository) error {
 	}
 
 	return nil
+}
+
+func (g *GitProvider) Wait() {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 }
 
 func (g *GitProvider) ValidateCommit() error {

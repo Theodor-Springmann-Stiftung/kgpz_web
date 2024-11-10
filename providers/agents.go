@@ -15,6 +15,7 @@ type Agent struct {
 	SortName string   `xml:"sortiername"`
 	Life     string   `xml:"lebensdaten"`
 	GND      string   `xml:"gnd"`
+	Org      bool     `xml:"org,attr"`
 	Identifier
 	AnnotationNote
 }
