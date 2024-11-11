@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/app"
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 )
 
 type ServerState int
@@ -31,7 +30,6 @@ const (
 // - we reload all clients
 // - if data validity catastrophically fails, we restart the router to map error pages.
 type Server struct {
-	Events helpers.EventMux[ServerState]
 }
 
 func Start(k *app.KGPZ) *Server {
@@ -44,23 +42,6 @@ func (s *Server) Start() {
 	s.shutdownHandler(srv)
 	s.runnerHandler(srv)
 	s.restartHandler()
-}
-
-func (s *Server) Restart() {
-	s.Events.Publish(ShutDown)
-}
-
-func (s *Server) Kill() {
-	s.Events.Publish(Kill)
-}
-
-func (s *Server) restartHandler() {
-	shutdown := s.Events.Subscribe(1)
-	go func() {
-		s.BreakUntil(shutdown, ShuttedDown)
-		s.Events.Publish(Restarting)
-		s.Start()
-	}()
 }
 
 func (s *Server) runnerHandler(srv *http.Server) {
@@ -95,11 +76,6 @@ func (s *Server) runnerHandler(srv *http.Server) {
 		}
 	}()
 
-}
-
-func (s *Server) shutdownHandler(srv *http.Server) {
-
-	shutdown := s.Events.Subscribe(1)
 	go func() {
 		s.BreakUntil(shutdown, ShutDown)
 		fmt.Println("Shutting down server")
@@ -110,31 +86,4 @@ func (s *Server) shutdownHandler(srv *http.Server) {
 		s.Events.Publish(ShuttingDown)
 	}()
 
-}
-
-func (s *Server) killHandler(srv *http.Server) {
-
-	kill := s.Events.Subscribe(1)
-	go func() {
-		s.BreakUntil(kill, Kill)
-		fmt.Println("Killing server")
-		if err := srv.Shutdown(nil); err != nil {
-			fmt.Println("Error shutting down server")
-		}
-
-		s.Events.Publish(Killing)
-	}()
-
-}
-
-func (s *Server) BreakUntil(c chan ServerState, state ServerState) {
-loop:
-	for {
-		msg := <-c
-		if msg == state {
-			break loop
-		}
-	}
-
-	s.Events.Unsubscribe(c)
 }
