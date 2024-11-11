@@ -46,7 +46,6 @@ func Start(k *app.KGPZ, s *server.Server) {
 
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
-	serversignals := s.Events.Subscribe(1)
 
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
@@ -54,10 +53,10 @@ func Start(k *app.KGPZ, s *server.Server) {
 		_ = <-sigs
 		fmt.Println("Received signal. Cleaning up.")
 		// INFO: here we add cleanup functions
-		s.Kill()
-		s.BreakUntil(serversignals, server.Killed)
-		fmt.Println("Server killed.")
+		s.Stop()
+		fmt.Println("Server stopped. Waiting for FS.")
 		k.Shutdown()
+		fmt.Println("FS stopped. Exiting.")
 		done <- true
 	}()
 
@@ -74,7 +73,8 @@ func Start(k *app.KGPZ, s *server.Server) {
 					fmt.Println("Pulling repo.")
 					k.Pull()
 				} else if input == "q" {
-					done <- true
+					s := os.Signal(syscall.SIGTERM)
+					sigs <- s
 				}
 			}
 		}()

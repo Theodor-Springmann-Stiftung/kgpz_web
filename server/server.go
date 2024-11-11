@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 
 	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 )
@@ -30,6 +31,8 @@ const (
 // - we reload all clients
 // - if data validity catastrophically fails, we restart the router to map error pages.
 type Server struct {
+	running  *sync.WaitGroup
+	shutdown *sync.WaitGroup
 }
 
 func Start(k *app.KGPZ) *Server {
@@ -38,17 +41,38 @@ func Start(k *app.KGPZ) *Server {
 
 func (s *Server) Start() {
 	srv := &http.Server{Addr: ":8081"}
-	s.killHandler(srv)
-	s.shutdownHandler(srv)
-	s.runnerHandler(srv)
-	s.restartHandler()
+	s.runner(srv)
 }
 
-func (s *Server) runnerHandler(srv *http.Server) {
+func (s *Server) Stop() {
+	if s.running == nil {
+		return
+	}
 
-	shutttingdown := s.Events.Subscribe(1)
+	s.running.Done()
+	s.shutdown.Wait()
+}
+
+func (s *Server) Restart() {
+	if s.running != nil {
+		s.running.Done()
+		s.shutdown.Wait()
+	}
+	s.Start()
+}
+
+func (s *Server) runner(srv *http.Server) {
+	s.running = &sync.WaitGroup{}
+	s.shutdown = &sync.WaitGroup{}
+
+	s.running.Add(1)
+	s.shutdown.Add(1)
+
+	cleanup := sync.WaitGroup{}
+	cleanup.Add(1)
+
 	go func() {
-		s.Events.Publish(Running)
+		defer s.shutdown.Done()
 		// EXAMPLE:
 		mux := http.NewServeMux()
 		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -62,28 +86,16 @@ func (s *Server) runnerHandler(srv *http.Server) {
 			return
 		}
 
-	loop:
-		for {
-			msg := <-shutttingdown
-			if msg == ShuttingDown {
-				s.Events.Publish(ShuttedDown)
-				break loop
-			}
-			if msg == Killing {
-				s.Events.Publish(Killed)
-				break loop
-			}
-		}
+		cleanup.Wait()
 	}()
 
 	go func() {
-		s.BreakUntil(shutdown, ShutDown)
-		fmt.Println("Shutting down server")
+		defer cleanup.Done()
+		s.running.Wait()
+
 		if err := srv.Shutdown(nil); err != nil {
 			fmt.Println("Error shutting down server")
 		}
-
-		s.Events.Publish(ShuttingDown)
 	}()
 
 }
