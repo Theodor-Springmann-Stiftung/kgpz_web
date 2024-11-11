@@ -42,8 +42,11 @@ func Bootstrap(k *app.KGPZ) {
 }
 
 func Start(k *app.KGPZ, s *server.Server) {
+	s.Start()
+
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
+	serversignals := s.Events.Subscribe(1)
 
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
@@ -52,17 +55,30 @@ func Start(k *app.KGPZ, s *server.Server) {
 		fmt.Println("Received signal. Cleaning up.")
 		// INFO: here we add cleanup functions
 		s.Kill()
+		s.BreakUntil(serversignals, server.Killed)
+		fmt.Println("Server killed.")
 		k.Shutdown()
 		done <- true
 	}()
 
-	// INFO: if the server fails to start this exits the program
-	// We handle graceful server recovery in the server itself.
-	go func() {
-		s.Start()
-		<-s.Killed
-		fmt.Println("Server exited. Cleaning up.")
-	}()
+	// Interactive listening for input
+	if k.IsDebug() {
+		go func() {
+			for {
+				var input string
+				fmt.Scanln(&input)
+				if input == "r" {
+					fmt.Println("Restarting server.")
+					s.Restart()
+				} else if input == "p" {
+					fmt.Println("Pulling repo.")
+					k.Pull()
+				} else if input == "q" {
+					done <- true
+				}
+			}
+		}()
+	}
 
 	<-done
 	fmt.Println("Cleanup finished. Exiting.")
