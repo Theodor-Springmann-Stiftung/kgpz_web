@@ -35,15 +35,10 @@ func main() {
 	}
 
 	kgpz := app.NewKGPZ(cfg)
-	Bootstrap(kgpz)
+	kgpz.Init()
 
 	server := server.Start(kgpz, cfg)
 	Start(kgpz, server)
-}
-
-func Bootstrap(k *app.KGPZ) {
-	k.InitRepo()
-	k.Serialize()
 }
 
 func Start(k *app.KGPZ, s *server.Server) {
@@ -83,8 +78,7 @@ func Start(k *app.KGPZ, s *server.Server) {
 					fmt.Println("Pulling repo.")
 					k.Pull()
 				} else if input == "q" {
-					s := os.Signal(syscall.SIGTERM)
-					sigs <- s
+					sigs <- os.Signal(syscall.SIGTERM)
 				}
 			}
 		}()

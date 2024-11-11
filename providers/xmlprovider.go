@@ -20,16 +20,24 @@ type XMLProvider[T KGPZXML[T]] struct {
 }
 
 func (p *XMLProvider[T]) Load() error {
+	// Introduce goroutine for every path, locking on append:
+	var wg sync.WaitGroup
 	for _, path := range p.paths {
-		var data T
-		if err := UnmarshalFile(path, &data); err != nil {
-			fmt.Println(err)
-			return err
-		}
-		p.mu.Lock()
-		p.Items = p.Items.Append(data)
-		p.mu.Unlock()
+		wg.Add(1)
+		go func(path string) {
+			defer wg.Done()
+			var data T
+			if err := UnmarshalFile(path, &data); err != nil {
+				fmt.Println(err)
+				return
+			}
+			p.mu.Lock()
+			defer p.mu.Unlock()
+			p.Items = p.Items.Append(data)
+		}(path)
 	}
+	wg.Wait()
+
 	return nil
 }
 

@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -31,9 +30,15 @@ type Library struct {
 
 type KGPZ struct {
 	lmu    sync.Mutex
+	gmu    sync.Mutex
 	Config *providers.ConfigProvider
 	Repo   *providers.GitProvider
 	Library
+}
+
+func (k *KGPZ) Init() {
+	go k.initRepo()
+	k.Serialize()
 }
 
 func NewKGPZ(config *providers.ConfigProvider) *KGPZ {
@@ -55,7 +60,9 @@ func (k *KGPZ) IsDebug() bool {
 func (k *KGPZ) Pull() {
 	// TODO: what happens if the application quits mid-pull?
 	// We need to make sure to exit gracefully
-	go func(k *KGPZ) {
+	go func() {
+		k.gmu.Lock()
+		defer k.gmu.Unlock()
 		if k.Repo == nil {
 			return
 		}
@@ -72,18 +79,19 @@ func (k *KGPZ) Pull() {
 			// Locking is handled in Serialize()
 			k.Serialize()
 		}
-	}(k)
+	}()
 }
 
-func (k *KGPZ) InitRepo() {
+func (k *KGPZ) initRepo() {
 	gp, err := providers.NewGitProvider(k.Config.Config.GitURL, k.Config.Config.FolderPath, k.Config.Config.GitBranch)
 	if err != nil {
 		helpers.LogOnErr(&gp, err, "Error creating GitProvider")
 		return
 	}
 
-	fmt.Println("InitRepo")
+	k.gmu.Lock()
 	k.Repo = gp
+	k.gmu.Unlock()
 	k.Pull()
 
 	if k.IsDebug() {
@@ -93,9 +101,6 @@ func (k *KGPZ) InitRepo() {
 
 // This panics if the data cant be read, and there is no data read
 func (k *KGPZ) Serialize() {
-	// TODO: maybe dont panic.
-	// We need to check the requirements only when starting the server
-	// We can serve an error page
 	new := Library{}
 
 	wg := sync.WaitGroup{}
