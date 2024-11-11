@@ -12,6 +12,11 @@ import (
 	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/server"
 )
 
+const (
+	DEFAULT_CONFIG = "config.json"
+	DEV_CONFIG     = "config.dev.json"
+)
+
 // 1. Check if folder exists
 //		- If not, clone the repo, if possible or throw if error
 // 2. If the folder exists, we try to serialize -- and spawn a goroutine to pull.
@@ -24,7 +29,7 @@ import (
 //		- Setup GitHub webhook if set
 
 func main() {
-	cfg := providers.NewConfigProvider([]string{"config.dev.json", "config.json"})
+	cfg := providers.NewConfigProvider([]string{DEV_CONFIG, DEFAULT_CONFIG})
 	if err := cfg.Read(); err != nil {
 		helpers.MaybePanic(err, "Error reading config")
 	}
@@ -32,7 +37,7 @@ func main() {
 	kgpz := app.NewKGPZ(cfg)
 	Bootstrap(kgpz)
 
-	server := server.Start(kgpz)
+	server := server.Start(kgpz, cfg)
 	Start(kgpz, server)
 }
 
@@ -50,11 +55,16 @@ func Start(k *app.KGPZ, s *server.Server) {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		_ = <-sigs
+		sig := <-sigs
 		fmt.Println("Received signal. Cleaning up.")
 		// INFO: here we add cleanup functions
-		s.Stop()
-		fmt.Println("Server stopped. Waiting for FS.")
+		if sig == syscall.SIGTERM {
+			s.Stop()
+			fmt.Println("Server stopped. Waiting for FS.")
+		} else {
+			s.Kill()
+			fmt.Println("Server killed. Waiting for FS.")
+		}
 		k.Shutdown()
 		fmt.Println("FS stopped. Exiting.")
 		done <- true

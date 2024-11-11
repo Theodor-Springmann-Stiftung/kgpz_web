@@ -16,6 +16,10 @@ const (
 	DEFAULT_GIT_DIR = "data_git"
 	DEFAULT_GND_DIR = "cache_gnd"
 	DEFAULT_GEO_DIR = "cache_geo"
+
+	DEFAULT_PORT  = "8080"
+	DEFAULT_ADDR  = "localhost"
+	DEFAULT_HTTPS = false
 )
 
 type ConfigProvider struct {
@@ -34,6 +38,10 @@ type Config struct {
 	WebHookSecret   string `json:"webhook_secret" envconfig:"WEBHOOK_SECRET"`
 	Debug           bool   `json:"debug" envconfig:"DEBUG"`
 	LogData         bool   `json:"log_data" envconfig:"LOG_DATA"`
+
+	Address string `json:"address" envconfig:"ADDRESS"`
+	Port    string `json:"port" envconfig:"PORT"`
+	Https   bool   `json:"https" envconfig:"HTTPS"`
 }
 
 func NewConfigProvider(files []string) *ConfigProvider {
@@ -89,6 +97,14 @@ func readDefaults(cfg *Config) *Config {
 
 	if strings.TrimSpace(cfg.GeoPath) == "" {
 		cfg.GeoPath = DEFAULT_GEO_DIR
+	}
+
+	if strings.TrimSpace(cfg.Address) == "" {
+		cfg.Address = DEFAULT_ADDR
+	}
+
+	if strings.TrimSpace(cfg.Port) == "" {
+		cfg.Port = DEFAULT_PORT
 	}
 
 	return cfg

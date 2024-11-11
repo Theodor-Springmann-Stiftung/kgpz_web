@@ -1,26 +1,15 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"sync"
+	"time"
 
 	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/app"
-)
-
-type ServerState int
-
-const (
-	Created ServerState = iota
-	Running
-	Restarting
-	ShuttingDown
-	ShutDown
-	ShuttedDown
-	Kill
-	Killing
-	Killed
+	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 )
 
 // INFO: Server is a meta-package that handles the current router, which it starts in a goroutine.
@@ -31,16 +20,19 @@ const (
 // - we reload all clients
 // - if data validity catastrophically fails, we restart the router to map error pages.
 type Server struct {
-	running  *sync.WaitGroup
+	Config   *providers.ConfigProvider
+	running  chan bool
 	shutdown *sync.WaitGroup
 }
 
-func Start(k *app.KGPZ) *Server {
-	return &Server{}
+func Start(k *app.KGPZ, c *providers.ConfigProvider) *Server {
+	return &Server{
+		Config: c,
+	}
 }
 
 func (s *Server) Start() {
-	srv := &http.Server{Addr: ":8081"}
+	srv := &http.Server{Addr: s.Config.Address + ":" + s.Config.Port}
 	s.runner(srv)
 }
 
@@ -49,23 +41,28 @@ func (s *Server) Stop() {
 		return
 	}
 
-	s.running.Done()
+	s.running <- true
+	s.shutdown.Wait()
+}
+
+func (s *Server) Kill() {
+	if s.running == nil {
+		return
+	}
+
+	s.running <- false
 	s.shutdown.Wait()
 }
 
 func (s *Server) Restart() {
-	if s.running != nil {
-		s.running.Done()
-		s.shutdown.Wait()
-	}
+	s.Stop()
 	s.Start()
 }
 
 func (s *Server) runner(srv *http.Server) {
-	s.running = &sync.WaitGroup{}
+	s.running = make(chan bool)
 	s.shutdown = &sync.WaitGroup{}
 
-	s.running.Add(1)
 	s.shutdown.Add(1)
 
 	cleanup := sync.WaitGroup{}
@@ -82,6 +79,7 @@ func (s *Server) runner(srv *http.Server) {
 		srv.Handler = mux
 
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			fmt.Println(err)
 			fmt.Println("Error starting server")
 			return
 		}
@@ -91,10 +89,20 @@ func (s *Server) runner(srv *http.Server) {
 
 	go func() {
 		defer cleanup.Done()
-		s.running.Wait()
+		clean := <-s.running
 
-		if err := srv.Shutdown(nil); err != nil {
-			fmt.Println("Error shutting down server")
+		if clean {
+			ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(8*time.Second))
+			defer cancel()
+			if err := srv.Shutdown(ctx); err != nil {
+				fmt.Println(err)
+				fmt.Println("Error shutting down server")
+			}
+		} else {
+			if err := srv.Close(); err != nil {
+				fmt.Println(err)
+				fmt.Println("Error closing server")
+			}
 		}
 	}()
 
