@@ -7,6 +7,7 @@ import (
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -16,6 +17,8 @@ import (
 const (
 	REQUEST_TIMEOUT = 8 * time.Second
 	SERVER_TIMEOUT  = 8 * time.Second
+
+	STATIC_PREFIX = "/assets"
 )
 
 // INFO: Server is a meta-package that handles the current router, which it starts in a goroutine.
@@ -59,6 +62,7 @@ func (s *Server) Start() {
 	}
 
 	srv.Use(recover.New())
+	srv.Use(STATIC_PREFIX, static(&views.StaticFS, STATIC_PREFIX))
 
 	srv.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("I'm a GET request!")

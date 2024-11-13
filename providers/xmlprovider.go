@@ -19,7 +19,88 @@ type XMLProvider[T KGPZXML[T]] struct {
 	Items T
 }
 
-func (p *XMLProvider[T]) Load() error {
+type Library struct {
+	Agents     *AgentProvider
+	Places     *PlaceProvider
+	Works      *WorkProvider
+	Categories *CategoryProvider
+	Issues     *IssueProvider
+	Pieces     *PieceProvider
+}
+
+func NewLibrary(agentpaths, placepaths, workpaths, categorypaths, issuepaths, piecepaths []string) *Library {
+	return &Library{
+		Agents:     NewAgentProvider(agentpaths),
+		Places:     NewPlaceProvider(placepaths),
+		Works:      NewWorkProvider(workpaths),
+		Categories: NewCategoryProvider(categorypaths),
+		Issues:     NewIssueProvider(issuepaths),
+		Pieces:     NewPieceProvider(piecepaths),
+	}
+}
+
+func (l *Library) Serialize() {
+	wg := sync.WaitGroup{}
+	wg.Add(6)
+
+	go func() {
+		defer wg.Done()
+		err := l.Agents.Serialize()
+		if err != nil {
+			l.Agents = nil
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		err := l.Places.Serialize()
+		if err != nil {
+			l.Places = nil
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		err := l.Works.Serialize()
+		if err != nil {
+			l.Works = nil
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		err := l.Categories.Serialize()
+		if err != nil {
+			l.Categories = nil
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		err := l.Issues.Serialize()
+		if err != nil {
+			l.Issues = nil
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		err := l.Pieces.Serialize()
+		if err != nil {
+			l.Pieces = nil
+			fmt.Println(err)
+		}
+	}()
+
+	wg.Wait()
+}
+
+func (p *XMLProvider[T]) Serialize() error {
 	// Introduce goroutine for every path, locking on append:
 	var wg sync.WaitGroup
 	for _, path := range p.paths {

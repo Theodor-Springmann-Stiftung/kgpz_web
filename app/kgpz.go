@@ -19,21 +19,12 @@ const (
 	PIECES_DIR = "XML/beitraege/"
 )
 
-type Library struct {
-	Agents     *providers.AgentProvider
-	Places     *providers.PlaceProvider
-	Works      *providers.WorkProvider
-	Categories *providers.CategoryProvider
-	Issues     *providers.IssueProvider
-	Pieces     *providers.PieceProvider
-}
-
 type KGPZ struct {
-	lmu    sync.Mutex
-	gmu    sync.Mutex
-	Config *providers.ConfigProvider
-	Repo   *providers.GitProvider
-	Library
+	lmu     sync.Mutex
+	gmu     sync.Mutex
+	Config  *providers.ConfigProvider
+	Repo    *providers.GitProvider
+	Library *providers.Library
 }
 
 func (k *KGPZ) Init() {
@@ -53,17 +44,77 @@ func NewKGPZ(config *providers.ConfigProvider) *KGPZ {
 	return &KGPZ{Config: config}
 }
 
+func (k *KGPZ) Serialize() {
+	// TODO: this is error handling from hell
+	// There is no need to recreate the whole library if the paths haven't changed
+	// We do it to keep the old data if the new data is missing
+
+	// Preventing pulling and serializing at the same time
+	k.gmu.Lock()
+	defer k.gmu.Unlock()
+
+	issues, err := getXMLFiles(filepath.Join(k.Config.FolderPath, ISSUES_DIR))
+	helpers.MaybePanic(err, "Error getting issues")
+
+	pieces, err := getXMLFiles(filepath.Join(k.Config.FolderPath, PIECES_DIR))
+	helpers.MaybePanic(err, "Error getting pieces")
+
+	lib := providers.NewLibrary(
+		[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
+		[]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)},
+		[]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)},
+		[]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)},
+		*issues,
+		*pieces)
+
+	lib.Serialize()
+
+	// TODO: is it neccessary to lock here, sice gmu lock prevents concurrent locking of the library?
+	k.lmu.Lock()
+	defer k.lmu.Unlock()
+
+	if k.Library == nil {
+		k.Library = lib
+		return
+	}
+
+	if lib.Agents == nil {
+		lib.Agents = k.Library.Agents
+	}
+
+	if lib.Places == nil {
+		lib.Places = k.Library.Places
+	}
+
+	if lib.Works == nil {
+		lib.Works = k.Library.Works
+	}
+
+	if lib.Categories == nil {
+		lib.Categories = k.Library.Categories
+	}
+
+	if lib.Issues == nil {
+		lib.Issues = k.Library.Issues
+	}
+
+	if lib.Pieces == nil {
+		lib.Pieces = k.Library.Pieces
+	}
+
+	k.Library = lib
+}
+
 func (k *KGPZ) IsDebug() bool {
 	return k.Config.Debug
 }
 
 func (k *KGPZ) Pull() {
-	// TODO: what happens if the application quits mid-pull?
-	// We need to make sure to exit gracefully
 	go func() {
 		k.gmu.Lock()
-		defer k.gmu.Unlock()
+
 		if k.Repo == nil {
+			k.gmu.Unlock()
 			return
 		}
 
@@ -72,11 +123,13 @@ func (k *KGPZ) Pull() {
 			helpers.LogOnErr(&k.Repo, err, "Error pulling repo")
 		}
 
+		// Need to unlock here to prevent deadlock, since Serialize locks the same mutex
+		k.gmu.Unlock()
+
 		if changed {
 			if k.IsDebug() {
 				helpers.LogOnDebug(&k.Repo, "GitProvider changed")
 			}
-			// Locking is handled in Serialize()
 			k.Serialize()
 		}
 	}()
@@ -97,161 +150,6 @@ func (k *KGPZ) initRepo() {
 	if k.IsDebug() {
 		helpers.LogOnDebug(&gp, "GitProvider")
 	}
-}
-
-// This panics if the data cant be read, and there is no data read
-func (k *KGPZ) Serialize() {
-	new := Library{}
-
-	wg := sync.WaitGroup{}
-	wg.Add(6)
-
-	go func() {
-		defer wg.Done()
-		new.Agents = k.InitAgents()
-	}()
-
-	go func() {
-		defer wg.Done()
-		new.Places = k.InitPlaces()
-	}()
-
-	go func() {
-		defer wg.Done()
-		new.Works = k.InitWorks()
-	}()
-
-	go func() {
-		defer wg.Done()
-		new.Categories = k.InitCategories()
-	}()
-
-	go func() {
-		defer wg.Done()
-		new.Issues = k.InitIssues()
-	}()
-
-	go func() {
-		defer wg.Done()
-		new.Pieces = k.InitPieces()
-	}()
-
-	wg.Wait()
-
-	k.lmu.Lock()
-	defer k.lmu.Unlock()
-	k.Library = new
-}
-
-// TODO: on error, we need to log the error, and use stale data to recover gracefully
-// If Repo != nil we can try the last commit; if k != nil we can try the last data
-func (k *KGPZ) InitAgents() *providers.AgentProvider {
-	ap := providers.NewAgentProvider([]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)})
-	if err := ap.Load(); err != nil {
-		helpers.LogOnErr(&ap, err, "Error loading agents")
-		k.lmu.Lock()
-		ap.Items = k.Agents.Items
-		k.lmu.Unlock()
-		// TODO: mark as stale
-	}
-
-	if k.Config.LogData {
-		helpers.LogOnDebug(&ap, "AgentProvider")
-	}
-
-	return ap
-}
-
-func (k *KGPZ) InitPlaces() *providers.PlaceProvider {
-	pp := providers.NewPlaceProvider([]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)})
-	if err := pp.Load(); err != nil {
-		helpers.LogOnErr(&pp, err, "Error loading places")
-		k.lmu.Lock()
-		pp.Items = k.Places.Items
-		k.lmu.Unlock()
-		// TODO: mark as stale
-	}
-
-	if k.Config.LogData {
-		helpers.LogOnDebug(&pp, "PlaceProvider")
-	}
-
-	return pp
-}
-
-func (k *KGPZ) InitWorks() *providers.WorkProvider {
-	wp := providers.NewWorkProvider([]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)})
-	if err := wp.Load(); err != nil {
-		helpers.LogOnErr(&wp, err, "Error loading works")
-		k.lmu.Lock()
-		wp.Items = k.Works.Items
-		k.lmu.Unlock()
-		// TODO: mark as stale
-	}
-
-	if k.Config.LogData {
-		helpers.LogOnDebug(&wp, "WorkProvider")
-	}
-
-	return wp
-}
-
-func (k *KGPZ) InitCategories() *providers.CategoryProvider {
-	cp := providers.NewCategoryProvider([]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)})
-	if err := cp.Load(); err != nil {
-		helpers.LogOnErr(&cp, err, "Error loading categories")
-		k.lmu.Lock()
-		cp.Items = k.Categories.Items
-		k.lmu.Unlock()
-	}
-
-	if k.Config.LogData {
-		helpers.LogOnDebug(&cp, "CategoryProvider")
-	}
-
-	return cp
-}
-
-func (k *KGPZ) InitIssues() *providers.IssueProvider {
-	files, err := getXMLFiles(filepath.Join(k.Config.FolderPath, ISSUES_DIR))
-
-	helpers.MaybePanic(err, "Error getting issues files")
-
-	cp := providers.NewIssueProvider(*files)
-	if err := cp.Load(); err != nil {
-		helpers.LogOnErr(&cp, err, "Error loading issues")
-		k.lmu.Lock()
-		cp.Items = k.Issues.Items
-		k.lmu.Unlock()
-		// TODO: mark as stale
-	}
-
-	if k.Config.LogData {
-		helpers.LogOnDebug(&cp, "IssueProvider")
-	}
-
-	return cp
-}
-
-func (k *KGPZ) InitPieces() *providers.PieceProvider {
-	files, err := getXMLFiles(filepath.Join(k.Config.FolderPath, PIECES_DIR))
-
-	helpers.MaybePanic(err, "Error getting pieces files")
-
-	cp := providers.NewPieceProvider(*files)
-	if err := cp.Load(); err != nil {
-		helpers.LogOnErr(&cp, err, "Error loading pieces")
-		k.lmu.Lock()
-		cp.Items = k.Pieces.Items
-		k.lmu.Unlock()
-		// TODO: mark as stale
-	}
-
-	if k.Config.LogData {
-		helpers.LogOnDebug(&cp, "PieceProvider")
-	}
-
-	return cp
 }
 
 func (k *KGPZ) Shutdown() {
