@@ -62,7 +62,7 @@ func (s *Server) Start() {
 	}
 
 	srv.Use(recover.New())
-	srv.Use(STATIC_PREFIX, static(&views.StaticFS, STATIC_PREFIX))
+	srv.Use(STATIC_PREFIX, static(&views.StaticFS))
 
 	srv.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("I'm a GET request!")
