@@ -6,10 +6,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/app"
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/server"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/server"
 )
 
 const (

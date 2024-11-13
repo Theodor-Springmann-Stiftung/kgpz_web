@@ -1,15 +1,21 @@
 package server
 
 import (
-	"context"
 	"fmt"
-	"io"
-	"net/http"
 	"sync"
 	"time"
 
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/app"
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+)
+
+const (
+	REQUEST_TIMEOUT = 8 * time.Second
+	SERVER_TIMEOUT  = 8 * time.Second
 )
 
 // INFO: Server is a meta-package that handles the current router, which it starts in a goroutine.
@@ -19,6 +25,7 @@ import (
 // - we invalidate all caches if data is valid
 // - we reload all clients
 // - if data validity catastrophically fails, we restart the router to map error pages.
+// TODO: Use fiber
 type Server struct {
 	Config   *providers.ConfigProvider
 	running  chan bool
@@ -32,7 +39,31 @@ func Start(k *app.KGPZ, c *providers.ConfigProvider) *Server {
 }
 
 func (s *Server) Start() {
-	srv := &http.Server{Addr: s.Config.Address + ":" + s.Config.Port}
+	srv := fiber.New(fiber.Config{
+		AppName:            s.Config.Address,
+		CaseSensitive:      false,
+		StrictRouting:      true,
+		EnableIPValidation: true,
+		EnablePrintRoutes:  s.Config.Debug,
+		// TODO: Error handler, which sadly, is global:
+		ErrorHandler: fiber.DefaultErrorHandler,
+		// WARNING: The app must be run in a console, since this uses environment variables:
+		// Prefork:           true,
+		StreamRequestBody: false,
+		WriteTimeout:      REQUEST_TIMEOUT,
+		ReadTimeout:       REQUEST_TIMEOUT,
+	})
+
+	if s.Config.Debug {
+		srv.Use(logger.New())
+	}
+
+	srv.Use(recover.New())
+
+	srv.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("I'm a GET request!")
+	})
+
 	s.runner(srv)
 }
 
@@ -59,7 +90,7 @@ func (s *Server) Restart() {
 	s.Start()
 }
 
-func (s *Server) runner(srv *http.Server) {
+func (s *Server) runner(srv *fiber.App) {
 	s.running = make(chan bool)
 	s.shutdown = &sync.WaitGroup{}
 
@@ -70,15 +101,7 @@ func (s *Server) runner(srv *http.Server) {
 
 	go func() {
 		defer s.shutdown.Done()
-		// EXAMPLE:
-		mux := http.NewServeMux()
-		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			io.WriteString(w, "hello world\n")
-		})
-
-		srv.Handler = mux
-
-		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		if err := srv.Listen(s.Config.Address + ":" + s.Config.Port); err != nil {
 			fmt.Println(err)
 			fmt.Println("Error starting server")
 			return
@@ -91,15 +114,15 @@ func (s *Server) runner(srv *http.Server) {
 		defer cleanup.Done()
 		clean := <-s.running
 
+		srv.Server().CloseOnShutdown = true
+
 		if clean {
-			ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(8*time.Second))
-			defer cancel()
-			if err := srv.Shutdown(ctx); err != nil {
+			if err := srv.ShutdownWithTimeout(SERVER_TIMEOUT); err != nil {
 				fmt.Println(err)
 				fmt.Println("Error shutting down server")
 			}
 		} else {
-			if err := srv.Close(); err != nil {
+			if err := srv.ShutdownWithTimeout(0); err != nil {
 				fmt.Println(err)
 				fmt.Println("Error closing server")
 			}

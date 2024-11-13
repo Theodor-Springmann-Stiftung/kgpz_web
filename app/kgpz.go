@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 )
 
 const (

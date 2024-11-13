@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/app"
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/templating"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/templating"
 )
 
 // ControllerFunc is a function that get injected all dependencies and returns a http.HandlerFunc

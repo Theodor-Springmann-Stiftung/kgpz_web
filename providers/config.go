@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"githib.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/kelseyhightower/envconfig"
 )
 
