@@ -20,17 +20,11 @@ type LayoutRegistry struct {
 	layouts map[string]TemplateContext
 	// WARNING: maybe this is too early for caching?
 	cache sync.Map
-	funcs template.FuncMap
 }
 
 func NewLayoutRegistry(routes fs.FS) *LayoutRegistry {
 	return &LayoutRegistry{
 		layoutsFS: routes,
-		funcs: template.FuncMap{
-			"safe": func(s string) template.HTML {
-				return template.HTML(s)
-			},
-		},
 	}
 }
 
@@ -39,14 +33,19 @@ func (r *LayoutRegistry) Register(fs fs.FS) *LayoutRegistry {
 	return NewLayoutRegistry(merged_fs.MergeMultiple(fs, r.layoutsFS))
 }
 
-// TODO: Funcs are not used in executing the templates yet
-func (r *LayoutRegistry) RegisterFuncs(funcs template.FuncMap) {
-	for k, v := range funcs {
-		r.funcs[k] = v
-	}
+func (r *LayoutRegistry) Load() error {
+	r.once.Do(func() {
+		err := r.load()
+		if err != nil {
+			fmt.Println(err)
+			panic(-1)
+		}
+	})
+
+	return nil
 }
 
-func (r *LayoutRegistry) Parse() error {
+func (r *LayoutRegistry) load() error {
 	layouts := make(map[string]TemplateContext)
 	rootcontext := NewTemplateContext(".")
 	err := rootcontext.Parse(r.layoutsFS)
@@ -85,14 +84,7 @@ func (r *LayoutRegistry) Layout(name string) (*template.Template, error) {
 	}
 
 	// TODO: What todo on errors?
-	r.once.Do(func() {
-		err := r.Parse()
-		if err != nil {
-			fmt.Println(err)
-			panic(-1)
-		}
-	})
-
+	r.Load()
 	context, ok := r.layouts[name]
 	if !ok {
 		return nil, NewError(NoTemplateError, name)

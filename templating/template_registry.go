@@ -16,21 +16,14 @@ type TemplateRegistry struct {
 	routesFS fs.FS
 	once     sync.Once
 	// INFO: Template & cache keys are directory routing paths, with '/' as root
-	// INFO: we don't need a mutex here since this is set in Parse() and never changed.
-	// Parse() is called only once in a thread-safe manner
+	// INFO: we don't need a mutex here since this is set in Load() protected by Once().
 	templates map[string]TemplateContext
 	cache     sync.Map
-	funcs     template.FuncMap
 }
 
 func NewTemplateRegistry(routes fs.FS) *TemplateRegistry {
 	return &TemplateRegistry{
 		routesFS: routes,
-		funcs: template.FuncMap{
-			"safe": func(s string) template.HTML {
-				return template.HTML(s)
-			},
-		},
 	}
 }
 
@@ -40,16 +33,21 @@ func (r *TemplateRegistry) Register(path string, fs fs.FS) *TemplateRegistry {
 	return NewTemplateRegistry(merged_fs.MergeMultiple(fs, r.routesFS))
 }
 
-func (r *TemplateRegistry) RegisterFuncs(funcs template.FuncMap) {
-	for k, v := range funcs {
-		r.funcs[k] = v
-	}
+func (r *TemplateRegistry) Load() error {
+	r.once.Do(func() {
+		err := r.load()
+		if err != nil {
+			fmt.Println(err)
+			panic(-1)
+		}
+	})
+	return nil
 }
 
 // TODO: Throw errors
 // TODO: what if there is no template in the directory above?
 // What if a certain path is or should uncallable since it has no index or body?
-func (r *TemplateRegistry) Parse() error {
+func (r *TemplateRegistry) load() error {
 	// INFO: Parse setrs r.templates, which is why you need to make sure to call Parse() once
 	templates := make(map[string]TemplateContext)
 	fs.WalkDir(r.routesFS, ".", func(path string, d fs.DirEntry, err error) error {
@@ -87,14 +85,7 @@ func (r *TemplateRegistry) Parse() error {
 func (r *TemplateRegistry) Add(path string, t *template.Template) error {
 	temp, ok := r.cache.Load(path)
 	if !ok {
-		// INFO: What todo on errors?
-		r.once.Do(func() {
-			err := r.Parse()
-			if err != nil {
-				fmt.Println(err)
-				panic(-1)
-			}
-		})
+		r.Load()
 		tc, ok := r.templates[path]
 		if !ok {
 			return NewError(NoTemplateError, path)
