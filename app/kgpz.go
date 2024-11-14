@@ -28,7 +28,18 @@ type KGPZ struct {
 }
 
 func (k *KGPZ) Init() {
-	go k.initRepo()
+	if k.Config.Debug {
+		// NOTE: validity checks for poor people, speeding up dev mode:
+		if _, err := os.Stat(k.Config.FolderPath); err != nil {
+			k.initRepo()
+		} else {
+			go k.initRepo()
+		}
+		k.Serialize()
+		return
+	}
+
+	k.initRepo()
 	k.Serialize()
 }
 
