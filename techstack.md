@@ -83,3 +83,4 @@
     - Horizontale Jahresnavigation durch vertikale ersetzen, so wie in der Einzelansicht
 - Was ist "Link auf seite teilen"?
 - Bevorzugtes Datumsformat
+- Zitierweise, Logo

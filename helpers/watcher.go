@@ -6,7 +6,6 @@ import (
 	"log"
 	"path/filepath"
 	"sync"
-	"time"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -99,7 +98,6 @@ func (fw *FileWatcher) Watch() error {
 				}
 				log.Println("event:", event)
 				if !event.Has(fsnotify.Chmod) {
-					time.Sleep(50 * time.Millisecond)
 					fw.mu.Lock()
 					for _, wf := range fw.wf {
 						wf(event.Name)
