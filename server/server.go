@@ -2,23 +2,36 @@ package server
 
 import (
 	"fmt"
+	"io/fs"
+	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/templating"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/storage/memory/v2"
 )
 
 const (
+	// INFO: This timeout is stupid. Uploads can take a long time, others might not. It's messy.
 	REQUEST_TIMEOUT = 8 * time.Second
 	SERVER_TIMEOUT  = 8 * time.Second
 
 	STATIC_PREFIX = "/assets"
+)
+
+const (
+	STATIC_FILEPATH = "./views/assets"
+	ROUTES_FILEPATH = "./views/routes"
+	LAYOUT_FILEPATH = "./views/layouts"
 )
 
 // INFO: Server is a meta-package that handles the current router, which it starts in a goroutine.
@@ -33,6 +46,7 @@ type Server struct {
 	Config   *providers.ConfigProvider
 	running  chan bool
 	shutdown *sync.WaitGroup
+	cache    *memory.Storage
 }
 
 func Start(k *app.KGPZ, c *providers.ConfigProvider) *Server {
@@ -41,7 +55,44 @@ func Start(k *app.KGPZ, c *providers.ConfigProvider) *Server {
 	}
 }
 
+// INFO: this is a hacky way to add watchers to the server, which will restart the server if the files change
+// It is very rudimentary and just restarts everything
+// TODO: send a reload on a websocket
+func (e *Server) AddWatchers(paths []string) error {
+	var dirs []string
+	for _, path := range paths {
+		// Get all subdirectories for paths
+		filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+			if d.IsDir() {
+				dirs = append(dirs, path)
+			}
+			return nil
+		})
+	}
+
+	watcher, err := helpers.NewFileWatcher(dirs)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		w := watcher.GetEvents()
+		<-w
+		watcher.Close()
+		time.Sleep(200 * time.Millisecond)
+		e.Restart()
+	}()
+
+	return nil
+}
+
 func (s *Server) Start() {
+	s.cache = memory.New(memory.Config{
+		GCInterval: 30 * time.Second,
+	})
+
+	engine := templating.NewEngine(&views.LayoutFS, &views.RoutesFS)
+
 	srv := fiber.New(fiber.Config{
 		AppName:            s.Config.Address,
 		CaseSensitive:      false,
@@ -55,6 +106,11 @@ func (s *Server) Start() {
 		StreamRequestBody: false,
 		WriteTimeout:      REQUEST_TIMEOUT,
 		ReadTimeout:       REQUEST_TIMEOUT,
+
+		PassLocalsToViews: true,
+
+		Views:       engine,
+		ViewsLayout: templating.DEFAULT_LAYOUT_NAME,
 	})
 
 	if s.Config.Debug {
@@ -62,13 +118,42 @@ func (s *Server) Start() {
 	}
 
 	srv.Use(recover.New())
+
+	// TODO: Dont cache static assets, bc storage gets huge
+	if s.Config.Debug {
+		srv.Use(cache.New(cache.Config{
+			Next: func(c *fiber.Ctx) bool {
+				return c.Query("noCache") == "true"
+			},
+			Expiration:   30 * time.Minute,
+			CacheControl: false,
+			Storage:      s.cache,
+		}))
+	} else {
+		srv.Use(cache.New(cache.Config{
+			Next: func(c *fiber.Ctx) bool {
+				return c.Query("noCache") == "true"
+			},
+			Expiration:   30 * time.Minute,
+			CacheControl: true,
+			Storage:      s.cache,
+		}))
+	}
+
 	srv.Use(STATIC_PREFIX, static(&views.StaticFS))
 
 	srv.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("I'm a GET request!")
+		return c.Render("/", fiber.Map{})
 	})
 
 	s.runner(srv)
+
+	if s.Config.Debug {
+		err := s.AddWatchers([]string{ROUTES_FILEPATH, LAYOUT_FILEPATH})
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 }
 
 func (s *Server) Stop() {
@@ -125,6 +210,7 @@ func (s *Server) runner(srv *fiber.App) {
 				fmt.Println(err)
 				fmt.Println("Error shutting down server")
 			}
+			s.cache.Close()
 		} else {
 			if err := srv.ShutdownWithTimeout(0); err != nil {
 				fmt.Println(err)

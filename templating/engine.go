@@ -4,25 +4,70 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"path/filepath"
 	"sync"
+	"time"
+
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 )
 
 type Engine struct {
-	// NOTE: LayoutRegistry and TemplateRegistry have their own syncronization and do not require a mutex here
+	// NOTE: LayoutRegistry and TemplateRegistry have their own syncronization & cache and do not require a mutex here
+	regmu            *sync.Mutex
 	LayoutRegistry   *LayoutRegistry
 	TemplateRegistry *TemplateRegistry
 
 	mu      *sync.Mutex
 	FuncMap template.FuncMap
+
+	paths     []string
+	layouts   *fs.FS
+	templates *fs.FS
 }
 
 func NewEngine(layouts, templates *fs.FS) *Engine {
 	return &Engine{
+		regmu:            &sync.Mutex{},
 		mu:               &sync.Mutex{},
 		LayoutRegistry:   NewLayoutRegistry(*layouts),
 		TemplateRegistry: NewTemplateRegistry(*templates),
 		FuncMap:          template.FuncMap{},
+		layouts:          layouts,
+		templates:        templates,
 	}
+}
+
+func (e *Engine) AddWatchers(paths []string) error {
+	e.paths = paths
+	var dirs []string
+	for _, path := range paths {
+		// Get all subdirectories for paths
+		filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+			if d.IsDir() {
+				dirs = append(dirs, path)
+			}
+			return nil
+		})
+	}
+
+	watcher, err := helpers.NewFileWatcher(dirs)
+	defer watcher.Close()
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		w := watcher.GetEvents()
+		<-w
+		time.Sleep(100 * time.Millisecond)
+		e.regmu.Lock()
+		defer e.regmu.Unlock()
+		e.LayoutRegistry = NewLayoutRegistry(*e.layouts)
+		e.TemplateRegistry = NewTemplateRegistry(*e.templates)
+		e.AddWatchers(e.paths)
+	}()
+
+	return nil
 }
 
 func (e *Engine) Load() error {
