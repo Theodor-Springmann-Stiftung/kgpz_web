@@ -83,3 +83,11 @@
 - Anzahl der Beiträge in der Primärüberlieferung
 - Logo
 - Sortiername ohne GND eintrag
+
+
+\(([^(\d{4}–)\(]*)(\d{4}–)*(\d{4})([^\)]*)\)
+($1<year>$2$3</year>$4)
+
+
+([\s\(])((?:16|17|18|19|20)\d{2}–)*((?:16|17|18|19|20)\d{2})
+$1<year>$2$3</year>
