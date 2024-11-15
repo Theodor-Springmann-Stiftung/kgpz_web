@@ -62,25 +62,24 @@
 
 ## File Inaccurancies:
 - No canonical names for Actors, can use GND for most of them
-- URL values YYYY/ST and YYYY/ST/P and YYYY/ST/B/P? Are they unique?
+- URL values YYYY/ST and YYYY/ST/P and YYYY/ST/Beilage/P? Are they unique?
 - Which names of places should be used? Example: Mitau, Jelgava, Jelgava (Mitau), Mitau (Jelgava)
-- Informationen zur Vorlage: not saved yet
 - Titel der Werke: not saved yet
-- Übersetzer in Werke: geht tatsächlich
-- Für die meisten Beiträge ist kein Akteur angegeben (Autor, Übersetzer etc.)
 - Kurzzitat: KGPZ St. 2, 14 Januar 1774 ? 
     - Besser: KGPZ 2/1774, 14. Januar
-- Die Seite ist sehr gelb????
-- Übersicht nach Werken = Übersicht nach Personen
-    - Besser: Person 
-              Autor
-              Rezensiert
-              Todesanzeige
-              Werke
-    - Ansicht ist nicht strukturiert genug, kann man fixen
 - Navigation: Galerie / Durchklicken??
 - Weniger Kästen / Volle Seitenbreite ausnutzen
     - Horizontale Jahresnavigation durch vertikale ersetzen, so wie in der Einzelansicht
-- Was ist "Link auf seite teilen"?
-- Bevorzugtes Datumsformat
-- Zitierweise, Logo
+- Was ist "Link auf seite teilen"? -> Permalink
+
+## Überarbeiten
+- Undifferenzierte Angabe von "Akteur" von Werken in der Kurzangabe, Differenzieren
+- Jahr
+- Kurztitel, Titel
+- Sekundärüberlieferung in Stück/Beitrag
+- Fehlende Daten in Stück/Beitrag
+- Kurzinformation Überlieferung
+- Link je Jahrgang gleich, in der Primärüberlieferung
+- Anzahl der Beiträge in der Primärüberlieferung
+- Logo
+- Sortiername ohne GND eintrag
