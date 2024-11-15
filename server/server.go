@@ -2,8 +2,7 @@ package server
 
 import (
 	"fmt"
-	"io/fs"
-	"path/filepath"
+	"log"
 	"sync"
 	"time"
 
@@ -47,6 +46,8 @@ type Server struct {
 	running  chan bool
 	shutdown *sync.WaitGroup
 	cache    *memory.Storage
+
+	watcher *helpers.FileWatcher
 }
 
 func Start(k *app.KGPZ, c *providers.ConfigProvider) *Server {
@@ -55,33 +56,23 @@ func Start(k *app.KGPZ, c *providers.ConfigProvider) *Server {
 	}
 }
 
-// INFO: this is a hacky way to add watchers to the server, which will restart the server if the files change
-// It is very rudimentary and just restarts everything
-// TODO: send a reload on a websocket
-func (e *Server) AddWatchers(paths []string) error {
-	var dirs []string
-	for _, path := range paths {
-		// Get all subdirectories for paths
-		filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
-			if d.IsDir() {
-				dirs = append(dirs, path)
-			}
-			return nil
-		})
-	}
+func (s *Server) Watcher() error {
+	watcher, err := helpers.NewFileWatcher()
+	s.watcher = watcher
+	s.watcher.Append(func(path string) {
+		log.Println("Restarting server")
+		s.Restart()
+	})
 
-	watcher, err := helpers.NewFileWatcher(dirs)
+	err = s.watcher.RecursiveDir(ROUTES_FILEPATH)
 	if err != nil {
 		return err
 	}
 
-	go func() {
-		w := watcher.GetEvents()
-		<-w
-		watcher.Close()
-		time.Sleep(200 * time.Millisecond)
-		e.Restart()
-	}()
+	err = s.watcher.RecursiveDir(LAYOUT_FILEPATH)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -149,7 +140,7 @@ func (s *Server) Start() {
 	s.runner(srv)
 
 	if s.Config.Debug {
-		err := s.AddWatchers([]string{ROUTES_FILEPATH, LAYOUT_FILEPATH})
+		err := s.Watcher()
 		if err != nil {
 			fmt.Println(err)
 		}

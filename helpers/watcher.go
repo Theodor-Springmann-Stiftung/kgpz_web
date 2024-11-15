@@ -1,38 +1,93 @@
 package helpers
 
 import (
+	"errors"
+	"io/fs"
 	"log"
+	"path/filepath"
+	"sync"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 )
 
+var NotInitializedError = errors.New("FileWatcher not initialized")
+var NoWatchFunctionError = errors.New("No watch function provided")
+
 type IFileWatcher interface {
-	GetEvents() chan string
+	RecursiveDir(path string) error
+	Dir(path string) error
+	Append(fn func(string))
+	Prepend(fn func(string))
+	Watch() error
+	Close()
+	Restart()
 }
 
 type FileWatcher struct {
-	path    []string
-	events  chan string
+	mu      sync.Mutex
+	wf      []func(string)
+	paths   []string
 	watcher *fsnotify.Watcher
 }
 
-func NewFileWatcher(path []string) (*FileWatcher, error) {
-	fw := &FileWatcher{path: path, events: make(chan string, 48)}
-	err := fw.Watch(path)
-	if err != nil {
-		return nil, err
-	}
+func NewFileWatcher() (*FileWatcher, error) {
+
+	fw := &FileWatcher{mu: sync.Mutex{}}
+	fw.Watch()
 	return fw, nil
 }
 
-func (fw *FileWatcher) Watch(paths []string) error {
-	fw.events = make(chan string, 48)
+func (fw *FileWatcher) RecursiveDir(path string) error {
+	err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+		if d.IsDir() {
+			err := fw.Dir(path)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 
+	return err
+}
+
+func (fw *FileWatcher) Dir(path string) error {
+	fw.mu.Lock()
+	defer fw.mu.Unlock()
+	if fw.watcher != nil {
+		err := fw.watcher.Add(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	fw.paths = append(fw.paths, path)
+
+	return nil
+}
+
+func (fw *FileWatcher) Append(fn func(string)) {
+	fw.mu.Lock()
+	defer fw.mu.Unlock()
+	fw.wf = append(fw.wf, fn)
+}
+
+func (fw *FileWatcher) Prepend(fn func(string)) {
+	fw.mu.Lock()
+	defer fw.mu.Unlock()
+	fw.wf = append([]func(string){fn}, fw.wf...)
+}
+
+func (fw *FileWatcher) Watch() error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
 	}
+
+	fw.mu.Lock()
 	fw.watcher = watcher
+	fw.mu.Unlock()
 
 	// Start listening for events.
 	go func() {
@@ -44,7 +99,12 @@ func (fw *FileWatcher) Watch(paths []string) error {
 				}
 				log.Println("event:", event)
 				if !event.Has(fsnotify.Chmod) {
-					fw.events <- event.Name
+					time.Sleep(50 * time.Millisecond)
+					fw.mu.Lock()
+					for _, wf := range fw.wf {
+						wf(event.Name)
+					}
+					fw.mu.Unlock()
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
@@ -55,21 +115,23 @@ func (fw *FileWatcher) Watch(paths []string) error {
 		}
 	}()
 
-	for _, path := range paths {
-		err = watcher.Add(path)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
-func (fw *FileWatcher) GetEvents() chan string {
-	return fw.events
+// INFO: After closing the watcher, you can't use it anymore.
+// Also, after a restart, you need to re add the paths
+func (fw *FileWatcher) Close() {
+	fw.mu.Lock()
+	defer fw.mu.Unlock()
+
+	if fw.watcher != nil {
+		fw.watcher.Close()
+	}
+	fw.watcher = nil
+	fw.paths = nil
 }
 
-func (fw *FileWatcher) Close() {
-	fw.watcher.Close()
-	close(fw.events)
+func (fw *FileWatcher) Restart() {
+	fw.Close()
+	fw.Watch()
 }
