@@ -8,6 +8,7 @@ import (
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/server"
 )
@@ -31,7 +32,13 @@ const (
 func main() {
 	cfg := providers.NewConfigProvider([]string{DEV_CONFIG, DEFAULT_CONFIG})
 	if err := cfg.Read(); err != nil {
-		helpers.MaybePanic(err, "Error reading config")
+		helpers.Assert(err, "Error reading config")
+	}
+
+	if cfg.Config.Debug {
+		logging.SetDebug()
+	} else {
+		logging.SetInfo()
 	}
 
 	kgpz := app.NewKGPZ(cfg)
@@ -51,17 +58,17 @@ func Start(k *app.KGPZ, s *server.Server) {
 
 	go func() {
 		sig := <-sigs
-		fmt.Println("Received signal. Cleaning up.")
+		logging.Info("Signal received, Cleaning up...")
 		// INFO: here we add cleanup functions
 		if sig == syscall.SIGTERM {
 			s.Stop()
-			fmt.Println("Server stopped. Waiting for FS.")
+			logging.Info("Server stopped. Waiting for FS.")
 		} else {
 			s.Kill()
-			fmt.Println("Server killed. Waiting for FS.")
+			logging.Info("Server killed. Waiting for FS.")
 		}
 		k.Shutdown()
-		fmt.Println("FS stopped. Exiting.")
+		logging.Info("Shutdown complete.")
 		done <- true
 	}()
 
@@ -72,10 +79,8 @@ func Start(k *app.KGPZ, s *server.Server) {
 				var input string
 				fmt.Scanln(&input)
 				if input == "r" {
-					fmt.Println("Restarting server.")
 					s.Restart()
 				} else if input == "p" {
-					fmt.Println("Pulling repo.")
 					k.Pull()
 				} else if input == "q" {
 					sigs <- os.Signal(syscall.SIGTERM)
@@ -85,5 +90,4 @@ func Start(k *app.KGPZ, s *server.Server) {
 	}
 
 	<-done
-	fmt.Println("Cleanup finished. Exiting.")
 }

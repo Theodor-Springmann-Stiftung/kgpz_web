@@ -5,9 +5,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+const (
+	START_YEAR = "1764"
+)
+
 func GetYear(kgpz *app.KGPZ) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		y := c.Params("year", "1764")
+		y := c.Params("year", START_YEAR)
 		if len(y) != 4 {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
@@ -16,6 +20,7 @@ func GetYear(kgpz *app.KGPZ) fiber.Handler {
 		if len(issues.Issues) == 0 {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
+
 		return c.Render("/", fiber.Map{"model": issues})
 	}
 }

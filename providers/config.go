@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -68,15 +69,14 @@ func (c *ConfigProvider) Validate() error {
 func readSettingsFile(cfg *Config, path string) *Config {
 	f, err := os.Open(path)
 	if err != nil {
-		fmt.Println("Error: ", err)
-		fmt.Println("Coudln't open ", path)
+		logging.Error(err, "Error opening config file "+path)
 		return cfg
 	}
 	defer f.Close()
 
 	dec := json.NewDecoder(f)
 	err = dec.Decode(cfg)
-	helpers.MaybePanic(err, "Error decoding config.json")
+	helpers.Assert(err, "Error decoding config file")
 
 	return cfg
 }

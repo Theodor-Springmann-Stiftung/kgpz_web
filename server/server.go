@@ -1,14 +1,13 @@
 package server
 
 import (
-	"fmt"
-	"log"
 	"sync"
 	"time"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/templating"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
@@ -55,7 +54,7 @@ type Server struct {
 
 func Create(k *app.KGPZ, c *providers.ConfigProvider) *Server {
 	if c == nil || k == nil {
-		log.Println("Error creating server")
+		logging.Error(nil, "Config or KGPZ is posssibly nil while tying to create server")
 		return nil
 	}
 
@@ -78,7 +77,7 @@ func (s *Server) Watcher() error {
 
 	s.watcher = watcher
 	s.watcher.Append(func(path string) {
-		log.Println("Restarting server")
+		logging.Info("File changed: ", path)
 		time.Sleep(200 * time.Millisecond)
 		s.Restart()
 	})
@@ -159,10 +158,7 @@ func (s *Server) Start() {
 
 	if s.Config.Debug {
 		err := s.Watcher()
-		if err != nil {
-			log.Println("Error watching files")
-			log.Println(err)
-		}
+		logging.Error(err, "Error setting up file watcher")
 	}
 }
 
@@ -200,9 +196,10 @@ func (s *Server) runner(srv *fiber.App) {
 
 	go func() {
 		defer s.shutdown.Done()
+
+		logging.Info("Starting server on ", s.Config.Address+":"+s.Config.Port)
 		if err := srv.Listen(s.Config.Address + ":" + s.Config.Port); err != nil {
-			fmt.Println(err)
-			fmt.Println("Error starting server")
+			logging.Error(err, "Error starting server")
 			return
 		}
 
@@ -213,16 +210,19 @@ func (s *Server) runner(srv *fiber.App) {
 		defer cleanup.Done()
 		clean := <-s.running
 
+		logging.Info("Server shutdown requested")
+
 		if clean {
 			if err := srv.ShutdownWithTimeout(SERVER_TIMEOUT); err != nil {
-				fmt.Println(err)
-				fmt.Println("Error shutting down server")
+				logging.Error(err, "Error closing server cleanly. Shutting server down by force.")
+				clean = false
 			}
 			s.cache.Close()
-		} else {
+		}
+
+		if !clean {
 			if err := srv.ShutdownWithTimeout(0); err != nil {
-				fmt.Println(err)
-				fmt.Println("Error closing server")
+				logging.Error(err, "Error closing server by force.")
 			}
 		}
 	}()

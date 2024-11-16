@@ -1,6 +1,8 @@
 package helpers
 
-import "sync"
+import (
+	"sync"
+)
 
 type EventMux[T any] struct {
 	// INFO: This is a simple event multiplexer that allows to subscribe to events and to publish them.

@@ -3,10 +3,10 @@ package helpers
 import (
 	"errors"
 	"io/fs"
-	"log"
 	"path/filepath"
 	"sync"
 
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -96,7 +96,6 @@ func (fw *FileWatcher) Watch() error {
 					return
 				}
 				if !event.Has(fsnotify.Chmod) {
-					log.Println("event:", event)
 					fw.mu.Lock()
 					for _, wf := range fw.wf {
 						wf(event.Name)
@@ -107,7 +106,7 @@ func (fw *FileWatcher) Watch() error {
 				if !ok {
 					return
 				}
-				log.Println("error:", err)
+				logging.Error(err)
 			}
 		}
 	}()

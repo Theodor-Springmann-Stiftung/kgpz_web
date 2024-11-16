@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 )
 
@@ -44,12 +45,9 @@ func (k *KGPZ) Init() {
 }
 
 func NewKGPZ(config *providers.ConfigProvider) *KGPZ {
-	if config == nil {
-		panic("ConfigProvider is nil")
-	}
-
+	helpers.AssertNonNil(config, "Config is nil")
 	if err := config.Validate(); err != nil {
-		helpers.MaybePanic(err, "Error validating config")
+		helpers.Assert(err, "Error validating config")
 	}
 
 	return &KGPZ{Config: config}
@@ -65,10 +63,10 @@ func (k *KGPZ) Serialize() {
 	defer k.gmu.Unlock()
 
 	issues, err := getXMLFiles(filepath.Join(k.Config.FolderPath, ISSUES_DIR))
-	helpers.MaybePanic(err, "Error getting issues")
+	helpers.Assert(err, "Error getting issues")
 
 	pieces, err := getXMLFiles(filepath.Join(k.Config.FolderPath, PIECES_DIR))
-	helpers.MaybePanic(err, "Error getting pieces")
+	helpers.Assert(err, "Error getting pieces")
 
 	lib := providers.NewLibrary(
 		[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
@@ -122,6 +120,7 @@ func (k *KGPZ) IsDebug() bool {
 
 func (k *KGPZ) Pull() {
 	go func() {
+		logging.Info("Pulling Repository...")
 		k.gmu.Lock()
 
 		if k.Repo == nil {
@@ -130,17 +129,13 @@ func (k *KGPZ) Pull() {
 		}
 
 		err, changed := k.Repo.Pull()
-		if err != nil {
-			helpers.LogOnErr(&k.Repo, err, "Error pulling repo")
-		}
+		logging.Error(err, "Error pulling GitProvider")
 
 		// Need to unlock here to prevent deadlock, since Serialize locks the same mutex
 		k.gmu.Unlock()
 
 		if changed {
-			if k.IsDebug() {
-				helpers.LogOnDebug(&k.Repo, "GitProvider changed")
-			}
+			logging.ObjDebug(&k.Repo, "Remote changed. Reparsing...")
 			k.Serialize()
 		}
 	}()
@@ -149,7 +144,7 @@ func (k *KGPZ) Pull() {
 func (k *KGPZ) initRepo() {
 	gp, err := providers.NewGitProvider(k.Config.Config.GitURL, k.Config.Config.FolderPath, k.Config.Config.GitBranch)
 	if err != nil {
-		helpers.LogOnErr(&gp, err, "Error creating GitProvider")
+		logging.ObjErr(&gp, err, "Error creating GitProvider")
 		return
 	}
 
@@ -158,9 +153,7 @@ func (k *KGPZ) initRepo() {
 	k.gmu.Unlock()
 	k.Pull()
 
-	if k.IsDebug() {
-		helpers.LogOnDebug(&gp, "GitProvider")
-	}
+	logging.ObjDebug(&k.Repo, "GitProvider initialized")
 }
 
 func (k *KGPZ) Shutdown() {

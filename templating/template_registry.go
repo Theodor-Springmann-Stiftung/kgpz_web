@@ -1,13 +1,13 @@
 package templating
 
 import (
-	"fmt"
 	"html/template"
 	"io/fs"
 	"os"
 	"strings"
 	"sync"
 
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/yalue/merged_fs"
 )
 
@@ -36,10 +36,7 @@ func (r *TemplateRegistry) Register(path string, fs fs.FS) *TemplateRegistry {
 func (r *TemplateRegistry) Load() error {
 	r.once.Do(func() {
 		err := r.load()
-		if err != nil {
-			fmt.Println(err)
-			panic(-1)
-		}
+		helpers.Assert(err, "Error loading templates. Exiting.")
 	})
 	return nil
 }

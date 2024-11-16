@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"sync"
+
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 )
 
 type KGPZXML[T any] interface {
@@ -48,7 +50,7 @@ func (l *Library) Serialize() {
 		err := l.Agents.Serialize()
 		if err != nil {
 			l.Agents = nil
-			fmt.Println(err)
+
 		}
 	}()
 
@@ -57,7 +59,7 @@ func (l *Library) Serialize() {
 		err := l.Places.Serialize()
 		if err != nil {
 			l.Places = nil
-			fmt.Println(err)
+
 		}
 	}()
 
@@ -66,7 +68,7 @@ func (l *Library) Serialize() {
 		err := l.Works.Serialize()
 		if err != nil {
 			l.Works = nil
-			fmt.Println(err)
+
 		}
 	}()
 
@@ -75,7 +77,7 @@ func (l *Library) Serialize() {
 		err := l.Categories.Serialize()
 		if err != nil {
 			l.Categories = nil
-			fmt.Println(err)
+
 		}
 	}()
 
@@ -84,7 +86,7 @@ func (l *Library) Serialize() {
 		err := l.Issues.Serialize()
 		if err != nil {
 			l.Issues = nil
-			fmt.Println(err)
+
 		}
 	}()
 
@@ -93,7 +95,7 @@ func (l *Library) Serialize() {
 		err := l.Pieces.Serialize()
 		if err != nil {
 			l.Pieces = nil
-			fmt.Println(err)
+
 		}
 	}()
 
@@ -109,7 +111,7 @@ func (p *XMLProvider[T]) Serialize() error {
 			defer wg.Done()
 			var data T
 			if err := UnmarshalFile(path, &data); err != nil {
-				fmt.Println(err)
+
 				return
 			}
 			p.mu.Lock()
@@ -131,11 +133,10 @@ func (a *XMLProvider[T]) String() string {
 func UnmarshalFile[T any](filename string, data *T) error {
 	xmlFile, err := os.Open(filename)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
-	fmt.Println("Successfully opened " + filename)
 	defer xmlFile.Close()
+	logging.Info("Opened " + filename)
 	byteValue, _ := io.ReadAll(xmlFile)
 	xml.Unmarshal(byteValue, data)
 

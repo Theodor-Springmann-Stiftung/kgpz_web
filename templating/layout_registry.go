@@ -1,11 +1,11 @@
 package templating
 
 import (
-	"fmt"
 	"html/template"
 	"io/fs"
 	"sync"
 
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/yalue/merged_fs"
 )
 
@@ -36,10 +36,7 @@ func (r *LayoutRegistry) Register(fs fs.FS) *LayoutRegistry {
 func (r *LayoutRegistry) Load() error {
 	r.once.Do(func() {
 		err := r.load()
-		if err != nil {
-			fmt.Println(err)
-			panic(-1)
-		}
+		helpers.Assert(err, "Error loading layouts. Exiting.")
 	})
 
 	return nil

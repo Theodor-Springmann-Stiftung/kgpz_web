@@ -1,24 +1,43 @@
 package helpers
 
 import (
-	"fmt"
 	"os"
+
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 )
 
-func Panic(err error, msg string) {
-	fmt.Println(msg)
-	if err != nil {
-		fmt.Println("Error: ", err)
-	}
-	os.Exit(1)
-}
-
-func MaybePanic(err error, msg string) {
+func Assert(err error, msg ...string) {
 	if err == nil {
 		return
 	}
 
-	fmt.Println(msg)
-	fmt.Println("Error: ", err)
+	logging.Error(err, msg...)
+	os.Exit(1)
+}
+
+func AssertNonNil(obj interface{}, msg ...string) {
+	if obj != nil {
+		return
+	}
+
+	logging.Error(nil, msg...)
+	os.Exit(1)
+}
+
+func AssertNil(obj interface{}, msg ...string) {
+	if obj == nil {
+		return
+	}
+
+	logging.Error(nil, msg...)
+	os.Exit(1)
+}
+
+func AssertStr(str string, msg ...string) {
+	if str != "" {
+		return
+	}
+
+	logging.Error(nil, msg...)
 	os.Exit(1)
 }
