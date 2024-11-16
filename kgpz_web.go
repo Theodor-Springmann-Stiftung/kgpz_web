@@ -37,7 +37,7 @@ func main() {
 	kgpz := app.NewKGPZ(cfg)
 	kgpz.Init()
 
-	server := server.Start(kgpz, cfg)
+	server := server.Create(kgpz, cfg)
 	Start(kgpz, server)
 }
 

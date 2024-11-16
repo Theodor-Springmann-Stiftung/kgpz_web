@@ -73,9 +73,6 @@
 - Was ist "Link auf seite teilen"? -> Permalink
 
 ## Überarbeiten
-- Undifferenzierte Angabe von "Akteur" von Werken in der Kurzangabe, Differenzieren
-- Jahr
-- Kurztitel, Titel
 - Sekundärüberlieferung in Stück/Beitrag
 - Fehlende Daten in Stück/Beitrag
 - Kurzinformation Überlieferung

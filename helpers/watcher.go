@@ -31,7 +31,6 @@ type FileWatcher struct {
 }
 
 func NewFileWatcher() (*FileWatcher, error) {
-
 	fw := &FileWatcher{mu: sync.Mutex{}}
 	fw.Watch()
 	return fw, nil
@@ -96,8 +95,8 @@ func (fw *FileWatcher) Watch() error {
 				if !ok {
 					return
 				}
-				log.Println("event:", event)
 				if !event.Has(fsnotify.Chmod) {
+					log.Println("event:", event)
 					fw.mu.Lock()
 					for _, wf := range fw.wf {
 						wf(event.Name)

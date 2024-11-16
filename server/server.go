@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/templating"
@@ -40,27 +41,45 @@ const (
 // - we invalidate all caches if data is valid
 // - we reload all clients
 // - if data validity catastrophically fails, we restart the router to map error pages.
-// TODO: Use fiber
 type Server struct {
 	Config   *providers.ConfigProvider
 	running  chan bool
 	shutdown *sync.WaitGroup
 	cache    *memory.Storage
 
+	mu      sync.Mutex
 	watcher *helpers.FileWatcher
+
+	kgpz *app.KGPZ
 }
 
-func Start(k *app.KGPZ, c *providers.ConfigProvider) *Server {
+func Create(k *app.KGPZ, c *providers.ConfigProvider) *Server {
+	if c == nil || k == nil {
+		log.Println("Error creating server")
+		return nil
+	}
+
 	return &Server{
 		Config: c,
+		kgpz:   k,
 	}
 }
 
+// INFO: hot reloading for poor people
+// BUG: unable to close the old file watcher here, since the process gets aborted in the middle of creating the new one.
 func (s *Server) Watcher() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	watcher, err := helpers.NewFileWatcher()
+	if err != nil {
+		return err
+	}
+
 	s.watcher = watcher
 	s.watcher.Append(func(path string) {
 		log.Println("Restarting server")
+		time.Sleep(200 * time.Millisecond)
 		s.Restart()
 	})
 
@@ -111,6 +130,7 @@ func (s *Server) Start() {
 	srv.Use(recover.New())
 
 	// TODO: Dont cache static assets, bc storage gets huge
+	// INFO: Maybe fiber does this already?
 	if s.Config.Debug {
 		srv.Use(cache.New(cache.Config{
 			Next: func(c *fiber.Ctx) bool {
@@ -133,16 +153,15 @@ func (s *Server) Start() {
 
 	srv.Use(STATIC_PREFIX, static(&views.StaticFS))
 
-	srv.Get("/", func(c *fiber.Ctx) error {
-		return c.Render("/", fiber.Map{})
-	})
+	srv.Get("/:year?", controllers.GetYear(s.kgpz))
 
 	s.runner(srv)
 
 	if s.Config.Debug {
 		err := s.Watcher()
 		if err != nil {
-			fmt.Println(err)
+			log.Println("Error watching files")
+			log.Println(err)
 		}
 	}
 }
@@ -193,8 +212,6 @@ func (s *Server) runner(srv *fiber.App) {
 	go func() {
 		defer cleanup.Done()
 		clean := <-s.running
-
-		srv.Server().CloseOnShutdown = true
 
 		if clean {
 			if err := srv.ShutdownWithTimeout(SERVER_TIMEOUT); err != nil {

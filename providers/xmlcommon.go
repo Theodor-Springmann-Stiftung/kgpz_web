@@ -81,5 +81,5 @@ type Reference struct {
 }
 
 type Value struct {
-	Value string `xml:",chardata"`
+	Chardata string `xml:",chardata"`
 }

@@ -1,3 +1,19 @@
 {{ define "body" }}
-	<p>Change! Hello from body</p>
+	{{ range $year := .model.AvailableYears }}
+		<a href="/{{ $year }}">{{ $year }}</a>
+	{{ end }}
+	{{ range $issue := .model.Issues }}
+		<div>
+			<div>
+				{{ $issue.Number.Chardata }}
+			</div>
+			<div>
+				{{ index $issue.Month 1 }}
+			</div>
+			<div>
+				{{ index $issue.Weekday 1 }}
+			</div>
+			<div>{{ $issue.Day }}.{{ index $issue.Month 2 }}.</div>
+		</div>
+	{{ end }}
 {{ end }}

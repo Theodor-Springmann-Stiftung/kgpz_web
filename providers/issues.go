@@ -11,7 +11,31 @@ type IssueProvider struct {
 
 type Issues struct {
 	XMLName xml.Name `xml:"stuecke"`
-	Issue   []Issue  `xml:"stueck"`
+	Issues  []Issue  `xml:"stueck"`
+}
+
+func (i *IssueProvider) GetYear(year string) YearViewModel {
+	res := YearViewModel{Year: year}
+	last := ""
+	for _, issue := range i.Items.Issues {
+		if len(issue.Datum.When) < 4 {
+			continue
+		}
+
+		date := issue.Datum.When[0:4]
+		if date != last {
+			res.PushAvailable(date)
+			last = date
+		}
+
+		if date == year {
+			res.PushIssue(issue)
+		}
+	}
+
+	res.SortAvailableYears()
+
+	return res
 }
 
 type Issue struct {
@@ -39,13 +63,13 @@ type Additional struct {
 }
 
 func (i Issues) Append(data Issues) Issues {
-	i.Issue = append(i.Issue, data.Issue...)
+	i.Issues = append(i.Issues, data.Issues...)
 	return i
 }
 
 func (i Issues) String() string {
 	var res []string
-	for _, issue := range i.Issue {
+	for _, issue := range i.Issues {
 		res = append(res, issue.String())
 	}
 
