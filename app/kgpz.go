@@ -8,6 +8,7 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
 const (
@@ -25,7 +26,7 @@ type KGPZ struct {
 	gmu     sync.Mutex
 	Config  *providers.ConfigProvider
 	Repo    *providers.GitProvider
-	Library *providers.Library
+	Library *xmlprovider.Library
 }
 
 func (k *KGPZ) Init() {
@@ -68,7 +69,7 @@ func (k *KGPZ) Serialize() {
 	pieces, err := getXMLFiles(filepath.Join(k.Config.FolderPath, PIECES_DIR))
 	helpers.Assert(err, "Error getting pieces")
 
-	lib := providers.NewLibrary(
+	lib := xmlprovider.NewLibrary(
 		[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
 		[]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)},
 		[]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)},
@@ -135,7 +136,7 @@ func (k *KGPZ) Pull() {
 		k.gmu.Unlock()
 
 		if changed {
-			logging.ObjDebug(&k.Repo, "Remote changed. Reparsing...")
+			logging.ObjDebug(&k.Repo, "Remote changed. Reparsing")
 			k.Serialize()
 		}
 	}()

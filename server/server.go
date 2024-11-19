@@ -142,7 +142,8 @@ func (s *Server) Start() {
 	} else {
 		srv.Use(cache.New(cache.Config{
 			Next: func(c *fiber.Ctx) bool {
-				return c.Query("noCache") == "true"
+				// We do not cache error responses
+				return c.Query("noCache") == "true" || c.Response().StatusCode() != fiber.StatusOK
 			},
 			Expiration:   30 * time.Minute,
 			CacheControl: true,
@@ -153,6 +154,8 @@ func (s *Server) Start() {
 	srv.Use(STATIC_PREFIX, static(&views.StaticFS))
 
 	srv.Get("/:year?", controllers.GetYear(s.kgpz))
+	srv.Get("/:year/:issue/:page?", controllers.GetIssue(s.kgpz))
+	srv.Get("/:year/:issue/beilage/:subpage?", controllers.GetIssue(s.kgpz))
 
 	s.runner(srv)
 

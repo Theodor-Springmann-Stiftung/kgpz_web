@@ -1,0 +1,305 @@
+> curl --header "Accept: application/json" https://lobid.org/gnd/11854523X > lobid_example.json
+{
+  "gender" : [ {
+    "id" : "https://d-nb.info/standards/vocab/gnd/gender#male",
+    "label" : "Männlich"
+  } ],
+  "dateOfDeath" : [ "1788-06-21" ],
+  "placeOfDeath" : [ {
+    "id" : "https://d-nb.info/gnd/4040608-8",
+    "label" : "Münster (Westf)"
+  } ],
+  "familialRelationship" : [ {
+    "id" : "https://d-nb.info/gnd/124138004",
+    "label" : "Hamann, Johann Georg"
+  } ],
+  "type" : [ "Person", "AuthorityResource", "DifferentiatedPerson" ],
+  "gndSubjectCategory" : [ {
+    "id" : "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.7p",
+    "label" : "Personen zu Philosophie"
+  }, {
+    "id" : "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6p",
+    "label" : "Personen zu Kirchengeschichte, Systematischer und Praktischer Theologie, Kirche und Konfession"
+  }, {
+    "id" : "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.2p",
+    "label" : "Personen zu Literaturgeschichte (Schriftsteller)"
+  } ],
+  "oldAuthorityNumber" : [ "(DE-588a)11854523X", "(DE-588c)4023109-4", "(DE-588a)126364664" ],
+  "geographicAreaCode" : [ {
+    "id" : "https://d-nb.info/standards/vocab/gnd/geographic-area-code#XA-RU",
+    "label" : "Russland"
+  }, {
+    "id" : "https://d-nb.info/standards/vocab/gnd/geographic-area-code#XA-DE",
+    "label" : "Deutschland"
+  } ],
+  "biographicalOrHistoricalInformation" : [ "Lutherischer Theologe und aufklärungskritischer Philosoph nach einem Erweckungserlebnis" ],
+  "hasAuntUncle" : [ {
+    "id" : "https://d-nb.info/gnd/124138004",
+    "label" : "Hamann, Johann Georg"
+  } ],
+  "publication" : [ "Hamann, Johann G.: Golgatha und Scheblimini", "Rink, Friedrich T.: [Mancherlei zur Geschichte der metakritischen Invasion]", "Hamann, Johann G.: Kreuzzüge der Philologen", "Hamann, Johann G.: Beobachtungen über die heilige Schrift", "Hamann, Johann G.: Versuch einer Sibylle über die Ehe", "Weisheits-Sprüche und Witzreden aus J. Georg Hamanns und Imanuel Kants Schriften", "Hamann, Johann G.: Sibyllinische Blätter des Magus im Norden" ],
+  "describedBy" : {
+    "id" : "https://d-nb.info/gnd/11854523X/about",
+    "license" : {
+      "id" : "http://creativecommons.org/publicdomain/zero/1.0/",
+      "label" : "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "dateModified" : "2024-01-08T10:50:15.000",
+    "descriptionLevel" : {
+      "id" : "https://d-nb.info/standards/vocab/gnd/description-level#1",
+      "label" : "Allgemeines, Interdisziplinäre Allgemeinwörter"
+    }
+  },
+  "gndIdentifier" : "11854523X",
+  "id" : "https://d-nb.info/gnd/11854523X",
+  "preferredName" : "Hamann, Johann Georg",
+  "wikipedia" : [ {
+    "id" : "https://de.wikipedia.org/wiki/Johann_Georg_Hamann",
+    "label" : "https://de.wikipedia.org/wiki/Johann_Georg_Hamann"
+  } ],
+  "preferredNameEntityForThePerson" : {
+    "forename" : [ "Johann Georg" ],
+    "surname" : [ "Hamann" ]
+  },
+  "depiction" : [ {
+    "id" : "https://commons.wikimedia.org/wiki/Special:FilePath/Johann%20Georg%20Hamann%20%281730%E2%80%931788%29.jpg",
+    "url" : "https://commons.wikimedia.org/wiki/File:Johann%20Georg%20Hamann%20%281730%E2%80%931788%29.jpg?uselang=de",
+    "thumbnail" : "https://commons.wikimedia.org/wiki/Special:FilePath/Johann%20Georg%20Hamann%20%281730%E2%80%931788%29.jpg?width=270"
+  } ],
+  "professionOrOccupation" : [ {
+    "id" : "https://d-nb.info/gnd/4045790-4",
+    "label" : "Philosoph"
+  }, {
+    "id" : "https://d-nb.info/gnd/4053309-8",
+    "label" : "Schriftsteller"
+  }, {
+    "id" : "https://d-nb.info/gnd/1041366884",
+    "label" : "Lutherischer Theologe"
+  }, {
+    "id" : "https://d-nb.info/gnd/4128272-3",
+    "label" : "Kaufmann"
+  }, {
+    "id" : "https://d-nb.info/gnd/4061414-1",
+    "label" : "Übersetzer"
+  }, {
+    "id" : "https://d-nb.info/gnd/7719046-4",
+    "label" : "Selbstverleger"
+  } ],
+  "placeOfBirth" : [ {
+    "id" : "https://d-nb.info/gnd/4031541-1",
+    "label" : "Königsberg"
+  } ],
+  "dateOfBirth" : [ "1730-08-27" ],
+  "variantNameEntityForThePerson" : [ {
+    "forename" : [ "Vettius" ],
+    "surname" : [ "Epagathus" ]
+  }, {
+    "forename" : [ "Iogann Georg" ],
+    "surname" : [ "Gaman" ]
+  }, {
+    "forename" : [ "J. G." ],
+    "surname" : [ "Hamann" ]
+  }, {
+    "personalName" : [ "Hamann" ]
+  }, {
+    "forename" : [ "Abälardus" ],
+    "surname" : [ "Virbius" ]
+  }, {
+    "forename" : [ "Yohan Geʼorg" ],
+    "surname" : [ "Haman" ]
+  }, {
+    "nameAddition" : [ "Magus des Nordens" ],
+    "personalName" : [ "Hamann" ]
+  }, {
+    "personalName" : [ "Magus des Nordens" ]
+  }, {
+    "forename" : [ "Johann George" ],
+    "surname" : [ "Hamann" ]
+  }, {
+    "forename" : [ "Johann G." ],
+    "surname" : [ "Haman" ]
+  }, {
+    "forename" : [ "Christian Z." ],
+    "surname" : [ "Telonarcha" ]
+  }, {
+    "forename" : [ "Georg" ],
+    "surname" : [ "Hamann" ]
+  }, {
+    "forename" : [ "I. G." ],
+    "surname" : [ "Gaman" ]
+  }, {
+    "forename" : [ "Johann Georg" ],
+    "surname" : [ "Haman" ]
+  }, {
+    "forename" : [ "Johann Georg" ],
+    "nameAddition" : [ "der Jüngere" ],
+    "surname" : [ "Hamann" ]
+  }, {
+    "forename" : [ "Johann G." ],
+    "surname" : [ "Hamann" ]
+  }, {
+    "personalName" : [ "Aristobulus" ]
+  }, {
+    "forename" : [ "Vetius" ],
+    "surname" : [ "Epagathus" ]
+  } ],
+  "languageCode" : [ {
+    "id" : "http://id.loc.gov/vocabulary/iso639-2/ger",
+    "label" : "http://id.loc.gov/vocabulary/iso639-2/ger"
+  } ],
+  "@context" : "https://lobid.org/gnd/context.jsonld",
+  "professionalRelationship" : [ {
+    "id" : "https://d-nb.info/gnd/118549553",
+    "label" : "Herder, Johann Gottfried von"
+  } ],
+  "relatedSubjectHeading" : [ {
+    "id" : "https://d-nb.info/gnd/4165591-6",
+    "label" : "Kreis von Münster"
+  } ],
+  "variantName" : [ "Hamann, J. G.", "Magus des Nordens", "Haman, Johann G.", "Virbius, Abälardus", "Hamann", "Gaman, Iogann Georg", "Hamann, Johann Georg, der Jüngere", "Hamann, Johann G.", "Aristobulus", "Hamann, Johann George", "Haman, Johann Georg", "Hamann, Magus des Nordens", "Epagathus, Vettius", "Haman, Yohan Geʼorg", "Gaman, I. G.", "Epagathus, Vetius", "Telonarcha, Christian Z.", "Hamann, Georg" ],
+  "sameAs" : [ {
+    "collection" : {
+      "abbr" : "BNF",
+      "name" : "Bibliothèque nationale de France",
+      "publisher" : "Bibliothèque nationale de France",
+      "icon" : "https://www.bnf.fr/themes/custom/bnfsi/favicon.ico",
+      "id" : "http://www.wikidata.org/entity/Q19938912"
+    },
+    "id" : "http://catalogue.bnf.fr/ark:/12148/cb12359677d"
+  }, {
+    "id" : "http://id.loc.gov/rwo/agents/n78093468",
+    "collection" : {
+      "id" : "http://www.wikidata.org/entity/Q13219454",
+      "abbr" : "LC",
+      "publisher" : "Library of Congress",
+      "icon" : "http://www.loc.gov/favicon.ico",
+      "name" : "NACO Authority File"
+    }
+  }, {
+    "collection" : {
+      "abbr" : "OSTDEBIB",
+      "name" : "Ostdeutsche Biographie",
+      "publisher" : "Kulturportal West-Ost",
+      "id" : "http://www.wikidata.org/entity/Q52617553"
+    },
+    "id" : "http://kulturportal-west-ost.eu/persons/hamann-johann-georg/"
+  }, {
+    "id" : "http://viaf.org/viaf/69006033",
+    "collection" : {
+      "id" : "http://www.wikidata.org/entity/Q54919",
+      "abbr" : "VIAF",
+      "publisher" : "OCLC",
+      "icon" : "http://viaf.org/viaf/images/viaf.ico",
+      "name" : "Virtual International Authority File (VIAF)"
+    }
+  }, {
+    "id" : "http://www.wikidata.org/entity/Q76499",
+    "collection" : {
+      "id" : "http://www.wikidata.org/entity/Q2013",
+      "abbr" : "WIKIDATA",
+      "publisher" : "Wikimedia Foundation Inc.",
+      "icon" : "https://www.wikidata.org/static/favicon/wikidata.ico",
+      "name" : "Wikidata"
+    }
+  }, {
+    "collection" : {
+      "abbr" : "DNB",
+      "name" : "Gemeinsame Normdatei (GND) im Katalog der Deutschen Nationalbibliothek",
+      "publisher" : "Deutsche Nationalbibliothek",
+      "icon" : "https://www.dnb.de/SiteGlobals/Frontend/DNBWeb/Images/favicon.png?__blob=normal&v=4",
+      "id" : "http://www.wikidata.org/entity/Q36578"
+    },
+    "id" : "https://d-nb.info/gnd/11854523X/about"
+  }, {
+    "id" : "https://dbpedia.org/resource/Johann_Georg_Hamann",
+    "collection" : {
+      "id" : "https://dbpedia.org"
+    }
+  }, {
+    "collection" : {
+      "abbr" : "dewiki",
+      "name" : "Wikipedia (Deutsch)",
+      "publisher" : "Wikimedia Foundation Inc.",
+      "icon" : "https://de.wikipedia.org/static/favicon/wikipedia.ico",
+      "id" : "http://www.wikidata.org/entity/Q48183"
+    },
+    "id" : "https://de.wikipedia.org/wiki/Johann_Georg_Hamann"
+  }, {
+    "collection" : {
+      "abbr" : "WIKISOURCE",
+      "name" : "Wikisource",
+      "publisher" : "Wikimedia Foundation Inc.",
+      "icon" : "https://wikisource.org/static/favicon/wikisource.ico",
+      "id" : "http://www.wikidata.org/entity/Q263"
+    },
+    "id" : "https://de.wikisource.org/wiki/Johann_Georg_Hamann"
+  }, {
+    "collection" : {
+      "abbr" : "enwiki",
+      "name" : "Wikipedia (English)",
+      "publisher" : "Wikimedia Foundation Inc.",
+      "icon" : "https://en.wikipedia.org/static/favicon/wikipedia.ico",
+      "id" : "http://www.wikidata.org/entity/Q328"
+    },
+    "id" : "https://en.wikipedia.org/wiki/Johann_Georg_Hamann"
+  }, {
+    "id" : "https://isni.org/isni/0000000121021204",
+    "collection" : {
+      "id" : "https://isni.org"
+    }
+  }, {
+    "collection" : {
+      "abbr" : "DE-611",
+      "name" : "Kalliope Verbundkatalog",
+      "publisher" : "Staatsbibliothek zu Berlin - Preußischer Kulturbesitz",
+      "icon" : "https://kalliope-verbund.info/img/favicon.ico",
+      "id" : "https://kalliope-verbund.info"
+    },
+    "id" : "https://kalliope-verbund.info/gnd/11854523X"
+  }, {
+    "collection" : {
+      "abbr" : "ARCHIV-D",
+      "name" : "Archivportal-D",
+      "publisher" : "Deutsche Digitale Bibliothek",
+      "icon" : "https://www.archivportal-d.de/favicon.ico",
+      "id" : "https://www.archivportal-d.de"
+    },
+    "id" : "https://www.archivportal-d.de/person/gnd/11854523X"
+  }, {
+    "collection" : {
+      "abbr" : "ADB",
+      "name" : "Allgemeine Deutsche Biographie (ADB)",
+      "publisher" : "Historische Kommission bei der Bayerischen Akademie der Wissenschaften und Bayerische Staatsbibliothek",
+      "icon" : "https://www.deutsche-biographie.de/favicon.ico",
+      "id" : "https://www.deutsche-biographie.de"
+    },
+    "id" : "https://www.deutsche-biographie.de/pnd11854523X.html#adbcontent"
+  }, {
+    "collection" : {
+      "abbr" : "NDB",
+      "name" : "Neue Deutsche Biographie (NDB)",
+      "publisher" : "Historische Kommission bei der Bayerischen Akademie der Wissenschaften und Bayerische Staatsbibliothek",
+      "icon" : "https://www.deutsche-biographie.de/favicon.ico",
+      "id" : "https://www.deutsche-biographie.de"
+    },
+    "id" : "https://www.deutsche-biographie.de/pnd11854523X.html#ndbcontent"
+  }, {
+    "collection" : {
+      "abbr" : "DDB",
+      "name" : "Deutsche Digitale Bibliothek",
+      "publisher" : "Deutsche Digitale Bibliothek",
+      "icon" : "https://www.deutsche-digitale-bibliothek.de/favicon.ico",
+      "id" : "http://www.wikidata.org/entity/Q621630"
+    },
+    "id" : "https://www.deutsche-digitale-bibliothek.de/person/gnd/11854523X"
+  }, {
+    "collection" : {
+      "abbr" : "Portraitindex",
+      "name" : "Digitaler Portraitindex der druckgraphischen Bildnisse der Frühen Neuzeit",
+      "publisher" : "Deutsches Dokumentationszentrum für Kunstgeschichte - Bildarchiv Foto Marburg",
+      "icon" : "https://www.portraitindex.de/favicon.ico",
+      "id" : "https://www.portraitindex.de"
+    },
+    "id" : "https://www.portraitindex.de/dokumente/pnd/11854523X"
+  } ]
+}

@@ -1,19 +1,26 @@
 {{ define "body" }}
+	{{ $y := .model.Year }}
+
 	{{ range $year := .model.AvailableYears }}
-		<a href="/{{ $year }}">{{ $year }}</a>
+		<a href="/{{ $year }}" aria-active="{{ eq $year $y }}">{{ $year }}</a>
 	{{ end }}
-	{{ range $issue := .model.Issues }}
-		<div>
-			<div>
-				{{ $issue.Number.Chardata }}
-			</div>
-			<div>
-				{{ index $issue.Month 1 }}
-			</div>
-			<div>
-				{{ index $issue.Weekday 1 }}
-			</div>
-			<div>{{ $issue.Day }}.{{ index $issue.Month 2 }}.</div>
-		</div>
+	{{ range $index, $month := .model.Issues }}
+
+		<!-- Month Header -->
+		{{ $first := index $month 0 }}
+		<h2>{{ index $first.Month 1 }}</h2>
+
+		<!-- Issues -->
+		{{ range $issue := $month }}
+			<a href="/{{ $y }}/{{ $issue.Number.Chardata }}">
+				<div>
+					{{ $issue.Number.Chardata }}
+				</div>
+				<div>
+					{{ index $issue.Weekday 1 }}
+				</div>
+				<div>{{ $issue.Day }}.{{ index $issue.Month 2 }}.</div>
+			</a>
+		{{ end }}
 	{{ end }}
 {{ end }}
