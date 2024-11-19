@@ -57,6 +57,14 @@ func Info(msg ...string) {
 	}
 }
 
+func Debug(msg ...string) {
+	if len(msg) > 0 {
+		for _, m := range msg {
+			slog.Debug(m)
+		}
+	}
+}
+
 func SetDebug() {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 }

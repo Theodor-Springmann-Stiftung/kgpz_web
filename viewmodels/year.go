@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
@@ -16,6 +15,35 @@ type YearViewModel struct {
 	Year           string
 	AvailableYears []string
 	Issues         IssuesByMonth
+}
+
+func YearView(year string, lib *xmlprovider.Library) (*YearViewModel, error) {
+	res := YearViewModel{Year: year}
+	res.Issues = make(IssuesByMonth, 12)
+	last := ""
+	for _, issue := range lib.Issues.Items.Issues {
+		if len(issue.Datum.When) < 4 {
+			continue
+		}
+
+		date := issue.Datum.When[0:4]
+		if date != last {
+			res.PushAvailable(date)
+			last = date
+		}
+
+		if date == year {
+			res.PushIssue(issue)
+		}
+	}
+
+	if len(res.Issues) == 0 {
+		return nil, errors.New("No issues found for year " + year)
+	}
+
+	res.SortAvailableYears()
+
+	return &res, nil
 }
 
 func (y *YearViewModel) PushIssue(i xmlprovider.Issue) {
@@ -53,35 +81,4 @@ func (y *YearViewModel) SortAvailableYears() {
 		}
 		return iint < jint
 	})
-}
-
-func YearView(year string, lib *xmlprovider.Library) (*YearViewModel, error) {
-	res := YearViewModel{Year: year}
-	res.Issues = make(IssuesByMonth, 12)
-	last := ""
-	for _, issue := range lib.Issues.Items.Issues {
-
-		logging.ObjDebug(&issue, "Issue")
-		if len(issue.Datum.When) < 4 {
-			continue
-		}
-
-		date := issue.Datum.When[0:4]
-		if date != last {
-			res.PushAvailable(date)
-			last = date
-		}
-
-		if date == year {
-			res.PushIssue(issue)
-		}
-	}
-
-	if len(res.Issues) == 0 {
-		return nil, errors.New("No issues found")
-	}
-
-	res.SortAvailableYears()
-
-	return &res, nil
 }

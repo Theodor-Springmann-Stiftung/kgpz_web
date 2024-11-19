@@ -12,9 +12,9 @@
 
 		<!-- Issues -->
 		{{ range $issue := $month }}
-			<a href="/{{ $y }}/{{ $issue.Number.Chardata }}">
+			<a href="/{{ $y }}/{{ $issue.Number.No }}">
 				<div>
-					{{ $issue.Number.Chardata }}
+					{{ $issue.Number.No }}
 				</div>
 				<div>
 					{{ index $issue.Weekday 1 }}

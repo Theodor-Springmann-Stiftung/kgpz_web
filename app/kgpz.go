@@ -8,6 +8,7 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/gnd"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
@@ -26,6 +27,7 @@ type KGPZ struct {
 	gmu     sync.Mutex
 	Config  *providers.ConfigProvider
 	Repo    *providers.GitProvider
+	GND     *gnd.GNDProvider
 	Library *xmlprovider.Library
 }
 
@@ -38,11 +40,15 @@ func (k *KGPZ) Init() {
 			go k.initRepo()
 		}
 		k.Serialize()
+		k.InitGND()
+		k.Enrich()
 		return
 	}
 
 	k.initRepo()
 	k.Serialize()
+	k.InitGND()
+	k.Enrich()
 }
 
 func NewKGPZ(config *providers.ConfigProvider) *KGPZ {
@@ -52,6 +58,43 @@ func NewKGPZ(config *providers.ConfigProvider) *KGPZ {
 	}
 
 	return &KGPZ{Config: config}
+}
+
+func (k *KGPZ) InitGND() {
+	k.gmu.Lock()
+	defer k.gmu.Unlock()
+	k.lmu.Lock()
+	defer k.lmu.Unlock()
+	if k.GND == nil {
+		k.GND = gnd.NewGNDProvider()
+	}
+
+	if err := k.GND.ReadCache(k.Config.GNDPath); err != nil {
+		logging.Error(err, "Error reading GND cache")
+	}
+}
+
+func (k *KGPZ) Enrich() error {
+	if k.GND == nil {
+		k.InitGND()
+	}
+
+	k.lmu.Lock()
+	defer k.lmu.Unlock()
+	k.gmu.Lock()
+	defer k.gmu.Unlock()
+
+	if k.Library == nil || k.Library.Agents == nil {
+		return nil
+	}
+
+	agents := k.Library.Agents.Items.Agents
+	go func(agents []xmlprovider.Agent) {
+		k.GND.FetchPersons(agents)
+		k.GND.WriteCache(k.Config.GNDPath)
+	}(agents)
+
+	return nil
 }
 
 func (k *KGPZ) Serialize() {

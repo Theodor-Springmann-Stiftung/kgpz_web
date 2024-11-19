@@ -6,3 +6,5 @@ cache_gnd/
 config.json
 out.log
 kgpz_web
+*.log
+*.out

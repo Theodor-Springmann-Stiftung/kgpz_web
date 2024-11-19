@@ -96,6 +96,7 @@ func (l *Library) Serialize() {
 	wg.Wait()
 }
 
+// TODO: make Items into a sync.Map
 func (p *XMLProvider[T]) Serialize() error {
 	// Introduce goroutine for every path, locking on append:
 	var wg sync.WaitGroup
@@ -114,7 +115,6 @@ func (p *XMLProvider[T]) Serialize() error {
 	}
 	wg.Wait()
 
-	fmt.Println(p.Items)
 	return nil
 }
 
@@ -127,13 +127,22 @@ func (a *XMLProvider[T]) String() string {
 func UnmarshalFile[T any](filename string, data *T) error {
 	xmlFile, err := os.Open(filename)
 	if err != nil {
-		logging.Error(err, "Could not deserialize file: "+filename)
+		logging.Error(err, "Could not open file: "+filename)
 		return err
 	}
 	defer xmlFile.Close()
-	logging.Info("Deserialization: " + filename)
-	byteValue, _ := io.ReadAll(xmlFile)
-	xml.Unmarshal(byteValue, data)
 
+	logging.Info("Deserialization: " + filename)
+	byteValue, err := io.ReadAll(xmlFile)
+	if err != nil {
+		logging.Error(err, "Could not read file: "+filename)
+		return err
+	}
+	err = xml.Unmarshal(byteValue, data)
+
+	if err != nil {
+		logging.Error(err, "Could not unmarshal file: "+filename)
+		return err
+	}
 	return nil
 }
