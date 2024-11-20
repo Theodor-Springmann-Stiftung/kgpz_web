@@ -211,7 +211,7 @@ func (p *GNDProvider) fetchPerson(person xmlprovider.Agent) {
 
 	for i := 0; i < 3; i++ {
 		response, err = http.DefaultClient.Do(request)
-		if err == nil && 500 > response.StatusCode {
+		if err == nil && 400 > response.StatusCode {
 			if i > 0 {
 				logging.Info("Successfully fetched person: " + person.ID + " after " + strconv.Itoa(i) + " retries")
 			}

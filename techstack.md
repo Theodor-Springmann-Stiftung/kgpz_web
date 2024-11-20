@@ -88,3 +88,8 @@
 
 ([\s\(])((?:16|17|18|19|20)\d{2}–)*((?:16|17|18|19|20)\d{2})
 $1<year>$2$3</year>
+
+Morgen:
+- sync.Map für alle Kollektionen
+- Eigene Funktionen zum willkürlichen Zugriff auf die sync.Map
+- Eigene Funktionen für Datum etc 
