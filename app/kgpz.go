@@ -23,7 +23,9 @@ const (
 )
 
 type KGPZ struct {
-	lmu     sync.Mutex
+	// LMU is here for file system access
+	lmu sync.Mutex
+	// GMU is only here to prevent concurrent pulls
 	gmu     sync.Mutex
 	Config  *providers.ConfigProvider
 	Repo    *providers.GitProvider
@@ -61,10 +63,6 @@ func NewKGPZ(config *providers.ConfigProvider) *KGPZ {
 }
 
 func (k *KGPZ) InitGND() {
-	k.gmu.Lock()
-	defer k.gmu.Unlock()
-	k.lmu.Lock()
-	defer k.lmu.Unlock()
 	if k.GND == nil {
 		k.GND = gnd.NewGNDProvider()
 	}
@@ -81,14 +79,14 @@ func (k *KGPZ) Enrich() error {
 
 	k.lmu.Lock()
 	defer k.lmu.Unlock()
-	k.gmu.Lock()
-	defer k.gmu.Unlock()
 
 	if k.Library == nil || k.Library.Agents == nil {
 		return nil
 	}
 
-	agents := k.Library.Agents.Items.Agents
+	// INFO: We pass agents by value since we don't want to block the library
+	agents := make([]xmlprovider.Agent, len(k.Library.Agents.Items.Agents))
+	_ = copy(agents, k.Library.Agents.Items.Agents)
 	go func(agents []xmlprovider.Agent) {
 		k.GND.FetchPersons(agents)
 		k.GND.WriteCache(k.Config.GNDPath)

@@ -1,4 +1,3 @@
-> curl --header "Accept: application/json" https://lobid.org/gnd/11854523X > lobid_example.json
 {
   "gender" : [ {
     "id" : "https://d-nb.info/standards/vocab/gnd/gender#male",

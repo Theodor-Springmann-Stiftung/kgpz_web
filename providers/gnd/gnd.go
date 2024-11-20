@@ -2,12 +2,15 @@ package gnd
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
@@ -18,13 +21,18 @@ const (
 )
 
 type GNDProvider struct {
-	// Mutex is for file reading & writing
+	// Mutex is for file reading & writing, not person map access
 	mu      sync.Mutex
 	Persons sync.Map
+
+	errmu sync.Mutex
+	errs  map[string]int
 }
 
 func NewGNDProvider() *GNDProvider {
-	return &GNDProvider{}
+	return &GNDProvider{
+		errs: make(map[string]int),
+	}
 }
 
 func (p *GNDProvider) ReadCache(folder string) error {
@@ -86,10 +94,11 @@ func (p *GNDProvider) readPerson(file string) {
 		return
 	}
 
-	if person.KGPZID != "" {
-		p.Persons.Store(person.KGPZID, person)
+	if person.Agent.GND != "" {
+		p.Persons.Store(person.Agent.GND, person)
 		return
 	}
+
 }
 
 func (p *GNDProvider) WriteCache(folder string) error {
@@ -101,6 +110,7 @@ func (p *GNDProvider) WriteCache(folder string) error {
 	return nil
 }
 
+// TODO: Dont write persons already written
 func (p *GNDProvider) writePersons(folder string) error {
 	info, err := os.Stat(folder)
 	if err == os.ErrNotExist {
@@ -126,7 +136,7 @@ func (p *GNDProvider) writePersons(folder string) error {
 
 func (p *GNDProvider) writePerson(folder, id string, person Person) {
 	// JSON marshalling of the person and sanity check:
-	filepath := filepath.Join(folder, id+".json")
+	filepath := filepath.Join(folder, person.KGPZID+".json")
 	f, err := os.Create(filepath)
 	if err != nil {
 		logging.Error(err, "Error creating file for writing: "+id)
@@ -157,18 +167,25 @@ func (p *GNDProvider) GetPerson(id string) (Person, error) {
 func (p *GNDProvider) FetchPersons(persons []xmlprovider.Agent) {
 	wg := sync.WaitGroup{}
 	for _, person := range persons {
-		if person.ID == "" {
+		if person.ID == "" || person.GND == "" {
 			continue
 		}
-		if _, ok := p.Persons.Load(person.ID); ok {
+
+		// INFO: person already fetched; check for updates??
+		if _, ok := p.Persons.Load(person.GND); ok {
 			continue
 		}
+
+		p.errmu.Lock()
+		if _, ok := p.errs[person.GND]; ok {
+			continue
+		}
+		p.errmu.Unlock()
+
 		wg.Add(1)
 		go func(person xmlprovider.Agent) {
 			defer wg.Done()
-			if person.GND != "" {
-				p.fetchPerson(person)
-			}
+			p.fetchPerson(person)
 		}(person)
 	}
 	wg.Wait()
@@ -177,23 +194,48 @@ func (p *GNDProvider) FetchPersons(persons []xmlprovider.Agent) {
 func (p *GNDProvider) fetchPerson(person xmlprovider.Agent) {
 	SPLITURL := strings.Split(person.GND, "/")
 	if len(SPLITURL) < 2 {
-		logging.Error(nil, "Error parsing GND ID: "+person.GND)
+		logging.Error(nil, "Error parsing GND ID from: "+person.GND)
 		return
 	}
 
 	GNDID := SPLITURL[len(SPLITURL)-1]
 
 	logging.Debug("Fetching person: " + person.ID + " with URL: " + LOBID_URL + GNDID)
-	request, _ := http.NewRequest("GET", LOBID_URL+GNDID, nil)
-	response, err := http.DefaultClient.Do(request)
+	request, err := http.NewRequest("GET", LOBID_URL+GNDID, nil)
+	if err != nil {
+		logging.Error(err, "Error creating request: "+person.ID)
+		return
+	}
+
+	var response *http.Response
+
+	for i := 0; i < 3; i++ {
+		response, err = http.DefaultClient.Do(request)
+		if err == nil && 500 > response.StatusCode {
+			if i > 0 {
+				logging.Info("Successfully fetched person: " + person.ID + " after " + strconv.Itoa(i) + " retries")
+			}
+			break
+		}
+
+		time.Sleep(time.Duration(i+1) * time.Second)
+		logging.Error(err, "Retry fetching person: "+person.ID)
+	}
+
 	if err != nil {
 		logging.Error(err, "Error fetching person: "+person.ID)
 		return
 	}
+
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		logging.Error(nil, "Error fetching person: "+person.ID+" with status code: "+response.Status)
+		if response.StatusCode < 500 {
+			p.errmu.Lock()
+			p.errs[person.GND] = response.StatusCode
+			p.errmu.Unlock()
+		}
+		logging.Error(errors.New("Error fetching person: " + person.ID + " with status code: " + http.StatusText(response.StatusCode)))
 		return
 	}
 
@@ -203,6 +245,9 @@ func (p *GNDProvider) fetchPerson(person xmlprovider.Agent) {
 		return
 	}
 
+	// Wirte response body to file:
+	// os.WriteFile("gnd_responses/"+person.ID+".json", body, 0644)
+
 	gndPerson := Person{}
 	if err := json.Unmarshal(body, &gndPerson); err != nil {
 		logging.Error(err, "Error unmarshalling response body: "+person.ID)
@@ -210,5 +255,6 @@ func (p *GNDProvider) fetchPerson(person xmlprovider.Agent) {
 	}
 
 	gndPerson.KGPZID = person.ID
-	p.Persons.Store(person.ID, gndPerson)
+	gndPerson.Agent = person
+	p.Persons.Store(person.GND, gndPerson)
 }
