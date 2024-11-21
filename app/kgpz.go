@@ -85,8 +85,7 @@ func (k *KGPZ) Enrich() error {
 	}
 
 	// INFO: We pass agents by value since we don't want to block the library
-	agents := make([]xmlprovider.Agent, len(k.Library.Agents.Items.Agents))
-	_ = copy(agents, k.Library.Agents.Items.Agents)
+	agents := k.Library.Agents.All()
 	go func(agents []xmlprovider.Agent) {
 		k.GND.FetchPersons(agents)
 		k.GND.WriteCache(k.Config.GNDPath)

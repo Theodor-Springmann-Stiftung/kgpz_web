@@ -33,6 +33,12 @@ func (r *TemplateRegistry) Register(path string, fs fs.FS) *TemplateRegistry {
 	return NewTemplateRegistry(merged_fs.MergeMultiple(fs, r.routesFS))
 }
 
+func (r *TemplateRegistry) Reset() error {
+	r.cache.Clear()
+	r.once = sync.Once{}
+	return nil
+}
+
 func (r *TemplateRegistry) Load() error {
 	r.once.Do(func() {
 		err := r.load()
@@ -79,7 +85,7 @@ func (r *TemplateRegistry) load() error {
 
 // This function takes a template (typically a layout) and adds all the templates of
 // a given directory path to it. This is useful for adding a layout to a template.
-func (r *TemplateRegistry) Add(path string, t *template.Template) error {
+func (r *TemplateRegistry) Add(path string, t *template.Template, funcmap *template.FuncMap) error {
 	temp, ok := r.cache.Load(path)
 	if !ok {
 		r.Load()
@@ -88,14 +94,14 @@ func (r *TemplateRegistry) Add(path string, t *template.Template) error {
 			return NewError(NoTemplateError, path)
 		}
 
-		template, err := tc.Template(r.routesFS)
+		template, err := tc.Template(r.routesFS, funcmap)
 		if err != nil {
 			return err
 		}
 
 		r.cache.Store(path, template)
 
-		return r.Add(path, t)
+		return r.Add(path, t, funcmap)
 	}
 
 	casted := temp.(*template.Template)

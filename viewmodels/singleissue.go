@@ -1,6 +1,8 @@
 package viewmodels
 
 import (
+	"strconv"
+
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
@@ -22,8 +24,10 @@ func NewSingleIssueView(y string, No string, lib *xmlprovider.Library) (*SingleI
 	}
 
 	sivm := SingleIssueViewModel{IssueViewModel: *ivm}
+	logging.Info(strconv.Itoa(len(lib.Pieces.All())) + "pieces in library")
 
-	for _, a := range lib.Pieces.Items.Piece {
+	lib.Pieces.Items.Range(func(key, value interface{}) bool {
+		a := value.(xmlprovider.Piece)
 		for _, r := range a.IssueRefs {
 			if r.Datum == y && r.Nr == No {
 				p, err := NewPieceView(a)
@@ -45,7 +49,8 @@ func NewSingleIssueView(y string, No string, lib *xmlprovider.Library) (*SingleI
 				sivm.Additionals = append(sivm.Additionals, p)
 			}
 		}
-	}
+		return true
+	})
 
 	return &sivm, nil
 }

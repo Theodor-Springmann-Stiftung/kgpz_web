@@ -3,16 +3,9 @@ package xmlprovider
 import (
 	"encoding/xml"
 	"fmt"
+
+	"github.com/google/uuid"
 )
-
-type PieceProvider struct {
-	XMLProvider[Pieces]
-}
-
-type Pieces struct {
-	XMLName xml.Name `xml:"beitraege"`
-	Piece   []Piece  `xml:"beitrag"`
-}
 
 type Piece struct {
 	XMLName       xml.Name        `xml:"beitrag"`
@@ -30,24 +23,18 @@ type Piece struct {
 	AnnotationNote
 }
 
-func (p Pieces) Append(data Pieces) Pieces {
-	p.Piece = append(p.Piece, data.Piece...)
-	return p
-}
-
-func (p Pieces) String() string {
-	var res []string
-	for _, piece := range p.Piece {
-		res = append(res, piece.String())
-	}
-
-	return fmt.Sprintf("Pieces: %v", res)
-}
-
 func (p Piece) String() string {
 	return fmt.Sprintf("ID: %s\nIssueRefs: %v\nPlaceRefs: %v\nCategoryRefs: %v\nAgentRefs: %v\nWorkRefs: %v\nPieceRefs: %v\nAdditionalRef: %v\nIncipit: %v\nTitle: %v\nAnnotations: %v\nNotes: %v\n", p.ID, p.IssueRefs, p.PlaceRefs, p.CategoryRefs, p.AgentRefs, p.WorkRefs, p.PieceRefs, p.AdditionalRef, p.Incipit, p.Title, p.Annotations, p.Notes)
 }
 
-func NewPieceProvider(paths []string) *PieceProvider {
-	return &PieceProvider{XMLProvider: XMLProvider[Pieces]{paths: paths}}
+func (p Piece) GetIDs() []string {
+	ret := make([]string, 2)
+	if p.ID != "" {
+		ret = append(ret, p.ID)
+	}
+
+	// TODO: sensible IDs
+	uid := uuid.New()
+	ret = append(ret, uid.String())
+	return ret
 }

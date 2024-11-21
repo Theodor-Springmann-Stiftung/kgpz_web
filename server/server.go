@@ -45,22 +45,23 @@ type Server struct {
 	running  chan bool
 	shutdown *sync.WaitGroup
 	cache    *memory.Storage
-
-	mu      sync.Mutex
-	watcher *helpers.FileWatcher
+	engine   *templating.Engine
+	mu       sync.Mutex
+	watcher  *helpers.FileWatcher
 
 	kgpz *app.KGPZ
 }
 
-func Create(k *app.KGPZ, c *providers.ConfigProvider) *Server {
+func Create(k *app.KGPZ, c *providers.ConfigProvider, e *templating.Engine) *Server {
 	if c == nil || k == nil {
-		logging.Error(nil, "Config or KGPZ is posssibly nil while tying to create server")
+		logging.Error(nil, "Error creating server: Config or App is posssibly nil.")
 		return nil
 	}
 
 	return &Server{
 		Config: c,
 		kgpz:   k,
+		engine: e,
 	}
 }
 
@@ -96,11 +97,11 @@ func (s *Server) Watcher() error {
 }
 
 func (s *Server) Start() {
+	s.engine.Reload()
+
 	s.cache = memory.New(memory.Config{
 		GCInterval: 30 * time.Second,
 	})
-
-	engine := templating.NewEngine(&views.LayoutFS, &views.RoutesFS)
 
 	srv := fiber.New(fiber.Config{
 		AppName:            s.Config.Address,
@@ -118,7 +119,7 @@ func (s *Server) Start() {
 
 		PassLocalsToViews: true,
 
-		Views:       engine,
+		Views:       s.engine,
 		ViewsLayout: templating.DEFAULT_LAYOUT_NAME,
 	})
 

@@ -39,6 +39,10 @@ type Identifier struct {
 	ID string `xml:"id,attr"`
 }
 
+func (i Identifier) GetIDs() []string {
+	return []string{i.ID}
+}
+
 type Reference struct {
 	Ref      string `xml:"ref,attr"`
 	Category string `xml:"kat,attr"`

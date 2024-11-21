@@ -33,6 +33,12 @@ func (r *LayoutRegistry) Register(fs fs.FS) *LayoutRegistry {
 	return NewLayoutRegistry(merged_fs.MergeMultiple(fs, r.layoutsFS))
 }
 
+func (r *LayoutRegistry) Reset() error {
+	r.cache.Clear()
+	r.once = sync.Once{}
+	return nil
+}
+
 func (r *LayoutRegistry) Load() error {
 	r.once.Do(func() {
 		err := r.load()
@@ -74,7 +80,7 @@ func (r *LayoutRegistry) load() error {
 	return nil
 }
 
-func (r *LayoutRegistry) Layout(name string) (*template.Template, error) {
+func (r *LayoutRegistry) Layout(name string, funcmap *template.FuncMap) (*template.Template, error) {
 	cached, ok := r.cache.Load(name)
 	if ok {
 		return cached.(*template.Template), nil
@@ -87,7 +93,7 @@ func (r *LayoutRegistry) Layout(name string) (*template.Template, error) {
 		return nil, NewError(NoTemplateError, name)
 	}
 
-	t, err := context.Template(r.layoutsFS)
+	t, err := context.Template(r.layoutsFS, funcmap)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +103,6 @@ func (r *LayoutRegistry) Layout(name string) (*template.Template, error) {
 	return t, nil
 }
 
-func (r *LayoutRegistry) Default() (*template.Template, error) {
-	return r.Layout(DEFAULT_LAYOUT_NAME)
+func (r *LayoutRegistry) Default(funcmap *template.FuncMap) (*template.Template, error) {
+	return r.Layout(DEFAULT_LAYOUT_NAME, funcmap)
 }

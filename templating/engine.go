@@ -5,6 +5,9 @@ import (
 	"io"
 	"io/fs"
 	"sync"
+
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/functions"
 )
 
 type Engine struct {
@@ -16,13 +19,28 @@ type Engine struct {
 	FuncMap template.FuncMap
 }
 
-func NewEngine(layouts, templates *fs.FS) *Engine {
-	return &Engine{
+// INFO: We pass the app here to be able to access the config and other data for functions
+// which also means we must reload the engine if the app changes
+func NewEngine(layouts, templates *fs.FS, app *app.KGPZ) *Engine {
+	e := Engine{
 		mu:               &sync.Mutex{},
 		LayoutRegistry:   NewLayoutRegistry(*layouts),
 		TemplateRegistry: NewTemplateRegistry(*templates),
-		FuncMap:          template.FuncMap{},
 	}
+
+	e.MapFuncs(app)
+	return &e
+}
+
+func (e *Engine) MapFuncs(app *app.KGPZ) error {
+	e.mu.Lock()
+	e.FuncMap = make(map[string]interface{})
+	e.mu.Unlock()
+
+	e.AddFunc("GetDate", functions.GetDate)
+	e.AddFunc("MonthName", functions.MonthName)
+	e.AddFunc("MonthNameShort", functions.MonthNameShort)
+	return nil
 }
 
 func (e *Engine) Load() error {
@@ -43,18 +61,44 @@ func (e *Engine) Load() error {
 	return nil
 }
 
+func (e *Engine) Reload() error {
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		e.LayoutRegistry.Reset()
+	}()
+
+	go func() {
+		defer wg.Done()
+		e.TemplateRegistry.Reset()
+	}()
+
+	wg.Wait()
+	return nil
+}
+
+// INFO: fn is a function that returns either one value or two values, the second one being an error
+func (e *Engine) AddFunc(name string, fn interface{}) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.FuncMap[name] = fn
+}
+
 func (e *Engine) Render(out io.Writer, path string, data interface{}, layout ...string) error {
 	// TODO: check if a reload is needed if files on disk have changed
-
+	e.mu.Lock()
+	defer e.mu.Unlock()
 	var l *template.Template
 	if layout == nil || len(layout) == 0 {
-		lay, err := e.LayoutRegistry.Default()
+		lay, err := e.LayoutRegistry.Default(&e.FuncMap)
 		if err != nil {
 			return err
 		}
 		l = lay
 	} else {
-		lay, err := e.LayoutRegistry.Layout(layout[0])
+		lay, err := e.LayoutRegistry.Layout(layout[0], &e.FuncMap)
 		if err != nil {
 			return err
 		}
@@ -66,7 +110,7 @@ func (e *Engine) Render(out io.Writer, path string, data interface{}, layout ...
 		return err
 	}
 
-	err = e.TemplateRegistry.Add(path, lay)
+	err = e.TemplateRegistry.Add(path, lay, &e.FuncMap)
 	if err != nil {
 		return err
 	}

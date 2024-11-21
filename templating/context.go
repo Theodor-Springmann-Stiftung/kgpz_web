@@ -92,13 +92,13 @@ func (c *TemplateContext) Globals() map[string]string {
 	return c.globals
 }
 
-func (c *TemplateContext) Template(fsys fs.FS) (*template.Template, error) {
-	t, err := readTemplates(fsys, nil, c.globals)
+func (c *TemplateContext) Template(fsys fs.FS, funcmap *template.FuncMap) (*template.Template, error) {
+	t, err := readTemplates(fsys, nil, c.globals, funcmap)
 	if err != nil {
 		return nil, err
 	}
 
-	t, err = readTemplates(fsys, t, c.locals)
+	t, err = readTemplates(fsys, t, c.locals, funcmap)
 	if err != nil {
 		return nil, err
 	}
@@ -106,14 +106,20 @@ func (c *TemplateContext) Template(fsys fs.FS) (*template.Template, error) {
 	return t, nil
 }
 
-func readTemplates(fsys fs.FS, t *template.Template, paths map[string]string) (*template.Template, error) {
+func readTemplates(fsys fs.FS, t *template.Template, paths map[string]string, funcmap *template.FuncMap) (*template.Template, error) {
 	for k, v := range paths {
 		text, err := fs.ReadFile(fsys, v)
 		if err != nil {
 			return nil, NewError(FileAccessError, v)
 		}
 
-		temp, err := template.New(k).Parse(string(text))
+		temp := template.New(k)
+
+		if funcmap != nil {
+			temp.Funcs(*funcmap)
+		}
+
+		temp, err = temp.Parse(string(text))
 		if err != nil {
 			return nil, err
 		}

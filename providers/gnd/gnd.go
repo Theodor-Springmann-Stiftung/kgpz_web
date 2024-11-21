@@ -25,6 +25,8 @@ type GNDProvider struct {
 	mu      sync.Mutex
 	Persons sync.Map
 
+	// INFO: this holds all errors that occured during fetching
+	// and is used to prevent further fetches of the same person.
 	errmu sync.Mutex
 	errs  map[string]int
 }
@@ -98,7 +100,6 @@ func (p *GNDProvider) readPerson(file string) {
 		p.Persons.Store(person.Agent.GND, person)
 		return
 	}
-
 }
 
 func (p *GNDProvider) WriteCache(folder string) error {
@@ -134,6 +135,7 @@ func (p *GNDProvider) writePersons(folder string) error {
 	return nil
 }
 
+// INFO: this overwrites any existing files
 func (p *GNDProvider) writePerson(folder, id string, person Person) {
 	// JSON marshalling of the person and sanity check:
 	filepath := filepath.Join(folder, person.KGPZID+".json")
@@ -209,9 +211,10 @@ func (p *GNDProvider) fetchPerson(person xmlprovider.Agent) {
 
 	var response *http.Response
 
+	// INFO: we do 3 retries with increasing time between them
 	for i := 0; i < 3; i++ {
 		response, err = http.DefaultClient.Do(request)
-		if err == nil && 400 > response.StatusCode {
+		if err == nil && response.StatusCode < 400 {
 			if i > 0 {
 				logging.Info("Successfully fetched person: " + person.ID + " after " + strconv.Itoa(i) + " retries")
 			}
@@ -245,7 +248,7 @@ func (p *GNDProvider) fetchPerson(person xmlprovider.Agent) {
 		return
 	}
 
-	// Wirte response body to file:
+	// For debug purposes: Write response body to file:
 	// os.WriteFile("gnd_responses/"+person.ID+".json", body, 0644)
 
 	gndPerson := Person{}

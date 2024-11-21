@@ -3,16 +3,8 @@ package xmlprovider
 import (
 	"encoding/xml"
 	"fmt"
+	"strconv"
 )
-
-type IssueProvider struct {
-	XMLProvider[Issues]
-}
-
-type Issues struct {
-	XMLName xml.Name `xml:"stuecke"`
-	Issues  []Issue  `xml:"stueck"`
-}
 
 type Issue struct {
 	XMLName     xml.Name     `xml:"stueck"`
@@ -37,24 +29,20 @@ type Additional struct {
 	Bis     string   `xml:"bis"`
 }
 
-func (i Issues) Append(data Issues) Issues {
-	i.Issues = append(i.Issues, data.Issues...)
-	return i
-}
-
-func (i Issues) String() string {
-	var res []string
-	for _, issue := range i.Issues {
-		res = append(res, issue.String())
+func (i Issue) GetIDs() []string {
+	res := make([]string, 2)
+	date := i.Datum.When
+	if date != "" {
+		res = append(res, date)
 	}
 
-	return fmt.Sprintf("Issues: %v", res)
+	if len(date) > 4 {
+		res = append(res, i.Datum.When[0:4]+"-"+strconv.Itoa(i.Number.No))
+	}
+
+	return res
 }
 
 func (i Issue) String() string {
 	return fmt.Sprintf("Number: %v, Datum: %v, Von: %d, Bis: %d, Additionals: %v, Identifier: %v, AnnotationNote: %v\n", i.Number, i.Datum, i.Von, i.Bis, i.Additionals, i.Identifier, i.AnnotationNote)
-}
-
-func NewIssueProvider(paths []string) *IssueProvider {
-	return &IssueProvider{XMLProvider: XMLProvider[Issues]{paths: paths}}
 }

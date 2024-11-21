@@ -11,6 +11,8 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/server"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/templating"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
 )
 
 const (
@@ -44,7 +46,9 @@ func main() {
 	kgpz := app.NewKGPZ(cfg)
 	kgpz.Init()
 
-	server := server.Create(kgpz, cfg)
+	engine := templating.NewEngine(&views.LayoutFS, &views.RoutesFS, kgpz)
+
+	server := server.Create(kgpz, cfg, engine)
 	Start(kgpz, server)
 }
 

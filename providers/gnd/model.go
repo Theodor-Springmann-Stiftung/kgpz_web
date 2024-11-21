@@ -9,65 +9,65 @@ import (
 type Person struct {
 	KGPZID                              string             `json:"kgpzid"`
 	Agent                               xmlprovider.Agent  `json:"agent"`
-	URL                                 string             `json:"id"`
-	DateOfBirth                         []string           `json:"dateOfBirth"`
-	PlaceOfBirth                        []Entity           `json:"placeOfBirth"`
-	DateOfDeath                         []string           `json:"dateOfDeath"`
-	PlaceOfDeath                        []Entity           `json:"placeOfDeath"`
-	PlaceOfBirthAsLiteral               []string           `json:"placeOfBirthAsLiteral"`
-	PlaceOfDeathAsLiteral               []string           `json:"placeOfDeathAsLiteral"`
-	BiographicalOrHistoricalInformation []string           `json:"biographicalOrHistoricalInformation"`
-	PreferredName                       string             `json:"preferredName"`
-	GndIdentifier                       string             `json:"gndIdentifier"`
-	Wikipedia                           []Entity           `json:"wikipedia"`
-	Depiction                           []Picture          `json:"depiction"`
-	ProfessionOrOccupation              []Entity           `json:"professionOrOccupation"`
-	PreferredNameEntityForThePerson     PersonNameEntity   `json:"preferredNameEntityForThePerson"`
-	VariantNameEntityForThePerson       []PersonNameEntity `json:"variantNameEntityForThePerson"`
-	VariantName                         []string           `json:"variantName"`
-	SameAs                              []CrossReferences  `json:"sameAs"`
-	Pseudonym                           []Entity           `json:"pseudonym"`
-	GNDSubjectCategory                  []Entity           `json:"gndSubjectCategory"`
-	Type                                []string           `json:"type"`
-	PlaceOfActivity                     []Entity           `json:"placeOfActivity"`
+	URL                                 string             `json:"id,omitempty"`
+	DateOfBirth                         []string           `json:"dateOfBirth,omitempty"`
+	PlaceOfBirth                        []Entity           `json:"placeOfBirth,omitempty"`
+	DateOfDeath                         []string           `json:"dateOfDeath,omitempty"`
+	PlaceOfDeath                        []Entity           `json:"placeOfDeath,omitempty"`
+	PlaceOfBirthAsLiteral               []string           `json:"placeOfBirthAsLiteral,omitempty"`
+	PlaceOfDeathAsLiteral               []string           `json:"placeOfDeathAsLiteral,omitempty"`
+	BiographicalOrHistoricalInformation []string           `json:"biographicalOrHistoricalInformation,omitempty"`
+	PreferredName                       string             `json:"preferredName,omitempty"`
+	GndIdentifier                       string             `json:"gndIdentifier,omitempty"`
+	Wikipedia                           []Entity           `json:"wikipedia,omitempty"`
+	Depiction                           []Picture          `json:"depiction,omitempty"`
+	ProfessionOrOccupation              []Entity           `json:"professionOrOccupation,omitempty"`
+	PreferredNameEntityForThePerson     PersonNameEntity   `json:"preferredNameEntityForThePerson,omitempty"`
+	VariantNameEntityForThePerson       []PersonNameEntity `json:"variantNameEntityForThePerson,omitempty"`
+	VariantName                         []string           `json:"variantName,omitempty"`
+	SameAs                              []CrossReferences  `json:"sameAs,omitempty"`
+	Pseudonym                           []Entity           `json:"pseudonym,omitempty"`
+	GNDSubjectCategory                  []Entity           `json:"gndSubjectCategory,omitempty"`
+	Type                                []string           `json:"type,omitempty"`
+	PlaceOfActivity                     []Entity           `json:"placeOfActivity,omitempty"`
 }
 
 type CrossReferences struct {
-	Items Collection `json:"collection"`
-	ID    string     `json:"id"`
+	Items Collection `json:"collection,omitempty"`
+	ID    string     `json:"id,omitempty"`
 }
 
 type Collection struct {
-	Abbr      string `json:"abbr"`
-	Name      string `json:"name"`
-	Publisher string `json:"publisher"`
-	Icon      string `json:"icon"`
-	ID        string `json:"id"`
+	Abbr      string `json:"abbr,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Publisher string `json:"publisher,omitempty"`
+	Icon      string `json:"icon,omitempty"`
+	ID        string `json:"id,omitempty"`
 }
 
 type Link struct {
-	ID    string `json:"id"`
-	Label string `json:"label"`
+	ID    string `json:"id,omitempty"`
+	Label string `json:"label,omitempty"`
 }
 
 type Picture struct {
-	ID        string `json:"id"`
-	URL       string `json:"url"`
-	Thumbnail string `json:"thumbnail"`
+	ID        string `json:"id,omitempty"`
+	URL       string `json:"url,omitempty"`
+	Thumbnail string `json:"thumbnail,omitempty"`
 }
 
 type Entity struct {
-	ID    string `json:"id"`
-	Label string `json:"label"`
+	ID    string `json:"id,omitempty"`
+	Label string `json:"label,omitempty"`
 }
 
 type PersonNameEntity struct {
-	Prefix       []string `json:"prefix"`
-	Counting     []string `json:"counting"`
-	Forename     []string `json:"forename"`
-	Surname      []string `json:"surname"`
-	PersonalName []string `json:"personalName"`
-	NameAddition []string `json:"nameAddition"`
+	Prefix       []string `json:"prefix,omitempty"`
+	Counting     []string `json:"counting,omitempty"`
+	Forename     []string `json:"forename,omitempty"`
+	Surname      []string `json:"surname,omitempty"`
+	PersonalName []string `json:"personalName,omitempty"`
+	NameAddition []string `json:"nameAddition,omitempty"`
 }
 
 func (p Person) String() string {

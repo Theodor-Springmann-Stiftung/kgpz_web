@@ -21,9 +21,11 @@ func YearView(year string, lib *xmlprovider.Library) (*YearViewModel, error) {
 	res := YearViewModel{Year: year}
 	res.Issues = make(IssuesByMonth, 12)
 	last := ""
-	for _, issue := range lib.Issues.Items.Issues {
+
+	lib.Issues.Items.Range(func(key, value interface{}) bool {
+		issue := value.(xmlprovider.Issue)
 		if len(issue.Datum.When) < 4 {
-			continue
+			return true
 		}
 
 		date := issue.Datum.When[0:4]
@@ -35,7 +37,8 @@ func YearView(year string, lib *xmlprovider.Library) (*YearViewModel, error) {
 		if date == year {
 			res.PushIssue(issue)
 		}
-	}
+		return true
+	})
 
 	if len(res.Issues) == 0 {
 		return nil, errors.New("No issues found for year " + year)
@@ -52,14 +55,12 @@ func (y *YearViewModel) PushIssue(i xmlprovider.Issue) {
 		return
 	}
 
-	month, _ := strconv.Atoi(iv.Month[2])
-
-	list, ok := y.Issues[month]
+	list, ok := y.Issues[iv.Month]
 	if !ok {
 		list = []IssueViewModel{}
 	}
 
-	y.Issues[month] = append(list, *iv)
+	y.Issues[iv.Month] = append(list, *iv)
 }
 
 func (y *YearViewModel) PushAvailable(s string) {

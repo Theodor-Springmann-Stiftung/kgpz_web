@@ -8,18 +8,21 @@
 
 		<!-- Month Header -->
 		{{ $first := index $month 0 }}
-		<h2>{{ index $first.Month 1 }}</h2>
+		<h2>{{ MonthNameShort $first.Month }}</h2>
 
 		<!-- Issues -->
 		{{ range $issue := $month }}
+			{{ $date := GetDate $issue.Datum.When }}
 			<a href="/{{ $y }}/{{ $issue.Number.No }}">
 				<div>
 					{{ $issue.Number.No }}
 				</div>
+
 				<div>
-					{{ index $issue.Weekday 1 }}
+					{{ $date.Wd }}
 				</div>
-				<div>{{ $issue.Day }}.{{ index $issue.Month 2 }}.</div>
+
+				<div>{{ $date.DayNo }}.{{ index $date.MonthNo }}.</div>
 			</a>
 		{{ end }}
 	{{ end }}

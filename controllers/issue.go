@@ -21,7 +21,7 @@ func GetIssue(kgpz *app.KGPZ) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		issue, err := viewmodels.IssueView(y, d, kgpz.Library)
+		issue, err := viewmodels.NewSingleIssueView(y, d, kgpz.Library)
 
 		if err != nil {
 			logging.Error(err, "Issue could not be found")
