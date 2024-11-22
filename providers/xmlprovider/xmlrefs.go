@@ -11,19 +11,19 @@ type AdditionalRef struct {
 	XMLName xml.Name `xml:"beilage"`
 	Reference
 	Datum        string `xml:"datum,attr"`
-	Nr           string `xml:"nr,attr"`
-	AdditionalNo string `xml:"beilage,attr"`
-	Von          string `xml:"von,attr"`
-	Bis          string `xml:"bis,attr"`
+	Nr           int    `xml:"nr,attr"`
+	AdditionalNo int    `xml:"beilage,attr"`
+	Von          int    `xml:"von,attr"`
+	Bis          int    `xml:"bis,attr"`
 }
 
 type IssueRef struct {
 	XMLName xml.Name `xml:"stueck"`
 	Reference
 	Datum string `xml:"datum,attr"`
-	Nr    string `xml:"nr,attr"`
-	Von   string `xml:"von,attr"`
-	Bis   string `xml:"bis,attr"`
+	Nr    int    `xml:"nr,attr"`
+	Von   int    `xml:"von,attr"`
+	Bis   int    `xml:"bis,attr"`
 }
 
 type PlaceRef struct {

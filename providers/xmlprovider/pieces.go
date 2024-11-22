@@ -3,6 +3,7 @@ package xmlprovider
 import (
 	"encoding/xml"
 	"fmt"
+	"strconv"
 
 	"github.com/google/uuid"
 )
@@ -38,11 +39,11 @@ func (p Piece) GetIDs() []string {
 	uid := uuid.New()
 
 	for _, i := range p.IssueRefs {
-		ret = append(ret, i.Datum+"-"+i.Nr+"-"+uid.String())
+		ret = append(ret, i.Datum+"-"+strconv.Itoa(i.Nr)+"-"+uid.String())
 	}
 
 	for _, i := range p.AdditionalRef {
-		ret = append(ret, i.Datum+"-"+i.Nr+"-"+uid.String())
+		ret = append(ret, i.Datum+"-"+strconv.Itoa(i.Nr)+"-b-"+uid.String())
 	}
 	return ret
 }

@@ -1,21 +1,21 @@
 package controllers
 
 import (
+	"strconv"
+
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/viewmodels"
 	"github.com/gofiber/fiber/v2"
 )
 
-const (
-	START_YEAR = "1764"
-)
-
 func GetYear(kgpz *app.KGPZ) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		y := c.Params("year", START_YEAR)
-		if len(y) != 4 {
-			return c.SendStatus(fiber.StatusBadRequest)
+		y := c.Params("year", strconv.Itoa(MINYEAR))
+		yi, err := strconv.Atoi(y)
+		if err != nil || yi < MINYEAR || yi > MAXYEAR {
+			logging.Error(err, "Year is not a valid number")
+			return c.SendStatus(fiber.StatusNotFound)
 		}
 
 		issues, err := viewmodels.YearView(y, kgpz.Library)

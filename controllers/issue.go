@@ -1,23 +1,32 @@
 package controllers
 
 import (
+	"strconv"
+
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/viewmodels"
 	"github.com/gofiber/fiber/v2"
 )
 
+const (
+	MINYEAR = 1764
+	MAXYEAR = 1779
+)
+
 func GetIssue(kgpz *app.KGPZ) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		y := c.Params("year")
-		if len(y) != 4 {
-			logging.Error(nil, "Year is not 4 characters long")
+		yi, err := strconv.Atoi(y)
+		if err != nil || yi < MINYEAR || yi > MAXYEAR {
+			logging.Error(err, "Year is not a valid number")
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
 		d := c.Params("issue")
-		if d == "" {
-			logging.Error(nil, "Issue number is empty")
+		di, err := strconv.Atoi(d)
+		if err != nil || di < 1 {
+			logging.Error(err, "Issue is not a valid number")
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
@@ -28,6 +37,6 @@ func GetIssue(kgpz *app.KGPZ) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		return c.Render("/issue/", fiber.Map{"model": issue})
+		return c.Render("/issue/", fiber.Map{"model": issue, "year": yi, "issue": di})
 	}
 }
