@@ -21,6 +21,7 @@ type Piece struct {
 	Title         []string        `xml:"titel"`
 	Identifier
 	AnnotationNote
+	SerializedItem
 }
 
 func (p Piece) String() string {
@@ -35,6 +36,43 @@ func (p Piece) GetIDs() []string {
 
 	// TODO: sensible IDs
 	uid := uuid.New()
-	ret = append(ret, uid.String())
+
+	for _, i := range p.IssueRefs {
+		ret = append(ret, i.Datum+"-"+i.Nr+"-"+uid.String())
+	}
+
+	for _, i := range p.AdditionalRef {
+		ret = append(ret, i.Datum+"-"+i.Nr+"-"+uid.String())
+	}
 	return ret
+}
+
+// TODO: We can make this fast depending on which category to look for
+// but we'll have to define rules for every single category (~35 of them)
+func (p Piece) IsCat(k string) bool {
+	for _, c := range p.CategoryRefs {
+		if c.Category == k {
+			return true
+		}
+	}
+
+	for _, c := range p.WorkRefs {
+		if c.Category == k {
+			return true
+		}
+	}
+
+	for _, c := range p.AgentRefs {
+		if c.Category == k {
+			return true
+		}
+	}
+
+	for _, c := range p.PieceRefs {
+		if c.Category == k {
+			return true
+		}
+	}
+
+	return false
 }

@@ -12,6 +12,7 @@ type Place struct {
 	Geo      string   `xml:"geonames"`
 	Identifier
 	AnnotationNote
+	SerializedItem
 }
 
 func (p Place) String() string {

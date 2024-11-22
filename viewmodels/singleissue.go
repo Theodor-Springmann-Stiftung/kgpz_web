@@ -2,6 +2,7 @@ package viewmodels
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
@@ -24,30 +25,19 @@ func NewSingleIssueView(y string, No string, lib *xmlprovider.Library) (*SingleI
 	}
 
 	sivm := SingleIssueViewModel{IssueViewModel: *ivm}
-	logging.Info(strconv.Itoa(len(lib.Pieces.All())) + "pieces in library")
+	logging.Info(strconv.Itoa(len(lib.Pieces.Everything())) + "pieces in library")
 
+	lookfor := y + "-" + No
 	lib.Pieces.Items.Range(func(key, value interface{}) bool {
-		a := value.(xmlprovider.Piece)
-		for _, r := range a.IssueRefs {
-			if r.Datum == y && r.Nr == No {
-				p, err := NewPieceView(a)
-				if err != nil {
-					logging.ObjErr(&a, err)
-					continue
-				}
-				sivm.Pieces = append(sivm.Pieces, p)
+		k := key.(string)
+		if strings.HasPrefix(k, lookfor) {
+			a := value.(xmlprovider.Piece)
+			p, err := NewPieceView(a)
+			if err != nil {
+				logging.ObjErr(&a, err)
+				return true
 			}
-		}
-
-		for _, r := range a.AdditionalRef {
-			if r.Datum == y && r.Nr == No {
-				p, err := NewPieceView(a)
-				if err != nil {
-					logging.ObjErr(&a, err)
-					continue
-				}
-				sivm.Additionals = append(sivm.Additionals, p)
-			}
+			sivm.Pieces = append(sivm.Pieces, p)
 		}
 		return true
 	})

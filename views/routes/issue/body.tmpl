@@ -1,1 +1,33 @@
-Hello from an issue!
+Issue found!
+
+{{ $model := .model }}
+
+{{ range  $piece := .model.Pieces }}
+	<div>
+		Piece!
+
+		{{ if gt (len $piece.IssueRefs) 1 }}
+			{{ len $piece.IssueRefs }} Teile
+			<ol>
+			{{ range $issue := $piece.IssueRefs }}
+				<li>
+					<a href="/{{- $issue.Datum -}}/{{- $issue.Nr -}}" >
+						{{- $issue.Datum }} Nr. {{ $issue.Nr -}}
+					</a>
+				</li>
+			{{ end }}
+			</ol>
+		{{ end }}
+
+		{{ range $agentref := $piece.AgentRefs }}
+			{{ $agent := GetAgent $agentref.Ref }}
+			{{ if gt (len $agent.Names) 0 }}
+				{{ index $agent.Names 0 }}
+			{{ end }}
+			{{ if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) }}
+				<span>Author</span>
+			{{ end }}
+		{{ end }}
+
+	</div>
+{{ end }}

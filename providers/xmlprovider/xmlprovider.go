@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 )
@@ -13,13 +14,20 @@ import (
 type XMLItem interface {
 	fmt.Stringer
 	GetIDs() []string
+	SetSource(string)
+	SetDate(string)
+	SetCommit(string)
+}
+
+type Collection[T XMLItem] struct {
+	Collection []T
+	lock       sync.Mutex
 }
 
 type XMLProvider[T XMLItem] struct {
 	Paths []string
+	// INFO: map is type [string]T
 	Items sync.Map
-
-	mu sync.Mutex
 }
 
 type Library struct {
@@ -47,88 +55,85 @@ func NewLibrary(agentpaths, placepaths, workpaths, categorypaths, issuepaths, pi
 	}
 }
 
-func (l *Library) Serialize() {
+func (l *Library) SetPaths(agentpaths, placepaths, workpaths, categorypaths, issuepaths, piecepaths []string) {
+	l.Agents.Paths = agentpaths
+	l.Places.Paths = placepaths
+	l.Works.Paths = workpaths
+	l.Categories.Paths = categorypaths
+	l.Issues.Paths = issuepaths
+	l.Pieces.Paths = piecepaths
+}
+
+func (l *Library) Serialize(commit string) {
 	wg := sync.WaitGroup{}
-	wg.Add(6)
 
-	go func() {
-		defer wg.Done()
-		lwg := sync.WaitGroup{}
-		for _, path := range l.Places.Paths {
-			lwg.Add(1)
-			go l.Places.Serialize(NewPlaceRoot(), path, &lwg)
-		}
-		lwg.Wait()
-	}()
+	for _, path := range l.Places.Paths {
+		wg.Add(1)
+		go func() {
+			l.Places.Serialize(NewPlaceRoot(), path, commit)
+			wg.Done()
+		}()
+	}
 
-	go func() {
-		defer wg.Done()
-		lwg := sync.WaitGroup{}
-		for _, path := range l.Agents.Paths {
-			lwg.Add(1)
-			go l.Agents.Serialize(NewAgentRoot(), path, &lwg)
-		}
-		lwg.Wait()
-	}()
+	for _, path := range l.Agents.Paths {
+		wg.Add(1)
+		go func() {
+			l.Agents.Serialize(NewAgentRoot(), path, commit)
+			wg.Done()
+		}()
+	}
 
-	go func() {
-		defer wg.Done()
-		lwg := sync.WaitGroup{}
-		for _, path := range l.Categories.Paths {
-			lwg.Add(1)
-			go l.Categories.Serialize(NewCategoryRoot(), path, &lwg)
-		}
-		lwg.Wait()
-	}()
+	for _, path := range l.Categories.Paths {
+		wg.Add(1)
+		go func() {
+			l.Categories.Serialize(NewCategoryRoot(), path, commit)
+			wg.Done()
+		}()
+	}
 
-	go func() {
-		defer wg.Done()
-		lwg := sync.WaitGroup{}
-		for _, path := range l.Works.Paths {
-			lwg.Add(1)
-			go l.Works.Serialize(NewWorkRoot(), path, &lwg)
-		}
-		lwg.Wait()
-	}()
+	for _, path := range l.Works.Paths {
+		wg.Add(1)
+		go func() {
+			l.Works.Serialize(NewWorkRoot(), path, commit)
+			wg.Done()
+		}()
+	}
 
-	go func() {
-		defer wg.Done()
-		lwg := sync.WaitGroup{}
-		for _, path := range l.Issues.Paths {
-			lwg.Add(1)
-			go l.Issues.Serialize(NewIssueRoot(), path, &lwg)
-		}
-		lwg.Wait()
-	}()
+	for _, path := range l.Issues.Paths {
+		wg.Add(1)
+		go func() {
+			l.Issues.Serialize(NewIssueRoot(), path, commit)
+			wg.Done()
+		}()
+	}
 
-	go func() {
-		defer wg.Done()
-		lwg := sync.WaitGroup{}
-		for _, path := range l.Pieces.Paths {
-			lwg.Add(1)
-			go l.Pieces.Serialize(NewPieceRoot(), path, &lwg)
-		}
-		lwg.Wait()
-	}()
+	for _, path := range l.Pieces.Paths {
+		wg.Add(1)
+		go func() {
+			l.Pieces.Serialize(NewPieceRoot(), path, commit)
+			wg.Done()
+		}()
+	}
 
 	wg.Wait()
 }
 
-func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, wg *sync.WaitGroup) error {
+func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path, commit string) error {
+	date := time.Now().Format("2006-01-02")
 	// Introduce goroutine for every path, locking on append:
 	if err := UnmarshalFile(path, dataholder); err != nil {
 		logging.Error(err, "Could not unmarshal file: "+path)
+		logging.ParseMessages.ParseErrors <- logging.ParseMessage{MessageType: logging.ErrorMessage, Message: "Could not unmarshal file: " + path}
 		return err
 	}
 	for _, item := range dataholder.Children() {
+		item.SetSource(path)
+		item.SetDate(date)
+		item.SetCommit(commit)
 		// INFO: Mostly it's just one ID, so the double loop is not that bad.
 		for _, id := range item.GetIDs() {
 			p.Items.Store(id, item)
 		}
-	}
-
-	if wg != nil {
-		wg.Done()
 	}
 
 	return nil
@@ -199,7 +204,9 @@ func (p *XMLProvider[T]) FindKey(fn func(string) bool) []T {
 	return items
 }
 
-func (p *XMLProvider[T]) All() []T {
+// INFO: Do not use this, except when iterating over a collection multiple times (three times or more).
+// Maps are slow to iterate, but many of the Iterations can only be done once.
+func (p *XMLProvider[T]) Everything() []T {
 	var items []T
 	p.Items.Range(func(key, value interface{}) bool {
 		items = append(items, value.(T))

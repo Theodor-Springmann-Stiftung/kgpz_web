@@ -85,7 +85,7 @@ func (k *KGPZ) Enrich() error {
 	}
 
 	// INFO: We pass agents by value since we don't want to block the library
-	agents := k.Library.Agents.All()
+	agents := k.Library.Agents.Everything()
 	go func(agents []xmlprovider.Agent) {
 		k.GND.FetchPersons(agents)
 		k.GND.WriteCache(k.Config.GNDPath)
@@ -103,56 +103,43 @@ func (k *KGPZ) Serialize() {
 	k.gmu.Lock()
 	defer k.gmu.Unlock()
 
+	commit := "staticfile"
+	if k.Repo != nil {
+		commit = k.Repo.Commit
+	}
+
 	issues, err := getXMLFiles(filepath.Join(k.Config.FolderPath, ISSUES_DIR))
 	helpers.Assert(err, "Error getting issues")
 
 	pieces, err := getXMLFiles(filepath.Join(k.Config.FolderPath, PIECES_DIR))
 	helpers.Assert(err, "Error getting pieces")
 
-	lib := xmlprovider.NewLibrary(
-		[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
-		[]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)},
-		[]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)},
-		[]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)},
-		*issues,
-		*pieces)
-
-	lib.Serialize()
-
-	// TODO: is it neccessary to lock here, sice gmu lock prevents concurrent locking of the library?
 	k.lmu.Lock()
 	defer k.lmu.Unlock()
-
 	if k.Library == nil {
+		lib := xmlprovider.NewLibrary(
+			[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
+			[]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)},
+			[]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)},
+			[]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)},
+			*issues,
+			*pieces)
+
+		lib.Serialize(commit)
+
 		k.Library = lib
-		return
+	} else {
+		// TODO: where to clear the old data?
+		// How to differentiate between deleted data points and stale data points bc of parse errors?
+		k.Library.SetPaths(
+			[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
+			[]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)},
+			[]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)},
+			[]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)},
+			*issues,
+			*pieces)
+		k.Library.Serialize(commit)
 	}
-
-	if lib.Agents == nil {
-		lib.Agents = k.Library.Agents
-	}
-
-	if lib.Places == nil {
-		lib.Places = k.Library.Places
-	}
-
-	if lib.Works == nil {
-		lib.Works = k.Library.Works
-	}
-
-	if lib.Categories == nil {
-		lib.Categories = k.Library.Categories
-	}
-
-	if lib.Issues == nil {
-		lib.Issues = k.Library.Issues
-	}
-
-	if lib.Pieces == nil {
-		lib.Pieces = k.Library.Pieces
-	}
-
-	k.Library = lib
 }
 
 func (k *KGPZ) IsDebug() bool {

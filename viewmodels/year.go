@@ -23,18 +23,19 @@ func YearView(year string, lib *xmlprovider.Library) (*YearViewModel, error) {
 	last := ""
 
 	lib.Issues.Items.Range(func(key, value interface{}) bool {
-		issue := value.(xmlprovider.Issue)
-		if len(issue.Datum.When) < 4 {
+		k := key.(string)
+		if len(k) < 4 {
 			return true
 		}
 
-		date := issue.Datum.When[0:4]
+		date := k[0:4]
 		if date != last {
 			res.PushAvailable(date)
 			last = date
 		}
 
 		if date == year {
+			issue := value.(xmlprovider.Issue)
 			res.PushIssue(issue)
 		}
 		return true

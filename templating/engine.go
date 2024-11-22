@@ -40,6 +40,14 @@ func (e *Engine) MapFuncs(app *app.KGPZ) error {
 	e.AddFunc("GetDate", functions.GetDate)
 	e.AddFunc("MonthName", functions.MonthName)
 	e.AddFunc("MonthNameShort", functions.MonthNameShort)
+
+	e.AddFunc("GetAgent", app.Library.Agents.Item)
+	e.AddFunc("GetPlace", app.Library.Places.Item)
+	e.AddFunc("GetWork", app.Library.Works.Item)
+	e.AddFunc("GetCategory", app.Library.Categories.Item)
+	e.AddFunc("GetIssue", app.Library.Issues.Item)
+	e.AddFunc("GetPiece", app.Library.Pieces.Item)
+
 	return nil
 }
 
