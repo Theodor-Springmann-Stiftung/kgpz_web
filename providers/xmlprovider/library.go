@@ -42,12 +42,12 @@ func (l *Library) SetPaths(agentpaths, placepaths, workpaths, categorypaths, iss
 func (l *Library) Serialize(commit string) {
 	wg := sync.WaitGroup{}
 
-	l.Prepare()
+	l.Prepare(commit)
 
 	for _, path := range l.Places.Paths {
 		wg.Add(1)
 		go func() {
-			l.Places.Serialize(NewPlaceRoot(), path, commit)
+			l.Places.Serialize(NewPlaceRoot(), path)
 			wg.Done()
 		}()
 	}
@@ -55,7 +55,7 @@ func (l *Library) Serialize(commit string) {
 	for _, path := range l.Agents.Paths {
 		wg.Add(1)
 		go func() {
-			l.Agents.Serialize(NewAgentRoot(), path, commit)
+			l.Agents.Serialize(NewAgentRoot(), path)
 			wg.Done()
 		}()
 	}
@@ -63,7 +63,7 @@ func (l *Library) Serialize(commit string) {
 	for _, path := range l.Categories.Paths {
 		wg.Add(1)
 		go func() {
-			l.Categories.Serialize(NewCategoryRoot(), path, commit)
+			l.Categories.Serialize(NewCategoryRoot(), path)
 			wg.Done()
 		}()
 	}
@@ -71,7 +71,7 @@ func (l *Library) Serialize(commit string) {
 	for _, path := range l.Works.Paths {
 		wg.Add(1)
 		go func() {
-			l.Works.Serialize(NewWorkRoot(), path, commit)
+			l.Works.Serialize(NewWorkRoot(), path)
 			wg.Done()
 		}()
 	}
@@ -79,7 +79,7 @@ func (l *Library) Serialize(commit string) {
 	for _, path := range l.Issues.Paths {
 		wg.Add(1)
 		go func() {
-			l.Issues.Serialize(NewIssueRoot(), path, commit)
+			l.Issues.Serialize(NewIssueRoot(), path)
 			wg.Done()
 		}()
 	}
@@ -87,7 +87,7 @@ func (l *Library) Serialize(commit string) {
 	for _, path := range l.Pieces.Paths {
 		wg.Add(1)
 		go func() {
-			l.Pieces.Serialize(NewPieceRoot(), path, commit)
+			l.Pieces.Serialize(NewPieceRoot(), path)
 			wg.Done()
 		}()
 	}
@@ -101,13 +101,13 @@ func (l *Library) Serialize(commit string) {
 
 // TODO: Prepare resets the list of failed parses for a new parse.
 // We need to set the logs accordingly.
-func (l *Library) Prepare() {
-	l.Agents.Prepare()
-	l.Places.Prepare()
-	l.Works.Prepare()
-	l.Categories.Prepare()
-	l.Issues.Prepare()
-	l.Pieces.Prepare()
+func (l *Library) Prepare(commit string) {
+	l.Agents.Prepare(commit)
+	l.Places.Prepare(commit)
+	l.Works.Prepare(commit)
+	l.Categories.Prepare(commit)
+	l.Issues.Prepare(commit)
+	l.Pieces.Prepare(commit)
 }
 
 func (l *Library) Cleanup(commit string) {

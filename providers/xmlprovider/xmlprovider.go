@@ -12,6 +12,11 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 )
 
+type ParseMeta struct {
+	Commit string
+	Date   time.Time
+}
+
 type XMLItem interface {
 	fmt.Stringer
 	GetIDs() []string
@@ -22,6 +27,7 @@ type Collection[T XMLItem] struct {
 	lock       sync.Mutex
 }
 
+// An XMLProvider is a struct that holds holds serialized XML data of a specific type. It combines multiple parses IF a succeeded parse can not serialize the data from a path.
 type XMLProvider[T XMLItem] struct {
 	Paths []string
 	// INFO: map is type [string]T
@@ -32,16 +38,24 @@ type XMLProvider[T XMLItem] struct {
 
 	mu     sync.Mutex
 	failed []string
+	parses []ParseMeta
 }
 
-func (p *XMLProvider[T]) Prepare() {
+// INFO: To parse sth, we call Prepare, then Serialize, then Cleanup.
+// Serialize can be called concurretly.
+func (p *XMLProvider[T]) Prepare(commit string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.failed = make([]string, 0)
+	p.parses = append(p.parses, ParseMeta{Commit: commit, Date: time.Now()})
 }
 
-func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path, commit string) error {
-	date := time.Now().Format("2006-01-02")
+func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) error {
+	if len(p.parses) == 0 {
+		logging.Error(fmt.Errorf("No commit set"), "No commit set")
+		return fmt.Errorf("No commit set")
+	}
+
 	// Introduce goroutine for every path, locking on append:
 	if err := UnmarshalFile(path, dataholder); err != nil {
 		logging.Error(err, "Could not unmarshal file: "+path)
@@ -55,12 +69,39 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path, commit st
 	for _, item := range dataholder.Children() {
 		// INFO: Mostly it's just one ID, so the double loop is not that bad.
 		for _, id := range item.GetIDs() {
-			p.Infos.Store(id, ItemInfo{Source: path, Date: date, Commit: commit})
+			p.Infos.Store(id, ItemInfo{Source: path, Parse: &p.parses[len(p.parses)-1]})
 			p.Items.Store(id, item)
 		}
 	}
 
 	return nil
+}
+
+func (p *XMLProvider[T]) Cleanup() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if len(p.parses) == 0 {
+		logging.Error(fmt.Errorf("Trying to cleanup an empty XMLProvider."))
+		return
+	}
+
+	lastcommit := p.parses[len(p.parses)-1].Commit
+	todelete := make([]string, 0)
+	p.Infos.Range(func(key, value interface{}) bool {
+		info := value.(ItemInfo)
+		if info.Parse.Commit != lastcommit {
+			if !slices.Contains(p.failed, info.Source) {
+				todelete = append(todelete, key.(string))
+			}
+		}
+		return true
+	})
+
+	for _, key := range todelete {
+		p.Infos.Delete(key)
+		p.Items.Delete(key)
+	}
 }
 
 func (a *XMLProvider[T]) String() string {
@@ -129,7 +170,9 @@ func (p *XMLProvider[T]) FindKey(fn func(string) bool) []T {
 }
 
 // INFO: Do not use this, except when iterating over a collection multiple times (three times or more).
-// Maps are slow to iterate, but many of the Iterations can only be done once.
+// Maps are slow to iterate, but many of the Iterations can only be done once, so it doesn´t matter for a
+// few thousand objects. We prefer to lookup objects by key and have multiple meaningful keys; along with
+// sensible caching rules to keep the application responsive.
 func (p *XMLProvider[T]) Everything() []T {
 	var items []T
 	p.Items.Range(func(key, value interface{}) bool {
@@ -137,28 +180,4 @@ func (p *XMLProvider[T]) Everything() []T {
 		return true
 	})
 	return items
-}
-
-// TODO: how to find that the item was deleted, and couldn't just be serialized?
-// -> We compare filepaths of failed serializations with filepaths of the items.
-//   - If the item is not in the failed serializations, it was deleted.
-//   - If the item is in the failed serializations, we don't know if it was deleted or not, and we keep it.
-//
-// Consequence: If all serializations completed, we cleanup everything.
-func (p *XMLProvider[T]) Cleanup(commit string) {
-	todelete := make([]string, 0)
-	p.Infos.Range(func(key, value interface{}) bool {
-		info := value.(ItemInfo)
-		if info.Commit != commit {
-			if !slices.Contains(p.failed, info.Source) {
-				todelete = append(todelete, key.(string))
-			}
-		}
-		return true
-	})
-
-	for _, key := range todelete {
-		p.Infos.Delete(key)
-		p.Items.Delete(key)
-	}
 }
