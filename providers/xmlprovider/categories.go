@@ -11,7 +11,6 @@ type Category struct {
 	SortName string   `xml:"sortiername"`
 	Identifier
 	AnnotationNote
-	SerializedItem
 }
 
 func (c Category) String() string {

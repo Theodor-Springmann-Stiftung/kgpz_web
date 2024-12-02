@@ -13,7 +13,6 @@ type Work struct {
 	Akteur         []AgentRef `xml:"akteur"`
 	Identifier
 	AnnotationNote
-	SerializedItem
 }
 
 type Citation struct {

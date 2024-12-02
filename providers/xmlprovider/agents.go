@@ -14,7 +14,6 @@ type Agent struct {
 	Org      bool     `xml:"org,attr"`
 	Identifier
 	AnnotationNote
-	SerializedItem
 }
 
 func (a Agent) String() string {

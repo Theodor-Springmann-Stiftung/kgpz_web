@@ -1,5 +1,7 @@
 package logging
 
+// BUG: loggings happens without manual flush, so the messagees come from all threads at the same time.
+
 import (
 	"fmt"
 	"log/slog"

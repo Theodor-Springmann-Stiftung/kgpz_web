@@ -15,7 +15,6 @@ type Issue struct {
 	Additionals []Additional `xml:"beilage"`
 	Identifier
 	AnnotationNote
-	SerializedItem
 }
 
 type Nummer struct {

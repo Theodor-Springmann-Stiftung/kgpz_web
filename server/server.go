@@ -112,6 +112,7 @@ func (s *Server) Start() {
 		// TODO: Error handler, which sadly, is global:
 		ErrorHandler: fiber.DefaultErrorHandler,
 		// WARNING: The app must be run in a console, since this uses environment variables:
+		// It is not trivial to turn this on, since we need to mark goroutines that can be started only once.
 		// Prefork:           true,
 		StreamRequestBody: false,
 		WriteTimeout:      REQUEST_TIMEOUT,
@@ -156,7 +157,7 @@ func (s *Server) Start() {
 
 	srv.Get("/:year?", controllers.GetYear(s.kgpz))
 	srv.Get("/:year/:issue/:page?", controllers.GetIssue(s.kgpz))
-	srv.Get("/:year/:issue/beilage/:subpage?", controllers.GetIssue(s.kgpz))
+	srv.Get("/:year/:issue/beilage/:page?", controllers.GetIssue(s.kgpz))
 
 	s.runner(srv)
 

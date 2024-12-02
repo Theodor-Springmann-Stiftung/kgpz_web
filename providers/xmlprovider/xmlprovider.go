@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"sync"
 	"time"
 
@@ -14,9 +15,6 @@ import (
 type XMLItem interface {
 	fmt.Stringer
 	GetIDs() []string
-	SetSource(string)
-	SetDate(string)
-	SetCommit(string)
 }
 
 type Collection[T XMLItem] struct {
@@ -28,94 +26,18 @@ type XMLProvider[T XMLItem] struct {
 	Paths []string
 	// INFO: map is type [string]T
 	Items sync.Map
+	// INFO: map is type [string]ItemInfo
+	// It keeps information about parsing status of the items.
+	Infos sync.Map
+
+	mu     sync.Mutex
+	failed []string
 }
 
-type Library struct {
-	Agents     *XMLProvider[Agent]
-	Places     *XMLProvider[Place]
-	Works      *XMLProvider[Work]
-	Categories *XMLProvider[Category]
-	Issues     *XMLProvider[Issue]
-	Pieces     *XMLProvider[Piece]
-}
-
-func (l *Library) String() string {
-	return fmt.Sprintf("Agents: %s\nPlaces: %s\nWorks: %s\nCategories: %s\nIssues: %s\nPieces: %s\n",
-		l.Agents.String(), l.Places.String(), l.Works.String(), l.Categories.String(), l.Issues.String(), l.Pieces.String())
-}
-
-func NewLibrary(agentpaths, placepaths, workpaths, categorypaths, issuepaths, piecepaths []string) *Library {
-	return &Library{
-		Agents:     &XMLProvider[Agent]{Paths: agentpaths},
-		Places:     &XMLProvider[Place]{Paths: placepaths},
-		Works:      &XMLProvider[Work]{Paths: workpaths},
-		Categories: &XMLProvider[Category]{Paths: categorypaths},
-		Issues:     &XMLProvider[Issue]{Paths: issuepaths},
-		Pieces:     &XMLProvider[Piece]{Paths: piecepaths},
-	}
-}
-
-func (l *Library) SetPaths(agentpaths, placepaths, workpaths, categorypaths, issuepaths, piecepaths []string) {
-	l.Agents.Paths = agentpaths
-	l.Places.Paths = placepaths
-	l.Works.Paths = workpaths
-	l.Categories.Paths = categorypaths
-	l.Issues.Paths = issuepaths
-	l.Pieces.Paths = piecepaths
-}
-
-func (l *Library) Serialize(commit string) {
-	wg := sync.WaitGroup{}
-
-	for _, path := range l.Places.Paths {
-		wg.Add(1)
-		go func() {
-			l.Places.Serialize(NewPlaceRoot(), path, commit)
-			wg.Done()
-		}()
-	}
-
-	for _, path := range l.Agents.Paths {
-		wg.Add(1)
-		go func() {
-			l.Agents.Serialize(NewAgentRoot(), path, commit)
-			wg.Done()
-		}()
-	}
-
-	for _, path := range l.Categories.Paths {
-		wg.Add(1)
-		go func() {
-			l.Categories.Serialize(NewCategoryRoot(), path, commit)
-			wg.Done()
-		}()
-	}
-
-	for _, path := range l.Works.Paths {
-		wg.Add(1)
-		go func() {
-			l.Works.Serialize(NewWorkRoot(), path, commit)
-			wg.Done()
-		}()
-	}
-
-	for _, path := range l.Issues.Paths {
-		wg.Add(1)
-		go func() {
-			l.Issues.Serialize(NewIssueRoot(), path, commit)
-			wg.Done()
-		}()
-	}
-
-	for _, path := range l.Pieces.Paths {
-		wg.Add(1)
-		go func() {
-			l.Pieces.Serialize(NewPieceRoot(), path, commit)
-			wg.Done()
-		}()
-	}
-
-	wg.Wait()
+func (p *XMLProvider[T]) Prepare() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.failed = make([]string, 0)
 }
 
 func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path, commit string) error {
@@ -124,14 +46,16 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path, commit st
 	if err := UnmarshalFile(path, dataholder); err != nil {
 		logging.Error(err, "Could not unmarshal file: "+path)
 		logging.ParseMessages.ParseErrors <- logging.ParseMessage{MessageType: logging.ErrorMessage, Message: "Could not unmarshal file: " + path}
+		p.mu.Lock()
+		defer p.mu.Unlock()
+		p.failed = append(p.failed, path)
 		return err
 	}
+
 	for _, item := range dataholder.Children() {
-		item.SetSource(path)
-		item.SetDate(date)
-		item.SetCommit(commit)
 		// INFO: Mostly it's just one ID, so the double loop is not that bad.
 		for _, id := range item.GetIDs() {
+			p.Infos.Store(id, ItemInfo{Source: path, Date: date, Commit: commit})
 			p.Items.Store(id, item)
 		}
 	}
@@ -213,4 +137,28 @@ func (p *XMLProvider[T]) Everything() []T {
 		return true
 	})
 	return items
+}
+
+// TODO: how to find that the item was deleted, and couldn't just be serialized?
+// -> We compare filepaths of failed serializations with filepaths of the items.
+//   - If the item is not in the failed serializations, it was deleted.
+//   - If the item is in the failed serializations, we don't know if it was deleted or not, and we keep it.
+//
+// Consequence: If all serializations completed, we cleanup everything.
+func (p *XMLProvider[T]) Cleanup(commit string) {
+	todelete := make([]string, 0)
+	p.Infos.Range(func(key, value interface{}) bool {
+		info := value.(ItemInfo)
+		if info.Commit != commit {
+			if !slices.Contains(p.failed, info.Source) {
+				todelete = append(todelete, key.(string))
+			}
+		}
+		return true
+	})
+
+	for _, key := range todelete {
+		p.Infos.Delete(key)
+		p.Items.Delete(key)
+	}
 }

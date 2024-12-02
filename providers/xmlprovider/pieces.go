@@ -22,7 +22,6 @@ type Piece struct {
 	Title         []string        `xml:"titel"`
 	Identifier
 	AnnotationNote
-	SerializedItem
 }
 
 func (p Piece) String() string {
