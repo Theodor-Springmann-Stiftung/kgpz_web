@@ -24,6 +24,6 @@ func GetYear(kgpz *app.KGPZ) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		return c.Render("/", fiber.Map{"model": issues})
+		return c.Render("/", fiber.Map{"model": issues, "title": "Ausgaben " + y})
 	}
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/functions"
+	"github.com/gofiber/fiber/v2"
 )
 
 type Engine struct {
@@ -15,24 +16,24 @@ type Engine struct {
 	LayoutRegistry   *LayoutRegistry
 	TemplateRegistry *TemplateRegistry
 
-	mu      *sync.Mutex
-	FuncMap template.FuncMap
+	mu         *sync.Mutex
+	FuncMap    template.FuncMap
+	GlobalData fiber.Map
 }
 
 // INFO: We pass the app here to be able to access the config and other data for functions
 // which also means we must reload the engine if the app changes
-func NewEngine(layouts, templates *fs.FS, app *app.KGPZ) *Engine {
+func NewEngine(layouts, templates *fs.FS) *Engine {
 	e := Engine{
 		mu:               &sync.Mutex{},
 		LayoutRegistry:   NewLayoutRegistry(*layouts),
 		TemplateRegistry: NewTemplateRegistry(*templates),
 	}
 
-	e.MapFuncs(app)
 	return &e
 }
 
-func (e *Engine) MapFuncs(app *app.KGPZ) error {
+func (e *Engine) Funcs(app *app.KGPZ) error {
 	e.mu.Lock()
 	e.FuncMap = make(map[string]interface{})
 	e.mu.Unlock()
@@ -49,6 +50,18 @@ func (e *Engine) MapFuncs(app *app.KGPZ) error {
 	e.AddFunc("GetPiece", app.Library.Pieces.Item)
 
 	return nil
+}
+
+func (e *Engine) Globals(data fiber.Map) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.GlobalData == nil {
+		e.GlobalData = data
+	} else {
+		for k, v := range data {
+			(e.GlobalData)[k] = v
+		}
+	}
 }
 
 func (e *Engine) Load() error {
@@ -96,6 +109,14 @@ func (e *Engine) AddFunc(name string, fn interface{}) {
 
 func (e *Engine) Render(out io.Writer, path string, data interface{}, layout ...string) error {
 	// TODO: check if a reload is needed if files on disk have changed
+	ld := data.(fiber.Map)
+	gd := e.GlobalData
+	if e.GlobalData != nil {
+		for k, v := range ld {
+			gd[k] = v
+		}
+	}
+
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	var l *template.Template
@@ -123,7 +144,7 @@ func (e *Engine) Render(out io.Writer, path string, data interface{}, layout ...
 		return err
 	}
 
-	err = lay.Execute(out, data)
+	err = lay.Execute(out, gd)
 	if err != nil {
 		return err
 	}

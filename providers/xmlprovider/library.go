@@ -95,7 +95,7 @@ func (l *Library) Serialize(commit string) {
 	wg.Wait()
 
 	go func() {
-		l.Cleanup(commit)
+		l.Cleanup()
 	}()
 }
 
@@ -110,11 +110,11 @@ func (l *Library) Prepare(commit string) {
 	l.Pieces.Prepare(commit)
 }
 
-func (l *Library) Cleanup(commit string) {
-	l.Agents.Cleanup(commit)
-	l.Places.Cleanup(commit)
-	l.Works.Cleanup(commit)
-	l.Categories.Cleanup(commit)
-	l.Issues.Cleanup(commit)
-	l.Pieces.Cleanup(commit)
+func (l *Library) Cleanup() {
+	l.Agents.Cleanup()
+	l.Places.Cleanup()
+	l.Works.Cleanup()
+	l.Categories.Cleanup()
+	l.Issues.Cleanup()
+	l.Pieces.Cleanup()
 }

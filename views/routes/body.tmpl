@@ -2,7 +2,7 @@
 	{{ $y := .model.Year }}
 
 	{{ range $year := .model.AvailableYears }}
-		<a href="/{{ $year }}" aria-active="{{ eq $year $y }}">{{ $year }}</a>
+		<a href="/{{ $year }}" {{ if eq $year $y }}aria-current="page"{{ end }}>{{ $year }}</a>
 	{{ end }}
 	{{ range $index, $month := .model.Issues }}
 

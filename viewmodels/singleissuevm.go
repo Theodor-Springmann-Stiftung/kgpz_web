@@ -8,7 +8,7 @@ import (
 
 type SingleIssueViewModel struct {
 	IssueViewModel
-	No     string
+	No     int
 	Year   string
 	Pieces PieceListViewModel
 	Next   IssueViewModel
@@ -25,12 +25,13 @@ func NewSingleIssueView(y string, No string, lib *xmlprovider.Library) (*SingleI
 	if err != nil {
 		return nil, err
 	}
-	sivm := SingleIssueViewModel{IssueViewModel: *ivm, No: No, Year: y, Pieces: *pl}
 
 	no, err := strconv.Atoi(No)
 	if err != nil {
 		return nil, err
 	}
+
+	sivm := SingleIssueViewModel{IssueViewModel: *ivm, No: no, Year: y, Pieces: *pl}
 
 	sivm.Pieces.Sort(y, no)
 

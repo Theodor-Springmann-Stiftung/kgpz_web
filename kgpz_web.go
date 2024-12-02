@@ -13,6 +13,7 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/server"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/templating"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
+	"github.com/gofiber/fiber/v2"
 )
 
 const (
@@ -46,7 +47,9 @@ func main() {
 	kgpz := app.NewKGPZ(cfg)
 	kgpz.Init()
 
-	engine := templating.NewEngine(&views.LayoutFS, &views.RoutesFS, kgpz)
+	engine := templating.NewEngine(&views.LayoutFS, &views.RoutesFS)
+	engine.Funcs(kgpz)
+	engine.Globals(fiber.Map{"isDev": cfg.Config.Debug, "name": "KGPZ", "lang": "de"})
 
 	server := server.Create(kgpz, cfg, engine)
 	Start(kgpz, server)

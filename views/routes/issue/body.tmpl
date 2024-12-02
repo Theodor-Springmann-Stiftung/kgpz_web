@@ -15,7 +15,11 @@ Issue found!
 			<ol>
 				{{ range $issue := $piece.IssueRefs }}
 					<li>
-						<a href="/{{- $issue.Datum -}}/{{- $issue.Nr -}}">
+						<a
+							href="/{{- $issue.Datum -}}/{{- $issue.Nr -}}"
+							{{ if and (eq $issue.Nr $model.No) (eq $issue.Datum $model.Year) }}
+								aria-current="page"
+							{{ end }}>
 							{{- $issue.Datum }} Nr.
 							{{ $issue.Nr -}}
 						</a>

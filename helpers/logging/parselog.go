@@ -18,6 +18,7 @@ const (
 	Category
 	Issue
 	Piece
+	Unknown
 )
 
 type ParseErrorLevel int64
@@ -34,14 +35,14 @@ const (
 type ParseMessage struct {
 	XMLType     XMLEntityType
 	XMLPath     string
-	Object      fmt.Stringer
+	Object      string
 	Message     string
 	MessageType ParseErrorLevel
 }
 
 func (pm ParseMessage) String() string {
-	if pm.Object != nil {
-		return fmt.Sprintf("%s: %s\n%s\n%s", pm.XMLType, pm.XMLPath, pm.Object.String(), pm.Message)
+	if pm.Object != "" {
+		return fmt.Sprintf("%s: %s\n%s\n%s", pm.XMLType, pm.XMLPath, pm.Object, pm.Message)
 	}
 	return fmt.Sprintf("%s: %s\n%s", pm.XMLType, pm.XMLPath, pm.Message)
 }
@@ -50,9 +51,9 @@ type ParseLogger struct {
 	mu           sync.Mutex
 	ParseInfo    chan ParseMessage
 	ParseErrors  chan ParseMessage
-	ParseObjects chan fmt.Stringer
+	ParseObjects chan string
 	messages     []ParseMessage
-	objects      []fmt.Stringer
+	objects      []string
 	State        ParseErrorLevel
 	subs         []func(ParseMessage)
 }
@@ -116,7 +117,7 @@ func (pl *ParseLogger) ClearMessages() {
 	pl.messages = []ParseMessage{}
 }
 
-func (pl *ParseLogger) LogInfo(xmlType XMLEntityType, xmlPath string, object fmt.Stringer, message string) {
+func (pl *ParseLogger) LogInfo(xmlType XMLEntityType, xmlPath string, object string, message string) {
 	pl.ParseInfo <- ParseMessage{
 		XMLType:     xmlType,
 		XMLPath:     xmlPath,
@@ -126,7 +127,7 @@ func (pl *ParseLogger) LogInfo(xmlType XMLEntityType, xmlPath string, object fmt
 	}
 }
 
-func (pl *ParseLogger) LogError(xmlType XMLEntityType, xmlPath string, object fmt.Stringer, message string) {
+func (pl *ParseLogger) LogError(xmlType XMLEntityType, xmlPath string, object string, message string) {
 	pl.ParseErrors <- ParseMessage{
 		XMLType:     xmlType,
 		XMLPath:     xmlPath,
@@ -136,7 +137,7 @@ func (pl *ParseLogger) LogError(xmlType XMLEntityType, xmlPath string, object fm
 	}
 }
 
-func (pl *ParseLogger) LogWarning(xmlType XMLEntityType, xmlPath string, object fmt.Stringer, message string) {
+func (pl *ParseLogger) LogWarning(xmlType XMLEntityType, xmlPath string, object string, message string) {
 	pl.ParseErrors <- ParseMessage{
 		XMLType:     xmlType,
 		XMLPath:     xmlPath,
@@ -146,7 +147,7 @@ func (pl *ParseLogger) LogWarning(xmlType XMLEntityType, xmlPath string, object 
 	}
 }
 
-func (pl *ParseLogger) LogFatal(xmlType XMLEntityType, xmlPath string, object fmt.Stringer, message string) {
+func (pl *ParseLogger) LogFatal(xmlType XMLEntityType, xmlPath string, object string, message string) {
 	pl.ParseErrors <- ParseMessage{
 		XMLType: xmlType,
 		XMLPath: xmlPath,
@@ -187,7 +188,7 @@ func (pl *ParseLogger) PrintObjects() {
 	pl.mu.Lock()
 	defer pl.mu.Unlock()
 	for _, o := range pl.objects {
-		ObjDebug(&o, "Object")
+		Debug(o)
 	}
 }
 

@@ -130,6 +130,8 @@ func (s *Server) Start() {
 
 	srv.Use(recover.New())
 
+	srv.Use("assets", static(&views.StaticFS))
+
 	// TODO: Dont cache static assets, bc storage gets huge
 	// INFO: Maybe fiber does this already?
 	if s.Config.Debug {
@@ -152,8 +154,6 @@ func (s *Server) Start() {
 			Storage:      s.cache,
 		}))
 	}
-
-	srv.Use(STATIC_PREFIX, static(&views.StaticFS))
 
 	srv.Get("/:year?", controllers.GetYear(s.kgpz))
 	srv.Get("/:year/:issue/:page?", controllers.GetIssue(s.kgpz))

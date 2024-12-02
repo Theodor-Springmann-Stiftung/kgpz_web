@@ -56,10 +56,14 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) er
 		return fmt.Errorf("No commit set")
 	}
 
+	p.mu.Lock()
+	commit := &p.parses[len(p.parses)-1]
+	p.mu.Unlock()
+
 	// Introduce goroutine for every path, locking on append:
 	if err := UnmarshalFile(path, dataholder); err != nil {
 		logging.Error(err, "Could not unmarshal file: "+path)
-		logging.ParseMessages.ParseErrors <- logging.ParseMessage{MessageType: logging.ErrorMessage, Message: "Could not unmarshal file: " + path}
+		logging.ParseMessages.LogError(logging.Unknown, path, "", "Could not unmarshal file.")
 		p.mu.Lock()
 		defer p.mu.Unlock()
 		p.failed = append(p.failed, path)
@@ -69,7 +73,7 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) er
 	for _, item := range dataholder.Children() {
 		// INFO: Mostly it's just one ID, so the double loop is not that bad.
 		for _, id := range item.GetIDs() {
-			p.Infos.Store(id, ItemInfo{Source: path, Parse: &p.parses[len(p.parses)-1]})
+			p.Infos.Store(id, ItemInfo{Source: path, Parse: commit})
 			p.Items.Store(id, item)
 		}
 	}
@@ -86,11 +90,11 @@ func (p *XMLProvider[T]) Cleanup() {
 		return
 	}
 
-	lastcommit := p.parses[len(p.parses)-1].Commit
+	lastcommit := &p.parses[len(p.parses)-1]
 	todelete := make([]string, 0)
 	p.Infos.Range(func(key, value interface{}) bool {
 		info := value.(ItemInfo)
-		if info.Parse.Commit != lastcommit {
+		if info.Parse != lastcommit {
 			if !slices.Contains(p.failed, info.Source) {
 				todelete = append(todelete, key.(string))
 			}
