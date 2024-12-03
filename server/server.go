@@ -165,9 +165,7 @@ func (s *Server) Start() {
 
 	srv.Get("/ort/:place?", controllers.GetPlace(s.kgpz))
 	srv.Get("/kategorie/:category?", controllers.GetCategory(s.kgpz))
-	srv.Get("/akteure/:letter?", controllers.GetAgents(s.kgpz))
-
-	srv.Get("/akteur/:agent", controllers.GetAgent(s.kgpz))
+	srv.Get("/akteure/:letterorid?", controllers.GetAgents(s.kgpz))
 
 	srv.Get("/edition/", controllers.Get("/edition/"))
 	srv.Get("/datenschutz/", controllers.Get("/datenschutz/"))
