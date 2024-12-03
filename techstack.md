@@ -20,11 +20,6 @@
 ## Common
 - HTMX + Go, with progressive enhancement
     - Settings: Git URL, folder path for repo
-- Integration with Git repo / local folder (same thing)
-- Integration with GND:
-    - Need to pull in and read MARCXML for alternative names, life data (?), canonical name and professions
-    - Cache MARCXML in a local folder
-    - Settings: GND URL, folder path for MARCXML
 - Integration with Geonames:
     - Need to pull in and read geonames data for places: alternative names, country, lat/long, wikipedia, maybe even dbpedia
     - Cache geonames data in a local folder
@@ -61,16 +56,21 @@
 - Restart
 
 ## File Inaccurancies:
-- No canonical names for Actors, can use GND for most of them
+- No canonical names for Actors, can use GND for most of them 
+    - Done, we can sort by akteur@id
 - URL values YYYY/ST and YYYY/ST/P and YYYY/ST/Beilage/P? Are they unique?
+    - Yes, they are unique
 - Which names of places should be used? Example: Mitau, Jelgava, Jelgava (Mitau), Mitau (Jelgava)
+    - Historical names
 - Titel der Werke: not saved yet
 - Kurzzitat: KGPZ St. 2, 14 Januar 1774 ? 
     - Besser: KGPZ 2/1774, 14. Januar
+    - Done
 - Navigation: Galerie / Durchklicken??
 - Weniger Kästen / Volle Seitenbreite ausnutzen
     - Horizontale Jahresnavigation durch vertikale ersetzen, so wie in der Einzelansicht
-- Was ist "Link auf seite teilen"? -> Permalink
+- Was ist "Link auf seite teilen"? 
+    - Permalink
 
 ## Überarbeiten
 - Sekundärüberlieferung in Stück/Beitrag
@@ -80,6 +80,7 @@
 - Anzahl der Beiträge in der Primärüberlieferung
 - Logo
 - Sortiername ohne GND eintrag
+    - Done
 
 
 \(([^(\d{4}–)\(]*)(\d{4}–)*(\d{4})([^\)]*)\)
@@ -89,7 +90,3 @@
 ([\s\(])((?:16|17|18|19|20)\d{2}–)*((?:16|17|18|19|20)\d{2})
 $1<year>$2$3</year>
 
-Morgen:
-- sync.Map für alle Kollektionen
-- Eigene Funktionen zum willkürlichen Zugriff auf die sync.Map
-- Eigene Funktionen für Datum etc 
