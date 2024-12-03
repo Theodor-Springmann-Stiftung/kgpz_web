@@ -51,7 +51,6 @@ func (r *TemplateRegistry) Load() error {
 // TODO: what if there is no template in the directory above?
 // What if a certain path is or should uncallable since it has no index or body?
 func (r *TemplateRegistry) load() error {
-	// INFO: Parse setrs r.templates, which is why you need to make sure to call Parse() once
 	templates := make(map[string]TemplateContext)
 	fs.WalkDir(r.routesFS, ".", func(path string, d fs.DirEntry, err error) error {
 		if !d.IsDir() {

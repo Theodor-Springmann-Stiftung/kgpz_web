@@ -93,12 +93,13 @@ func (c *TemplateContext) Globals() map[string]string {
 }
 
 func (c *TemplateContext) Template(fsys fs.FS, funcmap *template.FuncMap) (*template.Template, error) {
-	t, err := readTemplates(fsys, nil, c.globals, funcmap)
+	// TODO: locals need to be in order: root, head, body
+	t, err := readTemplates(fsys, nil, c.locals, funcmap)
 	if err != nil {
 		return nil, err
 	}
 
-	t, err = readTemplates(fsys, t, c.locals, funcmap)
+	t, err = readTemplates(fsys, t, c.globals, funcmap)
 	if err != nil {
 		return nil, err
 	}

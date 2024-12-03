@@ -13,14 +13,6 @@
 			<link rel="icon" href="/assets/logo/favicon.png" />
 		{{ end }}
 
-		{{ if (and .name .title) }}
-			<title>{{ .name }} - {{ .title }}</title>
-		{{ else if .name }}
-			<title>{{ .name }}</title>
-		{{ else if .title }}
-			<title>{{ .title }}</title>
-		{{ end }}
-
 
 		<link rel="stylesheet" type="text/css" href="/assets/style.css" />
 		<link href="/assets/css/remixicon.css" rel="stylesheet" />
@@ -35,6 +27,10 @@
 	</head>
 
 	<body class="w-full h-full" hx-ext="response-targets">
+		{{ block "_menu" . }}
+			<!-- Default app menu... -->
+		{{ end }}
+
 		{{ block "body" . }}
 			<!-- Default app body... -->
 		{{ end }}
