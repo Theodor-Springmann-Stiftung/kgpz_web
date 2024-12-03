@@ -45,9 +45,14 @@ func YearView(year string, lib *xmlprovider.Library) (*YearViewModel, error) {
 		return nil, errors.New("No issues found for year " + year)
 	}
 
-	res.SortAvailableYears()
+	res.Sort()
 
 	return &res, nil
+}
+
+func (y *YearViewModel) Sort() {
+	y.SortAvailableYears()
+	y.Issues.Sort()
 }
 
 func (y *YearViewModel) PushIssue(i xmlprovider.Issue) {
@@ -59,6 +64,12 @@ func (y *YearViewModel) PushIssue(i xmlprovider.Issue) {
 	list, ok := y.Issues[iv.Month]
 	if !ok {
 		list = []IssueViewModel{}
+	} else {
+		for _, issue := range list {
+			if issue.Number.No == iv.Number.No {
+				return
+			}
+		}
 	}
 
 	y.Issues[iv.Month] = append(list, *iv)
@@ -83,4 +94,12 @@ func (y *YearViewModel) SortAvailableYears() {
 		}
 		return iint < jint
 	})
+}
+
+func (ibm *IssuesByMonth) Sort() {
+	for _, issues := range *ibm {
+		sort.Slice(issues, func(i, j int) bool {
+			return issues[i].Number.No < issues[j].Number.No
+		})
+	}
 }

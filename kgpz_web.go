@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -80,21 +79,21 @@ func Start(k *app.KGPZ, s *server.Server) {
 	}()
 
 	// Interactive listening for input
-	if k.IsDebug() {
-		go func() {
-			for {
-				var input string
-				fmt.Scanln(&input)
-				if input == "r" {
-					s.Restart()
-				} else if input == "p" {
-					k.Pull()
-				} else if input == "q" {
-					sigs <- os.Signal(syscall.SIGTERM)
-				}
-			}
-		}()
-	}
-
+	// if k.IsDebug() {
+	// 	go func() {
+	// 		for {
+	// 			var input string
+	// 			fmt.Scanln(&input)
+	// 			if input == "r" {
+	// 				s.Restart()
+	// 			} else if input == "p" {
+	// 				k.Pull()
+	// 			} else if input == "q" {
+	// 				sigs <- os.Signal(syscall.SIGTERM)
+	// 			}
+	// 		}
+	// 	}()
+	// }
+	//
 	<-done
 }

@@ -101,13 +101,11 @@ func (s *Server) Watcher() error {
 func (s *Server) Start() {
 	s.engine.Reload()
 
-	if s.cache != nil {
-		s.cache.Close()
+	if s.cache == nil {
+		s.cache = memory.New(memory.Config{
+			GCInterval: 30 * time.Second,
+		})
 	}
-
-	s.cache = memory.New(memory.Config{
-		GCInterval: 30 * time.Second,
-	})
 
 	srv := fiber.New(fiber.Config{
 		AppName:       s.Config.Address,
@@ -164,6 +162,11 @@ func (s *Server) Start() {
 	srv.Get("/:year?", controllers.GetYear(s.kgpz))
 	srv.Get("/:year/:issue/:page?", controllers.GetIssue(s.kgpz))
 	srv.Get("/:year/:issue/beilage/:page?", controllers.GetIssue(s.kgpz))
+
+	srv.Get("/edition/", controllers.Get("/edition/"))
+	srv.Get("/datenschutz/", controllers.Get("/datenschutz/"))
+	srv.Get("/kontakt/", controllers.Get("/kontakt/"))
+	srv.Get("/zitation/", controllers.Get("/zitation/"))
 
 	s.runner(srv)
 
@@ -228,7 +231,7 @@ func (s *Server) runner(srv *fiber.App) {
 				logging.Error(err, "Error closing server cleanly. Shutting server down by force.")
 				clean = false
 			}
-			s.cache.Close()
+			s.cache.Reset()
 		}
 
 		if !clean {

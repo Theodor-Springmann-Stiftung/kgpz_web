@@ -1,11 +1,10 @@
 {{ $model := .model }}
 <div>
-	<a href="/{{- $model.Year -}}" aria-current="page">
+	<a href="/{{- $model.Year -}}">
 		Zurück zum Jahr
 		{{ $model.Year }}
 	</a>
 </div>
-Issue found!
 {{ $page := 0 }}
 {{ range  $piece := .model.Pieces.IssuePieces }}
 	<div>
@@ -14,7 +13,7 @@ Issue found!
 			<div>S. {{ $page }}</div>
 		{{ end }}
 
-		Piece!
+		Eintrag!
 		{{ if gt (len $piece.IssueRefs) 1 }}
 			{{ len $piece.IssueRefs }} Teile
 			<ol>
