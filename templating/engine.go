@@ -49,6 +49,8 @@ func (e *Engine) Funcs(app *app.KGPZ) error {
 	e.AddFunc("GetIssue", app.Library.Issues.Item)
 	e.AddFunc("GetPiece", app.Library.Pieces.Item)
 
+	e.AddFunc("GetGND", app.GND.Person)
+
 	return nil
 }
 

@@ -158,12 +158,14 @@ func (p *GNDProvider) writePerson(folder, id string, person Person) {
 	}
 }
 
-func (p *GNDProvider) GetPerson(id string) (Person, error) {
+func (p *GNDProvider) Person(id string) *Person {
 	person, ok := p.Persons.Load(id)
 	if !ok {
-		return Person{}, nil
+		return nil
 	}
-	return person.(Person), nil
+
+	pers := person.(Person)
+	return &pers
 }
 
 func (p *GNDProvider) FetchPersons(persons []xmlprovider.Agent) {

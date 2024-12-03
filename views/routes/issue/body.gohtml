@@ -1,6 +1,11 @@
-Issue found!
 {{ $model := .model }}
-
+<div>
+	<a href="/{{- $model.Year -}}" aria-current="page">
+		Zurück zum Jahr
+		{{ $model.Year }}
+	</a>
+</div>
+Issue found!
 {{ $page := 0 }}
 {{ range  $piece := .model.Pieces.IssuePieces }}
 	<div>
@@ -36,6 +41,12 @@ Issue found!
 			{{ if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) }}
 				<span>Author</span>
 			{{ end }}
+		{{ end }}
+
+		{{ range $annotation := $piece.AnnotationNote.Annotations }}
+			<div>
+				{{ $annotation.Inner.InnerXML }}
+			</div>
 		{{ end }}
 
 	</div>

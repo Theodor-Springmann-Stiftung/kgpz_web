@@ -24,6 +24,8 @@ const (
 	REQUEST_TIMEOUT = 8 * time.Second
 	SERVER_TIMEOUT  = 8 * time.Second
 
+	CACHE_TIME = 24 * time.Hour
+
 	STATIC_PREFIX = "/assets"
 )
 
@@ -99,18 +101,27 @@ func (s *Server) Watcher() error {
 func (s *Server) Start() {
 	s.engine.Reload()
 
+	if s.cache != nil {
+		s.cache.Close()
+	}
+
 	s.cache = memory.New(memory.Config{
 		GCInterval: 30 * time.Second,
 	})
 
 	srv := fiber.New(fiber.Config{
-		AppName:            s.Config.Address,
-		CaseSensitive:      false,
-		StrictRouting:      true,
-		EnableIPValidation: true,
-		EnablePrintRoutes:  s.Config.Debug,
+		AppName:       s.Config.Address,
+		CaseSensitive: false,
+
+		// INFO: This is a bit of an issue, since this treats /foo and /foo/ as different routes:
+		// Maybe we turn that behavior permanently off and differentiate HTMX from "normal" reuqests only by headers.
+		StrictRouting: true,
+
+		EnablePrintRoutes: s.Config.Debug,
+
 		// TODO: Error handler, which sadly, is global:
 		ErrorHandler: fiber.DefaultErrorHandler,
+
 		// WARNING: The app must be run in a console, since this uses environment variables:
 		// It is not trivial to turn this on, since we need to mark goroutines that can be started only once.
 		// Prefork:           true,
@@ -136,20 +147,15 @@ func (s *Server) Start() {
 	// INFO: Maybe fiber does this already?
 	if s.Config.Debug {
 		srv.Use(cache.New(cache.Config{
-			Next: func(c *fiber.Ctx) bool {
-				return c.Query("noCache") == "true"
-			},
-			Expiration:   30 * time.Minute,
+			Next:         CacheFunc,
+			Expiration:   CACHE_TIME,
 			CacheControl: false,
 			Storage:      s.cache,
 		}))
 	} else {
 		srv.Use(cache.New(cache.Config{
-			Next: func(c *fiber.Ctx) bool {
-				// We do not cache error responses
-				return c.Query("noCache") == "true" || c.Response().StatusCode() != fiber.StatusOK
-			},
-			Expiration:   30 * time.Minute,
+			Next:         CacheFunc,
+			Expiration:   CACHE_TIME,
 			CacheControl: true,
 			Storage:      s.cache,
 		}))

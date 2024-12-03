@@ -1,0 +1,25 @@
+{{ $y := .model.Year }}
+{{ range $year := .model.AvailableYears }}
+	<a href="/{{ $year }}" {{ if eq $year $y }}aria-current="page"{{ end }}>{{ $year }}</a>
+{{ end }}
+{{ range $index, $month := .model.Issues }}
+	<!-- Month Header -->
+	{{ $first := index $month 0 }}
+	<h2>{{ MonthNameShort $first.Month }}</h2>
+
+	<!-- Issues -->
+	{{ range $issue := $month }}
+		{{ $date := GetDate $issue.Datum.When }}
+		<a href="/{{ $y }}/{{ $issue.Number.No }}">
+			<div>
+				{{ $issue.Number.No }}
+			</div>
+
+			<div>
+				{{ $date.Wd }}
+			</div>
+
+			<div>{{ $date.DayNo }}.{{ index $date.MonthNo }}.</div>
+		</a>
+	{{ end }}
+{{ end }}
