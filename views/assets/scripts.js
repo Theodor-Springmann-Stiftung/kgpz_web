@@ -1,22 +1,31 @@
-function a() {
-  document.querySelectorAll("template[simple]").forEach((l) => {
-    let s = l.getAttribute("id"), n = l.content;
-    customElements.define(s, class extends HTMLElement {
+function setup() {
+  let templates = document.querySelectorAll("template[simple]");
+  templates.forEach((template) => {
+    let templateId = template.getAttribute("id");
+    let templateContent = template.content;
+    customElements.define(templateId, class extends HTMLElement {
       constructor() {
-        super(), this.appendChild(n.cloneNode(!0)), this.slots = this.querySelectorAll("slot");
+        super();
+        this.appendChild(templateContent.cloneNode(true));
+        this.slots = this.querySelectorAll("slot");
       }
       connectedCallback() {
-        let o = [];
-        this.slots.forEach((e) => {
-          let r = e.getAttribute("name"), t = this.querySelector(`[slot="${r}"]`);
-          t && (e.replaceWith(t.cloneNode(!0)), o.push(t));
-        }), o.forEach((e) => {
-          e.remove();
+        let toremove = [];
+        this.slots.forEach((tslot) => {
+          let slotName = tslot.getAttribute("name");
+          let slotContent = this.querySelector(`[slot="${slotName}"]`);
+          if (slotContent) {
+            tslot.replaceWith(slotContent.cloneNode(true));
+            toremove.push(slotContent);
+          }
+        });
+        toremove.forEach((element) => {
+          element.remove();
         });
       }
     });
   });
 }
 export {
-  a as setup
+  setup
 };

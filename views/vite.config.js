@@ -4,12 +4,14 @@ export default defineConfig({
 	build: {
 		root: resolve(__dirname, ""),
 		// These are dev options only:
-		assetsInlineLimit: 0,
 		minify: false,
+		emitAssets: true,
+
 		lib: {
 			entry: "./transform/main.js",
 			name: "PC-UI",
 			fileName: "scripts",
+			cssFileName: "style",
 			formats: ["es"],
 		},
 		outDir: resolve(__dirname, "assets/"),
