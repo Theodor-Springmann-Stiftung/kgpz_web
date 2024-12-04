@@ -4,10 +4,10 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
+  full_bin = "export KGPZ_WATCH=false; ./tmp/main"
   cmd = "go build -tags=\"dev\" -o ./tmp/main ."
   delay = 400
-  exclude_dir = ["views/assets", "views/routes", "views/node_modules", "tmp", "vendor", "testdata", "data_git", "cache_gnd", "cache_geonames"]
+  exclude_dir = ["views/public", "views/node_modules", "tmp", "vendor", "testdata", "data_git", "cache_gnd", "cache_geonames"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false

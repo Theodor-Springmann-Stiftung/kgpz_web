@@ -6,7 +6,6 @@ import (
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/templating"
@@ -49,7 +48,6 @@ type Server struct {
 	cache    *memory.Storage
 	engine   *templating.Engine
 	mu       sync.Mutex
-	watcher  *helpers.FileWatcher
 
 	kgpz *app.KGPZ
 }
@@ -67,39 +65,17 @@ func Create(k *app.KGPZ, c *providers.ConfigProvider, e *templating.Engine) *Ser
 	}
 }
 
-// INFO: hot reloading for poor people
-// BUG: unable to close the old file watcher here, since the process gets aborted in the middle of creating the new one.
-func (s *Server) Watcher() error {
+func (s *Server) Engine(e *templating.Engine) {
+	s.Stop()
 	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	watcher, err := helpers.NewFileWatcher()
-	if err != nil {
-		return err
-	}
-
-	s.watcher = watcher
-	s.watcher.Append(func(path string) {
-		logging.Info("File changed: ", path)
-		time.Sleep(200 * time.Millisecond)
-		s.Restart()
-	})
-
-	err = s.watcher.RecursiveDir(ROUTES_FILEPATH)
-	if err != nil {
-		return err
-	}
-
-	err = s.watcher.RecursiveDir(LAYOUT_FILEPATH)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	s.engine = e
+	s.mu.Unlock()
+	s.Start()
 }
 
 func (s *Server) Start() {
-	s.engine.Reload()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	if s.cache == nil {
 		s.cache = memory.New(memory.Config{
@@ -174,10 +150,6 @@ func (s *Server) Start() {
 
 	s.runner(srv)
 
-	if s.Config.Debug {
-		err := s.Watcher()
-		logging.Error(err, "Error setting up file watcher")
-	}
 }
 
 func (s *Server) Stop() {

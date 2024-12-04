@@ -16,7 +16,7 @@
 		<!-- Links zu anderen Teilen: -->
 		{{ if gt (len $piece.IssueRefs) 1 }}
 			<div>
-				{{ len $piece.IssueRefs }} Teile
+				{{ len $piece.IssueRefs }} Teile:
 				<ol>
 					{{ range $issue := $piece.IssueRefs }}
 						<li>

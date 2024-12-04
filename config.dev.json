@@ -3,5 +3,6 @@
 	"git_branch": "main",
 	"webhook_endpoint": "/webhook",
 	"webhook_secret": "secret",
-	"debug": true
+	"debug": true,
+	"watch": true
 }

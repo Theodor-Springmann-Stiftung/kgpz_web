@@ -3,15 +3,17 @@ Eintrag!
 
 <!-- Autor(en) -->
 {{ $authorset := false }}
-{{ range $agentref := $piece.AgentRefs }}
-	{{ if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) }}
-		{{ $agent := GetAgent $agentref.Ref }}
-		<!-- NOT IMPLEMENTED: Multiple agent names -->
-		{{- if gt (len $agent.Names) 0 -}}
-			<div class="inline-block">{{- index $agent.Names 0 -}}</div>
+<div class="authors">
+	{{ range $agentref := $piece.AgentRefs }}
+		{{ if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) }}
+			{{ $agent := GetAgent $agentref.Ref }}
+			<!-- NOT IMPLEMENTED: Multiple agent names -->
+			{{- if gt (len $agent.Names) 0 -}}
+				<div class="author inline-block">{{- index $agent.Names 0 -}}</div>
+			{{ end }}
 		{{ end }}
 	{{ end }}
-{{ end }}
+</div>
 
 {{ range $annotation := $piece.AnnotationNote.Annotations }}
 	<div>

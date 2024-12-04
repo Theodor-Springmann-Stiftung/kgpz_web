@@ -21,6 +21,8 @@ const (
 	DEFAULT_PORT  = "8080"
 	DEFAULT_ADDR  = "localhost"
 	DEFAULT_HTTPS = false
+
+	ENV_PREFIX = "KGPZ"
 )
 
 type ConfigProvider struct {
@@ -38,6 +40,7 @@ type Config struct {
 	WebHookEndpoint string `json:"webhook_endpoint" envconfig:"WEBHOOK_ENDPOINT"`
 	WebHookSecret   string `json:"webhook_secret" envconfig:"WEBHOOK_SECRET"`
 	Debug           bool   `json:"debug" envconfig:"DEBUG"`
+	Watch           bool   `json:"watch" envconfig:"WATCH"`
 	LogData         bool   `json:"log_data" envconfig:"LOG_DATA"`
 
 	Address string `json:"address" envconfig:"ADDRESS"`
@@ -82,7 +85,7 @@ func readSettingsFile(cfg *Config, path string) *Config {
 }
 
 func readSettingsEnv(cfg *Config) *Config {
-	_ = envconfig.Process("KGPZ", cfg)
+	_ = envconfig.Process(ENV_PREFIX, cfg)
 	return cfg
 }
 

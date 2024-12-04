@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
@@ -46,15 +47,11 @@ func main() {
 	kgpz := app.NewKGPZ(cfg)
 	kgpz.Init()
 
-	engine := templating.NewEngine(&views.LayoutFS, &views.RoutesFS)
-	engine.Funcs(kgpz)
-	engine.Globals(fiber.Map{"isDev": cfg.Config.Debug, "name": "KGPZ", "lang": "de"})
-
-	server := server.Create(kgpz, cfg, engine)
-	Start(kgpz, server)
+	server := server.Create(kgpz, cfg, Engine(kgpz, cfg))
+	Start(kgpz, server, cfg)
 }
 
-func Start(k *app.KGPZ, s *server.Server) {
+func Start(k *app.KGPZ, s *server.Server, c *providers.ConfigProvider) {
 	s.Start()
 
 	sigs := make(chan os.Signal, 1)
@@ -78,6 +75,33 @@ func Start(k *app.KGPZ, s *server.Server) {
 		done <- true
 	}()
 
+	// INFO: hot reloading for poor people
+	if c.Watch {
+		go func() {
+			watcher, err := helpers.NewFileWatcher()
+			if err != nil {
+				return
+			}
+
+			watcher.Append(func(path string) {
+				logging.Info("File changed: ", path)
+				time.Sleep(200 * time.Millisecond)
+				s.Engine(Engine(k, c))
+			})
+
+			err = watcher.RecursiveDir(server.ROUTES_FILEPATH)
+			if err != nil {
+				return
+			}
+
+			err = watcher.RecursiveDir(server.LAYOUT_FILEPATH)
+			if err != nil {
+				return
+			}
+		}()
+
+	}
+
 	// Interactive listening for input
 	// if k.IsDebug() {
 	// 	go func() {
@@ -96,4 +120,11 @@ func Start(k *app.KGPZ, s *server.Server) {
 	// }
 	//
 	<-done
+}
+
+func Engine(kgpz *app.KGPZ, c *providers.ConfigProvider) *templating.Engine {
+	e := templating.NewEngine(&views.LayoutFS, &views.RoutesFS)
+	e.Funcs(kgpz)
+	e.Globals(fiber.Map{"isDev": c.Config.Debug, "name": "KGPZ", "lang": "de"})
+	return e
 }
