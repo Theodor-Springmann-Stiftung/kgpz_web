@@ -78,6 +78,14 @@ func Start(k *app.KGPZ, s *server.Server, c *providers.ConfigProvider) {
 	// INFO: hot reloading for poor people
 	if c.Watch {
 		go func() {
+			_, routesexist := os.Stat(server.ROUTES_FILEPATH)
+			_, layoutexist := os.Stat(server.LAYOUT_FILEPATH)
+
+			if routesexist != nil && layoutexist != nil {
+				logging.Info("Routes or Layout folder does not exist. Watcher disabled.")
+				return
+			}
+
 			watcher, err := helpers.NewFileWatcher()
 			if err != nil {
 				return
@@ -89,14 +97,18 @@ func Start(k *app.KGPZ, s *server.Server, c *providers.ConfigProvider) {
 				s.Engine(Engine(k, c))
 			})
 
-			err = watcher.RecursiveDir(server.ROUTES_FILEPATH)
-			if err != nil {
-				return
+			if routesexist != nil {
+				err = watcher.RecursiveDir(server.ROUTES_FILEPATH)
+				if err != nil {
+					return
+				}
 			}
 
-			err = watcher.RecursiveDir(server.LAYOUT_FILEPATH)
-			if err != nil {
-				return
+			if layoutexist != nil {
+				err = watcher.RecursiveDir(server.LAYOUT_FILEPATH)
+				if err != nil {
+					return
+				}
 			}
 		}()
 

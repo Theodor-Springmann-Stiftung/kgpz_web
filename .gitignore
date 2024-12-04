@@ -1,5 +1,6 @@
 KGPZ/
 tmp/
+bin/
 data_git/
 cache_geo/
 cache_gnd/

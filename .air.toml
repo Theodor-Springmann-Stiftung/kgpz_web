@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
 args_bin = []
-full_bin = "export KGPZ_WATCH=false; ./tmp/main"
+full_bin = "npm --prefix views/ run build -- --config vite.dev.config.js; export KGPZ_WATCH=false; ./tmp/main"
 cmd = "go build -tags=\"dev\" -o ./tmp/main ."
 delay = 400
 exclude_dir = [
@@ -30,7 +30,7 @@ log = "build-errors.log"
 poll = false
 poll_interval = 0
 post_cmd = []
-pre_cmd = ["npm --prefix views/ run build"]
+pre_cmd = []
 rerun = false
 rerun_delay = 500
 send_interrupt = true
