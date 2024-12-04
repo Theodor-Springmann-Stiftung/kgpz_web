@@ -91,7 +91,7 @@ func (s *Server) Start() {
 		// Maybe we turn that behavior permanently off and differentiate HTMX from "normal" reuqests only by headers.
 		StrictRouting: true,
 
-		EnablePrintRoutes: s.Config.Debug,
+		// EnablePrintRoutes: s.Config.Debug,
 
 		// TODO: Error handler, which sadly, is global:
 		ErrorHandler: fiber.DefaultErrorHandler,
@@ -135,7 +135,17 @@ func (s *Server) Start() {
 		}))
 	}
 
-	srv.Get("/:year?", controllers.GetYear(s.kgpz))
+	// TODO: this is probably a bad idea, since it basically applies to every /XXXX URL
+	// And probably creates problems with static files, and in case we add a front page later.
+	// That's why we redirect to /1764 on "/ " and don´t use an optional /:year?
+	srv.Get("/", func(c *fiber.Ctx) error {
+		c.Redirect("/1764")
+		return nil
+	})
+	srv.Get("/:year", controllers.GetYear(s.kgpz))
+
+	// TODO: Same here, this prob applies to all paths with two or three segments, which is bad.
+	// Prob better to do /ausgabe/:year/:issue/:page? here and /jahrgang/:year? above.
 	srv.Get("/:year/:issue/:page?", controllers.GetIssue(s.kgpz))
 	srv.Get("/:year/:issue/beilage/:page?", controllers.GetIssue(s.kgpz))
 
@@ -187,7 +197,6 @@ func (s *Server) runner(srv *fiber.App) {
 	go func() {
 		defer s.shutdown.Done()
 
-		logging.Info("Starting server on ", s.Config.Address+":"+s.Config.Port)
 		if err := srv.Listen(s.Config.Address + ":" + s.Config.Port); err != nil {
 			logging.Error(err, "Error starting server")
 			return

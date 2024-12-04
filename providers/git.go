@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
@@ -80,11 +81,13 @@ func (g *GitProvider) Pull() (error, bool) {
 	branch := plumbing.NewBranchReferenceName(g.Branch)
 	repo, err := git.PlainOpen(g.Path)
 	if err != nil {
+		logging.Error(err, "Error opening repository")
 		return err, false
 	}
 
 	wt, err := repo.Worktree()
 	if err != nil {
+		logging.Error(err, "Error getting worktree")
 		return err, false
 	}
 
@@ -96,12 +99,14 @@ func (g *GitProvider) Pull() (error, bool) {
 		if err == git.NoErrAlreadyUpToDate {
 			return nil, false
 		}
+		logging.Error(err, "Error pulling repository")
 		return err, false
 	}
 	defer wt.Clean(&git.CleanOptions{Dir: true})
 
 	oldCommit := g.Commit
 	if err := g.setValues(repo); err != nil {
+		logging.Error(err, "Error setting values for new commit")
 		return err, false
 	}
 
@@ -123,11 +128,8 @@ func (g *GitProvider) Clone() error {
 	branch := plumbing.NewBranchReferenceName(g.Branch)
 
 	repo, err := git.PlainClone(g.Path, false, &git.CloneOptions{
-		URL:           g.URL,
-		Progress:      os.Stdout,
-		SingleBranch:  true,
-		ReferenceName: branch,
-		Depth:         1,
+		URL:      g.URL,
+		Progress: os.Stdout,
 	})
 
 	if err != nil {
