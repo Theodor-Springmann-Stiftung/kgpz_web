@@ -1,6 +1,7 @@
 #!/bin/bash
 
 rm -rf ./bin
+npm --prefix ./views install
 npm --prefix ./views run build -- --config vite.config.js
 mkdir -p ./bin
 go build -o ./bin/kgpz . 
