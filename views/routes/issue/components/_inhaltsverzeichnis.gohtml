@@ -1,38 +1,40 @@
-{{ $page := 0 }}
 {{ $model := .model }}
 
 
 <div>Inhalt</div>
-{{ range  $piece := .model.Pieces.IssuePieces }}
-	<div>
-		{{ if (ne $page $piece.Von) }}
-			{{ $page = $piece.Von }}
+<div>
+	{{ range  $page := $model.Pages }}
+		<div>
 			<div>Seite {{ $page }}</div>
-		{{ end }}
 
-		{{ template "_inhaltsverzeichnis_eintrag" $piece }}
+			{{ range $piece := (index $model.Pieces $page) }}
+
+				{{ template "_inhaltsverzeichnis_eintrag" $piece }}
 
 
-		<!-- Links zu anderen Teilen: -->
-		{{ if gt (len $piece.IssueRefs) 1 }}
-			<div>
-				{{ len $piece.IssueRefs }} Teile:
-				<ol>
-					{{ range $issue := $piece.IssueRefs }}
-						<li>
-							<a
-								href="/{{- $issue.Datum -}}/{{- $issue.Nr -}}"
-								{{ if and (eq $issue.Nr $model.No) (eq $issue.Datum $model.Year) }}
-									aria-current="page"
-								{{ end }}>
-								{{- $issue.Datum }} Nr.
-								{{ $issue.Nr -}}
-							</a>
-						</li>
-					{{ end }}
-				</ol>
-			</div>
-		{{ end }}
+				<!-- Links zu anderen Teilen: -->
+				{{ if gt (len $piece.IssueRefs) 1 }}
+					<div>
+						{{ len $piece.IssueRefs }} Teile:
+						<ol>
+							{{ range $issue := $piece.IssueRefs }}
+								<li>
+									<a
+										href="/{{- $issue.Datum -}}/{{- $issue.Nr -}}"
+										{{ if and (eq $issue.Nr $model.No) (eq $issue.Datum $model.Year) }}
+											aria-current="page"
+										{{ end }}>
+										{{- $issue.Datum }} Nr.
+										{{ $issue.Nr -}}
+									</a>
+								</li>
+							{{ end }}
+						</ol>
+					</div>
+				{{ end }}
 
-	</div>
-{{ end }}
+			{{ end }}
+
+		</div>
+	{{ end }}
+</div>
