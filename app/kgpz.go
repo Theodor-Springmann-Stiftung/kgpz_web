@@ -35,7 +35,8 @@ type KGPZ struct {
 
 func (k *KGPZ) Init() {
 	if k.Config.Debug {
-		// NOTE: validity checks for poor people, speeding up dev mode:
+		// NOTE: validity checks done wrong, but speeding up dev mode:
+		// In dev mode we expect the folder to be a valid repository
 		if _, err := os.Stat(k.Config.FolderPath); err != nil {
 			k.initRepo()
 		} else {
@@ -171,8 +172,11 @@ func (k *KGPZ) Pull() {
 
 func (k *KGPZ) initRepo() {
 	gp, err := providers.NewGitProvider(k.Config.Config.GitURL, k.Config.Config.FolderPath, k.Config.Config.GitBranch)
+	// TODO: what to do if the repo can't be initialized?
+	// What to do if the data can't be read?
+	// Handle in Serialize --> it musttry to initialize the repository if files are missing.
 	if err != nil {
-		logging.ObjErr(&gp, err, "Error creating GitProvider")
+		logging.Error(err, "Error initializing GitProvider")
 		return
 	}
 

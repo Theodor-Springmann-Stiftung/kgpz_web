@@ -1,12 +1,12 @@
-name: kgpz_web
+name: kgpz
 services:
-  kgpz_web:
+  web:
     build: .
     volumes:
-      - kgpz_xml_data:/app/data_git
+      - kgpz_data:/app/data_git
     ports:
       - "8000:8080"
 
 volumes:
-  kgpz_xml_data:
+  kgpz_data:
     external: true
