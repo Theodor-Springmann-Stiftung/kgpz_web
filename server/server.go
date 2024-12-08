@@ -26,6 +26,11 @@ const (
 	CACHE_TIME = 24 * time.Hour
 
 	STATIC_PREFIX = "/assets"
+
+	EDITION_URL  = "/edition/"
+	PRIVACY_URL  = "/datenschutz/"
+	CONTACT_URL  = "/kontakt/"
+	CITATION_URL = "/zitation/"
 )
 
 const (
@@ -142,21 +147,20 @@ func (s *Server) Start() {
 		c.Redirect("/1764")
 		return nil
 	})
-	srv.Get("/:year", controllers.GetYear(s.kgpz))
-
-	// TODO: Same here, this prob applies to all paths with two or three segments, which is bad.
-	// Prob better to do /ausgabe/:year/:issue/:page? here and /jahrgang/:year? above.
-	srv.Get("/:year/:issue/:page?", controllers.GetIssue(s.kgpz))
-	srv.Get("/:year/:issue/beilage/:page?", controllers.GetIssue(s.kgpz))
-
 	srv.Get("/ort/:place?", controllers.GetPlace(s.kgpz))
 	srv.Get("/kategorie/:category?", controllers.GetCategory(s.kgpz))
 	srv.Get("/akteure/:letterorid?", controllers.GetAgents(s.kgpz))
 
-	srv.Get("/edition/", controllers.Get("/edition/"))
-	srv.Get("/datenschutz/", controllers.Get("/datenschutz/"))
-	srv.Get("/kontakt/", controllers.Get("/kontakt/"))
-	srv.Get("/zitation/", controllers.Get("/zitation/"))
+	// TODO: Same here, this prob applies to all paths with two or three segments, which is bad.
+	// Prob better to do /ausgabe/:year/:issue/:page? here and /jahrgang/:year? above.
+	srv.Get("/:year", controllers.GetYear(s.kgpz))
+	srv.Get("/:year/:issue/:page?", controllers.GetIssue(s.kgpz))
+	srv.Get("/:year/:issue/beilage/:page?", controllers.GetIssue(s.kgpz))
+
+	srv.Get(EDITION_URL, controllers.Get(EDITION_URL))
+	srv.Get(PRIVACY_URL, controllers.Get(PRIVACY_URL))
+	srv.Get(CONTACT_URL, controllers.Get(CONTACT_URL))
+	srv.Get(CITATION_URL, controllers.Get(CITATION_URL))
 
 	s.runner(srv)
 
