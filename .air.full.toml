@@ -30,9 +30,9 @@ log = "build-errors.log"
 poll = false
 poll_interval = 0
 post_cmd = []
-pre_cmd = ["npm --prefix views/ run tailwind"]
+pre_cmd = ["npm --prefix views/ run build -- --config vite.dev.config.js"]
 rerun = false
-rerun_delay = 250
+rerun_delay = 500
 send_interrupt = true
 stop_on_error = true
 
