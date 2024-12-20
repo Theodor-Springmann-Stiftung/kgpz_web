@@ -37,10 +37,15 @@ type Note struct {
 
 type Identifier struct {
 	ID string `xml:"id,attr"`
+	KeyedItem
 }
 
-func (i Identifier) GetIDs() []string {
-	return []string{i.ID}
+func (i Identifier) Keys() []string {
+	if len(i.keys) > 0 {
+		return i.keys
+	}
+	i.keys = []string{i.ID}
+	return i.keys
 }
 
 type Reference struct {

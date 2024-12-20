@@ -1,10 +1,7 @@
 package xmlprovider
 
 import (
-	"encoding/xml"
 	"fmt"
-	"io"
-	"os"
 	"slices"
 	"sync"
 	"time"
@@ -19,45 +16,40 @@ type ParseMeta struct {
 
 type XMLItem interface {
 	fmt.Stringer
-	GetIDs() []string
+	Keys() []string
 }
 
 // An XMLProvider is a struct that holds holds serialized XML data of a specific type. It combines multiple parses IF a succeeded parse can not serialize the data from a path.
 type XMLProvider[T XMLItem] struct {
 	Paths []string
-	// INFO: map is type [string]*T
+	// INFO: map is type map[string]*T
 	Items sync.Map
 	// INFO: map is type [string]ItemInfo
 	// It keeps information about parsing status of the items.
 	Infos sync.Map
 
 	mu sync.Mutex
-	// TODO: This is not populated yet
-	Array  []T
-	failed []string
-	parses []ParseMeta
+	// TODO: This array is meant to be for iteration purposes, since iteration over the sync.Map is slow.
+	// It is best for this array to be sorted by key of the corresponding item.
+	Array    []T
+	Previous []T
+	failed   []string
+	parses   []ParseMeta
 }
 
 // INFO: To parse sth, we call Prepare, then Serialize, then Cleanup.
-// Serialize can be called concurretly.
+// Prepare & Cleanup are called once per parse. Serialize is called for every path.
+// and can be called concurretly.
 func (p *XMLProvider[T]) Prepare(commit string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	p.Previous = p.Array
+	p.Array = make([]T, len(p.Previous))
 	p.failed = make([]string, 0)
 	p.parses = append(p.parses, ParseMeta{Commit: commit, Date: time.Now()})
 }
 
 func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) error {
-	if len(p.parses) == 0 {
-		logging.Error(fmt.Errorf("No commit set"), "No commit set")
-		return fmt.Errorf("No commit set")
-	}
-
-	p.mu.Lock()
-	commit := &p.parses[len(p.parses)-1]
-	p.mu.Unlock()
-
-	// Introduce goroutine for every path, locking on append:
 	if err := UnmarshalFile(path, dataholder); err != nil {
 		logging.Error(err, "Could not unmarshal file: "+path)
 		logging.ParseMessages.LogError(logging.Unknown, path, "", "Could not unmarshal file.")
@@ -67,9 +59,18 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) er
 		return err
 	}
 
+	p.mu.Lock()
+	if len(p.parses) == 0 {
+		logging.Error(fmt.Errorf("No commit set"), "No commit set")
+		return fmt.Errorf("No commit set")
+	}
+	commit := &p.parses[len(p.parses)-1]
+	p.Array = append(p.Array, dataholder.Children()...)
+	p.mu.Unlock()
+
 	for _, item := range dataholder.Children() {
 		// INFO: Mostly it's just one ID, so the double loop is not that bad.
-		for _, id := range item.GetIDs() {
+		for _, id := range item.Keys() {
 			p.Infos.Store(id, ItemInfo{Source: path, Parse: commit})
 			p.Items.Store(id, &item)
 		}
@@ -92,11 +93,20 @@ func (p *XMLProvider[T]) Cleanup() {
 
 	lastcommit := &p.parses[len(p.parses)-1]
 	todelete := make([]string, 0)
+	toappend := make([]*T, 0)
 	p.Infos.Range(func(key, value interface{}) bool {
 		info := value.(ItemInfo)
 		if info.Parse != lastcommit {
 			if !slices.Contains(p.failed, info.Source) {
 				todelete = append(todelete, key.(string))
+			} else {
+				item, ok := p.Items.Load(key)
+				if ok {
+					i := item.(*T)
+					if !slices.Contains(toappend, i) {
+						toappend = append(toappend, i)
+					}
+				}
 			}
 		}
 		return true
@@ -105,6 +115,10 @@ func (p *XMLProvider[T]) Cleanup() {
 	for _, key := range todelete {
 		p.Infos.Delete(key)
 		p.Items.Delete(key)
+	}
+
+	for _, item := range toappend {
+		p.Array = append(p.Array, *item)
 	}
 }
 
@@ -116,29 +130,6 @@ func (a *XMLProvider[T]) String() string {
 		return true
 	})
 	return s
-}
-
-func UnmarshalFile[T any](filename string, data T) error {
-	xmlFile, err := os.Open(filename)
-	if err != nil {
-		logging.Error(err, "Could not open file: "+filename)
-		return err
-	}
-	defer xmlFile.Close()
-
-	logging.Info("Deserialization: " + filename)
-	byteValue, err := io.ReadAll(xmlFile)
-	if err != nil {
-		logging.Error(err, "Could not read file: "+filename)
-		return err
-	}
-	err = xml.Unmarshal(byteValue, &data)
-
-	if err != nil {
-		logging.Error(err, "Could not unmarshal file: "+filename)
-		return err
-	}
-	return nil
 }
 
 func (p *XMLProvider[T]) Item(id string) *T {
@@ -173,15 +164,10 @@ func (p *XMLProvider[T]) FindKey(fn func(string) bool) []*T {
 	return items
 }
 
-// INFO: Do not use this, except when iterating over a collection multiple times (three times or more).
-// Maps are slow to iterate, but many of the Iterations can only be done once, so it doesn´t matter for a
-// few thousand objects. We prefer to lookup objects by key and have multiple meaningful keys; along with
-// sensible caching rules to keep the application responsive.
-func (p *XMLProvider[T]) Everything() []*T {
-	var items []*T
-	p.Items.Range(func(key, value interface{}) bool {
-		items = append(items, value.(*T))
-		return true
-	})
-	return items
+func (p *XMLProvider[T]) Lock() {
+	p.mu.Lock()
+}
+
+func (p *XMLProvider[T]) Unlock() {
+	p.mu.Unlock()
 }

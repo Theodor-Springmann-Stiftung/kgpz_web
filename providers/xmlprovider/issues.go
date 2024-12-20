@@ -29,7 +29,11 @@ type Additional struct {
 	Bis     int      `xml:"bis"`
 }
 
-func (i Issue) GetIDs() []string {
+func (i Issue) Keys() []string {
+	if len(i.keys) > 0 {
+		return i.keys
+	}
+
 	res := make([]string, 2)
 	date := i.Datum.When
 	if date != "" {
@@ -39,6 +43,8 @@ func (i Issue) GetIDs() []string {
 	if len(date) > 4 {
 		res = append(res, i.Datum.When[0:4]+"-"+strconv.Itoa(i.Number.No))
 	}
+
+	i.keys = res
 
 	return res
 }

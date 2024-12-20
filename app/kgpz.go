@@ -23,9 +23,8 @@ const (
 )
 
 type KGPZ struct {
-	// LMU is here for file system access
-	lmu sync.Mutex
 	// GMU is only here to prevent concurrent pulls
+	// or file system operations while parsing
 	gmu     sync.Mutex
 	Config  *providers.ConfigProvider
 	Repo    *providers.GitProvider
@@ -78,28 +77,23 @@ func (k *KGPZ) Enrich() error {
 		k.InitGND()
 	}
 
-	k.lmu.Lock()
-	defer k.lmu.Unlock()
-
 	if k.Library == nil || k.Library.Agents == nil {
 		return nil
 	}
 
-	// INFO: We pass agents by value since we don't want to block the library
-	agents := k.Library.Agents.Everything()
-	go func(agents []*xmlprovider.Agent) {
-		k.GND.FetchPersons(agents)
+	// TODO: Library locking is never needed, since the library items, once set, are never changed
+	// We only need to check if set
+	go func() {
+		data := gnd.ProviderIntoDataset(k.Library.Agents)
+		k.GND.FetchPersons(data)
 		k.GND.WriteCache(k.Config.GNDPath)
-	}(agents)
+	}()
 
 	return nil
 }
 
 func (k *KGPZ) Serialize() {
 	// TODO: this is error handling from hell
-	// There is no need to recreate the whole library if the paths haven't changed
-	// We do it to keep the old data if the new data is missing
-
 	// Preventing pulling and serializing at the same time
 	k.gmu.Lock()
 	defer k.gmu.Unlock()
@@ -115,23 +109,15 @@ func (k *KGPZ) Serialize() {
 	pieces, err := getXMLFiles(filepath.Join(k.Config.FolderPath, PIECES_DIR))
 	helpers.Assert(err, "Error getting pieces")
 
-	k.lmu.Lock()
-	defer k.lmu.Unlock()
 	if k.Library == nil {
-		lib := xmlprovider.NewLibrary(
+		k.Library = xmlprovider.NewLibrary(
 			[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
 			[]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)},
 			[]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)},
 			[]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)},
 			*issues,
 			*pieces)
-
-		lib.Serialize(commit)
-
-		k.Library = lib
 	} else {
-		// TODO: where to clear the old data?
-		// How to differentiate between deleted data points and stale data points bc of parse errors?
 		k.Library.SetPaths(
 			[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
 			[]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)},
@@ -139,8 +125,8 @@ func (k *KGPZ) Serialize() {
 			[]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)},
 			*issues,
 			*pieces)
-		k.Library.Serialize(commit)
 	}
+	k.Library.Serialize(commit)
 }
 
 func (k *KGPZ) IsDebug() bool {

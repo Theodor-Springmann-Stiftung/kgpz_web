@@ -28,7 +28,11 @@ func (p Piece) String() string {
 	return fmt.Sprintf("ID: %s\nIssueRefs: %v\nPlaceRefs: %v\nCategoryRefs: %v\nAgentRefs: %v\nWorkRefs: %v\nPieceRefs: %v\nAdditionalRef: %v\nIncipit: %v\nTitle: %v\nAnnotations: %v\nNotes: %v\n", p.ID, p.IssueRefs, p.PlaceRefs, p.CategoryRefs, p.AgentRefs, p.WorkRefs, p.PieceRefs, p.AdditionalRef, p.Incipit, p.Title, p.Annotations, p.Notes)
 }
 
-func (p Piece) GetIDs() []string {
+func (p Piece) Keys() []string {
+	if len(p.keys) > 0 {
+		return p.keys
+	}
+
 	ret := make([]string, 2)
 	if p.ID != "" {
 		ret = append(ret, p.ID)
@@ -44,6 +48,9 @@ func (p Piece) GetIDs() []string {
 	for _, i := range p.AdditionalRef {
 		ret = append(ret, i.Datum+"-"+strconv.Itoa(i.Nr)+"-b-"+uid.String())
 	}
+
+	p.keys = ret
+
 	return ret
 }
 

@@ -6,6 +6,7 @@ import (
 )
 
 type Library struct {
+	amu        sync.Mutex
 	Agents     *XMLProvider[Agent]
 	Places     *XMLProvider[Place]
 	Works      *XMLProvider[Work]
@@ -19,6 +20,7 @@ func (l *Library) String() string {
 		l.Agents.String(), l.Places.String(), l.Works.String(), l.Categories.String(), l.Issues.String(), l.Pieces.String())
 }
 
+// INFO: this is the only place where the providers are created. There is no need for locking on access.
 func NewLibrary(agentpaths, placepaths, workpaths, categorypaths, issuepaths, piecepaths []string) *Library {
 	return &Library{
 		Agents:     &XMLProvider[Agent]{Paths: agentpaths},
@@ -31,6 +33,8 @@ func NewLibrary(agentpaths, placepaths, workpaths, categorypaths, issuepaths, pi
 }
 
 func (l *Library) SetPaths(agentpaths, placepaths, workpaths, categorypaths, issuepaths, piecepaths []string) {
+	l.amu.Lock()
+	defer l.amu.Unlock()
 	l.Agents.Paths = agentpaths
 	l.Places.Paths = placepaths
 	l.Works.Paths = workpaths
@@ -93,14 +97,9 @@ func (l *Library) Serialize(commit string) {
 	}
 
 	wg.Wait()
-
-	go func() {
-		l.Cleanup()
-	}()
+	l.Cleanup()
 }
 
-// TODO: Prepare resets the list of failed parses for a new parse.
-// We need to set the logs accordingly.
 func (l *Library) Prepare(commit string) {
 	l.Agents.Prepare(commit)
 	l.Places.Prepare(commit)
@@ -111,10 +110,38 @@ func (l *Library) Prepare(commit string) {
 }
 
 func (l *Library) Cleanup() {
-	l.Agents.Cleanup()
-	l.Places.Cleanup()
-	l.Works.Cleanup()
-	l.Categories.Cleanup()
-	l.Issues.Cleanup()
-	l.Pieces.Cleanup()
+	wg := sync.WaitGroup{}
+	wg.Add(6)
+
+	go func() {
+		l.Agents.Cleanup()
+		wg.Done()
+	}()
+
+	go func() {
+		l.Places.Cleanup()
+		wg.Done()
+	}()
+
+	go func() {
+		l.Works.Cleanup()
+		wg.Done()
+	}()
+
+	go func() {
+		l.Categories.Cleanup()
+		wg.Done()
+	}()
+
+	go func() {
+		l.Issues.Cleanup()
+		wg.Done()
+	}()
+
+	go func() {
+		l.Pieces.Cleanup()
+		wg.Done()
+	}()
+
+	wg.Wait()
 }

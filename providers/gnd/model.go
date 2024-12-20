@@ -2,13 +2,11 @@ package gnd
 
 import (
 	"fmt"
-
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
 type Person struct {
 	KGPZID                              string             `json:"kgpzid"`
-	Agent                               xmlprovider.Agent  `json:"agent"`
+	KGPZURL                             string             `json:"kgpzurl"`
 	URL                                 string             `json:"id,omitempty"`
 	DateOfBirth                         []string           `json:"dateOfBirth,omitempty"`
 	PlaceOfBirth                        []Entity           `json:"placeOfBirth,omitempty"`

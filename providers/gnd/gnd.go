@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
 const (
@@ -77,7 +76,6 @@ func (p *GNDProvider) readPersons(folder string) error {
 
 func (p *GNDProvider) readPerson(file string) {
 	person := Person{}
-	// JSON unmarshalling of the file and sanity check:
 	f, err := os.Open(file)
 	if err != nil {
 		logging.Error(err, "Error opening file for reading: "+file)
@@ -96,8 +94,8 @@ func (p *GNDProvider) readPerson(file string) {
 		return
 	}
 
-	if person.Agent.GND != "" {
-		p.Persons.Store(person.Agent.GND, person)
+	if person.KGPZURL != "" {
+		p.Persons.Store(person.KGPZURL, person)
 		return
 	}
 }
@@ -168,14 +166,14 @@ func (p *GNDProvider) Person(id string) *Person {
 	return &pers
 }
 
-func (p *GNDProvider) FetchPersons(persons []*xmlprovider.Agent) {
+func (p *GNDProvider) FetchPersons(persons []GNDData) {
 	wg := sync.WaitGroup{}
 	for _, person := range persons {
 		if person.ID == "" || person.GND == "" {
 			continue
 		}
 
-		// INFO: person already fetched; check for updates??
+		// TODO: person already fetched; check for updates??
 		if _, ok := p.Persons.Load(person.GND); ok {
 			continue
 		}
@@ -187,27 +185,27 @@ func (p *GNDProvider) FetchPersons(persons []*xmlprovider.Agent) {
 		p.errmu.Unlock()
 
 		wg.Add(1)
-		go func(person *xmlprovider.Agent) {
+		go func(person *GNDData) {
 			defer wg.Done()
-			p.fetchPerson(*person)
-		}(person)
+			p.fetchPerson(person.ID, person.GND)
+		}(&person)
 	}
 	wg.Wait()
 }
 
-func (p *GNDProvider) fetchPerson(person xmlprovider.Agent) {
-	SPLITURL := strings.Split(person.GND, "/")
+func (p *GNDProvider) fetchPerson(ID, GND string) {
+	SPLITURL := strings.Split(GND, "/")
 	if len(SPLITURL) < 2 {
-		logging.Error(nil, "Error parsing GND ID from: "+person.GND)
+		logging.Error(nil, "Error parsing GND ID from: "+GND)
 		return
 	}
 
 	GNDID := SPLITURL[len(SPLITURL)-1]
 
-	logging.Debug("Fetching person: " + person.ID + " with URL: " + LOBID_URL + GNDID)
+	logging.Debug("Fetching person: " + ID + " with URL: " + LOBID_URL + GNDID)
 	request, err := http.NewRequest("GET", LOBID_URL+GNDID, nil)
 	if err != nil {
-		logging.Error(err, "Error creating request: "+person.ID)
+		logging.Error(err, "Error creating request: "+ID)
 		return
 	}
 
@@ -218,17 +216,17 @@ func (p *GNDProvider) fetchPerson(person xmlprovider.Agent) {
 		response, err = http.DefaultClient.Do(request)
 		if err == nil && response.StatusCode < 400 {
 			if i > 0 {
-				logging.Info("Successfully fetched person: " + person.ID + " after " + strconv.Itoa(i) + " retries")
+				logging.Info("Successfully fetched person: " + ID + " after " + strconv.Itoa(i) + " retries")
 			}
 			break
 		}
 
 		time.Sleep(time.Duration(i+1) * time.Second)
-		logging.Error(err, "Retry fetching person: "+person.ID)
+		logging.Error(err, "Retry fetching person: "+ID)
 	}
 
 	if err != nil {
-		logging.Error(err, "Error fetching person: "+person.ID)
+		logging.Error(err, "Error fetching person: "+ID)
 		return
 	}
 
@@ -237,29 +235,29 @@ func (p *GNDProvider) fetchPerson(person xmlprovider.Agent) {
 	if response.StatusCode != http.StatusOK {
 		if response.StatusCode < 500 {
 			p.errmu.Lock()
-			p.errs[person.GND] = response.StatusCode
+			p.errs[GND] = response.StatusCode
 			p.errmu.Unlock()
 		}
-		logging.Error(errors.New("Error fetching person: " + person.ID + " with status code: " + http.StatusText(response.StatusCode)))
+		logging.Error(errors.New("Error fetching person: " + ID + " with status code: " + http.StatusText(response.StatusCode)))
 		return
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		logging.Error(err, "Error reading response body: "+person.ID)
+		logging.Error(err, "Error reading response body: "+ID)
 		return
 	}
 
 	// For debug purposes: Write response body to file:
-	// os.WriteFile("gnd_responses/"+person.ID+".json", body, 0644)
+	// os.WriteFile("gnd_responses/"+ID+".json", body, 0644)
 
 	gndPerson := Person{}
 	if err := json.Unmarshal(body, &gndPerson); err != nil {
-		logging.Error(err, "Error unmarshalling response body: "+person.ID)
+		logging.Error(err, "Error unmarshalling response body: "+ID)
 		return
 	}
 
-	gndPerson.KGPZID = person.ID
-	gndPerson.Agent = person
-	p.Persons.Store(person.GND, gndPerson)
+	gndPerson.KGPZID = ID
+	gndPerson.KGPZURL = GND
+	p.Persons.Store(GND, gndPerson)
 }
