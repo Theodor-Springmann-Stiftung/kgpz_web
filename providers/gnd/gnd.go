@@ -168,7 +168,7 @@ func (p *GNDProvider) Person(id string) *Person {
 	return &pers
 }
 
-func (p *GNDProvider) FetchPersons(persons []xmlprovider.Agent) {
+func (p *GNDProvider) FetchPersons(persons []*xmlprovider.Agent) {
 	wg := sync.WaitGroup{}
 	for _, person := range persons {
 		if person.ID == "" || person.GND == "" {
@@ -187,9 +187,9 @@ func (p *GNDProvider) FetchPersons(persons []xmlprovider.Agent) {
 		p.errmu.Unlock()
 
 		wg.Add(1)
-		go func(person xmlprovider.Agent) {
+		go func(person *xmlprovider.Agent) {
 			defer wg.Done()
-			p.fetchPerson(person)
+			p.fetchPerson(*person)
 		}(person)
 	}
 	wg.Wait()

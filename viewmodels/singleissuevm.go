@@ -28,10 +28,6 @@ func NewSingleIssueView(y string, No string, lib *xmlprovider.Library) (*SingleI
 		return nil, err
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
 	no, err := strconv.Atoi(No)
 	if err != nil {
 		return nil, err
@@ -61,7 +57,7 @@ func (issue *SingleIssueViewModel) PiecesForIsssue(lib *xmlprovider.Library) err
 	lib.Pieces.Items.Range(func(key, value interface{}) bool {
 		k := key.(string)
 		if strings.HasPrefix(k, lookfor) {
-			a := value.(xmlprovider.Piece)
+			a := value.(*xmlprovider.Piece)
 			p, err := NewPieceView(a)
 			if err != nil {
 				logging.ObjErr(&a, err)

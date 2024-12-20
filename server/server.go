@@ -20,17 +20,30 @@ import (
 
 const (
 	// INFO: This timeout is stupid. Uploads can take a long time, others might not. It's messy.
-	REQUEST_TIMEOUT = 8 * time.Second
-	SERVER_TIMEOUT  = 8 * time.Second
+	REQUEST_TIMEOUT = 16 * time.Second
+	SERVER_TIMEOUT  = 16 * time.Second
 
+	// INFO: Maybe this is too long/short?
 	CACHE_TIME = 24 * time.Hour
+)
 
-	STATIC_PREFIX = "/assets"
+const (
+	ASSETS_URL_PREFIX = "/assets"
 
 	EDITION_URL  = "/edition/"
 	PRIVACY_URL  = "/datenschutz/"
 	CONTACT_URL  = "/kontakt/"
 	CITATION_URL = "/zitation/"
+
+	INDEX_URL = "/1764"
+
+	YEAR_OVERVIEW_URL     = "/:year"
+	PLACE_OVERVIEW_URL    = "/ort/:place"
+	AGENTS_OVERVIEW_URL   = "/akteure/:letterorid"
+	CATEGORY_OVERVIEW_URL = "/kategorie/:category"
+
+	ISSSUE_URL    = "/:year/:issue/:page?"
+	ADDITIONS_URL = "/:year/:issue/beilage/:page?"
 )
 
 const (
@@ -120,7 +133,7 @@ func (s *Server) Start() {
 
 	srv.Use(recover.New())
 
-	srv.Use("assets", static(&views.StaticFS))
+	srv.Use(ASSETS_URL_PREFIX, static(&views.StaticFS))
 
 	// TODO: Dont cache static assets, bc storage gets huge
 	// INFO: Maybe fiber does this already?
@@ -144,18 +157,19 @@ func (s *Server) Start() {
 	// And probably creates problems with static files, and in case we add a front page later.
 	// That's why we redirect to /1764 on "/ " and don´t use an optional /:year?
 	srv.Get("/", func(c *fiber.Ctx) error {
-		c.Redirect("/1764")
+		c.Redirect(INDEX_URL)
 		return nil
 	})
-	srv.Get("/ort/:place?", controllers.GetPlace(s.kgpz))
-	srv.Get("/kategorie/:category?", controllers.GetCategory(s.kgpz))
-	srv.Get("/akteure/:letterorid?", controllers.GetAgents(s.kgpz))
+
+	srv.Get(PLACE_OVERVIEW_URL, controllers.GetPlace(s.kgpz))
+	srv.Get(CATEGORY_OVERVIEW_URL, controllers.GetCategory(s.kgpz))
+	srv.Get(AGENTS_OVERVIEW_URL, controllers.GetAgents(s.kgpz))
 
 	// TODO: Same here, this prob applies to all paths with two or three segments, which is bad.
 	// Prob better to do /ausgabe/:year/:issue/:page? here and /jahrgang/:year? above.
-	srv.Get("/:year", controllers.GetYear(s.kgpz))
-	srv.Get("/:year/:issue/:page?", controllers.GetIssue(s.kgpz))
-	srv.Get("/:year/:issue/beilage/:page?", controllers.GetIssue(s.kgpz))
+	srv.Get(YEAR_OVERVIEW_URL, controllers.GetYear(s.kgpz))
+	srv.Get(ISSSUE_URL, controllers.GetIssue(s.kgpz))
+	srv.Get(ADDITIONS_URL, controllers.GetIssue(s.kgpz))
 
 	srv.Get(EDITION_URL, controllers.Get(EDITION_URL))
 	srv.Get(PRIVACY_URL, controllers.Get(PRIVACY_URL))

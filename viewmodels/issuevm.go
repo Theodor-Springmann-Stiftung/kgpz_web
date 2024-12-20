@@ -10,7 +10,7 @@ import (
 const TLAYOUT = "2006-01-02"
 
 type IssueViewModel struct {
-	xmlprovider.Issue
+	*xmlprovider.Issue
 	Day   int
 	Month int
 	Year  int
@@ -23,11 +23,11 @@ func IssueView(y string, No string, lib *xmlprovider.Library) (*IssueViewModel, 
 		return nil, errors.New("Issue not found")
 	}
 
-	return FromIssue(*issue)
+	return FromIssue(issue)
 
 }
 
-func FromIssue(i xmlprovider.Issue) (*IssueViewModel, error) {
+func FromIssue(i *xmlprovider.Issue) (*IssueViewModel, error) {
 	t, err := time.Parse(TLAYOUT, i.Datum.When)
 	if err != nil {
 		return nil, err

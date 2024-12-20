@@ -35,7 +35,7 @@ func YearView(year string, lib *xmlprovider.Library) (*YearViewModel, error) {
 		}
 
 		if date == year {
-			issue := value.(xmlprovider.Issue)
+			issue := value.(*xmlprovider.Issue)
 			res.PushIssue(issue)
 		}
 		return true
@@ -55,7 +55,7 @@ func (y *YearViewModel) Sort() {
 	y.Issues.Sort()
 }
 
-func (y *YearViewModel) PushIssue(i xmlprovider.Issue) {
+func (y *YearViewModel) PushIssue(i *xmlprovider.Issue) {
 	iv, err := FromIssue(i)
 	if err != nil {
 		return

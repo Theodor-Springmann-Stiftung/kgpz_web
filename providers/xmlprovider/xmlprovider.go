@@ -22,21 +22,18 @@ type XMLItem interface {
 	GetIDs() []string
 }
 
-type Collection[T XMLItem] struct {
-	Collection []T
-	lock       sync.Mutex
-}
-
 // An XMLProvider is a struct that holds holds serialized XML data of a specific type. It combines multiple parses IF a succeeded parse can not serialize the data from a path.
 type XMLProvider[T XMLItem] struct {
 	Paths []string
-	// INFO: map is type [string]T
+	// INFO: map is type [string]*T
 	Items sync.Map
 	// INFO: map is type [string]ItemInfo
 	// It keeps information about parsing status of the items.
 	Infos sync.Map
 
-	mu     sync.Mutex
+	mu sync.Mutex
+	// TODO: This is not populated yet
+	Array  []T
 	failed []string
 	parses []ParseMeta
 }
@@ -74,13 +71,16 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) er
 		// INFO: Mostly it's just one ID, so the double loop is not that bad.
 		for _, id := range item.GetIDs() {
 			p.Infos.Store(id, ItemInfo{Source: path, Parse: commit})
-			p.Items.Store(id, item)
+			p.Items.Store(id, &item)
 		}
 	}
 
 	return nil
 }
 
+// INFO: Cleanup is called after all paths have been serialized.
+// It deletes all items that have not been parsed in the last commit,
+// and whose filepath has not been marked as failed.
 func (p *XMLProvider[T]) Cleanup() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -147,26 +147,26 @@ func (p *XMLProvider[T]) Item(id string) *T {
 		return nil
 	}
 
-	i := item.(T)
-	return &i
+	i := item.(*T)
+	return i
 }
 
-func (p *XMLProvider[T]) Find(fn func(T) bool) []T {
-	var items []T
+func (p *XMLProvider[T]) Find(fn func(*T) bool) []*T {
+	var items []*T
 	p.Items.Range(func(key, value interface{}) bool {
-		if fn(value.(T)) {
-			items = append(items, value.(T))
+		if fn(value.(*T)) {
+			items = append(items, value.(*T))
 		}
 		return true
 	})
 	return items
 }
 
-func (p *XMLProvider[T]) FindKey(fn func(string) bool) []T {
-	var items []T
+func (p *XMLProvider[T]) FindKey(fn func(string) bool) []*T {
+	var items []*T
 	p.Items.Range(func(key, value interface{}) bool {
 		if fn(key.(string)) {
-			items = append(items, value.(T))
+			items = append(items, value.(*T))
 		}
 		return true
 	})
@@ -177,10 +177,10 @@ func (p *XMLProvider[T]) FindKey(fn func(string) bool) []T {
 // Maps are slow to iterate, but many of the Iterations can only be done once, so it doesn´t matter for a
 // few thousand objects. We prefer to lookup objects by key and have multiple meaningful keys; along with
 // sensible caching rules to keep the application responsive.
-func (p *XMLProvider[T]) Everything() []T {
-	var items []T
+func (p *XMLProvider[T]) Everything() []*T {
+	var items []*T
 	p.Items.Range(func(key, value interface{}) bool {
-		items = append(items, value.(T))
+		items = append(items, value.(*T))
 		return true
 	})
 	return items

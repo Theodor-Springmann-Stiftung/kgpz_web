@@ -24,9 +24,9 @@ type Nummer struct {
 
 type Additional struct {
 	XMLName xml.Name `xml:"beilage"`
-	Nummer  string   `xml:"nummer,attr"`
-	Von     string   `xml:"von"`
-	Bis     string   `xml:"bis"`
+	Nummer  int      `xml:"nummer,attr"`
+	Von     int      `xml:"von"`
+	Bis     int      `xml:"bis"`
 }
 
 func (i Issue) GetIDs() []string {

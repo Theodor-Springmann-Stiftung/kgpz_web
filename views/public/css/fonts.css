@@ -1,0 +1,71 @@
+@font-face {
+	font-family: "Rancho";
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url(/assets/fonts/Rancho-Regular.ttf) format("truetype");
+}
+
+@font-face {
+	font-family: "Merriweather";
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url(/assets/fonts/Merriweather-Regular.ttf) format("truetype");
+}
+
+@font-face {
+	font-family: "Merriweather";
+	font-style: italic;
+	font-weight: 500;
+	font-display: swap;
+	src: url(/assets/fonts/Merriweather-Italic.ttf) format("truetype");
+}
+
+@font-face {
+	font-family: "Merriweather";
+	font-style: normal;
+	font-weight: bold;
+	font-display: swap;
+	src: url(/assets/fonts/Merriweather-Bold.ttf) format("truetype");
+}
+
+@font-face {
+	font-family: "Merriweather";
+	font-style: italic;
+	font-weight: bold;
+	font-display: swap;
+	src: url(/assets/fonts/SourceSans3-BoldItalic.ttf) format("truetype");
+}
+
+@font-face {
+	font-family: "Source Sans 3";
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url(/assets/fonts/SourceSans3-Medium.ttf) format("truetype");
+}
+
+@font-face {
+	font-family: "Source Sans 3";
+	font-style: italic;
+	font-weight: 500;
+	font-display: swap;
+	src: url(/assets/fonts/SourceSans3-MediumItalic.ttf) format("truetype");
+}
+
+@font-face {
+	font-family: "Source Sans 3";
+	font-style: normal;
+	font-weight: bold;
+	font-display: swap;
+	src: url(/assets/fonts/SourceSans3-Bold.ttf) format("truetype");
+}
+
+@font-face {
+	font-family: "Source Sans 3";
+	font-style: italic;
+	font-weight: bold;
+	font-display: swap;
+	src: url(/assets/fonts/SourceSans3-BoldItalic.ttf) format("truetype");
+}
