@@ -51,6 +51,20 @@ func Error(err error, msg ...string) {
 	slog.Error(err.Error())
 }
 
+func ErrorDebug(err error, msg ...string) {
+	if err == nil {
+		return
+	}
+
+	if len(msg) > 0 {
+		for _, m := range msg {
+			slog.Debug(m)
+		}
+	}
+
+	slog.Debug(err.Error())
+}
+
 func Info(msg ...string) {
 	if len(msg) > 0 {
 		for _, m := range msg {
