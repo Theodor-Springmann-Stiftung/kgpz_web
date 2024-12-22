@@ -40,13 +40,29 @@ func (i Issue) Keys() []string {
 		res = append(res, date)
 	}
 
-	if len(date) > 4 {
-		res = append(res, i.Datum.When[0:4]+"-"+strconv.Itoa(i.Number.No))
+	if ref, err := i.Reference(); err == nil {
+		res = append(res, ref)
 	}
 
 	i.keys = res
 
 	return res
+}
+
+// TODO: We could even cache this
+func (i Issue) Year() (int, error) {
+	if date := i.Datum.Date(); date != nil {
+		return date.Year(), nil
+	}
+	return 0, InvalidDateError
+}
+
+func (i Issue) Reference() (string, error) {
+	if date := i.Datum.Date(); date != nil {
+		return strconv.Itoa(date.Year()) + "-" + strconv.Itoa(i.Number.No), nil
+	}
+
+	return "", InvalidDateError
 }
 
 func (i Issue) String() string {

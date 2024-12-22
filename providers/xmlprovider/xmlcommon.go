@@ -1,15 +1,29 @@
 package xmlprovider
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"errors"
+
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/xsdtime"
+)
+
+var InvalidDateError = errors.New("Invalid date")
+
+const DateLayout = "2006-01-02"
 
 type KGPZDate struct {
-	XMLName   xml.Name `xml:"datum"`
-	When      string   `xml:"when,attr"`
-	NotBefore string   `xml:"notBefore,attr"`
-	NotAfter  string   `xml:"notAfter,attr"`
-	From      string   `xml:"from,attr"`
-	To        string   `xml:"to,attr"`
+	XMLName xml.Name `xml:"datum"`
+	DateAttributes
 	Value
+}
+
+type DateAttributes struct {
+	When      xsdtime.XSDDate `xml:"when,attr"`
+	NotBefore xsdtime.XSDDate `xml:"notBefore,attr"`
+	NotAfter  xsdtime.XSDDate `xml:"notAfter,attr"`
+	From      xsdtime.XSDDate `xml:"from,attr"`
+	To        xsdtime.XSDDate `xml:"to,attr"`
+	Cert      string          `xml:"cert,attr"`
 }
 
 type URL struct {

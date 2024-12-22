@@ -9,23 +9,22 @@ import (
 )
 
 type Piece struct {
-	XMLName       xml.Name        `xml:"beitrag"`
-	IssueRefs     []IssueRef      `xml:"stueck"`
-	PlaceRefs     []PlaceRef      `xml:"ort"`
-	CategoryRefs  []CategoryRef   `xml:"kategorie"`
-	AgentRefs     []AgentRef      `xml:"akteur"`
-	WorkRefs      []WorkRef       `xml:"werk"`
-	PieceRefs     []PieceRef      `xml:"beitrag"`
-	AdditionalRef []AdditionalRef `xml:"beilage"`
-	Datum         []KGPZDate      `xml:"datum"`
-	Incipit       []string        `xml:"incipit"`
-	Title         []string        `xml:"titel"`
+	XMLName      xml.Name      `xml:"beitrag"`
+	IssueRefs    []IssueRef    `xml:"stueck"`
+	PlaceRefs    []PlaceRef    `xml:"ort"`
+	CategoryRefs []CategoryRef `xml:"kategorie"`
+	AgentRefs    []AgentRef    `xml:"akteur"`
+	WorkRefs     []WorkRef     `xml:"werk"`
+	PieceRefs    []PieceRef    `xml:"beitrag"`
+	Datum        []KGPZDate    `xml:"datum"`
+	Incipit      []string      `xml:"incipit"`
+	Title        []string      `xml:"titel"`
 	Identifier
 	AnnotationNote
 }
 
 func (p Piece) String() string {
-	return fmt.Sprintf("ID: %s\nIssueRefs: %v\nPlaceRefs: %v\nCategoryRefs: %v\nAgentRefs: %v\nWorkRefs: %v\nPieceRefs: %v\nAdditionalRef: %v\nIncipit: %v\nTitle: %v\nAnnotations: %v\nNotes: %v\n", p.ID, p.IssueRefs, p.PlaceRefs, p.CategoryRefs, p.AgentRefs, p.WorkRefs, p.PieceRefs, p.AdditionalRef, p.Incipit, p.Title, p.Annotations, p.Notes)
+	return fmt.Sprintf("ID: %s\nIssueRefs: %v\nPlaceRefs: %v\nCategoryRefs: %v\nAgentRefs: %v\nWorkRefs: %v\nPieceRefs: %v\nIncipit: %v\nTitle: %v\nAnnotations: %v\nNotes: %v\n", p.ID, p.IssueRefs, p.PlaceRefs, p.CategoryRefs, p.AgentRefs, p.WorkRefs, p.PieceRefs, p.Incipit, p.Title, p.Annotations, p.Notes)
 }
 
 func (p Piece) Keys() []string {
@@ -42,16 +41,27 @@ func (p Piece) Keys() []string {
 	uid := uuid.New()
 
 	for _, i := range p.IssueRefs {
-		ret = append(ret, i.Datum+"-"+strconv.Itoa(i.Nr)+"-"+uid.String())
-	}
-
-	for _, i := range p.AdditionalRef {
-		ret = append(ret, i.Datum+"-"+strconv.Itoa(i.Nr)+"-b-"+uid.String())
+		if d := i.Date(); d != nil {
+			ret = append(ret, strconv.Itoa(d.Year())+"-"+strconv.Itoa(i.Nr)+"-"+uid.String())
+		}
 	}
 
 	p.keys = ret
 
 	return ret
+}
+
+func (p Piece) ReferencesIssue(y, no int) (*IssueRef, bool) {
+	for _, i := range p.IssueRefs {
+		if i.Nr == no {
+			d := i.Date()
+			if d != nil && d.Year() == y {
+				return &i, true
+			}
+		}
+	}
+
+	return nil, false
 }
 
 // TODO: We can make this fast depending on which category to look for

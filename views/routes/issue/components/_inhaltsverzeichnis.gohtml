@@ -3,11 +3,11 @@
 
 <div>Inhalt</div>
 <div>
-	{{ range  $page := $model.Pages }}
+	{{ range  $page := $model.Pieces.Pages }}
 		<div>
 			<div>Seite {{ $page }}</div>
 
-			{{ range $piece := (index $model.Pieces $page) }}
+			{{ range $piece := (index $model.Pieces.Items $page) }}
 
 				{{ template "_inhaltsverzeichnis_eintrag" $piece }}
 

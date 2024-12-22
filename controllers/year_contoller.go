@@ -19,7 +19,7 @@ func GetYear(kgpz *app.KGPZ) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		view, err := viewmodels.YearView(y, kgpz.Library)
+		view, err := viewmodels.YearView(yi, kgpz.Library)
 		if err != nil {
 			logging.ErrorDebug(err, "Keine Ausgaben für das Jahr "+y)
 			return c.SendStatus(fiber.StatusNotFound)
