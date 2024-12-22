@@ -31,12 +31,11 @@ func YearView(year int, lib *xmlprovider.Library) (*YearVM, error) {
 
 	lib.Issues.Lock()
 	for _, issue := range lib.Issues.Array {
-		if y, err := issue.Year(); err == nil {
-			years[y] = true
-			if y == year {
-				if issuevm, err := ListitemFromIssue(issue); err == nil {
-					issues[issuevm.Month] = append(issues[issuevm.Month], *issuevm)
-				}
+		y := issue.Datum.When.Year
+		years[y] = true
+		if y == year {
+			if issuevm, err := ListitemFromIssue(issue); err == nil {
+				issues[issuevm.Month] = append(issues[issuevm.Month], *issuevm)
 			}
 		}
 	}

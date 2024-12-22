@@ -53,19 +53,13 @@ func NewSingleIssueView(y string, no string, lib *xmlprovider.Library) (*IssueVM
 }
 
 func PiecesForIsssue(lib *xmlprovider.Library, issue xmlprovider.Issue) (*PiecesByPage, *PiecesByPage, error) {
-	date := issue.Datum.Date()
-	if date == nil {
-		return nil, nil, fmt.Errorf("Issue has no date")
-	}
-
-	year := date.Year()
+	year := issue.Datum.When.Year
 
 	ppi := PiecesByPage{Items: make(map[int][]PieceListitemVM)}
 	ppa := PiecesByPage{Items: make(map[int][]PieceListitemVM)}
 
 	slog.Debug(fmt.Sprintf("Checking piece for year %v, number %v", year, issue.Number.No))
 	for _, piece := range lib.Pieces.Array {
-
 		if d, ok := piece.ReferencesIssue(year, issue.Number.No); ok {
 			slog.Debug(fmt.Sprintf("Found piece %v in issue %v-%v", piece, year, issue.Number.No))
 			p := PieceListitemVM{Piece: piece, Reference: *d}

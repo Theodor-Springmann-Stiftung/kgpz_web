@@ -41,21 +41,17 @@ func (p Piece) Keys() []string {
 	uid := uuid.New()
 
 	for _, i := range p.IssueRefs {
-		if d := i.Date(); d != nil {
-			ret = append(ret, strconv.Itoa(d.Year())+"-"+strconv.Itoa(i.Nr)+"-"+uid.String())
-		}
+		ret = append(ret, strconv.Itoa(i.When.Year)+"-"+strconv.Itoa(i.Nr)+"-"+uid.String())
 	}
 
 	p.keys = ret
-
 	return ret
 }
 
 func (p Piece) ReferencesIssue(y, no int) (*IssueRef, bool) {
 	for _, i := range p.IssueRefs {
 		if i.Nr == no {
-			d := i.Date()
-			if d != nil && d.Year() == y {
+			if i.When.Year == y {
 				return &i, true
 			}
 		}

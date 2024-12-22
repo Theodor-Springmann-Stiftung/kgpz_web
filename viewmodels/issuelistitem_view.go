@@ -1,8 +1,6 @@
 package viewmodels
 
 import (
-	"time"
-
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
@@ -17,16 +15,11 @@ type IssueListitemVM struct {
 }
 
 func ListitemFromIssue(i xmlprovider.Issue) (*IssueListitemVM, error) {
-	t, err := time.Parse(TLAYOUT, i.Datum.When)
-	if err != nil {
-		return nil, err
-	}
-
 	return &IssueListitemVM{
 		No:    i.Number.No,
 		Issue: i,
-		Day:   t.Day(),
-		Month: int(t.Month()),
-		Year:  t.Year(),
+		Day:   i.Datum.When.Day,
+		Month: i.Datum.When.Month,
+		Year:  i.Datum.When.Year,
 	}, nil
 }

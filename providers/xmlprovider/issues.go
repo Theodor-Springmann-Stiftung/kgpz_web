@@ -35,34 +35,23 @@ func (i Issue) Keys() []string {
 	}
 
 	res := make([]string, 2)
-	date := i.Datum.When
+	date := i.Datum.When.String()
 	if date != "" {
 		res = append(res, date)
 	}
 
-	if ref, err := i.Reference(); err == nil {
-		res = append(res, ref)
-	}
-
+	res = append(res, i.Reference())
 	i.keys = res
 
 	return res
 }
 
-// TODO: We could even cache this
-func (i Issue) Year() (int, error) {
-	if date := i.Datum.Date(); date != nil {
-		return date.Year(), nil
-	}
-	return 0, InvalidDateError
+func (i Issue) Year() int {
+	return i.Datum.When.Year
 }
 
-func (i Issue) Reference() (string, error) {
-	if date := i.Datum.Date(); date != nil {
-		return strconv.Itoa(date.Year()) + "-" + strconv.Itoa(i.Number.No), nil
-	}
-
-	return "", InvalidDateError
+func (i Issue) Reference() string {
+	return strconv.Itoa(i.Number.No) + "-" + i.Datum.When.String()
 }
 
 func (i Issue) String() string {
