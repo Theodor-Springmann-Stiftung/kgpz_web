@@ -1,17 +1,17 @@
 {{ $model := .model }}
-{{ $date := GetDate .model.Datum.When }}
+{{ $date := .model.Datum.When }}
 <div>
-	<a href="/{{- $model.Year -}}">
+	<a href="/{{- $date.Year -}}">
 		Zurück zum Jahr
-		{{ $model.Year }}
+		{{ $date.Year }}
 	</a>
 </div>
 
 <div>
 	<div class="py-3 text-xl">
-		<div>{{ $model.Year }}</div>
+		<div>{{ $date.Year }}</div>
 		<div>Stück {{ $model.No }}</div>
-		<div>{{ $model.Day }}. {{ $date.Month }} ({{ $date.Weekday }})</div>
+		<div>{{ WeekdayName $date.Weekday }}, {{ $date.Day }}. {{ MonthName $date.Month }}</div>
 	</div>
 	{{ template "_inhaltsverzeichnis" . }}
 </div>

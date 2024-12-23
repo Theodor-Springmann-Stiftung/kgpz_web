@@ -29,7 +29,7 @@ type IssueVM struct {
 }
 
 func NewSingleIssueView(y string, no string, lib *xmlprovider.Library) (*IssueVM, error) {
-	issue := lib.Issues.Item(y + "-" + no)
+	issue := lib.Issues.Item(no + "-" + y)
 	if issue == nil {
 		return nil, fmt.Errorf("No issue found for %v-%v", y, no)
 	}

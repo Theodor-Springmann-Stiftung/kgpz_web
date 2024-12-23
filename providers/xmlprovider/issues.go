@@ -51,7 +51,7 @@ func (i Issue) Year() int {
 }
 
 func (i Issue) Reference() string {
-	return strconv.Itoa(i.Number.No) + "-" + i.Datum.When.String()
+	return strconv.Itoa(i.Number.No) + "-" + strconv.Itoa(i.Datum.When.Year)
 }
 
 func (i Issue) String() string {

@@ -20,11 +20,11 @@
 							{{ range $issue := $piece.IssueRefs }}
 								<li>
 									<a
-										href="/{{- $issue.Datum -}}/{{- $issue.Nr -}}"
-										{{ if and (eq $issue.Nr $model.No) (eq $issue.Datum $model.Year) }}
+										href="/{{- $issue.When -}}/{{- $issue.Nr -}}"
+										{{ if and (eq $issue.Nr $model.No) (eq $issue.When.Year $model.Datum.When.Year) }}
 											aria-current="page"
 										{{ end }}>
-										{{- $issue.Datum }} Nr.
+										{{- $issue.When.Year }} Nr.
 										{{ $issue.Nr -}}
 									</a>
 								</li>
