@@ -9,7 +9,7 @@
 
 	<!-- Issues -->
 	{{ range $issue := $month }}
-		{{ $date := GetDate $issue.Datum.When }}
+		{{ $date := GetDate $issue.Datum.When.String }}
 		<a href="/{{ $y }}/{{ $issue.Number.No }}">
 			<div>
 				{{ $issue.Number.No }}

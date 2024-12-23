@@ -1,66 +1,55 @@
 package functions
 
-import (
-	"time"
-)
-
-const TLAYOUT = "2006-01-02"
-
-var TRANSLM = [][]string{
-	{"Januar", "Jan", "1"},
-	{"Februar", "Feb", "2"},
-	{"März", "Mär", "3"},
-	{"April", "Apr", "4"},
-	{"Mai", "Mai", "5"},
-	{"Juni", "Jun", "6"},
-	{"Juli", "Jul", "7"},
-	{"August", "Aug", "8"},
-	{"September", "Sep", "9"},
-	{"Oktober", "Okt", "10"},
-	{"November", "Nov", "11"},
-	{"Dezember", "Dez", "12"},
+type Month struct {
+	Full   string
+	Short  string
+	Number string
+	No     int
 }
 
-var TRANSLD = [][]string{
-	{"Montag", "Mo"},
-	{"Dienstag", "Di"},
-	{"Mittwoch", "Mi"},
-	{"Donnerstag", "Do"},
-	{"Freitag", "Fr"},
-	{"Samstag", "Sa"},
-	{"Sonntag", "So"},
+type Weekday struct {
+	Full  string
+	Short string
+	No    int
 }
 
-type Date struct {
-	Month   string
-	Mon     string
-	MonthNo string
-	DayNo   int
-	Weekday string
-	Wd      string
+var TRANSLM = []Month{
+	{"NotAvailable", "NA", "0", 0},
+	{"Januar", "Jan", "1", 1},
+	{"Februar", "Feb", "2", 2},
+	{"März", "Mär", "3", 3},
+	{"April", "Apr", "4", 4},
+	{"Mai", "Mai", "5", 5},
+	{"Juni", "Jun", "6", 6},
+	{"Juli", "Jul", "7", 7},
+	{"August", "Aug", "8", 8},
+	{"September", "Sep", "9", 9},
+	{"Oktober", "Okt", "10", 10},
+	{"November", "Nov", "11", 11},
+	{"Dezember", "Dez", "12", 12},
 }
 
-func GetDate(d string) Date {
-	t, err := time.Parse(TLAYOUT, d)
-	if err != nil {
-		return Date{}
+var TRANSLD = []Weekday{
+	{"NotAvailable", "NA", 0},
+	{"Montag", "Mo", 1},
+	{"Dienstag", "Di", 2},
+	{"Mittwoch", "Mi", 3},
+	{"Donnerstag", "Do", 4},
+	{"Freitag", "Fr", 5},
+	{"Samstag", "Sa", 6},
+	{"Sonntag", "So", 7},
+}
+
+func MonthName(i int) Month {
+	if i > 12 || i < 1 {
+		return TRANSLM[0]
 	}
-	m := int(t.Month()) - 1
-	wd := int(t.Weekday()) - 1
-	return Date{
-		Month:   TRANSLM[m][0],
-		Mon:     TRANSLM[m][1],
-		MonthNo: TRANSLM[m][2],
-		DayNo:   t.Day(),
-		Weekday: TRANSLD[wd][0],
-		Wd:      TRANSLD[wd][1],
+	return TRANSLM[i]
+}
+
+func WeekdayName(i int) Weekday {
+	if i > 7 || i < 1 {
+		return TRANSLD[0]
 	}
-}
-
-func MonthName(m int) string {
-	return TRANSLM[m-1][0]
-}
-
-func MonthNameShort(m int) string {
-	return TRANSLM[m-1][1]
+	return TRANSLD[i]
 }

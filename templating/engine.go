@@ -38,9 +38,8 @@ func (e *Engine) Funcs(app *app.KGPZ) error {
 	e.FuncMap = make(map[string]interface{})
 	e.mu.Unlock()
 
-	e.AddFunc("GetDate", functions.GetDate)
 	e.AddFunc("MonthName", functions.MonthName)
-	e.AddFunc("MonthNameShort", functions.MonthNameShort)
+	e.AddFunc("WeekdayName", functions.WeekdayName)
 
 	e.AddFunc("GetAgent", app.Library.Agents.Item)
 	e.AddFunc("GetPlace", app.Library.Places.Item)

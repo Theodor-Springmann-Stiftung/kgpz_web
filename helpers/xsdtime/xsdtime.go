@@ -1,10 +1,10 @@
 package xsdtime
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // An implementation of the xsd 1.1 datatypes:
@@ -29,7 +29,9 @@ const (
 )
 
 const (
-	Date XSDDatetype = iota
+	Unknown XSDDatetype = iota
+	Invalid
+	Date
 	GDay
 	GMonth
 	GYear
@@ -38,15 +40,27 @@ const (
 )
 
 type XSDDate struct {
-	Year     int
-	Month    int
-	Day      int
-	Timezone int
+	base string
 
-	Type        XSDDatetype
-	HasTimezone bool
+	Year  int
+	Month int
+	Day   int
 
-	Time time.Time
+	hasTimezone bool
+	hasYear     bool
+	hasMonth    bool
+	hasDay      bool
+
+	TZH int
+	TZM int
+
+	state XSDDatetype
+	error bool
+
+	// INFO: XSD Date Datatypes typically describe a duration in the value space.
+	// TimeError  bool
+	// BaseTime     time.Time
+	// BaseDuration time.Duration
 }
 
 // Sanity check:
@@ -63,6 +77,12 @@ type XSDDate struct {
 //			 Else its not a leap year.
 //		- no 0000 Year
 //
+
+func New(s string) (XSDDate, error) {
+	dt := XSDDate{base: s}
+	err := dt.Parse(s)
+	return dt, err
+}
 
 func (d XSDDate) String() string {
 	var s string
@@ -84,24 +104,19 @@ func (d XSDDate) String() string {
 		s += fmt.Sprintf("-%02d", d.Day)
 	}
 
-	if d.HasTimezone {
-		if d.Timezone == 0 {
+	if d.hasTimezone {
+		if d.TZH == 0 && d.TZM == 0 {
 			s += "Z"
 		} else {
-			m := d.Timezone % 60
-			if m < 0 {
-				m *= -1
-			}
-
-			hint := d.Timezone / 60
 			sep := "+"
+			hint := d.TZH
 			if hint < 0 {
 				sep = "-"
 				hint *= -1
 			}
 			h := fmt.Sprintf("%02d", hint)
 
-			s += fmt.Sprintf("%v%v:%02d", sep, h, m)
+			s += fmt.Sprintf("%v%v:%02d", sep, h, d.TZM)
 		}
 	}
 
@@ -109,48 +124,29 @@ func (d XSDDate) String() string {
 }
 
 func (d *XSDDate) UnmarshalText(text []byte) error {
-	dt, err := Parse(string(text))
-	if err != nil {
-		return err
-	}
-	d.Year = dt.Year
-	d.Month = dt.Month
-	d.Day = dt.Day
-	d.Timezone = dt.Timezone
-	d.Type = dt.Type
-	d.HasTimezone = dt.HasTimezone
-
-	return nil
+	return d.Parse(string(text))
 }
 
 func (d XSDDate) MarshalText() ([]byte, error) {
 	return []byte(d.String()), nil
 }
 
-func Parse(s string) (XSDDate, error) {
+func (xsdd *XSDDate) Parse(s string) error {
 	s = strings.TrimSpace(s)
+	xsdd.base = s
 
 	// The smallest possible date is 4 chars long
 	if len(s) < 4 {
-		return XSDDate{}, fmt.Errorf("Invalid date")
+		return xsdd.parseError("Date too short")
 	}
 
-	y := 0
-	m := 0
-	d := 0
-
-	hastz := false
-	tz := 0
-
+	// Check for Z, then check for timezone
 	if len(s) >= 5 && s[len(s)-1] == TIMEZONE {
-		hastz = true
-		tz = 0
+		xsdd.hasTimezone = true
 		s = s[:len(s)-1]
 	} else if len(s) >= 10 {
-		t, err := parseTimezone(s[len(s)-6:])
+		err := xsdd.parseTimezone(s[len(s)-6:])
 		if err == nil {
-			hastz = true
-			tz = t
 			s = s[:len(s)-6]
 		}
 	}
@@ -159,23 +155,20 @@ func Parse(s string) (XSDDate, error) {
 	if s[1] != SEPERATOR {
 		i := 3
 		for ; i < len(s); i++ {
-			if !isAllowed(s[i]) {
+			if s[i] < MIN_ALLOWED_NUMBER || s[i] > MAX_ALLOWED_NUMBER {
 				break
 			}
 		}
 
 		yint, err := strconv.Atoi(s[:i])
 		if err != nil {
-			return XSDDate{}, fmt.Errorf("Invalid year: %v", s[:i])
-		} else if yint == 0 {
-			return XSDDate{}, fmt.Errorf("Zero is an invalid year")
+			return xsdd.parseError(fmt.Sprintf("Invalid year: %v", s[:i]))
 		}
-		y = yint
+		xsdd.Year = yint
+		xsdd.hasYear = true
 
 		if i == len(s) {
-			return XSDDate{Year: y, Type: GYear, Timezone: tz, HasTimezone: hastz}, nil
-		} else if i >= len(s)-1 || s[i] != SEPERATOR {
-			return XSDDate{}, fmt.Errorf("Invalid date ending")
+			return nil
 		}
 
 		s = s[i+1:]
@@ -188,23 +181,16 @@ func Parse(s string) (XSDDate, error) {
 		mstr := s[:2]
 		mint, err := strconv.Atoi(mstr)
 		if err != nil {
-			return XSDDate{}, fmt.Errorf("Invalid month")
+			return xsdd.parseError(fmt.Sprintf("Invalid month: %v", mstr))
 		}
 
-		if mint < 1 || mint > 12 {
-			return XSDDate{}, fmt.Errorf("Invalid month value")
-		}
-
-		m = mint
+		xsdd.Month = mint
+		xsdd.hasMonth = true
 		s = s[2:]
 		if len(s) == 0 {
-			if y == 0 {
-				return XSDDate{Month: m, Type: GMonth, HasTimezone: hastz, Timezone: tz}, nil
-			} else {
-				return XSDDate{Year: y, Month: m, Type: GYearMonth, HasTimezone: hastz, Timezone: tz}, nil
-			}
+			return nil
 		} else if len(s) != 3 || s[0] != SEPERATOR {
-			return XSDDate{}, fmt.Errorf("Invalid date ending: %v", s)
+			return xsdd.parseError(fmt.Sprintf("Invalid date ending: %v", s))
 		}
 	}
 
@@ -213,59 +199,173 @@ func Parse(s string) (XSDDate, error) {
 	// Left is 02 Day
 	dint, err := strconv.Atoi(s)
 	if err != nil {
-		return XSDDate{}, fmt.Errorf("Invalid day: %v", s)
+		return xsdd.parseError(fmt.Sprintf("Invalid day: %v", s))
 	}
 
-	if dint < 1 || dint > 31 {
-		return XSDDate{}, fmt.Errorf("Invalid day value: %v", dint)
-	}
+	// INFO: We do not check len here, it is handled above
+	xsdd.Day = dint
+	xsdd.hasDay = true
 
-	d = dint
-	if y == 0 {
-		if m == 0 {
-			return XSDDate{Day: d, Type: GDay, HasTimezone: hastz, Timezone: tz}, nil
-		} else {
-			return XSDDate{Month: m, Day: d, Type: GMonthDay, HasTimezone: hastz, Timezone: tz}, nil
-		}
-	} else {
-		return XSDDate{Year: y, Month: m, Day: d, Type: Date, HasTimezone: hastz, Timezone: tz}, nil
-	}
+	return nil
 }
 
-func parseTimezone(s string) (int, error) {
+var WD_CALC_MATRIX = []int{0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4}
+
+func (xsdd XSDDate) Weekday() int {
+	y := xsdd.Year
+	if xsdd.Month < 3 {
+		y--
+	}
+	return (y + y/4 - y/100 + y/400 + WD_CALC_MATRIX[xsdd.Month-1] + xsdd.Day) % 7
+}
+
+func (xsdd XSDDate) Base() string {
+	return xsdd.base
+}
+
+func (xsdd XSDDate) Type() XSDDatetype {
+	if xsdd.state == Unknown {
+		_ = xsdd.Validate()
+	}
+
+	return xsdd.state
+}
+
+func (xsdd *XSDDate) Validate() bool {
+	if xsdd.error {
+		xsdd.state = Invalid
+		return false
+	}
+
+	xsdd.state = xsdd.inferState()
+	if xsdd.state != Invalid {
+		return true
+	}
+
+	return false
+}
+
+func (xsdd *XSDDate) parseError(s string) error {
+	xsdd.error = true
+	xsdd.state = Invalid
+	return errors.New(s)
+}
+
+func (xsdd *XSDDate) parseTimezone(s string) error {
 	// INFO: We assume the check for 'Z' has already been done
 	if len(s) != 6 || s[3] != COLON || (s[0] != PLUS && s[0] != SIGN) {
-		return 0, fmt.Errorf("Invalid timezone")
+		return fmt.Errorf("Invalid timezone")
 	}
 
 	h, err := strconv.Atoi(s[:3])
 	if err != nil {
-		return 0, fmt.Errorf("Invalid hour: %v", s[:3])
+		return fmt.Errorf("Invalid hour: %v", s[:3])
 	}
 
 	m, err := strconv.Atoi(s[4:])
 	if err != nil {
-		return 0, fmt.Errorf("Invalid minute: %v", s[4:])
+		return fmt.Errorf("Invalid minute: %v", s[4:])
 	}
 
-	if (h < -13 || h > 13) && ((h == -14 || h == 14) && m != 0) {
-		return 0, fmt.Errorf("Invalid timezone: hour: %v minute: %v", h, m)
-	}
+	xsdd.hasTimezone = true
+	xsdd.TZH = h
+	xsdd.TZM = m
 
-	if m < 0 || m > 59 {
-		return 0, fmt.Errorf("Invalid timezone: minute: %v", m)
-	}
-
-	h *= 60
-	if h < 0 {
-		h -= m
-	} else {
-		h += m
-	}
-
-	return h, nil
+	return nil
 }
 
-func isAllowed(c byte) bool {
-	return c >= MIN_ALLOWED_NUMBER && c <= MAX_ALLOWED_NUMBER
+func (xsdd XSDDate) inferState() XSDDatetype {
+	if xsdd.hasYear && xsdd.hasMonth && xsdd.hasDay {
+		if !validDayMonthYear(xsdd.Year, xsdd.Month, xsdd.Day) {
+			return Invalid
+		}
+		return Date
+	} else if xsdd.hasYear && xsdd.hasMonth {
+		if !validMonth(xsdd.Month) || !validYear(xsdd.Year) {
+			return Invalid
+		}
+		return GYearMonth
+	} else if xsdd.hasMonth && xsdd.hasDay {
+		if !validDayMonth(xsdd.Day, xsdd.Month) {
+			return Invalid
+		}
+		return GMonthDay
+	} else if xsdd.hasYear {
+		if !validYear(xsdd.Year) {
+			return Invalid
+		}
+		return GYear
+	} else if xsdd.hasMonth {
+		if !validMonth(xsdd.Month) {
+			return Invalid
+		}
+		return GMonth
+	} else if xsdd.hasDay {
+		if !validDay(xsdd.Day) {
+			return Invalid
+		}
+		return GDay
+	}
+
+	return Invalid
+}
+
+func validDay(i int) bool {
+	if i < 1 || i > 31 {
+		return false
+	}
+
+	return true
+}
+
+func validMonth(i int) bool {
+	if i < 1 || i > 12 {
+		return false
+	}
+
+	return true
+}
+
+func validYear(i int) bool {
+	if i == 0 {
+		return false
+	}
+
+	return true
+}
+
+func validDayMonth(d int, m int) bool {
+	if !validDay(d) || !validMonth(m) {
+		return false
+	}
+
+	if m == 2 {
+		if d > 29 {
+			return false
+		}
+	} else if m == 4 || m == 6 || m == 9 || m == 11 {
+		if d > 30 {
+			return false
+		}
+	}
+
+	return true
+}
+
+func validDayMonthYear(y int, m int, d int) bool {
+	if !validDay(d) || !validMonth(m) || !validYear(y) {
+		return false
+	}
+
+	if m == 2 {
+		if d == 29 {
+			if y%4 == 0 && (y%100 != 0 || y%400 == 0) {
+				return true
+			}
+
+			return false
+		}
+	}
+
+	return true
 }
