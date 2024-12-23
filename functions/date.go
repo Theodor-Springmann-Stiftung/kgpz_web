@@ -13,6 +13,14 @@ type Weekday struct {
 	No    int
 }
 
+func (m Month) String() string {
+	return m.Full
+}
+
+func (w Weekday) String() string {
+	return w.Full
+}
+
 var TRANSLM = []Month{
 	{"NotAvailable", "NA", "0", 0},
 	{"Januar", "Jan", "1", 1},
