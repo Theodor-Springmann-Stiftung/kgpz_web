@@ -142,25 +142,15 @@ func (p *XMLProvider[T]) Item(id string) *T {
 	return i
 }
 
-func (p *XMLProvider[T]) Find(fn func(*T) bool) []*T {
-	var items []*T
-	p.Items.Range(func(key, value interface{}) bool {
-		if fn(value.(*T)) {
-			items = append(items, value.(*T))
+func (p *XMLProvider[T]) Find(fn func(*T) bool) []T {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	var items []T
+	for _, item := range p.Array {
+		if fn(&item) {
+			items = append(items, item)
 		}
-		return true
-	})
-	return items
-}
-
-func (p *XMLProvider[T]) FindKey(fn func(string) bool) []*T {
-	var items []*T
-	p.Items.Range(func(key, value interface{}) bool {
-		if fn(key.(string)) {
-			items = append(items, value.(*T))
-		}
-		return true
-	})
+	}
 	return items
 }
 

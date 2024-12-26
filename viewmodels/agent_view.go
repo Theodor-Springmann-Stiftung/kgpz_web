@@ -1,58 +1,85 @@
 package viewmodels
 
 import (
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
-type AgentView struct {
-	Agents []xmlprovider.Agent
-	Works  map[string][]xmlprovider.Work
-	Pieces map[string][]xmlprovider.Piece
+type AgentsListView struct {
+	Search           string
+	AvailableLetters []string
+	Agents           map[string]AgentView
+	Sorted           []string
 }
 
-func AgentsView(letterorid string, lib *xmlprovider.Library) *AgentView {
-	res := AgentView{}
-	lib.Agents.Items.Range(func(key, value interface{}) bool {
-		k := key.(string)
-		if strings.HasPrefix(k, letterorid) {
-			agent := value.(xmlprovider.Agent)
-			res.Agents = append(res.Agents, agent)
-		}
-		return true
-	})
+type AgentView struct {
+	xmlprovider.Agent
+	Works  []WorkByAgent
+	Pieces []PieceByAgent
+}
 
-	res.Works = make(map[string][]xmlprovider.Work)
-	res.Pieces = make(map[string][]xmlprovider.Piece)
+type WorkByAgent struct {
+	xmlprovider.Work
+	Reference xmlprovider.AgentRef
+}
 
-	lib.Works.Items.Range(func(key, value interface{}) bool {
-		w := value.(xmlprovider.Work)
-		for _, a := range res.Agents {
+type PieceByAgent struct {
+	xmlprovider.Piece
+	Reference xmlprovider.AgentRef
+}
+
+func AgentsView(letterorid string, lib *xmlprovider.Library) *AgentsListView {
+	res := AgentsListView{Search: letterorid, Agents: make(map[string]AgentView)}
+	av := make(map[string]bool)
+
+	if len(letterorid) == 1 {
+		// INFO: This is all persons beginning with a letter
+		for _, a := range lib.Agents.Array {
+			av[strings.ToUpper(a.ID[:1])] = true
 			if strings.HasPrefix(a.ID, letterorid) {
-				_, ok := res.Works[a.ID]
-				if !ok {
-					res.Works[a.ID] = []xmlprovider.Work{}
-				}
-				res.Works[a.ID] = append(res.Works[a.ID], w)
+				res.Sorted = append(res.Sorted, a.ID)
+				res.Agents[a.ID] = AgentView{Agent: a}
 			}
 		}
-		return true
-	})
-
-	lib.Pieces.Items.Range(func(key, value interface{}) bool {
-		p := value.(xmlprovider.Piece)
-		for _, a := range res.Agents {
-			if strings.HasPrefix(a.ID, letterorid) {
-				_, ok := res.Pieces[a.ID]
-				if !ok {
-					res.Pieces[a.ID] = []xmlprovider.Piece{}
-				}
-				res.Pieces[a.ID] = append(res.Pieces[a.ID], p)
+	} else {
+		// INFO: This is a specific person lookup by ID
+		for _, a := range lib.Agents.Array {
+			av[strings.ToUpper(a.ID[:1])] = true
+			if a.ID == letterorid {
+				res.Sorted = append(res.Sorted, a.ID)
+				res.Agents[a.ID] = AgentView{Agent: a}
+				break
 			}
 		}
-		return true
-	})
+	}
+
+	// TODO: We won't need to lock the library if we take down all routes during parsing
+	lib.Works.Lock()
+	for _, w := range lib.Works.Array {
+		if ref, ok := w.ReferencesAgent(letterorid); ok {
+			if entry, ok := res.Agents[ref.Ref]; ok {
+				entry.Works = append(entry.Works, WorkByAgent{Work: w, Reference: *ref})
+			}
+		}
+	}
+	lib.Works.Unlock()
+
+	lib.Pieces.Lock()
+	for _, p := range lib.Pieces.Array {
+		if ref, ok := p.ReferencesAgent(letterorid); ok {
+			if entry, ok := res.Agents[ref.Ref]; ok {
+				entry.Pieces = append(entry.Pieces, PieceByAgent{Piece: p, Reference: *ref})
+			}
+		}
+	}
+	lib.Pieces.Unlock()
+
+	res.AvailableLetters = slices.Collect(maps.Keys(av))
+	slices.Sort(res.AvailableLetters)
+	slices.Sort(res.Sorted)
 
 	return &res
 }

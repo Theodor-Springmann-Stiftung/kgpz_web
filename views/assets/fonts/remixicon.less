@@ -10,12 +10,12 @@
 */
 @font-face {
   font-family: "remixicon";
-  src: url('/assets/fonts/remixicon.eot?t=1734404658139'); /* IE9*/
-  src: url('/assets/fonts/remixicon.eot?t=1734404658139#iefix') format('embedded-opentype'), /* IE6-IE8 */
-  url("/assets/fonts/remixicon.woff2?t=1734404658139") format("woff2"),
-  url("/assets/fonts/remixicon.woff?t=1734404658139") format("woff"),
-  url('/assets/fonts/remixicon.ttf?t=1734404658139') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
-  url('/assets/fonts/remixicon.svg?t=1734404658139#remixicon') format('svg'); /* iOS 4.1- */
+  src: url('remixicon.eot?t=1734404658139'); /* IE9*/
+  src: url('remixicon.eot?t=1734404658139#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url("remixicon.woff2?t=1734404658139") format("woff2"),
+  url("remixicon.woff?t=1734404658139") format("woff"),
+  url('remixicon.ttf?t=1734404658139') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+  url('remixicon.svg?t=1734404658139#remixicon') format('svg'); /* iOS 4.1- */
   font-display: swap;
 }
 
@@ -43,6 +43,7 @@
 .ri-10x { font-size: 10em; }
 .ri-fw { text-align: center; width: 1.25em; }
 
+:global {
 .ri-24-hours-fill:before { content: "\ea01"; }
 .ri-24-hours-line:before { content: "\ea02"; }
 .ri-4k-fill:before { content: "\ea03"; }
@@ -3102,3 +3103,4 @@
 .ri-service-bell-fill:before { content: "\f5f1"; }
 .ri-service-bell-line:before { content: "\f5f2"; }
 
+}

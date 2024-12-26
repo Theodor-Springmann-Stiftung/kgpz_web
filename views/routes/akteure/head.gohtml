@@ -1,0 +1,9 @@
+<title>
+	KGPZ &ndash;
+	{{ if ne (len .model.Search) 1 }}
+		{{ index (index .model.Agents .model.Search).Names 0 }}
+	{{ else }}
+		Personen &amp; Körperschaften:
+		{{ Upper .model.Search }}
+	{{ end }}
+</title>

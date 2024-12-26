@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -57,6 +58,15 @@ func (p Piece) ReferencesIssue(y, no int) (*IssueRef, bool) {
 		}
 	}
 
+	return nil, false
+}
+
+func (p Piece) ReferencesAgent(a string) (*AgentRef, bool) {
+	for _, i := range p.AgentRefs {
+		if strings.HasPrefix(i.Ref, a) {
+			return &i, true
+		}
+	}
 	return nil, false
 }
 

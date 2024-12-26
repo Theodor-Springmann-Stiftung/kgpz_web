@@ -1,0 +1,58 @@
+{{ if ne (len .model.Search) 1 }}
+	{{ $agent := index $.model.Agents .model.Search }}
+	{{ if not $agent }}
+		<div>Agent nicht gefunden: {{ .model.Search }}</div>
+	{{ else }}
+		<div>
+			{{ $letter := Upper (FirstLetter $agent.ID) }}
+			<a href="/akteure/{{ $letter }}">
+				&larr; Personen &amp; Körperschaften &ndash; Buchstabe
+				{{ $letter }}
+			</a>
+		</div>
+		<div>{{ index $agent.Names 0 }}</div>
+	{{ end }}
+{{ else }}
+	<div>
+		{{ range $_, $l := .model.AvailableLetters }}
+			<a href="/akteure/{{ $l }}">
+				{{ $l }}
+			</a>
+		{{ end }}
+	</div>
+
+	{{ range $_, $id := .model.Sorted }}
+		<div class="pb-4">
+			<a href="/akteure/{{ $id }}">
+				{{ $a := index $.model.Agents $id }}
+				{{ index $a.Names 0 }}
+			</a>
+			<div>
+				{{ $gnd := GetGND $a.GND }}
+				{{ if and (ne $gnd nil) (ne $gnd.DateOfBirth nil) }}
+					{{- if	ne (len $gnd.DateOfBirth) 0 -}}
+						<i class="ri-asterisk text-xs relative bottom-0.5"></i>&nbsp;
+						{{- HRDateShort (index $gnd.DateOfBirth 0) -}}
+					{{- end -}}
+					{{- if	ne (len $gnd.DateOfDeath) 0 }}
+						&emsp;<i class="ri-cross-fill text-xs relative bottom-0.5"></i
+						>&nbsp;{{ HRDateShort (index $gnd.DateOfDeath 0) }}
+					{{ end }}
+					{{- if ne (len $gnd.ProfessionOrOccupation) 0 -}}
+						<div>
+							{{- (index $gnd.ProfessionOrOccupation 0).Label -}}
+							{{- if gt (len $gnd.ProfessionOrOccupation) 1 -}}
+								,
+								{{ (index $gnd.ProfessionOrOccupation 1).Label -}}
+							{{ end -}}
+							{{- if gt (len $gnd.ProfessionOrOccupation) 2 -}}
+								,
+								{{ (index $gnd.ProfessionOrOccupation 2).Label -}}
+							{{ end -}}
+						</div>
+					{{ end }}
+				{{ end }}
+			</div>
+		</div>
+	{{ end }}
+{{ end }}

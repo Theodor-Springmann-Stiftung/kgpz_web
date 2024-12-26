@@ -2,7 +2,6 @@ package viewmodels
 
 import (
 	"fmt"
-	"log/slog"
 	"maps"
 	"slices"
 
@@ -10,20 +9,20 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
-type PieceListitemVM struct {
+type PieceByIssue struct {
 	xmlprovider.Piece
 	// TODO: this is a bit hacky, but it refences the page number of the piece in the issue
 	Reference xmlprovider.IssueRef
 }
 
 type PiecesByPage struct {
-	Items map[int][]PieceListitemVM
+	Items map[int][]PieceByIssue
 	Pages []int
 }
 
 // TODO: Next & Prev
 type IssueVM struct {
-	IssueListitemVM
+	xmlprovider.Issue
 	Pieces           PiecesByPage
 	AdditionalPieces PiecesByPage
 }
@@ -34,35 +33,34 @@ func NewSingleIssueView(y string, no string, lib *xmlprovider.Library) (*IssueVM
 		return nil, fmt.Errorf("No issue found for %v-%v", y, no)
 	}
 
-	ivm, err := ListitemFromIssue(*issue)
+	sivm := IssueVM{Issue: *issue}
+	ppi, ppa, err := PiecesForIsssue(lib, *issue)
 	if err != nil {
 		return nil, err
 	}
 
-	sivm := IssueVM{IssueListitemVM: *ivm}
-
-	ppi, ppa, err := PiecesForIsssue(lib, *issue)
-
 	slices.Sort(ppi.Pages)
 	slices.Sort(ppa.Pages)
 
-	sivm.Pieces = *ppi
-	sivm.AdditionalPieces = *ppa
+	sivm.Pieces = ppi
+	sivm.AdditionalPieces = ppa
 
 	return &sivm, nil
 }
 
-func PiecesForIsssue(lib *xmlprovider.Library, issue xmlprovider.Issue) (*PiecesByPage, *PiecesByPage, error) {
+func PiecesForIsssue(lib *xmlprovider.Library, issue xmlprovider.Issue) (PiecesByPage, PiecesByPage, error) {
 	year := issue.Datum.When.Year
 
-	ppi := PiecesByPage{Items: make(map[int][]PieceListitemVM)}
-	ppa := PiecesByPage{Items: make(map[int][]PieceListitemVM)}
+	ppi := PiecesByPage{Items: make(map[int][]PieceByIssue)}
+	ppa := PiecesByPage{Items: make(map[int][]PieceByIssue)}
 
-	slog.Debug(fmt.Sprintf("Checking piece for year %v, number %v", year, issue.Number.No))
+	// TODO: will we have to lock this, if we shutdown the server while loading the library?
+	lib.Pieces.Lock()
+	defer lib.Pieces.Unlock()
+
 	for _, piece := range lib.Pieces.Array {
 		if d, ok := piece.ReferencesIssue(year, issue.Number.No); ok {
-			slog.Debug(fmt.Sprintf("Found piece %v in issue %v-%v", piece, year, issue.Number.No))
-			p := PieceListitemVM{Piece: piece, Reference: *d}
+			p := PieceByIssue{Piece: piece, Reference: *d}
 			if d.Beilage > 0 {
 				functions.MapArrayInsert(ppa.Items, d.Von, p)
 			} else {
@@ -74,5 +72,5 @@ func PiecesForIsssue(lib *xmlprovider.Library, issue xmlprovider.Issue) (*Pieces
 	ppi.Pages = slices.Collect(maps.Keys(ppi.Items))
 	ppa.Pages = slices.Collect(maps.Keys(ppa.Items))
 
-	return &ppi, &ppa, nil
+	return ppi, ppa, nil
 }

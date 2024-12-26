@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"strings"
 	"sync"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
@@ -38,16 +39,23 @@ func (e *Engine) Funcs(app *app.KGPZ) error {
 	e.FuncMap = make(map[string]interface{})
 	e.mu.Unlock()
 
+	// Dates
 	e.AddFunc("MonthName", functions.MonthName)
 	e.AddFunc("WeekdayName", functions.WeekdayName)
+	e.AddFunc("HRDateShort", functions.HRDateShort)
 
+	// Strings
+	e.AddFunc("FirstLetter", functions.FirstLetter)
+	e.AddFunc("Upper", strings.ToUpper)
+	e.AddFunc("Lower", strings.ToLower)
+
+	// App specific
 	e.AddFunc("GetAgent", app.Library.Agents.Item)
 	e.AddFunc("GetPlace", app.Library.Places.Item)
 	e.AddFunc("GetWork", app.Library.Works.Item)
 	e.AddFunc("GetCategory", app.Library.Categories.Item)
 	e.AddFunc("GetIssue", app.Library.Issues.Item)
 	e.AddFunc("GetPiece", app.Library.Pieces.Item)
-
 	e.AddFunc("GetGND", app.GND.Person)
 
 	return nil

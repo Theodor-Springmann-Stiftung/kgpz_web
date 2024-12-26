@@ -1,5 +1,11 @@
 package functions
 
+import (
+	"strconv"
+
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/xsdtime"
+)
+
 type Month struct {
 	Full   string
 	Short  string
@@ -46,6 +52,28 @@ var TRANSLD = []Weekday{
 	{"Freitag", "Fr", 5},
 	{"Samstag", "Sa", 6},
 	{"Sonntag", "So", 7},
+}
+
+func HRDateShort(date string) string {
+	xsdt, err := xsdtime.New(date)
+	if err != nil {
+		return ""
+	}
+
+	t := xsdt.Type()
+	if t == xsdtime.GYear {
+		return strconv.Itoa(xsdt.Year)
+	}
+
+	if t == xsdtime.GYearMonth {
+		return strconv.Itoa(xsdt.Month) + "." + strconv.Itoa(xsdt.Year)
+	}
+
+	if t == xsdtime.Date {
+		return strconv.Itoa(xsdt.Day) + "." + strconv.Itoa(xsdt.Month) + "." + strconv.Itoa(xsdt.Year)
+	}
+
+	return ""
 }
 
 func MonthName(i int) Month {

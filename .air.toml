@@ -8,15 +8,15 @@ full_bin = "export KGPZ_WATCH=false; ./tmp/main"
 cmd = "go build -tags=\"dev\" -o ./tmp/main ."
 delay = 400
 exclude_dir = [
-  "views/public",
-  "views/node_modules",
-  "views/transform",
-  "tmp",
-  "vendor",
-  "testdata",
-  "data_git",
-  "cache_gnd",
-  "cache_geonames",
+	"views/public",
+	"views/node_modules",
+	"views/transform",
+	"tmp",
+	"vendor",
+	"testdata",
+	"data_git",
+	"cache_gnd",
+	"cache_geonames",
 ]
 exclude_file = []
 exclude_regex = ["_test.go"]
@@ -30,7 +30,7 @@ log = "build-errors.log"
 poll = false
 poll_interval = 0
 post_cmd = []
-pre_cmd = ["npm --prefix views/ run tailwind"]
+pre_cmd = ["npm --prefix views/ run build"]
 rerun = false
 rerun_delay = 250
 send_interrupt = true

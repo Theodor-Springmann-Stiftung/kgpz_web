@@ -22,6 +22,9 @@ func GetAgents(kgpz *app.KGPZ) fiber.Handler {
 			logging.Error(nil, "No agents found for letter or id: "+a)
 			return c.SendStatus(fiber.StatusNotFound)
 		}
-		return c.Render("/akteure/", fiber.Map{"model": fiber.Map{"agents": agents, "search": a}, "title": "Akteure"})
+		return c.Render(
+			"/akteure/",
+			fiber.Map{"model": agents},
+		)
 	}
 }

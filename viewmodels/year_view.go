@@ -6,10 +6,11 @@ import (
 	"slices"
 	"sort"
 
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/functions"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
-type IssuesByMonth map[int][]IssueListitemVM
+type IssuesByMonth map[int][]xmlprovider.Issue
 
 func (ibm *IssuesByMonth) Sort() {
 	for _, issues := range *ibm {
@@ -34,9 +35,7 @@ func YearView(year int, lib *xmlprovider.Library) (*YearVM, error) {
 		y := issue.Datum.When.Year
 		years[y] = true
 		if y == year {
-			if issuevm, err := ListitemFromIssue(issue); err == nil {
-				issues[issuevm.Month] = append(issues[issuevm.Month], *issuevm)
-			}
+			functions.MapArrayInsert(issues, issue.Datum.When.Month, issue)
 		}
 	}
 	lib.Issues.Unlock()

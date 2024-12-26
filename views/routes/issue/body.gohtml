@@ -10,7 +10,7 @@
 <div>
 	<div class="py-3 text-xl">
 		<div>{{ $date.Year }}</div>
-		<div>Stück {{ $model.No }}</div>
+		<div>Stück {{ $model.Number.No }}</div>
 		<div>{{ WeekdayName $date.Weekday }}, {{ $date.Day }}. {{ MonthName $date.Month }}</div>
 	</div>
 	{{ template "_inhaltsverzeichnis" . }}

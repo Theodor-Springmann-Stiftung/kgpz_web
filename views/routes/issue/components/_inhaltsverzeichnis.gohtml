@@ -8,7 +8,6 @@
 			<div>Seite {{ $page }}</div>
 
 			{{ range $piece := (index $model.Pieces.Items $page) }}
-
 				{{ template "_inhaltsverzeichnis_eintrag" $piece }}
 
 
@@ -21,7 +20,9 @@
 								<li>
 									<a
 										href="/{{- $issue.When -}}/{{- $issue.Nr -}}"
-										{{ if and (eq $issue.Nr $model.No) (eq $issue.When.Year $model.Datum.When.Year) }}
+										{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
+											$model.Datum.When.Year)
+										-}}
 											aria-current="page"
 										{{ end }}>
 										{{- $issue.When.Year }} Nr.
