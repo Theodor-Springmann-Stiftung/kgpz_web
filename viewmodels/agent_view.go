@@ -62,6 +62,7 @@ func AgentsView(letterorid string, lib *xmlprovider.Library) *AgentsListView {
 		if ref, ok := w.ReferencesAgent(letterorid); ok {
 			if entry, ok := res.Agents[ref.Ref]; ok {
 				entry.Works = append(entry.Works, WorkByAgent{Work: w, Reference: *ref})
+				res.Agents[ref.Ref] = entry
 			}
 		}
 	}
@@ -72,6 +73,7 @@ func AgentsView(letterorid string, lib *xmlprovider.Library) *AgentsListView {
 		if ref, ok := p.ReferencesAgent(letterorid); ok {
 			if entry, ok := res.Agents[ref.Ref]; ok {
 				entry.Pieces = append(entry.Pieces, PieceByAgent{Piece: p, Reference: *ref})
+				res.Agents[ref.Ref] = entry
 			}
 		}
 	}

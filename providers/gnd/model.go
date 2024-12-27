@@ -72,3 +72,7 @@ func (p Person) String() string {
 	// Copilot: Please format and return all fields of the struct
 	return fmt.Sprintf("Person{KGPZID: %v, URL: %v, DateOfDeath: %v, PlaceOfDeath: %v, BiographicalOrHistoricalInformation: %v, PreferredName: %v, GndIdentifier: %v, Wikipedia: %v, Depiction: %v, ProfessionOrOccupation: %v, PreferredNameEntityForThePerson: %v, DateOfBirth: %v, PlaceOfBirth: %v, VariantNameEntityForThePerson: %v, VariantName: %v, SameAs: %v}", p.KGPZID, p.URL, p.DateOfDeath, p.PlaceOfDeath, p.BiographicalOrHistoricalInformation, p.PreferredName, p.GndIdentifier, p.Wikipedia, p.Depiction, p.ProfessionOrOccupation, p.PreferredNameEntityForThePerson, p.DateOfBirth, p.PlaceOfBirth, p.VariantNameEntityForThePerson, p.VariantName, p.SameAs)
 }
+
+func (p Person) Name() string {
+	return p.PreferredName
+}

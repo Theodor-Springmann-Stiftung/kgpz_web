@@ -22,37 +22,70 @@
 	</div>
 
 	{{ range $_, $id := .model.Sorted }}
-		<div class="pb-4">
-			<a href="/akteure/{{ $id }}">
-				{{ $a := index $.model.Agents $id }}
+		{{ $a := index $.model.Agents $id }}
+		{{ if and $a (ne (len $a.Names) 0) }}
+			<div class="pb-4">
 				{{ index $a.Names 0 }}
-			</a>
-			<div>
-				{{ $gnd := GetGND $a.GND }}
-				{{ if and (ne $gnd nil) (ne $gnd.DateOfBirth nil) }}
-					{{- if	ne (len $gnd.DateOfBirth) 0 -}}
-						<i class="ri-asterisk text-xs relative bottom-0.5"></i>&nbsp;
-						{{- HRDateShort (index $gnd.DateOfBirth 0) -}}
-					{{- end -}}
-					{{- if	ne (len $gnd.DateOfDeath) 0 }}
-						&emsp;<i class="ri-cross-fill text-xs relative bottom-0.5"></i
-						>&nbsp;{{ HRDateShort (index $gnd.DateOfDeath 0) }}
+				<div>
+					{{ $gnd := GetGND $a.GND }}
+					{{ if (ne $gnd nil) }}
+						{{- if	ne (len $gnd.DateOfBirth) 0 -}}
+							<i class="ri-asterisk text-xs relative bottom-0.5"></i>&nbsp;
+							{{- HRDateShort (index $gnd.DateOfBirth 0) -}}
+						{{- end -}}
+						{{- if	ne (len $gnd.DateOfDeath) 0 }}
+							&emsp;<i class="ri-cross-fill text-xs relative bottom-0.5"></i
+							>&nbsp;{{ HRDateShort (index $gnd.DateOfDeath 0) }}
+						{{ end }}
+						{{- if ne (len $gnd.ProfessionOrOccupation) 0 -}}
+							<div>
+								{{- (index $gnd.ProfessionOrOccupation 0).Label -}}
+								{{- if gt (len $gnd.ProfessionOrOccupation) 1 -}}
+									,
+									{{ (index $gnd.ProfessionOrOccupation 1).Label -}}
+								{{ end -}}
+								{{- if gt (len $gnd.ProfessionOrOccupation) 2 -}}
+									,
+									{{ (index $gnd.ProfessionOrOccupation 2).Label -}}
+								{{ end -}}
+							</div>
+						{{ end }}
 					{{ end }}
-					{{- if ne (len $gnd.ProfessionOrOccupation) 0 -}}
-						<div>
-							{{- (index $gnd.ProfessionOrOccupation 0).Label -}}
-							{{- if gt (len $gnd.ProfessionOrOccupation) 1 -}}
-								,
-								{{ (index $gnd.ProfessionOrOccupation 1).Label -}}
+					<div class="flex gap-x-2 flex-row">
+						<a href="/akteure/{{ $id }}" class="!no-underline"><i class="ri-links-line"></i></a>
+						{{- if ne $gnd nil -}}
+							<a href="{{ $a.GND }}" target="_blank">GND &rarr;</a>
+							{{- if ne (len $gnd.Wikipedia) 0 -}}
+								<a href="{{ (index $gnd.Wikipedia 0).Label }}" target="_blank">WIKI &rarr;</a>
 							{{ end -}}
-							{{- if gt (len $gnd.ProfessionOrOccupation) 2 -}}
-								,
-								{{ (index $gnd.ProfessionOrOccupation 2).Label -}}
-							{{ end -}}
-						</div>
-					{{ end }}
+						{{ end }}
+
+					</div>
+				</div>
+				{{- if ne (len $a.Works) 0 -}}
+					<div>
+						{{ range $_, $w := $a.Works }}
+							{{- if ne (len $w.Citation.InnerXML ) 0 -}}
+								<div>
+									{{- $w.Citation.InnerXML -}}
+								</div>
+							{{- end -}}
+						{{ end }}
+					</div>
+				{{ end }}
+
+				{{- if ne (len $a.Pieces) 0 -}}
+					<div>
+						{{ range $_, $p := $a.Pieces }}
+							{{- range $_, $i := $p.IssueRefs -}}
+								<div>
+									<a href="/{{ $i.When }}/{{ $i.Nr }}">{{ $i.Nr }}/{{ $i.When }}</a>
+								</div>
+							{{- end -}}
+						{{ end }}
+					</div>
 				{{ end }}
 			</div>
-		</div>
+		{{ end }}
 	{{ end }}
 {{ end }}
