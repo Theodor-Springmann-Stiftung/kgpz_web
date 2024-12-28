@@ -66,8 +66,12 @@
 					<div>
 						{{ range $_, $w := $a.Works }}
 							{{- if ne (len $w.Citation.InnerXML ) 0 -}}
-								<div>
-									{{- $w.Citation.InnerXML -}}
+								<div hx-ext="client-side-templates">
+									<div xslt-template="citation-xslt" xslt-onload>
+										<xml>
+											{{- Safe $w.Citation.InnerXML -}}
+										</xml>
+									</div>
 								</div>
 							{{- end -}}
 						{{ end }}
@@ -89,3 +93,5 @@
 		{{ end }}
 	{{ end }}
 {{ end }}
+
+{{ template "_xslt_citation" . }}

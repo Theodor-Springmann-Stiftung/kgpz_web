@@ -48,6 +48,7 @@ func (e *Engine) Funcs(app *app.KGPZ) error {
 	e.AddFunc("FirstLetter", functions.FirstLetter)
 	e.AddFunc("Upper", strings.ToUpper)
 	e.AddFunc("Lower", strings.ToLower)
+	e.AddFunc("Safe", functions.Safe)
 
 	// App specific
 	e.AddFunc("GetAgent", app.Library.Agents.Item)
