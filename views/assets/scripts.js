@@ -1,56 +1,54 @@
-const u = "[xslt-onload]", f = "xslt-template", a = "xslt-transformed", c = "xslt-remote-template";
-function h() {
+const u = "[xslt-onload]", a = "xslt-template", c = "xslt-transformed", i = /* @__PURE__ */ new Map();
+function p() {
   let t = htmx.findAll(u);
-  for (let n of t)
-    d(n);
+  for (let e of t)
+    f(e);
 }
-function d(t) {
-  if (t.getAttribute(a) === "true")
+function f(t) {
+  if (t.getAttribute(c) === "true" || !t.hasAttribute(a))
     return;
-  let n = t.getAttribute(f), o = htmx.find("#" + n);
-  if (o) {
-    let s = o.innerHTML ? new DOMParser().parseFromString(o.innerHTML, "application/xml") : o.contentDocument;
-    console.log(s);
-    let l = new XSLTProcessor();
-    l.importStylesheet(s);
-    let e = new DOMParser().parseFromString(t.innerHTML, "application/xml"), i = l.transformToFragment(e, document), r = new XMLSerializer().serializeToString(i);
-    t.innerHTML = r, t.setAttribute(a, !0);
-  } else if (t.hasAttribute(c)) {
-    let s = t.getAttribute(c), l = new Request(s, {
-      headers: { "Content-Type": "application/xslt+xml" },
-      cache: "default"
-    });
-    fetch(l).then((e) => e.text()).then((e) => {
-      let i = new DOMParser().parseFromString(e, "application/xslt+xml"), r = new XSLTProcessor();
-      r.importStylesheet(i);
-      let p = new DOMParser().parseFromString(t.innerHTML, "application/xml"), T = r.transformToFragment(p, document), m = new XMLSerializer().serializeToString(T);
-      t.innerHTML = m, t.setAttribute(a, !0);
-    });
+  let e = "#" + t.getAttribute(a), r = i.get(e);
+  if (!r) {
+    let o = htmx.find(e);
+    if (o) {
+      let n = o.innerHTML ? new DOMParser().parseFromString(o.innerHTML, "application/xml") : o.contentDocument;
+      r = new XSLTProcessor(), r.importStylesheet(n), i.set(e, r);
+    } else
+      throw new Error("Unknown XSLT template: " + e);
+  }
+  if (r) {
+    let o = new DOMParser().parseFromString(t.innerHTML, "application/xml"), n = r.transformToFragment(o, document), s = new XMLSerializer().serializeToString(n);
+    t.innerHTML = s, t.setAttribute(c, !0), htmx.process(t);
   } else
-    throw new Error("Unknown XSLT template: " + n);
+    throw new Error("No Processor: " + e);
 }
-function S() {
-  h(), document.querySelectorAll("template[simple]").forEach((n) => {
-    let o = n.getAttribute("id"), s = n.content;
+function T() {
+  document.querySelectorAll("template[simple]").forEach((e) => {
+    let r = e.getAttribute("id"), o = e.content;
     customElements.define(
-      o,
+      r,
       class extends HTMLElement {
         constructor() {
-          super(), this.appendChild(s.cloneNode(!0)), this.slots = this.querySelectorAll("slot");
+          super(), this.appendChild(o.cloneNode(!0)), this.slots = this.querySelectorAll("slot");
         }
         connectedCallback() {
-          let l = [];
-          this.slots.forEach((e) => {
-            let i = e.getAttribute("name"), r = this.querySelector(`[slot="${i}"]`);
-            r && (e.replaceWith(r.cloneNode(!0)), l.push(r));
-          }), l.forEach((e) => {
-            e.remove();
+          let n = [];
+          this.slots.forEach((s) => {
+            let m = s.getAttribute("name"), l = this.querySelector(`[slot="${m}"]`);
+            l && (s.replaceWith(l.cloneNode(!0)), n.push(l));
+          }), n.forEach((s) => {
+            s.remove();
           });
         }
       }
     );
   });
 }
+function h() {
+  p(), htmx.on("htmx:afterSettle", function(t) {
+    i.clear(), p();
+  }), T();
+}
 export {
-  S as setup
+  h as setup
 };

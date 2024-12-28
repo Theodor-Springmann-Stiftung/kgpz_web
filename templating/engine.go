@@ -51,7 +51,9 @@ func (e *Engine) Funcs(app *app.KGPZ) error {
 	e.AddFunc("Lower", strings.ToLower)
 	e.AddFunc("Safe", functions.Safe)
 
+	// Embedding of file contents
 	e.AddFunc("EmbedSafe", functions.EmbedSafe(views.StaticFS))
+	e.AddFunc("Embed", functions.Embed(views.StaticFS))
 
 	// App specific
 	e.AddFunc("GetAgent", app.Library.Agents.Item)

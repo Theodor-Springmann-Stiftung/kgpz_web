@@ -3,7 +3,8 @@ import "./site.css";
 const ATTR_XSLT_ONLOAD = "[xslt-onload]";
 const ATTR_XSLT_TEMPLATE = "xslt-template";
 const ATTR_XSLT_STATE = "xslt-transformed";
-const ATTR_XSLT_REMOTE_TEMPLATE = "xslt-remote-template";
+
+const xslt_processors = new Map();
 
 function setup_xslt() {
 	let els = htmx.findAll(ATTR_XSLT_ONLOAD);
@@ -13,50 +14,44 @@ function setup_xslt() {
 }
 
 function transform_xslt(element) {
-	if (element.getAttribute(ATTR_XSLT_STATE) === "true") {
+	if (
+		element.getAttribute(ATTR_XSLT_STATE) === "true" ||
+		!element.hasAttribute(ATTR_XSLT_TEMPLATE)
+	) {
 		return;
 	}
-	let templateId = element.getAttribute(ATTR_XSLT_TEMPLATE);
-	let template = htmx.find("#" + templateId);
-	if (template) {
-		let content = template.innerHTML
-			? new DOMParser().parseFromString(template.innerHTML, "application/xml")
-			: template.contentDocument;
-		console.log(content);
-		let processor = new XSLTProcessor();
-		processor.importStylesheet(content);
+
+	let templateId = "#" + element.getAttribute(ATTR_XSLT_TEMPLATE);
+	let processor = xslt_processors.get(templateId);
+	if (!processor) {
+		let template = htmx.find(templateId);
+		if (template) {
+			let content = template.innerHTML
+				? new DOMParser().parseFromString(template.innerHTML, "application/xml")
+				: template.contentDocument;
+			processor = new XSLTProcessor();
+			processor.importStylesheet(content);
+			xslt_processors.set(templateId, processor);
+		} else {
+			throw new Error("Unknown XSLT template: " + templateId);
+		}
+	}
+
+	if (processor) {
 		let data = new DOMParser().parseFromString(element.innerHTML, "application/xml");
 		let frag = processor.transformToFragment(data, document);
 		let s = new XMLSerializer().serializeToString(frag);
 		element.innerHTML = s;
 		element.setAttribute(ATTR_XSLT_STATE, true);
-	} else if (element.hasAttribute(ATTR_XSLT_REMOTE_TEMPLATE)) {
-		let url = element.getAttribute(ATTR_XSLT_REMOTE_TEMPLATE);
-		let req = new Request(url, {
-			headers: { "Content-Type": "application/xslt+xml" },
-			cache: "default",
-		});
-		// WARNING: It is important to set the right cache cache policy server-side; else a request is
-		// made every time.
-		fetch(req)
-			.then((response) => response.text())
-			.then((text) => {
-				let content = new DOMParser().parseFromString(text, "application/xslt+xml");
-				let processor = new XSLTProcessor();
-				processor.importStylesheet(content);
-				let data = new DOMParser().parseFromString(element.innerHTML, "application/xml");
-				let frag = processor.transformToFragment(data, document);
-				let s = new XMLSerializer().serializeToString(frag);
-				element.innerHTML = s;
-				element.setAttribute(ATTR_XSLT_STATE, true);
-			});
+
+		// INFO: This allows to insert htmx elements in the transformed content
+		htmx.process(element);
 	} else {
-		throw new Error("Unknown XSLT template: " + templateId);
+		throw new Error("No Processor: " + templateId);
 	}
 }
 
-function setup() {
-	setup_xslt();
+function setup_templates() {
 	let templates = document.querySelectorAll("template[simple]");
 	templates.forEach((template) => {
 		let templateId = template.getAttribute("id");
@@ -88,6 +83,18 @@ function setup() {
 			},
 		);
 	});
+}
+
+// INFO: This is intended to be callled once on website load
+function setup() {
+	setup_xslt();
+
+	htmx.on("htmx:afterSettle", function (_) {
+		xslt_processors.clear();
+		setup_xslt();
+	});
+
+	setup_templates();
 }
 
 export { setup };

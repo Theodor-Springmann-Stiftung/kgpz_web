@@ -23,7 +23,7 @@ func EmbedSafe(fs fs.FS) func(string) template.HTML {
 	}
 }
 
-func EmbedUnsafe(fs fs.FS) func(string) string {
+func Embed(fs fs.FS) func(string) string {
 	embed_cache.Clear()
 	return func(path string) string {
 		val, err := getFileData(fs, path)
