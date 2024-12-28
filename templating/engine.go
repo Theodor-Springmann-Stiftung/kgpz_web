@@ -9,6 +9,7 @@ import (
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/functions"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -49,6 +50,8 @@ func (e *Engine) Funcs(app *app.KGPZ) error {
 	e.AddFunc("Upper", strings.ToUpper)
 	e.AddFunc("Lower", strings.ToLower)
 	e.AddFunc("Safe", functions.Safe)
+
+	e.AddFunc("EmbedSafe", functions.EmbedSafe(views.StaticFS))
 
 	// App specific
 	e.AddFunc("GetAgent", app.Library.Agents.Item)

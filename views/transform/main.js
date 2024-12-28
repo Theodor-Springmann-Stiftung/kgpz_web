@@ -1,37 +1,62 @@
 import "./site.css";
 
-const ATTR_XSLT = "[xslt-onload]";
+const ATTR_XSLT_ONLOAD = "[xslt-onload]";
 const ATTR_XSLT_TEMPLATE = "xslt-template";
 const ATTR_XSLT_STATE = "xslt-transformed";
+const ATTR_XSLT_REMOTE_TEMPLATE = "xslt-remote-template";
 
-function setup_xslt(evt) {
-	let els = document.querySelectorAll(ATTR_XSLT);
+function setup_xslt() {
+	let els = htmx.findAll(ATTR_XSLT_ONLOAD);
 	for (let element of els) {
-		if (element.getAttribute(ATTR_XSLT_STATE) === "true") {
-			continue;
-		}
-		let templateId = element.getAttribute(ATTR_XSLT_TEMPLATE);
-		let template = htmx.find("#" + templateId);
-		if (template) {
-			let content = template.innerHTML
-				? new DOMParser().parseFromString(template.innerHTML, "application/xml")
-				: template.contentDocument;
-			let processor = new XSLTProcessor();
-			processor.importStylesheet(content);
-			let data = new DOMParser().parseFromString(element.innerHTML, "application/xml");
-			let frag = processor.transformToFragment(data, document);
-			let s = new XMLSerializer().serializeToString(frag);
-			element.innerHTML = s;
-			element.setAttribute(ATTR_XSLT_STATE, true);
-		} else {
-			throw new Error("Unknown XSLT template: " + templateId);
-		}
+		transform_xslt(element);
+	}
+}
+
+function transform_xslt(element) {
+	if (element.getAttribute(ATTR_XSLT_STATE) === "true") {
+		return;
+	}
+	let templateId = element.getAttribute(ATTR_XSLT_TEMPLATE);
+	let template = htmx.find("#" + templateId);
+	if (template) {
+		let content = template.innerHTML
+			? new DOMParser().parseFromString(template.innerHTML, "application/xml")
+			: template.contentDocument;
+		console.log(content);
+		let processor = new XSLTProcessor();
+		processor.importStylesheet(content);
+		let data = new DOMParser().parseFromString(element.innerHTML, "application/xml");
+		let frag = processor.transformToFragment(data, document);
+		let s = new XMLSerializer().serializeToString(frag);
+		element.innerHTML = s;
+		element.setAttribute(ATTR_XSLT_STATE, true);
+	} else if (element.hasAttribute(ATTR_XSLT_REMOTE_TEMPLATE)) {
+		let url = element.getAttribute(ATTR_XSLT_REMOTE_TEMPLATE);
+		let req = new Request(url, {
+			headers: { "Content-Type": "application/xslt+xml" },
+			cache: "default",
+		});
+		// WARNING: It is important to set the right cache cache policy server-side; else a request is
+		// made every time.
+		fetch(req)
+			.then((response) => response.text())
+			.then((text) => {
+				let content = new DOMParser().parseFromString(text, "application/xslt+xml");
+				let processor = new XSLTProcessor();
+				processor.importStylesheet(content);
+				let data = new DOMParser().parseFromString(element.innerHTML, "application/xml");
+				let frag = processor.transformToFragment(data, document);
+				let s = new XMLSerializer().serializeToString(frag);
+				element.innerHTML = s;
+				element.setAttribute(ATTR_XSLT_STATE, true);
+			});
+	} else {
+		throw new Error("Unknown XSLT template: " + templateId);
 	}
 }
 
 function setup() {
-	setup_xslt(null);
-	htmx.on("htmx:load", setup_xslt);
+	setup_xslt();
 	let templates = document.querySelectorAll("template[simple]");
 	templates.forEach((template) => {
 		let templateId = template.getAttribute("id");
