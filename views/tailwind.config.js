@@ -4,6 +4,7 @@ export default {
 		"./routes/**/*.{html,js,svelte,ts,tmpl,gotmpl,gohtml}",
 		"./layouts/**/*.{html,js,svelte,ts,tmpl,gotmpl,gohtml}",
 		"./transform/**/*.{html,js,svelte,ts,tmpl,gotmpl,gohtml}",
+		"./public/**/*.{html,js,svelte,ts,tmpl,gotmpl,gohtml,xsl}",
 	],
 	theme: {
 		extend: {

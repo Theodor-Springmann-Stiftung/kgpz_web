@@ -1,6 +1,6 @@
 import "./site.css";
 
-const ATTR_XSLT_ONLOAD = "[xslt-onload]";
+const ATTR_XSLT_ONLOAD = "script[xslt-onload]";
 const ATTR_XSLT_TEMPLATE = "xslt-template";
 const ATTR_XSLT_STATE = "xslt-transformed";
 
@@ -37,18 +37,10 @@ function transform_xslt(element) {
 		}
 	}
 
-	if (processor) {
-		let data = new DOMParser().parseFromString(element.innerHTML, "application/xml");
-		let frag = processor.transformToFragment(data, document);
-		let s = new XMLSerializer().serializeToString(frag);
-		element.innerHTML = s;
-		element.setAttribute(ATTR_XSLT_STATE, true);
-
-		// INFO: This allows to insert htmx elements in the transformed content
-		htmx.process(element);
-	} else {
-		throw new Error("No Processor: " + templateId);
-	}
+	let data = new DOMParser().parseFromString(element.innerHTML, "application/xml");
+	let frag = processor.transformToFragment(data, document);
+	let s = new XMLSerializer().serializeToString(frag);
+	element.outerHTML = s;
 }
 
 function setup_templates() {
@@ -89,8 +81,9 @@ function setup_templates() {
 function setup() {
 	setup_xslt();
 
-	htmx.on("htmx:afterSettle", function (_) {
-		xslt_processors.clear();
+	htmx.on("htmx:load", function (_) {
+		// INFO: We can instead use afterSettle; and also clear the map with
+		// xslt_processors.clear();
 		setup_xslt();
 	});
 

@@ -55,6 +55,9 @@ func (e *Engine) Funcs(app *app.KGPZ) error {
 	e.AddFunc("EmbedSafe", functions.EmbedSafe(views.StaticFS))
 	e.AddFunc("Embed", functions.Embed(views.StaticFS))
 
+	// Embedding of XSLT files
+	e.AddFunc("EmbedXSLT", functions.EmbedXSLT(views.StaticFS))
+
 	// App specific
 	e.AddFunc("GetAgent", app.Library.Agents.Item)
 	e.AddFunc("GetPlace", app.Library.Places.Item)
