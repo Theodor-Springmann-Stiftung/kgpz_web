@@ -1,8 +1,8 @@
 package xmlmodels
 
 import (
+	"encoding/json"
 	"encoding/xml"
-	"fmt"
 )
 
 type Category struct {
@@ -13,6 +13,11 @@ type Category struct {
 	AnnotationNote
 }
 
+func (c Category) Name() string {
+	return "category"
+}
+
 func (c Category) String() string {
-	return fmt.Sprintf("ID: %s\nNames: %v\nSortName: %s\nAnnotations: %v\nNotes: %v\n", c.ID, c.Names, c.SortName, c.Annotations, c.Notes)
+	data, _ := json.MarshalIndent(c, "", "  ")
+	return string(data)
 }

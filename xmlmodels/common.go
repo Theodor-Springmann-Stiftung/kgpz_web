@@ -55,10 +55,9 @@ type Identifier struct {
 }
 
 func (i Identifier) Keys() []string {
-	if len(i.keys) > 0 {
-		return i.keys
+	if len(i.keys) == 0 {
+		i.keys = append(i.keys, i.ID)
 	}
-	i.keys = []string{i.ID}
 	return i.keys
 }
 

@@ -1,8 +1,8 @@
 package xmlmodels
 
 import (
+	"encoding/json"
 	"encoding/xml"
-	"fmt"
 )
 
 type Place struct {
@@ -14,6 +14,11 @@ type Place struct {
 	AnnotationNote
 }
 
+func (p Place) Name() string {
+	return "place"
+}
+
 func (p Place) String() string {
-	return fmt.Sprintf("ID: %s\nNames: %v\nSortName: %s\nGeo: %s\nAnnotations: %v\nNotes: %v\n", p.ID, p.Names, p.SortName, p.Geo, p.Annotations, p.Notes)
+	data, _ := json.MarshalIndent(p, "", "  ")
+	return string(data)
 }

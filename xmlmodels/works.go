@@ -1,8 +1,8 @@
 package xmlmodels
 
 import (
+	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"strings"
 )
 
@@ -14,6 +14,10 @@ type Work struct {
 	AgentRefs      []AgentRef `xml:"akteur"`
 	Identifier
 	AnnotationNote
+}
+
+func (w Work) Name() string {
+	return "work"
 }
 
 func (p Work) ReferencesAgent(a string) (*AgentRef, bool) {
@@ -34,5 +38,6 @@ type Citation struct {
 }
 
 func (w Work) String() string {
-	return fmt.Sprintf("URLs: %v, Citation: %v, PreferredTitle: %s, Akteur: %v, Identifier: %v, AnnotationNote: %v\n", w.URLs, w.Citation, w.PreferredTitle, w.AgentRefs, w.Identifier, w.AnnotationNote)
+	data, _ := json.MarshalIndent(w, "", "  ")
+	return string(data)
 }

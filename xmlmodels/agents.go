@@ -1,8 +1,8 @@
 package xmlmodels
 
 import (
+	"encoding/json"
 	"encoding/xml"
-	"fmt"
 )
 
 type Agent struct {
@@ -16,6 +16,11 @@ type Agent struct {
 	AnnotationNote
 }
 
+func (a Agent) Name() string {
+	return "agent"
+}
+
 func (a Agent) String() string {
-	return fmt.Sprintf("ID: %s\nNames: %v\nSortName: %s\nLife: %s\nGND: %s\nAnnotations: %v\nNotes: %v\n", a.ID, a.Names, a.SortName, a.Life, a.GND, a.Annotations, a.Notes)
+	data, _ := json.MarshalIndent(a, "", "  ")
+	return string(data)
 }

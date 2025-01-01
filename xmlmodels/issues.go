@@ -1,8 +1,8 @@
 package xmlmodels
 
 import (
+	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"strconv"
 )
 
@@ -27,6 +27,10 @@ type Additional struct {
 	Nummer  int      `xml:"nummer,attr"`
 	Von     int      `xml:"von"`
 	Bis     int      `xml:"bis"`
+}
+
+func (i Issue) Name() string {
+	return "issue"
 }
 
 func (i Issue) Keys() []string {
@@ -55,5 +59,6 @@ func (i Issue) Reference() string {
 }
 
 func (i Issue) String() string {
-	return fmt.Sprintf("Number: %v, Datum: %v, Von: %d, Bis: %d, Additionals: %v, Identifier: %v, AnnotationNote: %v\n", i.Number, i.Datum, i.Von, i.Bis, i.Additionals, i.Identifier, i.AnnotationNote)
+	data, _ := json.MarshalIndent(i, "", "  ")
+	return string(data)
 }

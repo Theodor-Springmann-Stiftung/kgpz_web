@@ -2,13 +2,13 @@ package app
 
 import (
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/gnd"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 )
 
@@ -86,22 +86,18 @@ func (k *KGPZ) Serialize() {
 	k.gmu.Lock()
 	defer k.gmu.Unlock()
 
-	commit := "staticfile"
+	commit := ""
+	source := xmlprovider.Path
 	if k.Repo != nil {
 		commit = k.Repo.Commit
+		source = xmlprovider.Commit
 	}
-
-	issues, err := getXMLFiles(filepath.Join(k.Config.FolderPath, ISSUES_DIR))
-	helpers.Assert(err, "Error getting issues")
-
-	pieces, err := getXMLFiles(filepath.Join(k.Config.FolderPath, PIECES_DIR))
-	helpers.Assert(err, "Error getting pieces")
 
 	if k.Library == nil {
-		k.Library = xmlmodels.NewLibrary(k.Config.FolderPath)
+		k.Library = xmlmodels.NewLibrary()
 	}
 
-	k.Library.Serialize(commit)
+	k.Library.Parse(source, k.Config.FolderPath, commit)
 }
 
 func (k *KGPZ) IsDebug() bool {

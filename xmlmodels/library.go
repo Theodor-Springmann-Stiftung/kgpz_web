@@ -3,13 +3,26 @@ package xmlmodels
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
+const (
+	AGENTS_PATH     = "XML/akteure.xml"
+	PLACES_PATH     = "XML/orte.xml"
+	WORKS_PATH      = "XML/werke.xml"
+	CATEGORIES_PATH = "XML/kategorien.xml"
+
+	ISSUES_DIR = "XML/stuecke/"
+	PIECES_DIR = "XML/beitraege/"
+)
+
 type Library struct {
-	baseDir string
+	mu     sync.Mutex
+	Parses []xmlprovider.ParseMeta
 
 	Agents     *xmlprovider.XMLProvider[Agent]
 	Places     *xmlprovider.XMLProvider[Place]
@@ -25,9 +38,8 @@ func (l *Library) String() string {
 }
 
 // INFO: this is the only place where the providers are created. There is no need for locking on access.
-func NewLibrary(basedir string) *Library {
+func NewLibrary() *Library {
 	return &Library{
-		baseDir:    basedir,
 		Agents:     &xmlprovider.XMLProvider[Agent]{},
 		Places:     &xmlprovider.XMLProvider[Place]{},
 		Works:      &xmlprovider.XMLProvider[Work]{},
@@ -37,97 +49,149 @@ func NewLibrary(basedir string) *Library {
 	}
 }
 
-func (l *Library) Serialize(commit string) {
+func (l *Library) Parse(source xmlprovider.ParseSource, baseDir, commit string) error {
+	// INFO: this lock prevents multiple parses from happening at the same time.
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	wg := sync.WaitGroup{}
+	meta := xmlprovider.ParseMeta{
+		Source:  source,
+		BaseDir: baseDir,
+		Commit:  commit,
+		Date:    time.Now(),
+	}
+	metamu := sync.Mutex{}
 
-	l.Prepare(commit)
+	l.prepare()
 
 	wg.Add(1)
 	go func() {
-		l.Places.Serialize(&PlaceRoot{}, filepath.Join(l.baseDir, PLACES_PATH))
+		err := l.Places.Serialize(&PlaceRoot{}, filepath.Join(meta.BaseDir, PLACES_PATH), meta)
+		if err != nil {
+			metamu.Lock()
+			meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, PLACES_PATH))
+			metamu.Unlock()
+		}
 		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
-		l.Agents.Serialize(&AgentRoot{}, filepath.Join(l.baseDir, AGENTS_PATH))
+		err := l.Agents.Serialize(&AgentRoot{}, filepath.Join(meta.BaseDir, AGENTS_PATH), meta)
+		if err != nil {
+			metamu.Lock()
+			meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, AGENTS_PATH))
+			metamu.Unlock()
+		}
 		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
-		l.Categories.Serialize(&CategoryRoot{}, filepath.Join(l.baseDir, CATEGORIES_PATH))
+		err := l.Categories.Serialize(&CategoryRoot{}, filepath.Join(meta.BaseDir, CATEGORIES_PATH), meta)
+		if err != nil {
+			metamu.Lock()
+			meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, CATEGORIES_PATH))
+			metamu.Unlock()
+		}
 		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
-		l.Works.Serialize(&WorkRoot{}, filepath.Join(l.baseDir, WORKS_PATH))
+		err := l.Works.Serialize(&WorkRoot{}, filepath.Join(meta.BaseDir, WORKS_PATH), meta)
+		if err != nil {
+			metamu.Lock()
+			meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, WORKS_PATH))
+			metamu.Unlock()
+		}
 		wg.Done()
 	}()
 
-	issuepaths, _ := xmlprovider.XMLFilesForPath(filepath.Join(l.baseDir, ISSUES_DIR))
+	issuepaths, _ := xmlprovider.XMLFilesForPath(filepath.Join(meta.BaseDir, ISSUES_DIR))
 	for _, path := range issuepaths {
 		wg.Add(1)
 		go func() {
-			l.Issues.Serialize(&IssueRoot{}, path)
+			err := l.Issues.Serialize(&IssueRoot{}, path, meta)
+			if err != nil {
+				metamu.Lock()
+				meta.FailedPaths = append(meta.FailedPaths, path)
+				metamu.Unlock()
+			}
 			wg.Done()
 		}()
 	}
 
-	piecepaths, _ := xmlprovider.XMLFilesForPath(filepath.Join(l.baseDir, PIECES_DIR))
+	piecepaths, _ := xmlprovider.XMLFilesForPath(filepath.Join(meta.BaseDir, PIECES_DIR))
 	for _, path := range piecepaths {
 		wg.Add(1)
 		go func() {
-			l.Pieces.Serialize(&PieceRoot{}, path)
+			err := l.Pieces.Serialize(&PieceRoot{}, path, meta)
+			if err != nil {
+				metamu.Lock()
+				meta.FailedPaths = append(meta.FailedPaths, path)
+				metamu.Unlock()
+			}
 			wg.Done()
 		}()
 	}
 
 	wg.Wait()
-	l.Cleanup()
+
+	l.cleanup(meta)
+	l.Parses = append(l.Parses, meta)
+
+	var errors []string
+	if len(meta.FailedPaths) > 0 {
+		errors = append(errors, fmt.Sprintf("Failed paths: %v", meta.FailedPaths))
+	}
+	if len(errors) > 0 {
+		return fmt.Errorf("Parsing encountered errors: %v", strings.Join(errors, "; "))
+	}
+	return nil
 }
 
-func (l *Library) Prepare(commit string) {
-	l.Agents.Prepare(commit)
-	l.Places.Prepare(commit)
-	l.Works.Prepare(commit)
-	l.Categories.Prepare(commit)
-	l.Issues.Prepare(commit)
-	l.Pieces.Prepare(commit)
+func (l *Library) prepare() {
+	l.Agents.Prepare()
+	l.Places.Prepare()
+	l.Works.Prepare()
+	l.Categories.Prepare()
+	l.Issues.Prepare()
+	l.Pieces.Prepare()
 }
 
-func (l *Library) Cleanup() {
+func (l *Library) cleanup(meta xmlprovider.ParseMeta) {
 	wg := sync.WaitGroup{}
 	wg.Add(6)
 
 	go func() {
-		l.Agents.Cleanup()
+		l.Agents.Cleanup(meta)
 		wg.Done()
 	}()
 
 	go func() {
-		l.Places.Cleanup()
+		l.Places.Cleanup(meta)
 		wg.Done()
 	}()
 
 	go func() {
-		l.Works.Cleanup()
+		l.Works.Cleanup(meta)
 		wg.Done()
 	}()
 
 	go func() {
-		l.Categories.Cleanup()
+		l.Categories.Cleanup(meta)
 		wg.Done()
 	}()
 
 	go func() {
-		l.Issues.Cleanup()
+		l.Issues.Cleanup(meta)
 		wg.Done()
 	}()
 
 	go func() {
-		l.Pieces.Cleanup()
+		l.Pieces.Cleanup(meta)
 		wg.Done()
 	}()
 

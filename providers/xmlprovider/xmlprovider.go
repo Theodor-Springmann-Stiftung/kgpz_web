@@ -9,14 +9,40 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 )
 
+type ParseSource int
+
+const (
+	Unknown ParseSource = iota
+	Path
+	Commit
+)
+
 type ParseMeta struct {
-	Commit string
-	Date   time.Time
+	Source  ParseSource
+	BaseDir string
+	Commit  string
+	Date    time.Time
+
+	FailedPaths []string
+}
+
+func (p ParseMeta) Equals(other ParseMeta) bool {
+	return p.Source == other.Source && p.BaseDir == other.BaseDir && p.Commit == other.Commit && p.Date == other.Date
+}
+
+func (p ParseMeta) Failed(path string) bool {
+	return slices.Contains(p.FailedPaths, path)
 }
 
 type XMLItem interface {
 	fmt.Stringer
 	Keys() []string
+	Name() string
+}
+
+type ILibrary interface {
+	Parse(meta ParseMeta) error
+	Latest() *ParseMeta
 }
 
 // An XMLProvider is a struct that holds holds serialized XML data of a specific type. It combines multiple parses IF a succeeded parse can not serialize the data from a path.
@@ -27,53 +53,53 @@ type XMLProvider[T XMLItem] struct {
 	// It keeps information about parsing status of the items.
 	Infos sync.Map
 
+	// INFO: Resolver is used to resolve references (back-links) between XML items.
+	Resolver Resolver[T]
+
 	mu sync.Mutex
 	// TODO: This array is meant to be for iteration purposes, since iteration over the sync.Map is slow.
 	// It is best for this array to be sorted by key of the corresponding item.
-	Array    []T
-	Previous []T
-	failed   []string
-	parses   []ParseMeta
+	Array []T
+}
+
+func NewXMLProvider[T XMLItem]() *XMLProvider[T] {
+	return &XMLProvider[T]{Resolver: *NewResolver[T]()}
 }
 
 // INFO: To parse sth, we call Prepare, then Serialize, then Cleanup.
 // Prepare & Cleanup are called once per parse. Serialize is called for every path.
 // and can be called concurretly.
-func (p *XMLProvider[T]) Prepare(commit string) {
+func (p *XMLProvider[T]) Prepare() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.Previous = p.Array
-	p.Array = make([]T, len(p.Previous))
-	p.failed = make([]string, 0)
-	p.parses = append(p.parses, ParseMeta{Commit: commit, Date: time.Now()})
+	p.Array = make([]T, 1000)
 }
 
-func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) error {
+func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, latest ParseMeta) error {
 	if err := UnmarshalFile(path, dataholder); err != nil {
 		logging.Error(err, "Could not unmarshal file: "+path)
 		logging.ParseMessages.LogError(logging.Unknown, path, "", "Could not unmarshal file.")
-		p.mu.Lock()
-		defer p.mu.Unlock()
-		p.failed = append(p.failed, path)
 		return err
 	}
 
 	p.mu.Lock()
 	defer p.mu.Unlock()
-
-	if len(p.parses) == 0 {
-		logging.Error(fmt.Errorf("No commit set"), "No commit set")
-		return fmt.Errorf("No commit set")
-	}
-
-	commit := &p.parses[len(p.parses)-1]
 	newItems := dataholder.Children()
 
 	for _, item := range newItems {
 		// INFO: Mostly it's just one ID, so the double loop is not that bad.
 		for _, id := range item.Keys() {
-			p.Infos.Store(id, ItemInfo{Source: path, Parse: commit})
+			p.Infos.Store(id, ItemInfo{Source: path, Parse: latest})
 			p.Items.Store(id, &item)
+		}
+
+		// INFO: If the item has a GetReferences method, we add the references to the resolver.
+		if refResolver, ok := any(item).(ReferenceResolver); ok {
+			for refType, ids := range refResolver.GetReferences() {
+				for _, refID := range ids {
+					p.Resolver.Add(refType, refID, &item)
+				}
+			}
 		}
 	}
 
@@ -84,22 +110,16 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) er
 // INFO: Cleanup is called after all paths have been serialized.
 // It deletes all items that have not been parsed in the last commit,
 // and whose filepath has not been marked as failed.
-func (p *XMLProvider[T]) Cleanup() {
+func (p *XMLProvider[T]) Cleanup(latest ParseMeta) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	if len(p.parses) == 0 {
-		logging.Error(fmt.Errorf("Trying to cleanup an empty XMLProvider."))
-		return
-	}
-
-	lastcommit := &p.parses[len(p.parses)-1]
 	todelete := make([]string, 0)
 	toappend := make([]*T, 0)
 	p.Infos.Range(func(key, value interface{}) bool {
 		info := value.(ItemInfo)
-		if info.Parse != lastcommit {
-			if !slices.Contains(p.failed, info.Source) {
+		if !info.Parse.Equals(latest) {
+			if !latest.Failed(info.Source) {
 				todelete = append(todelete, key.(string))
 			} else {
 				item, ok := p.Items.Load(key)
@@ -122,6 +142,23 @@ func (p *XMLProvider[T]) Cleanup() {
 	for _, item := range toappend {
 		p.Array = append(p.Array, *item)
 	}
+}
+
+func (p *XMLProvider[T]) ReverseLookup(item XMLItem) ([]*T, error) {
+	keys := item.Keys()
+
+	if len(keys) == 0 {
+		return nil, fmt.Errorf("Item has no keys")
+	}
+
+	for _, key := range keys {
+		ret, err := p.Resolver.Get(item.Name(), key)
+		if err != nil {
+			return ret, nil
+		}
+	}
+
+	return []*T{}, nil
 }
 
 func (a *XMLProvider[T]) String() string {
