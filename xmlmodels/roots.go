@@ -1,24 +1,14 @@
-package xmlprovider
+package xmlmodels
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+)
 
-// INFO: These are just root elements that hold the data of the XML files.
+// INFO: These are just root elements to hold the data of a file
 // They get discarded after a parse.
-type XMLRootElement[T any] interface {
-	Children() []T
-}
-
 type AgentRoot struct {
 	XMLName xml.Name `xml:"akteure"`
 	Agents  []Agent  `xml:"akteur"`
-}
-
-func NewAgentRoot() *AgentRoot {
-	return &AgentRoot{}
-}
-
-func (a AgentRoot) New() *AgentRoot {
-	return NewAgentRoot()
 }
 
 func (a AgentRoot) Children() []Agent {
@@ -30,14 +20,6 @@ type PlaceRoot struct {
 	Place   []Place  `xml:"ort"`
 }
 
-func NewPlaceRoot() *PlaceRoot {
-	return &PlaceRoot{}
-}
-
-func (p PlaceRoot) New() *PlaceRoot {
-	return NewPlaceRoot()
-}
-
 func (p PlaceRoot) Children() []Place {
 	return p.Place
 }
@@ -45,14 +27,6 @@ func (p PlaceRoot) Children() []Place {
 type CategoryRoot struct {
 	XMLName  xml.Name   `xml:"kategorien"`
 	Category []Category `xml:"kategorie"`
-}
-
-func NewCategoryRoot() *CategoryRoot {
-	return &CategoryRoot{}
-}
-
-func (c CategoryRoot) New() XMLRootElement[Category] {
-	return NewCategoryRoot()
 }
 
 func (c CategoryRoot) Children() []Category {
@@ -64,14 +38,6 @@ type PieceRoot struct {
 	Piece   []Piece  `xml:"beitrag"`
 }
 
-func NewPieceRoot() *PieceRoot {
-	return &PieceRoot{}
-}
-
-func (p PieceRoot) New() XMLRootElement[Piece] {
-	return NewPieceRoot()
-}
-
 func (p PieceRoot) Children() []Piece {
 	return p.Piece
 }
@@ -81,14 +47,6 @@ type IssueRoot struct {
 	Issues  []Issue  `xml:"stueck"`
 }
 
-func NewIssueRoot() *IssueRoot {
-	return &IssueRoot{}
-}
-
-func (i IssueRoot) New() XMLRootElement[Issue] {
-	return NewIssueRoot()
-}
-
 func (i IssueRoot) Children() []Issue {
 	return i.Issues
 }
@@ -96,14 +54,6 @@ func (i IssueRoot) Children() []Issue {
 type WorkRoot struct {
 	XMLName xml.Name `xml:"werke"`
 	Work    []Work   `xml:"werk"`
-}
-
-func NewWorkRoot() *WorkRoot {
-	return &WorkRoot{}
-}
-
-func (w WorkRoot) New() XMLRootElement[Work] {
-	return NewWorkRoot()
 }
 
 func (w WorkRoot) Children() []Work {

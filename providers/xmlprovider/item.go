@@ -5,6 +5,8 @@ type ItemInfo struct {
 	Parse  *ParseMeta
 }
 
-type KeyedItem struct {
-	keys []string
+// INFO: These are just root elements that hold the data of the XML files.
+// They get discarded after a parse.
+type XMLRootElement[T any] interface {
+	Children() []T
 }

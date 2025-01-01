@@ -1,4 +1,4 @@
-package xmlprovider
+package xmlmodels
 
 import (
 	"encoding/xml"
@@ -50,8 +50,8 @@ type Note struct {
 }
 
 type Identifier struct {
-	ID string `xml:"id,attr"`
-	KeyedItem
+	ID   string `xml:"id,attr"`
+	keys []string
 }
 
 func (i Identifier) Keys() []string {
@@ -60,13 +60,6 @@ func (i Identifier) Keys() []string {
 	}
 	i.keys = []string{i.ID}
 	return i.keys
-}
-
-type Reference struct {
-	Ref      string `xml:"ref,attr"`
-	Category string `xml:"kat,attr"`
-	Unsicher bool   `xml:"unsicher,attr"`
-	Value
 }
 
 type Value struct {

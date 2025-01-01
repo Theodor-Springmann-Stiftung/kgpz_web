@@ -1,4 +1,4 @@
-package xmlprovider
+package xmlmodels
 
 import (
 	"encoding/xml"
@@ -65,6 +65,15 @@ func (p Piece) ReferencesAgent(a string) (*AgentRef, bool) {
 	for _, i := range p.AgentRefs {
 		if strings.HasPrefix(i.Ref, a) {
 			return &i, true
+		}
+	}
+	return nil, false
+}
+
+func (p Piece) ReferencesWork(id string) (*WorkRef, bool) {
+	for _, w := range p.WorkRefs {
+		if w.Ref == id {
+			return &w, true
 		}
 	}
 	return nil, false

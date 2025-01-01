@@ -13,13 +13,14 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cache"
+	"github.com/gofiber/fiber/v2/middleware/etag"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/storage/memory/v2"
 )
 
 const (
-	// INFO: This timeout is stupid. Uploads can take a long time, others might not. It's messy.
+	// INFO: This timeout is stupid. Uploads can take a long time, other routes might not. It's messy.
 	REQUEST_TIMEOUT = 16 * time.Second
 	SERVER_TIMEOUT  = 16 * time.Second
 
@@ -91,6 +92,7 @@ func (s *Server) Engine(e *templating.Engine) {
 	s.Start()
 }
 
+// TODO: There is no error handler
 func (s *Server) Start() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -133,6 +135,7 @@ func (s *Server) Start() {
 
 	srv.Use(recover.New())
 
+	srv.Use(ASSETS_URL_PREFIX, etag.New())
 	srv.Use(ASSETS_URL_PREFIX, static(&views.StaticFS))
 
 	// TODO: Dont cache static assets, bc storage gets huge

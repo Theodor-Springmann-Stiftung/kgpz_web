@@ -1,4 +1,4 @@
-package xmlprovider
+package xmlmodels
 
 import (
 	"encoding/xml"

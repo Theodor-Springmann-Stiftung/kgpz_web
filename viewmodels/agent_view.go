@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 )
 
 type AgentsListView struct {
@@ -16,22 +16,28 @@ type AgentsListView struct {
 }
 
 type AgentView struct {
-	xmlprovider.Agent
+	xmlmodels.Agent
 	Works  []WorkByAgent
 	Pieces []PieceByAgent
 }
 
 type WorkByAgent struct {
-	xmlprovider.Work
-	Reference xmlprovider.AgentRef
+	xmlmodels.Work
+	Pieces    []PieceByWork
+	Reference xmlmodels.AgentRef
 }
 
 type PieceByAgent struct {
-	xmlprovider.Piece
-	Reference xmlprovider.AgentRef
+	xmlmodels.Piece
+	Reference xmlmodels.AgentRef
 }
 
-func AgentsView(letterorid string, lib *xmlprovider.Library) *AgentsListView {
+type PieceByWork struct {
+	xmlmodels.Piece
+	Reference xmlmodels.WorkRef
+}
+
+func AgentsView(letterorid string, lib *xmlmodels.Library) *AgentsListView {
 	res := AgentsListView{Search: letterorid, Agents: make(map[string]AgentView)}
 	av := make(map[string]bool)
 
@@ -56,7 +62,7 @@ func AgentsView(letterorid string, lib *xmlprovider.Library) *AgentsListView {
 		}
 	}
 
-	// TODO: We won't need to lock the library if we take down all routes during parsing
+	// TODO: We won't need to lock the library if we take down the server during parsing
 	lib.Works.Lock()
 	for _, w := range lib.Works.Array {
 		if ref, ok := w.ReferencesAgent(letterorid); ok {
@@ -74,6 +80,15 @@ func AgentsView(letterorid string, lib *xmlprovider.Library) *AgentsListView {
 			if entry, ok := res.Agents[ref.Ref]; ok {
 				entry.Pieces = append(entry.Pieces, PieceByAgent{Piece: p, Reference: *ref})
 				res.Agents[ref.Ref] = entry
+			}
+		}
+
+		// PERF: This is really slow: resolve all backlinks after parse?
+		for _, a := range res.Agents {
+			for _, w := range a.Works {
+				if ref, ok := p.ReferencesWork(w.ID); ok {
+					w.Pieces = append(w.Pieces, PieceByWork{Piece: p, Reference: *ref})
+				}
 			}
 		}
 	}

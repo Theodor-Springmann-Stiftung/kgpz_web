@@ -11,7 +11,7 @@
 				{{ $letter }}
 			</a>
 		</div>
-		<div>{{ template "_agent" $agent }}</div>
+		<div>{{ template "_akteur" $agent }}</div>
 	{{ end }}
 
 {{ else }}
@@ -25,7 +25,7 @@
 
 	{{ range $_, $id := .model.Sorted }}
 		{{ $a := index $.model.Agents $id }}
-		{{ template "_agent" $a }}
+		{{ template "_akteur" $a }}
 	{{ end }}
 {{ end }}
 

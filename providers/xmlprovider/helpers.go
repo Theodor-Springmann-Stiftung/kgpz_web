@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 )
@@ -29,4 +30,14 @@ func UnmarshalFile[T any](filename string, data T) error {
 		return err
 	}
 	return nil
+}
+
+func XMLFilesForPath(path string) ([]string, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil, err
+	}
+
+	matches, err := filepath.Glob(filepath.Join(path, "*.xml"))
+
+	return matches, err
 }

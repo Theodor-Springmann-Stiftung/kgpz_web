@@ -7,10 +7,10 @@ import (
 	"sort"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/functions"
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 )
 
-type IssuesByMonth map[int][]xmlprovider.Issue
+type IssuesByMonth map[int][]xmlmodels.Issue
 
 func (ibm *IssuesByMonth) Sort() {
 	for _, issues := range *ibm {
@@ -26,7 +26,7 @@ type YearVM struct {
 	Issues         IssuesByMonth
 }
 
-func YearView(year int, lib *xmlprovider.Library) (*YearVM, error) {
+func YearView(year int, lib *xmlmodels.Library) (*YearVM, error) {
 	issues := make(IssuesByMonth, 12)
 	years := make(map[int]bool)
 

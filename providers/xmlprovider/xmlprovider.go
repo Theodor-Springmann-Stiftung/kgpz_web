@@ -21,7 +21,6 @@ type XMLItem interface {
 
 // An XMLProvider is a struct that holds holds serialized XML data of a specific type. It combines multiple parses IF a succeeded parse can not serialize the data from a path.
 type XMLProvider[T XMLItem] struct {
-	Paths []string
 	// INFO: map is type map[string]*T
 	Items sync.Map
 	// INFO: map is type [string]ItemInfo
@@ -60,15 +59,17 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) er
 	}
 
 	p.mu.Lock()
+	defer p.mu.Unlock()
+
 	if len(p.parses) == 0 {
 		logging.Error(fmt.Errorf("No commit set"), "No commit set")
 		return fmt.Errorf("No commit set")
 	}
-	commit := &p.parses[len(p.parses)-1]
-	p.Array = append(p.Array, dataholder.Children()...)
-	p.mu.Unlock()
 
-	for _, item := range dataholder.Children() {
+	commit := &p.parses[len(p.parses)-1]
+	newItems := dataholder.Children()
+
+	for _, item := range newItems {
 		// INFO: Mostly it's just one ID, so the double loop is not that bad.
 		for _, id := range item.Keys() {
 			p.Infos.Store(id, ItemInfo{Source: path, Parse: commit})
@@ -76,6 +77,7 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string) er
 		}
 	}
 
+	p.Array = append(p.Array, newItems...)
 	return nil
 }
 

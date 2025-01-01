@@ -9,17 +9,7 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/gnd"
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
-)
-
-const (
-	AGENTS_PATH     = "XML/akteure.xml"
-	PLACES_PATH     = "XML/orte.xml"
-	WORKS_PATH      = "XML/werke.xml"
-	CATEGORIES_PATH = "XML/kategorien.xml"
-
-	ISSUES_DIR = "XML/stuecke/"
-	PIECES_DIR = "XML/beitraege/"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 )
 
 type KGPZ struct {
@@ -29,7 +19,7 @@ type KGPZ struct {
 	Config  *providers.ConfigProvider
 	Repo    *providers.GitProvider
 	GND     *gnd.GNDProvider
-	Library *xmlprovider.Library
+	Library *xmlmodels.Library
 }
 
 func (k *KGPZ) Init() {
@@ -81,10 +71,8 @@ func (k *KGPZ) Enrich() error {
 		return nil
 	}
 
-	// TODO: Library locking is never needed, since the library items, once set, are never changed
-	// We only need to check if set
 	go func() {
-		data := gnd.ProviderIntoDataset(k.Library.Agents)
+		data := xmlmodels.AgentsIntoDataset(k.Library.Agents)
 		k.GND.FetchPersons(data)
 		k.GND.WriteCache(k.Config.GNDPath)
 	}()
@@ -110,22 +98,9 @@ func (k *KGPZ) Serialize() {
 	helpers.Assert(err, "Error getting pieces")
 
 	if k.Library == nil {
-		k.Library = xmlprovider.NewLibrary(
-			[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
-			[]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)},
-			[]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)},
-			[]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)},
-			*issues,
-			*pieces)
-	} else {
-		k.Library.SetPaths(
-			[]string{filepath.Join(k.Config.FolderPath, AGENTS_PATH)},
-			[]string{filepath.Join(k.Config.FolderPath, PLACES_PATH)},
-			[]string{filepath.Join(k.Config.FolderPath, WORKS_PATH)},
-			[]string{filepath.Join(k.Config.FolderPath, CATEGORIES_PATH)},
-			*issues,
-			*pieces)
+		k.Library = xmlmodels.NewLibrary(k.Config.FolderPath)
 	}
+
 	k.Library.Serialize(commit)
 }
 
@@ -176,14 +151,4 @@ func (k *KGPZ) initRepo() {
 
 func (k *KGPZ) Shutdown() {
 	k.Repo.Wait()
-}
-
-func getXMLFiles(path string) (*[]string, error) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, err
-	}
-
-	matches, err := filepath.Glob(filepath.Join(path, "*.xml"))
-
-	return &matches, err
 }

@@ -6,13 +6,13 @@ import (
 	"slices"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/functions"
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 )
 
 type PieceByIssue struct {
-	xmlprovider.Piece
+	xmlmodels.Piece
 	// TODO: this is a bit hacky, but it refences the page number of the piece in the issue
-	Reference xmlprovider.IssueRef
+	Reference xmlmodels.IssueRef
 }
 
 type PiecesByPage struct {
@@ -22,12 +22,12 @@ type PiecesByPage struct {
 
 // TODO: Next & Prev
 type IssueVM struct {
-	xmlprovider.Issue
+	xmlmodels.Issue
 	Pieces           PiecesByPage
 	AdditionalPieces PiecesByPage
 }
 
-func NewSingleIssueView(y string, no string, lib *xmlprovider.Library) (*IssueVM, error) {
+func NewSingleIssueView(y string, no string, lib *xmlmodels.Library) (*IssueVM, error) {
 	issue := lib.Issues.Item(no + "-" + y)
 	if issue == nil {
 		return nil, fmt.Errorf("No issue found for %v-%v", y, no)
@@ -48,7 +48,7 @@ func NewSingleIssueView(y string, no string, lib *xmlprovider.Library) (*IssueVM
 	return &sivm, nil
 }
 
-func PiecesForIsssue(lib *xmlprovider.Library, issue xmlprovider.Issue) (PiecesByPage, PiecesByPage, error) {
+func PiecesForIsssue(lib *xmlmodels.Library, issue xmlmodels.Issue) (PiecesByPage, PiecesByPage, error) {
 	year := issue.Datum.When.Year
 
 	ppi := PiecesByPage{Items: make(map[int][]PieceByIssue)}
