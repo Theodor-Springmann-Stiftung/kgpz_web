@@ -95,9 +95,9 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, la
 
 		// INFO: If the item has a GetReferences method, we add the references to the resolver.
 		if refResolver, ok := any(item).(ReferenceResolver); ok {
-			for refType, ids := range refResolver.GetReferences() {
-				for _, refID := range ids {
-					p.Resolver.Add(refType, refID, &item)
+			for name, ids := range refResolver.GetReferences() {
+				for _, id := range ids {
+					p.Resolver.Add(name, id, &item)
 				}
 			}
 		}
