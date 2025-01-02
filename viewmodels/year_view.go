@@ -33,10 +33,8 @@ func YearView(year int, lib *xmlmodels.Library) (*YearVM, error) {
 
 	lib.Issues.Lock()
 	for _, issue := range lib.Issues.Array {
+		log.Printf("Issue: %v", issue)
 		y := issue.Datum.When.Year
-		if y == 0 {
-			log.Println("Issue has no year: ", issue.String())
-		}
 		years[y] = true
 		if y == year {
 			functions.MapArrayInsert(issues, issue.Datum.When.Month, issue)

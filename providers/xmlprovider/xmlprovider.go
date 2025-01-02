@@ -72,7 +72,7 @@ func NewXMLProvider[T XMLItem]() *XMLProvider[T] {
 func (p *XMLProvider[T]) Prepare() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.Array = make([]T, 1000)
+	p.Array = make([]T, 0)
 }
 
 func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, latest ParseMeta) error {
@@ -94,13 +94,13 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, la
 		}
 
 		// INFO: If the item has a GetReferences method, we add the references to the resolver.
-		if refResolver, ok := any(item).(ReferenceResolver); ok {
-			for name, ids := range refResolver.GetReferences() {
-				for _, id := range ids {
-					p.Resolver.Add(name, id, &item)
-				}
-			}
-		}
+		// if refResolver, ok := any(item).(ReferenceResolver); ok {
+		// 	for name, ids := range refResolver.GetReferences() {
+		// 		for _, id := range ids {
+		// 			p.Resolver.Add(name, id, &item)
+		// 		}
+		// 	}
+		// }
 	}
 
 	p.Array = append(p.Array, newItems...)
@@ -168,6 +168,9 @@ func (a *XMLProvider[T]) String() string {
 		s += v.String()
 		return true
 	})
+	for _, item := range a.Array {
+		s += item.String()
+	}
 	return s
 }
 
