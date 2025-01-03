@@ -3,7 +3,8 @@ package xmlmodels
 import (
 	"encoding/json"
 	"encoding/xml"
-	"strings"
+
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
 type Work struct {
@@ -20,15 +21,6 @@ func (w Work) Name() string {
 	return "work"
 }
 
-func (p Work) ReferencesAgent(a string) (*AgentRef, bool) {
-	for _, i := range p.AgentRefs {
-		if strings.HasPrefix(i.Ref, a) {
-			return &i, true
-		}
-	}
-	return nil, false
-}
-
 type Citation struct {
 	XMLName xml.Name `xml:"zitation"`
 	Title   string   `xml:"title"`
@@ -37,6 +29,22 @@ type Citation struct {
 	Inner
 }
 
+func (w Work) References() xmlprovider.ResolvingMap[Work] {
+	refs := make(xmlprovider.ResolvingMap[Work])
+
+	for _, ref := range w.AgentRefs {
+		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Work]{
+			Item:       &w,            // Reference to the current Work item
+			Reference:  ref.Ref,       // Reference ID
+			Category:   ref.Category,  // Category of the reference
+			Cert:       !ref.Unsicher, // Certainty flag (true if not unsure)
+			Conjecture: false,
+			Comment:    ref.Inner.InnerXML,
+		})
+	}
+
+	return refs
+}
 func (w Work) String() string {
 	data, _ := json.MarshalIndent(w, "", "  ")
 	return string(data)

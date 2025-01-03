@@ -40,12 +40,12 @@ func (l *Library) String() string {
 // INFO: this is the only place where the providers are created. There is no need for locking on access.
 func NewLibrary() *Library {
 	return &Library{
-		Agents:     &xmlprovider.XMLProvider[Agent]{},
-		Places:     &xmlprovider.XMLProvider[Place]{},
-		Works:      &xmlprovider.XMLProvider[Work]{},
-		Categories: &xmlprovider.XMLProvider[Category]{},
-		Issues:     &xmlprovider.XMLProvider[Issue]{},
-		Pieces:     &xmlprovider.XMLProvider[Piece]{},
+		Agents:     xmlprovider.NewXMLProvider[Agent](),
+		Places:     xmlprovider.NewXMLProvider[Place](),
+		Works:      xmlprovider.NewXMLProvider[Work](),
+		Categories: xmlprovider.NewXMLProvider[Category](),
+		Issues:     xmlprovider.NewXMLProvider[Issue](),
+		Pieces:     xmlprovider.NewXMLProvider[Piece](),
 	}
 }
 

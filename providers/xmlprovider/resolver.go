@@ -7,30 +7,26 @@ import (
 	"sync"
 )
 
-type ReferenceResolver interface {
-	GetReferences() map[string][]string
-}
-
 type Resolver[T XMLItem] struct {
-	index map[string]map[string][]*T // Map[typeName][refID] -> []*T
-	mu    sync.Mutex                 // Synchronization for thread safety
+	index map[string]map[string][]Resolved[T] // Map[typeName][refID] -> []*T
+	mu    sync.Mutex                          // Synchronization for thread safety
 }
 
 func NewResolver[T XMLItem]() *Resolver[T] {
-	return &Resolver[T]{index: make(map[string]map[string][]*T)}
+	return &Resolver[T]{index: make(map[string]map[string][]Resolved[T])}
 }
 
-func (r *Resolver[T]) Add(typeName, refID string, item *T) {
+func (r *Resolver[T]) Add(typeName, refID string, item Resolved[T]) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	if _, exists := r.index[typeName]; !exists {
-		r.index[typeName] = make(map[string][]*T)
+		r.index[typeName] = make(map[string][]Resolved[T])
 	}
 	r.index[typeName][refID] = append(r.index[typeName][refID], item)
 }
 
-func (r *Resolver[T]) Get(typeName, refID string) ([]*T, error) {
+func (r *Resolver[T]) Get(typeName, refID string) ([]Resolved[T], error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

@@ -2,7 +2,6 @@ package viewmodels
 
 import (
 	"fmt"
-	"log"
 	"maps"
 	"slices"
 	"sort"
@@ -33,7 +32,6 @@ func YearView(year int, lib *xmlmodels.Library) (*YearVM, error) {
 
 	lib.Issues.Lock()
 	for _, issue := range lib.Issues.Array {
-		log.Printf("Issue: %v", issue)
 		y := issue.Datum.When.Year
 		years[y] = true
 		if y == year {

@@ -61,6 +61,13 @@ func (i Identifier) Keys() []string {
 	return i.keys
 }
 
+type Reference struct {
+	Ref      string `xml:"ref,attr"`
+	Category string `xml:"kat,attr"`
+	Unsicher bool   `xml:"unsicher,attr"`
+	Inner    Inner
+}
+
 type Value struct {
 	Chardata string `xml:",chardata"`
 }

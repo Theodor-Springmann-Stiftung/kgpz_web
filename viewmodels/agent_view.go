@@ -64,14 +64,17 @@ func AgentsView(letterorid string, lib *xmlmodels.Library) *AgentsListView {
 
 	// TODO: We won't need to lock the library if we take down the server during parsing
 	lib.Works.Lock()
-	for _, w := range lib.Works.Array {
-		if ref, ok := w.ReferencesAgent(letterorid); ok {
-			if entry, ok := res.Agents[ref.Ref]; ok {
-				entry.Works = append(entry.Works, WorkByAgent{Work: w, Reference: *ref})
-				res.Agents[ref.Ref] = entry
-			}
-		}
-	}
+	// for _, a := range res.Agents {
+	//
+	// }
+	// for _, w := range lib.Works.Array {
+	// 	if ref, ok := w.ReferencesAgent(letterorid); ok {
+	// 		if entry, ok := res.Agents[ref.Ref]; ok {
+	// 			entry.Works = append(entry.Works, WorkByAgent{Work: w, Reference: *ref})
+	// 			res.Agents[ref.Ref] = entry
+	// 		}
+	// 	}
+	// }
 	lib.Works.Unlock()
 
 	lib.Pieces.Lock()

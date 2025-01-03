@@ -34,17 +34,6 @@ func (p ParseMeta) Failed(path string) bool {
 	return slices.Contains(p.FailedPaths, path)
 }
 
-type XMLItem interface {
-	fmt.Stringer
-	Keys() []string
-	Name() string
-}
-
-type ILibrary interface {
-	Parse(meta ParseMeta) error
-	Latest() *ParseMeta
-}
-
 // An XMLProvider is a struct that holds holds serialized XML data of a specific type. It combines multiple parses IF a succeeded parse can not serialize the data from a path.
 type XMLProvider[T XMLItem] struct {
 	// INFO: map is type map[string]*T
@@ -72,7 +61,8 @@ func NewXMLProvider[T XMLItem]() *XMLProvider[T] {
 func (p *XMLProvider[T]) Prepare() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.Array = make([]T, 0)
+	// INFO: We take 1000 here as to not reallocate the memory as mutch.
+	p.Array = make([]T, 0, 1000)
 }
 
 func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, latest ParseMeta) error {
@@ -94,13 +84,14 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, la
 		}
 
 		// INFO: If the item has a GetReferences method, we add the references to the resolver.
-		// if refResolver, ok := any(item).(ReferenceResolver); ok {
-		// 	for name, ids := range refResolver.GetReferences() {
-		// 		for _, id := range ids {
-		// 			p.Resolver.Add(name, id, &item)
-		// 		}
-		// 	}
-		// }
+		if rr, ok := any(item).(ReferenceResolver[T]); ok {
+			for name, ids := range rr.References() {
+				for _, res := range ids {
+					res.Item = &item
+					p.Resolver.Add(name, res.Reference, res)
+				}
+			}
+		}
 	}
 
 	p.Array = append(p.Array, newItems...)
@@ -144,7 +135,7 @@ func (p *XMLProvider[T]) Cleanup(latest ParseMeta) {
 	}
 }
 
-func (p *XMLProvider[T]) ReverseLookup(item XMLItem) ([]*T, error) {
+func (p *XMLProvider[T]) ReverseLookup(item XMLItem) ([]Resolved[T], error) {
 	keys := item.Keys()
 
 	if len(keys) == 0 {
@@ -158,7 +149,7 @@ func (p *XMLProvider[T]) ReverseLookup(item XMLItem) ([]*T, error) {
 		}
 	}
 
-	return []*T{}, nil
+	return []Resolved[T]{}, nil
 }
 
 func (a *XMLProvider[T]) String() string {
