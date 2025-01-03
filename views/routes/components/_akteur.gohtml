@@ -45,10 +45,10 @@
 		{{- if ne (len $a.Works) 0 -}}
 			<div>
 				{{ range $_, $w := $a.Works }}
-					{{- if ne (len $w.Citation.InnerXML ) 0 -}}
+					{{- if ne (len $w.Item.Citation.InnerXML ) 0 -}}
 								<script type="application/xml" xslt-template="transform-citation" xslt-onload>
 									<xml>
-										{{- Safe $w.Citation.InnerXML -}}
+										{{- Safe $w.Item.Citation.InnerXML -}}
 									</xml>
 								</script>
 					{{- end -}}
@@ -59,7 +59,7 @@
 		{{- if ne (len $a.Pieces) 0 -}}
 			<div>
 				{{ range $_, $p := $a.Pieces }}
-					{{- range $_, $i := $p.IssueRefs -}}
+					{{- range $_, $i := $p.Item.IssueRefs -}}
 						<div>
 							<a href="/{{ $i.When }}/{{ $i.Nr }}">{{ $i.Nr }}/{{ $i.When }}</a>
 						</div>

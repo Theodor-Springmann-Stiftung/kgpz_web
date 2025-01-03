@@ -142,14 +142,17 @@ func (p *XMLProvider[T]) ReverseLookup(item XMLItem) ([]Resolved[T], error) {
 		return nil, fmt.Errorf("Item has no keys")
 	}
 
+	// INFO: this runs just once for the first key
+	ret := make([]Resolved[T], 0)
 	for _, key := range keys {
-		ret, err := p.Resolver.Get(item.Name(), key)
+		r, err := p.Resolver.Get(item.Name(), key)
 		if err != nil {
-			return ret, nil
+			return ret, err
 		}
+		ret = append(ret, r...)
 	}
 
-	return []Resolved[T]{}, nil
+	return ret, nil
 }
 
 func (a *XMLProvider[T]) String() string {

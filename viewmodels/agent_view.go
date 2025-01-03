@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 )
 
@@ -18,23 +19,12 @@ type AgentsListView struct {
 type AgentView struct {
 	xmlmodels.Agent
 	Works  []WorkByAgent
-	Pieces []PieceByAgent
+	Pieces []xmlprovider.Resolved[xmlmodels.Piece]
 }
 
 type WorkByAgent struct {
-	xmlmodels.Work
-	Pieces    []PieceByWork
-	Reference xmlmodels.AgentRef
-}
-
-type PieceByAgent struct {
-	xmlmodels.Piece
-	Reference xmlmodels.AgentRef
-}
-
-type PieceByWork struct {
-	xmlmodels.Piece
-	Reference xmlmodels.WorkRef
+	xmlprovider.Resolved[xmlmodels.Work]
+	Pieces []xmlprovider.Resolved[xmlmodels.Piece]
 }
 
 func AgentsView(letterorid string, lib *xmlmodels.Library) *AgentsListView {
@@ -62,40 +52,23 @@ func AgentsView(letterorid string, lib *xmlmodels.Library) *AgentsListView {
 		}
 	}
 
-	// TODO: We won't need to lock the library if we take down the server during parsing
-	lib.Works.Lock()
-	// for _, a := range res.Agents {
-	//
-	// }
-	// for _, w := range lib.Works.Array {
-	// 	if ref, ok := w.ReferencesAgent(letterorid); ok {
-	// 		if entry, ok := res.Agents[ref.Ref]; ok {
-	// 			entry.Works = append(entry.Works, WorkByAgent{Work: w, Reference: *ref})
-	// 			res.Agents[ref.Ref] = entry
-	// 		}
-	// 	}
-	// }
-	lib.Works.Unlock()
-
-	lib.Pieces.Lock()
-	for _, p := range lib.Pieces.Array {
-		if ref, ok := p.ReferencesAgent(letterorid); ok {
-			if entry, ok := res.Agents[ref.Ref]; ok {
-				entry.Pieces = append(entry.Pieces, PieceByAgent{Piece: p, Reference: *ref})
-				res.Agents[ref.Ref] = entry
-			}
-		}
-
-		// PERF: This is really slow: resolve all backlinks after parse?
-		for _, a := range res.Agents {
-			for _, w := range a.Works {
-				if ref, ok := p.ReferencesWork(w.ID); ok {
-					w.Pieces = append(w.Pieces, PieceByWork{Piece: p, Reference: *ref})
+	// INFO: All lookups are O(1)
+	for _, a := range res.Agents {
+		if works, err := lib.Works.ReverseLookup(a); err == nil {
+			for _, w := range works {
+				if pieces, err := lib.Pieces.ReverseLookup(w.Item); err == nil {
+					a.Works = append(a.Works, WorkByAgent{Resolved: w, Pieces: pieces})
 				}
 			}
 		}
+
+		if pieces, err := lib.Pieces.ReverseLookup(a.Agent); err == nil {
+			a.Pieces = pieces
+		}
+
+		// TODO: sort the things, also for works and pieces above
+		res.Agents[a.ID] = a
 	}
-	lib.Pieces.Unlock()
 
 	res.AvailableLetters = slices.Collect(maps.Keys(av))
 	slices.Sort(res.AvailableLetters)
