@@ -52,11 +52,11 @@ func AgentsView(letterorid string, lib *xmlmodels.Library) *AgentsListView {
 		}
 	}
 
-	// INFO: All lookups are O(1)
 	for _, a := range res.Agents {
 		if works, err := lib.Works.ReverseLookup(a); err == nil {
 			for _, w := range works {
 				if pieces, err := lib.Pieces.ReverseLookup(w.Item); err == nil {
+					// INFO: it makes no sense to append works that have no pieces attached
 					a.Works = append(a.Works, WorkByAgent{Resolved: w, Pieces: pieces})
 				}
 			}

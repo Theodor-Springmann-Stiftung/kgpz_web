@@ -27,9 +27,6 @@ func (r *Resolver[T]) Add(typeName, refID string, item Resolved[T]) {
 }
 
 func (r *Resolver[T]) Get(typeName, refID string) ([]Resolved[T], error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	if typeIndex, exists := r.index[typeName]; exists {
 		if items, ok := typeIndex[refID]; ok {
 			return items, nil
@@ -37,4 +34,11 @@ func (r *Resolver[T]) Get(typeName, refID string) ([]Resolved[T], error) {
 		return nil, fmt.Errorf("no references found for refID '%s' of type '%s'", refID, typeName)
 	}
 	return nil, fmt.Errorf("no index exists for type '%s'", typeName)
+}
+
+func (r *Resolver[T]) Clear() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.index = make(map[string]map[string][]Resolved[T])
 }
