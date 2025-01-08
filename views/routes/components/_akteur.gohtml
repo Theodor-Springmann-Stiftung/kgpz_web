@@ -42,9 +42,10 @@
 			</div>
 		</div>
 
-		{{- if ne (len $a.Works) 0 -}}
+		{{ $works := LookupWorks $a }}
+		{{- if ne (len $works) 0 -}}
 			<div>
-				{{ range $_, $w := $a.Works }}
+				{{ range $_, $w := $works }}
 					{{- if ne (len $w.Item.Citation.InnerXML ) 0 -}}
 								<script type="application/xml" xslt-template="transform-citation" xslt-onload>
 									<xml>
@@ -52,13 +53,19 @@
 									</xml>
 								</script>
 					{{- end -}}
+					{{ range $_, $url := $w.Item.URLs }}
+						<div>
+							<a href="{{ $url.Address }}" target="_blank">{{ $url.Chardata }}</a>
+						</div>
+					{{ end }}
 				{{ end }}
 			</div>
 		{{ end }}
 
-		{{- if ne (len $a.Pieces) 0 -}}
+		{{ $pieces := LookupPieces $a }}
+		{{- if ne (len $pieces) 0 -}}
 			<div>
-				{{ range $_, $p := $a.Pieces }}
+				{{ range $_, $p := $pieces }}
 					{{- range $_, $i := $p.Item.IssueRefs -}}
 						<div>
 							<a href="/{{ $i.When }}/{{ $i.Nr }}">{{ $i.Nr }}/{{ $i.When }}</a>

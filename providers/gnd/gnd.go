@@ -109,7 +109,8 @@ func (p *GNDProvider) WriteCache(folder string) error {
 	return nil
 }
 
-// TODO: Dont write persons already written
+// INFO: this writes all persons to the cache folder
+// We do that on every fetch, it's easier that way
 func (p *GNDProvider) writePersons(folder string) error {
 	info, err := os.Stat(folder)
 	if err == os.ErrNotExist {

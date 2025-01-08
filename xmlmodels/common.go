@@ -30,6 +30,7 @@ type URL struct {
 	XMLName xml.Name `xml:"url"`
 	Address string   `xml:"address,attr"`
 	Value
+	Inner
 }
 
 type AnnotationNote struct {

@@ -1,7 +1,6 @@
 package xmlprovider
 
 import (
-	"fmt"
 	"slices"
 	"sync"
 	"time"
@@ -135,24 +134,20 @@ func (p *XMLProvider[T]) Cleanup(latest ParseMeta) {
 	}
 }
 
-func (p *XMLProvider[T]) ReverseLookup(item XMLItem) ([]Resolved[T], error) {
-	keys := item.Keys()
-
-	if len(keys) == 0 {
-		return nil, fmt.Errorf("Item has no keys")
-	}
-
+func (p *XMLProvider[T]) ReverseLookup(item XMLItem) []Resolved[T] {
 	// INFO: this runs just once for the first key
 	ret := make([]Resolved[T], 0)
+	keys := item.Keys()
+
 	for _, key := range keys {
 		r, err := p.Resolver.Get(item.Name(), key)
-		if err != nil {
-			return ret, err
+		if err == nil {
+			ret = append(ret, r...)
+			return ret
 		}
-		ret = append(ret, r...)
 	}
 
-	return ret, nil
+	return ret
 }
 
 func (a *XMLProvider[T]) String() string {

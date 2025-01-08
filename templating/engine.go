@@ -67,6 +67,10 @@ func (e *Engine) Funcs(app *app.KGPZ) error {
 	e.AddFunc("GetPiece", app.Library.Pieces.Item)
 	e.AddFunc("GetGND", app.GND.Person)
 
+	e.AddFunc("LookupPieces", app.Library.Pieces.ReverseLookup)
+	e.AddFunc("LookupWorks", app.Library.Works.ReverseLookup)
+	e.AddFunc("LookupIssues", app.Library.Issues.ReverseLookup)
+
 	return nil
 }
 
