@@ -17,12 +17,11 @@ var InvalidStateError = errors.New("The GitProvider is not in a valid state. Fix
 var NoURLProvidedError = errors.New("No URL provided for GitProvider.")
 var NoPathProvidedError = errors.New("No path or branch provided for GitProvider.")
 
-// NOTE: GitProvider does not open XML files, it can only
-// - read in information from the repo, given a path
-// - clone the repo, given an URL & a path
-// - pull the repo, given a path
-// In case of success in either case it updates the commit hash and date and closes the repo again.
-// The Files are opened  and serialized by the FSProvider, which operates on the same file path.
+// NOTE: GitProvider does not open any worktree files, it only
+// - reads in information from the repo, given a path
+// - clones a repo, given an URL & a path
+// - pulls a repo, given a path
+// In case of success it updates it's state: the commit hash and date. Then it closes the repo.
 type GitProvider struct {
 	mu sync.Mutex
 

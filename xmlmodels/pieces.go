@@ -189,33 +189,3 @@ func (p Piece) ReferencesWork(id string) (*WorkRef, bool) {
 	}
 	return nil, false
 }
-
-// TODO: We can make this fast depending on which category to look for
-// but we'll have to define rules for every single category (~35 of them)
-func (p Piece) IsCat(k string) bool {
-	for _, c := range p.CategoryRefs {
-		if c.Category == k {
-			return true
-		}
-	}
-
-	for _, c := range p.WorkRefs {
-		if c.Category == k {
-			return true
-		}
-	}
-
-	for _, c := range p.AgentRefs {
-		if c.Category == k {
-			return true
-		}
-	}
-
-	for _, c := range p.PieceRefs {
-		if c.Category == k {
-			return true
-		}
-	}
-
-	return false
-}

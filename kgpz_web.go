@@ -21,17 +21,6 @@ const (
 	DEV_CONFIG     = "config.dev.json"
 )
 
-// 1. Check if folder exists
-//		- If not, clone the repo, if possible or throw if error
-// 2. If the folder exists, we try to serialize -- and spawn a goroutine to pull.
-//		Upon pulling, we read in the current state of the repository, even if it's up to date.
-//		-> If the repo was changed we execute a callback and parse again.
-//		-> If pulling fails, we retry after a certain amount of time.
-//		   Still we can continue if serialization proceeds.
-//		-> If serialization fails, we throw an error, log it. We try to pull in the background.
-//		- setup commit date & hash
-//		- Setup GitHub webhook if set
-
 func main() {
 	cfg := providers.NewConfigProvider([]string{DEV_CONFIG, DEFAULT_CONFIG})
 	if err := cfg.Read(); err != nil {

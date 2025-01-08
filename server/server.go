@@ -25,7 +25,8 @@ const (
 	SERVER_TIMEOUT  = 16 * time.Second
 
 	// INFO: Maybe this is too long/short?
-	CACHE_TIME = 24 * time.Hour
+	CACHE_TIME        = 24 * time.Hour
+	CACHE_GC_INTERVAL = 120 * time.Second
 )
 
 const (
@@ -99,7 +100,7 @@ func (s *Server) Start() {
 
 	if s.cache == nil {
 		s.cache = memory.New(memory.Config{
-			GCInterval: 30 * time.Second,
+			GCInterval: CACHE_GC_INTERVAL,
 		})
 	}
 
@@ -117,7 +118,7 @@ func (s *Server) Start() {
 		ErrorHandler: fiber.DefaultErrorHandler,
 
 		// WARNING: The app must be run in a console, since this uses environment variables:
-		// It is not trivial to turn this on, since we need to mark goroutines that can be started only once.
+		// It is not trivial to turn this on, since we need to mark goroutines that must be started only once.
 		// Prefork:           true,
 		StreamRequestBody: false,
 		WriteTimeout:      REQUEST_TIMEOUT,
@@ -138,8 +139,8 @@ func (s *Server) Start() {
 	srv.Use(ASSETS_URL_PREFIX, etag.New())
 	srv.Use(ASSETS_URL_PREFIX, static(&views.StaticFS))
 
-	// TODO: Dont cache static assets, bc storage gets huge
-	// INFO: Maybe fiber does this already?
+	// TODO: Dont cache static assets, bc storage gets huge on images.
+	// -> Maybe fiber does this already, automatically?
 	if s.Config.Debug {
 		srv.Use(cache.New(cache.Config{
 			Next:         CacheFunc,
@@ -156,9 +157,6 @@ func (s *Server) Start() {
 		}))
 	}
 
-	// TODO: this is probably a bad idea, since it basically applies to every /XXXX URL
-	// And probably creates problems with static files, and in case we add a front page later.
-	// That's why we redirect to /1764 on "/ " and don´t use an optional /:year?
 	srv.Get("/", func(c *fiber.Ctx) error {
 		c.Redirect(INDEX_URL)
 		return nil
@@ -168,8 +166,12 @@ func (s *Server) Start() {
 	srv.Get(CATEGORY_OVERVIEW_URL, controllers.GetCategory(s.kgpz))
 	srv.Get(AGENTS_OVERVIEW_URL, controllers.GetAgents(s.kgpz))
 
-	// TODO: Same here, this prob applies to all paths with two or three segments, which is bad.
-	// Prob better to do /ausgabe/:year/:issue/:page? here and /jahrgang/:year? above.
+	// TODO: YEAR_OVERVIEW_URL being /:year is a bad idea, since it captures basically everything,
+	// probably creating problems with static files, and also in case we add a front page later.
+	// That's why we redirect to /1764 on "/ " above and don´t use an optional /:year? paramter.
+	// -> Check SEO requirements on index pages that are 301 forwarded.
+	// This applies to all paths with two or three segments without a static prefix:
+	// Prob better to do /ausgabe/:year/:issue/:page? and /jahrgang/:year? respectively.
 	srv.Get(YEAR_OVERVIEW_URL, controllers.GetYear(s.kgpz))
 	srv.Get(ISSSUE_URL, controllers.GetIssue(s.kgpz))
 	srv.Get(ADDITIONS_URL, controllers.GetIssue(s.kgpz))
