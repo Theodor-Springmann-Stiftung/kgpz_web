@@ -62,6 +62,7 @@ func (p *XMLProvider[T]) Prepare() {
 	defer p.mu.Unlock()
 	// INFO: We take 1000 here as to not reallocate the memory as mutch.
 	p.Array = make([]T, 0, 1000)
+	p.Resolver.Clear()
 }
 
 func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, latest ParseMeta) error {
@@ -82,15 +83,7 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, la
 			p.Items.Store(id, &item)
 		}
 
-		// INFO: If the item has a GetReferences method, we add the references to the resolver.
-		if rr, ok := any(item).(ReferenceResolver[T]); ok {
-			for name, ids := range rr.References() {
-				for _, res := range ids {
-					res.Item = &item
-					p.Resolver.Add(name, res.Reference, res)
-				}
-			}
-		}
+		p.addResolvable(item)
 	}
 
 	p.Array = append(p.Array, newItems...)
@@ -131,6 +124,19 @@ func (p *XMLProvider[T]) Cleanup(latest ParseMeta) {
 
 	for _, item := range toappend {
 		p.Array = append(p.Array, *item)
+		p.addResolvable(*item)
+	}
+}
+
+func (p *XMLProvider[T]) addResolvable(item T) {
+	// INFO: If the item has a GetReferences method, we add the references to the resolver.
+	if rr, ok := any(item).(ReferenceResolver[T]); ok {
+		for name, ids := range rr.References() {
+			for _, res := range ids {
+				res.Item = &item
+				p.Resolver.Add(name, res.Reference, res)
+			}
+		}
 	}
 }
 
@@ -161,6 +167,14 @@ func (a *XMLProvider[T]) String() string {
 		s += item.String()
 	}
 	return s
+}
+
+func (p *XMLProvider[T]) Info(id string) ItemInfo {
+	info, ok := p.Infos.Load(id)
+	if !ok {
+		return ItemInfo{}
+	}
+	return info.(ItemInfo)
 }
 
 func (p *XMLProvider[T]) Item(id string) *T {

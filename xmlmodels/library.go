@@ -21,8 +21,8 @@ const (
 )
 
 type Library struct {
-	mu     sync.Mutex
-	Parses []xmlprovider.ParseMeta
+	mu sync.Mutex
+	xmlprovider.Library
 
 	Agents     *xmlprovider.XMLProvider[Agent]
 	Places     *xmlprovider.XMLProvider[Place]
