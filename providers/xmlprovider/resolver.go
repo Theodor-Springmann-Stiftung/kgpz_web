@@ -9,7 +9,7 @@ import (
 
 type Resolver[T XMLItem] struct {
 	index map[string]map[string][]Resolved[T] // Map[typeName][refID] -> []*T
-	mu    sync.Mutex                          // Synchronization for thread safety
+	mu    sync.RWMutex                        // Synchronization for thread safety
 }
 
 func NewResolver[T XMLItem]() *Resolver[T] {
@@ -27,6 +27,9 @@ func (r *Resolver[T]) Add(typeName, refID string, item Resolved[T]) {
 }
 
 func (r *Resolver[T]) Get(typeName, refID string) ([]Resolved[T], error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
 	if typeIndex, exists := r.index[typeName]; exists {
 		if items, ok := typeIndex[refID]; ok {
 			return items, nil

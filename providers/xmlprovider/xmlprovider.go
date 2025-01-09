@@ -44,7 +44,7 @@ type XMLProvider[T XMLItem] struct {
 	// INFO: Resolver is used to resolve references (back-links) between XML items.
 	Resolver Resolver[T]
 
-	mu sync.Mutex
+	mu sync.RWMutex
 	// TODO: This array is meant to be for iteration purposes, since iteration over the sync.Map is slow.
 	// It is best for this array to be sorted by key of the corresponding item.
 	Array []T
@@ -149,7 +149,6 @@ func (p *XMLProvider[T]) ReverseLookup(item XMLItem) []Resolved[T] {
 		r, err := p.Resolver.Get(item.Name(), key)
 		if err == nil {
 			ret = append(ret, r...)
-			return ret
 		}
 	}
 
@@ -158,11 +157,6 @@ func (p *XMLProvider[T]) ReverseLookup(item XMLItem) []Resolved[T] {
 
 func (a *XMLProvider[T]) String() string {
 	var s string
-	a.Items.Range(func(key, value interface{}) bool {
-		v := value.(T)
-		s += v.String()
-		return true
-	})
 	for _, item := range a.Array {
 		s += item.String()
 	}
@@ -188,8 +182,8 @@ func (p *XMLProvider[T]) Item(id string) *T {
 }
 
 func (p *XMLProvider[T]) Find(fn func(*T) bool) []T {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	var items []T
 	for _, item := range p.Array {
 		if fn(&item) {
@@ -199,10 +193,11 @@ func (p *XMLProvider[T]) Find(fn func(*T) bool) []T {
 	return items
 }
 
+// INFO: These are only reading locks.
 func (p *XMLProvider[T]) Lock() {
-	p.mu.Lock()
+	p.mu.RLock()
 }
 
 func (p *XMLProvider[T]) Unlock() {
-	p.mu.Unlock()
+	p.mu.RUnlock()
 }
