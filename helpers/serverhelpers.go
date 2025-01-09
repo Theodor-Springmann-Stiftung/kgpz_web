@@ -1,4 +1,4 @@
-package server
+package helpers
 
 import (
 	"io/fs"
@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 )
 
-func static(fs *fs.FS) fiber.Handler {
+func StaticHandler(fs *fs.FS) fiber.Handler {
 	return filesystem.New(filesystem.Config{
 		Root:   http.FS(*fs),
 		Browse: false,

@@ -3,13 +3,13 @@ package controllers
 import (
 	"strconv"
 
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/viewmodels"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetYear(kgpz *app.KGPZ) fiber.Handler {
+func GetYear(kgpz *xmlmodels.Library) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		y := c.Params("year", strconv.Itoa(MINYEAR))
 		yi, err := strconv.Atoi(y)
@@ -19,7 +19,7 @@ func GetYear(kgpz *app.KGPZ) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		view, err := viewmodels.YearView(yi, kgpz.Library)
+		view, err := viewmodels.YearView(yi, kgpz)
 		if err != nil {
 			logging.ErrorDebug(err, "Keine Ausgaben für das Jahr "+y)
 			return c.SendStatus(fiber.StatusNotFound)

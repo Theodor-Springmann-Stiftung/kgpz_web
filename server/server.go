@@ -4,16 +4,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/templating"
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cache"
-	"github.com/gofiber/fiber/v2/middleware/etag"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/storage/memory/v2"
@@ -27,25 +23,6 @@ const (
 	// INFO: Maybe this is too long/short?
 	CACHE_TIME        = 24 * time.Hour
 	CACHE_GC_INTERVAL = 120 * time.Second
-)
-
-const (
-	ASSETS_URL_PREFIX = "/assets"
-
-	EDITION_URL  = "/edition/"
-	PRIVACY_URL  = "/datenschutz/"
-	CONTACT_URL  = "/kontakt/"
-	CITATION_URL = "/zitation/"
-
-	INDEX_URL = "/1764"
-
-	YEAR_OVERVIEW_URL     = "/:year"
-	PLACE_OVERVIEW_URL    = "/ort/:place"
-	AGENTS_OVERVIEW_URL   = "/akteure/:letterorid"
-	CATEGORY_OVERVIEW_URL = "/kategorie/:category"
-
-	ISSSUE_URL    = "/:year/:issue/:page?"
-	ADDITIONS_URL = "/:year/:issue/beilage/:page?"
 )
 
 const (
@@ -69,18 +46,20 @@ type Server struct {
 	engine   *templating.Engine
 	mu       sync.Mutex
 
-	kgpz *app.KGPZ
+	// Maybe that is to much, it should just be a list of method, path, handler structs
+	// in the order in which they are ought to be mapped.
+	muxproviders    []MuxProvider
+	premuxproviders []PreMuxProvider
 }
 
-func Create(k *app.KGPZ, c *providers.ConfigProvider, e *templating.Engine) *Server {
-	if c == nil || k == nil {
+func Create(c *providers.ConfigProvider, e *templating.Engine) *Server {
+	if c == nil {
 		logging.Error(nil, "Error creating server: Config or App is posssibly nil.")
 		return nil
 	}
 
 	return &Server{
 		Config: c,
-		kgpz:   k,
 		engine: e,
 	}
 }
@@ -91,6 +70,22 @@ func (s *Server) Engine(e *templating.Engine) {
 	s.engine = e
 	s.mu.Unlock()
 	s.Start()
+}
+
+func (s *Server) AddMux(m MuxProvider) {
+	s.muxproviders = append(s.muxproviders, m)
+}
+
+func (s *Server) ClearMux() {
+	s.muxproviders = []MuxProvider{}
+}
+
+func (s *Server) AddPre(m PreMuxProvider) {
+	s.premuxproviders = append(s.premuxproviders, m)
+}
+
+func (s *Server) ClearPre() {
+	s.premuxproviders = []PreMuxProvider{}
 }
 
 // TODO: There is no error handler
@@ -130,14 +125,19 @@ func (s *Server) Start() {
 		ViewsLayout: templating.DEFAULT_LAYOUT_NAME,
 	})
 
+	for _, m := range s.premuxproviders {
+		err := m.Pre(srv)
+		if err != nil {
+			logging.Error(err, "Error mapping premuxprovider")
+			return
+		}
+	}
+
 	if s.Config.Debug {
 		srv.Use(logger.New())
 	}
 
 	srv.Use(recover.New())
-
-	srv.Use(ASSETS_URL_PREFIX, etag.New())
-	srv.Use(ASSETS_URL_PREFIX, static(&views.StaticFS))
 
 	// TODO: Dont cache static assets, bc storage gets huge on images.
 	// -> Maybe fiber does this already, automatically?
@@ -157,29 +157,13 @@ func (s *Server) Start() {
 		}))
 	}
 
-	srv.Get("/", func(c *fiber.Ctx) error {
-		c.Redirect(INDEX_URL)
-		return nil
-	})
-
-	srv.Get(PLACE_OVERVIEW_URL, controllers.GetPlace(s.kgpz))
-	srv.Get(CATEGORY_OVERVIEW_URL, controllers.GetCategory(s.kgpz))
-	srv.Get(AGENTS_OVERVIEW_URL, controllers.GetAgents(s.kgpz))
-
-	// TODO: YEAR_OVERVIEW_URL being /:year is a bad idea, since it captures basically everything,
-	// probably creating problems with static files, and also in case we add a front page later.
-	// That's why we redirect to /1764 on "/ " above and don´t use an optional /:year? paramter.
-	// -> Check SEO requirements on index pages that are 301 forwarded.
-	// This applies to all paths with two or three segments without a static prefix:
-	// Prob better to do /ausgabe/:year/:issue/:page? and /jahrgang/:year? respectively.
-	srv.Get(YEAR_OVERVIEW_URL, controllers.GetYear(s.kgpz))
-	srv.Get(ISSSUE_URL, controllers.GetIssue(s.kgpz))
-	srv.Get(ADDITIONS_URL, controllers.GetIssue(s.kgpz))
-
-	srv.Get(EDITION_URL, controllers.Get(EDITION_URL))
-	srv.Get(PRIVACY_URL, controllers.Get(PRIVACY_URL))
-	srv.Get(CONTACT_URL, controllers.Get(CONTACT_URL))
-	srv.Get(CITATION_URL, controllers.Get(CITATION_URL))
+	for _, m := range s.muxproviders {
+		err := m.Routes(srv)
+		if err != nil {
+			logging.Error(err, "Error mapping muxprovider")
+			return
+		}
+	}
 
 	s.runner(srv)
 

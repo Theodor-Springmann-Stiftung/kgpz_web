@@ -7,10 +7,15 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Theodor-Springmann-Stiftung/kgpz_web/app"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/functions"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/etag"
+)
+
+const (
+	ASSETS_URL_PREFIX = "/assets"
 )
 
 type Engine struct {
@@ -30,14 +35,14 @@ func NewEngine(layouts, templates *fs.FS) *Engine {
 		mu:               &sync.Mutex{},
 		LayoutRegistry:   NewLayoutRegistry(*layouts),
 		TemplateRegistry: NewTemplateRegistry(*templates),
+		FuncMap:          make(template.FuncMap),
 	}
-
+	e.funcs()
 	return &e
 }
 
-func (e *Engine) Funcs(app *app.KGPZ) error {
+func (e *Engine) funcs() error {
 	e.mu.Lock()
-	e.FuncMap = make(map[string]interface{})
 	e.mu.Unlock()
 
 	// Dates
@@ -58,19 +63,12 @@ func (e *Engine) Funcs(app *app.KGPZ) error {
 	// Embedding of XSLT files
 	e.AddFunc("EmbedXSLT", functions.EmbedXSLT(views.StaticFS))
 
-	// App specific
-	e.AddFunc("GetAgent", app.Library.Agents.Item)
-	e.AddFunc("GetPlace", app.Library.Places.Item)
-	e.AddFunc("GetWork", app.Library.Works.Item)
-	e.AddFunc("GetCategory", app.Library.Categories.Item)
-	e.AddFunc("GetIssue", app.Library.Issues.Item)
-	e.AddFunc("GetPiece", app.Library.Pieces.Item)
-	e.AddFunc("GetGND", app.GND.Person)
+	return nil
+}
 
-	e.AddFunc("LookupPieces", app.Library.Pieces.ReverseLookup)
-	e.AddFunc("LookupWorks", app.Library.Works.ReverseLookup)
-	e.AddFunc("LookupIssues", app.Library.Issues.ReverseLookup)
-
+func (e Engine) Pre(srv *fiber.App) error {
+	srv.Use(ASSETS_URL_PREFIX, etag.New())
+	srv.Use(ASSETS_URL_PREFIX, helpers.StaticHandler(&views.StaticFS))
 	return nil
 }
 
@@ -127,6 +125,14 @@ func (e *Engine) AddFunc(name string, fn interface{}) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.FuncMap[name] = fn
+}
+
+func (e *Engine) AddFuncs(funcs map[string]interface{}) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	for k, v := range funcs {
+		e.FuncMap[k] = v
+	}
 }
 
 func (e *Engine) Render(out io.Writer, path string, data interface{}, layout ...string) error {

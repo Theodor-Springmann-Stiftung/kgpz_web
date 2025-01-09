@@ -21,12 +21,26 @@ const (
 	DEV_CONFIG     = "config.dev.json"
 )
 
+type App struct {
+	KGPZ   *app.KGPZ
+	Server *server.Server
+	Config *providers.ConfigProvider
+	Engine *templating.Engine
+}
+
 func main() {
 	cfg := providers.NewConfigProvider([]string{DEV_CONFIG, DEFAULT_CONFIG})
 	if err := cfg.Read(); err != nil {
 		helpers.Assert(err, "Error reading config")
 	}
 
+	app, err := Init(cfg)
+	helpers.Assert(err, "Error initializing app")
+
+	Run(app)
+}
+
+func Init(cfg *providers.ConfigProvider) (*App, error) {
 	if cfg.Config.Debug {
 		logging.SetDebug()
 	} else {
@@ -34,14 +48,20 @@ func main() {
 	}
 
 	kgpz := app.NewKGPZ(cfg)
+	// TODO: this must return an error on failure
 	kgpz.Init()
 
-	server := server.Create(kgpz, cfg, Engine(kgpz, cfg))
-	Start(kgpz, server, cfg)
+	engine := Engine(kgpz, cfg)
+	server := server.Create(cfg, engine)
+
+	server.AddPre(engine)
+	server.AddMux(kgpz)
+
+	return &App{KGPZ: kgpz, Server: server, Config: cfg, Engine: engine}, nil
 }
 
-func Start(k *app.KGPZ, s *server.Server, c *providers.ConfigProvider) {
-	s.Start()
+func Run(app *App) {
+	app.Server.Start()
 
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
@@ -53,19 +73,19 @@ func Start(k *app.KGPZ, s *server.Server, c *providers.ConfigProvider) {
 		logging.Info("Signal received, Cleaning up...")
 		// INFO: here we add cleanup functions
 		if sig == syscall.SIGTERM {
-			s.Stop()
+			app.Server.Stop()
 			logging.Info("Server stopped. Waiting for FS.")
 		} else {
-			s.Kill()
+			app.Server.Kill()
 			logging.Info("Server killed. Waiting for FS.")
 		}
-		k.Shutdown()
+		app.KGPZ.Shutdown()
 		logging.Info("Shutdown complete.")
 		done <- true
 	}()
 
 	// INFO: hot reloading for poor people
-	if c.Watch {
+	if app.Config.Watch {
 		go func() {
 			_, routesexist := os.Stat(server.ROUTES_FILEPATH)
 			_, layoutexist := os.Stat(server.LAYOUT_FILEPATH)
@@ -83,7 +103,10 @@ func Start(k *app.KGPZ, s *server.Server, c *providers.ConfigProvider) {
 			watcher.Append(func(path string) {
 				logging.Info("File changed: ", path)
 				time.Sleep(200 * time.Millisecond)
-				s.Engine(Engine(k, c))
+				engine := Engine(app.KGPZ, app.Config)
+				app.Server.ClearPre()
+				app.Server.AddPre(engine)
+				app.Server.Engine(engine)
 			})
 
 			if routesexist != nil {
@@ -125,7 +148,7 @@ func Start(k *app.KGPZ, s *server.Server, c *providers.ConfigProvider) {
 
 func Engine(kgpz *app.KGPZ, c *providers.ConfigProvider) *templating.Engine {
 	e := templating.NewEngine(&views.LayoutFS, &views.RoutesFS)
-	e.Funcs(kgpz)
+	e.AddFuncs(kgpz.Funcs())
 	e.Globals(fiber.Map{"isDev": c.Config.Debug, "name": "KGPZ", "lang": "de"})
 	return e
 }

@@ -4,12 +4,37 @@ import (
 	"os"
 	"sync"
 
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/gnd"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
+	"github.com/gofiber/fiber/v2"
+)
+
+// INFO: this holds all the stuff specific to the KGPZ application
+// It implements Map(*fiber.App) error, so it can be used as a MuxProvider
+// It also implements Funcs() map[string]interface{} to map funcs to a template engine
+
+const (
+	ASSETS_URL_PREFIX = "/assets"
+
+	EDITION_URL  = "/edition/"
+	PRIVACY_URL  = "/datenschutz/"
+	CONTACT_URL  = "/kontakt/"
+	CITATION_URL = "/zitation/"
+
+	INDEX_URL = "/1764"
+
+	YEAR_OVERVIEW_URL     = "/:year"
+	PLACE_OVERVIEW_URL    = "/ort/:place"
+	AGENTS_OVERVIEW_URL   = "/akteure/:letterorid"
+	CATEGORY_OVERVIEW_URL = "/kategorie/:category"
+
+	ISSSUE_URL    = "/:year/:issue/:page?"
+	ADDITIONS_URL = "/:year/:issue/beilage/:page?"
 )
 
 type KGPZ struct {
@@ -60,6 +85,52 @@ func (k *KGPZ) InitGND() {
 	if err := k.GND.ReadCache(k.Config.GNDPath); err != nil {
 		logging.Error(err, "Error reading GND cache")
 	}
+}
+
+func (k *KGPZ) Routes(srv *fiber.App) error {
+	srv.Get("/", func(c *fiber.Ctx) error {
+		c.Redirect(INDEX_URL)
+		return nil
+	})
+
+	srv.Get(PLACE_OVERVIEW_URL, controllers.GetPlace(k.Library))
+	srv.Get(CATEGORY_OVERVIEW_URL, controllers.GetCategory(k.Library))
+	srv.Get(AGENTS_OVERVIEW_URL, controllers.GetAgents(k.Library))
+
+	// TODO: YEAR_OVERVIEW_URL being /:year is a bad idea, since it captures basically everything,
+	// probably creating problems with static files, and also in case we add a front page later.
+	// That's why we redirect to /1764 on "/ " above and don´t use an optional /:year? paramter.
+	// -> Check SEO requirements on index pages that are 301 forwarded.
+	// This applies to all paths with two or three segments without a static prefix:
+	// Prob better to do /ausgabe/:year/:issue/:page? and /jahrgang/:year? respectively.
+	srv.Get(YEAR_OVERVIEW_URL, controllers.GetYear(k.Library))
+	srv.Get(ISSSUE_URL, controllers.GetIssue(k.Library))
+	srv.Get(ADDITIONS_URL, controllers.GetIssue(k.Library))
+
+	srv.Get(EDITION_URL, controllers.Get(EDITION_URL))
+	srv.Get(PRIVACY_URL, controllers.Get(PRIVACY_URL))
+	srv.Get(CONTACT_URL, controllers.Get(CONTACT_URL))
+	srv.Get(CITATION_URL, controllers.Get(CITATION_URL))
+
+	return nil
+}
+
+func (k *KGPZ) Funcs() map[string]interface{} {
+	e := make(map[string]interface{})
+	// App specific
+	e["GetAgent"] = k.Library.Agents.Item
+	e["GetPlace"] = k.Library.Places.Item
+	e["GetWork"] = k.Library.Works.Item
+	e["GetCategory"] = k.Library.Categories.Item
+	e["GetIssue"] = k.Library.Issues.Item
+	e["GetPiece"] = k.Library.Pieces.Item
+	e["GetGND"] = k.GND.Person
+
+	e["LookupPieces"] = k.Library.Pieces.ReverseLookup
+	e["LookupWorks"] = k.Library.Works.ReverseLookup
+	e["LookupIssues"] = k.Library.Issues.ReverseLookup
+
+	return e
 }
 
 func (k *KGPZ) Enrich() error {
