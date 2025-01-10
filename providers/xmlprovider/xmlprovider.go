@@ -60,8 +60,8 @@ func NewXMLProvider[T XMLItem]() *XMLProvider[T] {
 func (p *XMLProvider[T]) Prepare() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	// INFO: We take 1000 here as to not reallocate the memory as mutch.
-	p.Array = make([]T, 0, 1000)
+
+	p.Array = make([]T, 0, len(p.Array))
 	p.Resolver.Clear()
 }
 
@@ -72,8 +72,6 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, la
 		return err
 	}
 
-	p.mu.Lock()
-	defer p.mu.Unlock()
 	newItems := dataholder.Children()
 
 	for _, item := range newItems {
@@ -86,6 +84,8 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, la
 		p.addResolvable(item)
 	}
 
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	p.Array = append(p.Array, newItems...)
 	return nil
 }
@@ -94,9 +94,6 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, la
 // It deletes all items that have not been parsed in the last commit,
 // and whose filepath has not been marked as failed.
 func (p *XMLProvider[T]) Cleanup(latest ParseMeta) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
 	todelete := make([]string, 0)
 	toappend := make([]*T, 0)
 	p.Infos.Range(func(key, value interface{}) bool {
@@ -122,6 +119,8 @@ func (p *XMLProvider[T]) Cleanup(latest ParseMeta) {
 		p.Items.Delete(key)
 	}
 
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	for _, item := range toappend {
 		p.Array = append(p.Array, *item)
 		p.addResolvable(*item)

@@ -47,9 +47,10 @@ func Init(cfg *providers.ConfigProvider) (*App, error) {
 		logging.SetInfo()
 	}
 
-	kgpz := app.NewKGPZ(cfg)
-	// TODO: this must return an error on failure
-	kgpz.Init()
+	kgpz, err := app.NewKGPZ(cfg)
+	if err != nil {
+		panic(err)
+	}
 
 	engine := Engine(kgpz, cfg)
 	server := server.Create(cfg, engine)

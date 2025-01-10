@@ -8,8 +8,9 @@ import (
 )
 
 type Resolver[T XMLItem] struct {
-	index map[string]map[string][]Resolved[T] // Map[typeName][refID] -> []*T
-	mu    sync.RWMutex                        // Synchronization for thread safety
+	// INFO: map[type][ID]
+	index map[string]map[string][]Resolved[T]
+	mu    sync.RWMutex
 }
 
 func NewResolver[T XMLItem]() *Resolver[T] {

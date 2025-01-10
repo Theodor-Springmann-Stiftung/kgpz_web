@@ -1,7 +1,6 @@
 package app
 
 import (
-	"os"
 	"sync"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
@@ -17,6 +16,7 @@ import (
 // INFO: this holds all the stuff specific to the KGPZ application
 // It implements Map(*fiber.App) error, so it can be used as a MuxProvider
 // It also implements Funcs() map[string]interface{} to map funcs to a template engine
+// It is meant to be constructed once and then used as a singleton.
 
 const (
 	ASSETS_URL_PREFIX = "/assets"
@@ -38,53 +38,62 @@ const (
 )
 
 type KGPZ struct {
-	// GMU is only here to prevent concurrent pulls
-	// or file system operations while parsing
-	gmu     sync.Mutex
+	// INFO: We need to prevent concurrent reads and writes to the fs here since
+	// - Git is accessing the FS
+	// - The Library is accessing the FS
+	// So we need to prevent concurrent pulls and serializations
+	// This is what fsmu is for. IT IS NOT FOR SETTING Config, Repo. GND or Library.
+	// Those are only set once during initalization and construction.
+	fsmu    sync.Mutex
 	Config  *providers.ConfigProvider
 	Repo    *providers.GitProvider
 	GND     *gnd.GNDProvider
 	Library *xmlmodels.Library
 }
 
-func (k *KGPZ) Init() {
-	if k.Config.Debug {
-		// NOTE: validity checks done wrong, but speeding up dev mode:
-		// In dev mode we expect the folder to be a valid repository
-		if _, err := os.Stat(k.Config.FolderPath); err != nil {
-			k.initRepo()
-		} else {
-			go k.initRepo()
-		}
-		k.Serialize()
-		k.InitGND()
-		k.Enrich()
-		return
-	}
-
-	k.initRepo()
-	k.Serialize()
-	k.InitGND()
-	k.Enrich()
-}
-
-func NewKGPZ(config *providers.ConfigProvider) *KGPZ {
+func NewKGPZ(config *providers.ConfigProvider) (*KGPZ, error) {
 	helpers.AssertNonNil(config, "Config is nil")
 	if err := config.Validate(); err != nil {
 		helpers.Assert(err, "Error validating config")
 	}
 
-	return &KGPZ{Config: config}
+	kgpz := &KGPZ{Config: config}
+	err := kgpz.Init()
+	if err != nil {
+		return nil, err
+	}
+
+	return kgpz, nil
 }
 
-func (k *KGPZ) InitGND() {
-	if k.GND == nil {
-		k.GND = gnd.NewGNDProvider()
+func (k *KGPZ) Init() error {
+	if gp, err := providers.NewGitProvider(
+		k.Config.Config.GitURL,
+		k.Config.Config.FolderPath,
+		k.Config.Config.GitBranch); err != nil {
+		logging.Error(err, "Error initializing GitProvider. Continuing without Git.")
+	} else {
+		k.Repo = gp
 	}
 
-	if err := k.GND.ReadCache(k.Config.GNDPath); err != nil {
-		logging.Error(err, "Error reading GND cache")
+	if err := k.Serialize(); err != nil {
+		logging.Error(err, "Error parsing XML.")
+		return err
 	}
+
+	if err := k.initGND(); err != nil {
+		logging.Error(err, "Error reading GND-Cache. Continuing.")
+	}
+
+	go k.Enrich()
+	go k.Pull()
+
+	return nil
+}
+
+func (k *KGPZ) initGND() error {
+	k.GND = gnd.NewGNDProvider()
+	return k.GND.ReadCache(k.Config.GNDPath)
 }
 
 func (k *KGPZ) Routes(srv *fiber.App) error {
@@ -134,15 +143,13 @@ func (k *KGPZ) Funcs() map[string]interface{} {
 }
 
 func (k *KGPZ) Enrich() error {
-	if k.GND == nil {
-		k.InitGND()
-	}
-
 	if k.Library == nil || k.Library.Agents == nil {
 		return nil
 	}
 
 	go func() {
+		k.fsmu.Lock()
+		defer k.fsmu.Unlock()
 		data := xmlmodels.AgentsIntoDataset(k.Library.Agents)
 		k.GND.FetchPersons(data)
 		k.GND.WriteCache(k.Config.GNDPath)
@@ -151,11 +158,11 @@ func (k *KGPZ) Enrich() error {
 	return nil
 }
 
-func (k *KGPZ) Serialize() {
+func (k *KGPZ) Serialize() error {
 	// TODO: this is error handling from hell
 	// Preventing pulling and serializing at the same time
-	k.gmu.Lock()
-	defer k.gmu.Unlock()
+	k.fsmu.Lock()
+	defer k.fsmu.Unlock()
 
 	commit := ""
 	source := xmlprovider.Path
@@ -168,7 +175,8 @@ func (k *KGPZ) Serialize() {
 		k.Library = xmlmodels.NewLibrary()
 	}
 
-	k.Library.Parse(source, k.Config.FolderPath, commit)
+	err := k.Library.Parse(source, k.Config.FolderPath, commit)
+	return err
 }
 
 func (k *KGPZ) IsDebug() bool {
@@ -176,44 +184,22 @@ func (k *KGPZ) IsDebug() bool {
 }
 
 func (k *KGPZ) Pull() {
-	go func() {
-		logging.Info("Pulling Repository...")
-		k.gmu.Lock()
-
-		if k.Repo == nil {
-			k.gmu.Unlock()
-			return
-		}
-
-		err, changed := k.Repo.Pull()
-		logging.Error(err, "Error pulling GitProvider")
-
-		// Need to unlock here to prevent deadlock, since Serialize locks the same mutex
-		k.gmu.Unlock()
-
-		if changed {
-			logging.ObjDebug(&k.Repo, "Remote changed. Reparsing")
-			k.Serialize()
-		}
-	}()
-}
-
-func (k *KGPZ) initRepo() {
-	gp, err := providers.NewGitProvider(k.Config.Config.GitURL, k.Config.Config.FolderPath, k.Config.Config.GitBranch)
-	// TODO: what to do if the repo can't be initialized?
-	// What to do if the data can't be read?
-	// Handle in Serialize --> it musttry to initialize the repository if files are missing.
-	if err != nil {
-		logging.Error(err, "Error initializing GitProvider")
+	if k.Repo == nil {
 		return
 	}
 
-	k.gmu.Lock()
-	k.Repo = gp
-	k.gmu.Unlock()
-	k.Pull()
+	logging.Info("Pulling Repository...")
 
-	logging.ObjDebug(&k.Repo, "GitProvider initialized")
+	k.fsmu.Lock()
+	err, changed := k.Repo.Pull()
+	logging.Error(err, "Error pulling GitProvider")
+	k.fsmu.Unlock()
+
+	if changed {
+		logging.ObjDebug(&k.Repo, "Remote changed. Reparsing")
+		k.Serialize()
+		k.Enrich()
+	}
 }
 
 func (k *KGPZ) Shutdown() {
