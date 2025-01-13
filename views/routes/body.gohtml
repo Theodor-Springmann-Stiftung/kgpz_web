@@ -1,25 +1,38 @@
 {{ $y := .model.Year }}
-{{ range $year := .model.AvailableYears }}
-	<a href="/{{ $year }}" {{ if eq $year $y }}aria-current="page"{{ end }}>{{ $year }}</a>
-{{ end }}
-{{ range $index, $month := .model.Issues }}
-	<!-- Month Header -->
-	{{ $first := index $month 0 }}
-	<h2>{{ (MonthName $first.Datum.When.Month).Short }}</h2>
 
-	<!-- Issues -->
-	{{ range $issue := $month }}
-		{{ $date := $issue.Datum.When }}
-		<a href="/{{ $y }}/{{ $issue.Number.No }}">
-			<div>
-				{{ $issue.Number.No }}
-			</div>
 
-			<div>
-				{{ (WeekdayName $date.Weekday).Short }}
-			</div>
-
-			<div>{{ $date.Day }}.{{ index $date.Month }}.</div>
-		</a>
+<div class="yearmenu">
+	{{ range $year := .model.AvailableYears }}
+		<a href="/{{ $year }}" {{ if eq $year $y }}aria-current="page"{{ end }}>{{ $year }}</a>
 	{{ end }}
-{{ end }}
+</div>
+
+<table class="border-spacing-y-2 border-separate">
+	{{ range $index, $month := .model.Issues }}
+		<tr class="">
+			<td class="!text-right px-8 align-top py-2">
+				<!-- Month Header -->
+				{{ $first := index $month 0 }}
+				<h2 class="text-lg">{{ (MonthName $first.Datum.When.Month) }}</h2>
+			</td>
+			<!-- Issues -->
+			{{ range $issue := $month }}
+				<td class="w-32 px-3 py-2 bg-slate-100 border-4 border-slate-50">
+					{{ $date := $issue.Datum.When }}
+					<a class="!no-underline" href="/{{ $y }}/{{ $issue.Number.No }}">
+						<div>
+							{{ $issue.Number.No }}
+						</div>
+
+						<div class="">
+							<div class="inline-block font-bold font-variant-small-caps pr-1">
+								{{ (WeekdayName $date.Weekday).Short }}
+							</div>
+							<div class="inline-block">{{ $date.Day }}.{{ index $date.Month }}.</div>
+						</div>
+					</a>
+				</td>
+			{{ end }}
+		</tr>
+	{{ end }}
+</table>
