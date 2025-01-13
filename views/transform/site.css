@@ -40,4 +40,8 @@
 	.font-variant-small-caps {
 		font-variant-caps: small-caps;
 	}
+
+	main {
+		@apply flex-grow shrink-0;
+	}
 }

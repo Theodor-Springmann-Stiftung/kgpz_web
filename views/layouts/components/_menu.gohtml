@@ -1,12 +1,23 @@
-<nav>
-	<div>
-		<div>Übersicht nach</div>
-		<a href="/">Jahrgängen</a>
-		<a href="/akteure/a">Personen</a>
-		<a href="/kategorie/">Betragsarten</a>
-		<a href="/ort/">Orten</a>
+<div class="mt-8 flex flex-row w-full">
+	<div class="mx-auto flex flex-row">
+		<div>
+			<input type="search" placeholder="Suche" class="px-2.5 py-1.5 border w-96" />
+		</div>
+
+		<div x-data="{ open: false }">
+			<button class="btn btn-primary" @click="open = !open">Menu</button>
+			<div x-show="open" class="absolute bg-slate-50">
+				<div>
+					<div>Übersicht nach</div>
+					<a href="/">Jahrgängen</a>
+					<a href="/akteure/a">Personen</a>
+					<a href="/kategorie/">Betragsarten</a>
+					<a href="/ort/">Orten</a>
+				</div>
+				<a href="/edition/">Geschichte &amp; Edition der KGPZ</a>
+				<a href="/zitation/">Zitation</a>
+				<a href="/kontakt/">Kontakt</a>
+			</div>
+		</div>
 	</div>
-	<a href="/edition/">Geschichte &amp; Edition der KGPZ</a>
-	<a href="/zitation/">Zitation</a>
-	<a href="/kontakt/">Kontakt</a>
-</nav>
+</div>

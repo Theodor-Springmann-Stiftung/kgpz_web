@@ -57,6 +57,7 @@ func (e *Engine) funcs() error {
 	e.AddFunc("Safe", functions.Safe)
 
 	// Embedding of file contents
+	functions.ClearEmbedCache()
 	e.AddFunc("EmbedSafe", functions.EmbedSafe(views.StaticFS))
 	e.AddFunc("Embed", functions.Embed(views.StaticFS))
 

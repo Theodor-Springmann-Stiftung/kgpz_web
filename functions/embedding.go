@@ -14,7 +14,6 @@ var embed_cache sync.Map
 // INFO: We initialize the cache in both functions, which is only valid if both of these get
 // called in the same context, eg. when creating a template engine.
 func EmbedSafe(fs fs.FS) func(string) template.HTML {
-	embed_cache.Clear()
 	return func(path string) template.HTML {
 		path = strings.TrimSpace(path)
 		path = filepath.Clean(path)
@@ -28,7 +27,6 @@ func EmbedSafe(fs fs.FS) func(string) template.HTML {
 }
 
 func Embed(fs fs.FS) func(string) string {
-	embed_cache.Clear()
 	return func(path string) string {
 		path = strings.TrimSpace(path)
 		path = filepath.Clean(path)
@@ -39,6 +37,10 @@ func Embed(fs fs.FS) func(string) string {
 
 		return string(val)
 	}
+}
+
+func ClearEmbedCache() {
+	embed_cache.Clear()
 }
 
 func getFileData(fs fs.FS, path string) ([]byte, error) {

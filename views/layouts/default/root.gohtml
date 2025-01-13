@@ -29,16 +29,30 @@
 		</script>
 	</head>
 
-	<body class="w-full h-full p-3" hx-ext="response-targets" hx-boost="true">
-		{{ block "_menu" . }}
-			<!-- Default app menu... -->
-		{{ end }}
+	<body class="w-full" hx-ext="response-targets" hx-boost="true">
+		<div class="container flex flex-col min-h-screen max-w-screen-2xl mx-auto">
+			<header>
+				{{ block "_header" . }}
+					<!-- Default app header... -->
+				{{ end }}
+			</header>
 
+			<div>
+				{{ block "_menu" . }}
+					<!-- Default app menu... -->
+				{{ end }}
+			</div>
 
-		<main>
-			{{ block "body" . }}
-				<!-- Default app body... -->
-			{{ end }}
-		</main>
+			<main class="">
+				{{ block "body" . }}
+					<!-- Default app body... -->
+				{{ end }}
+			</main>
+
+			<footer>
+				{{ block "_footer" . }}
+				{{ end }}
+			</footer>
+		</div>
 	</body>
 </html>
