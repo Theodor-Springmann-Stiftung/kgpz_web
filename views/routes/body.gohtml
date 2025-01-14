@@ -2,12 +2,12 @@
 
 
 <div class="mt-6 w-full">
-	<div class="mx-auto flex flex-row gap-x-3 w-fit">
+	<div class="mx-auto flex flex-row gap-x-4 w-fit items-end leading-none">
 		{{ range $year := .model.AvailableYears }}
 			<a
-				class="block"
 				href="/{{ $year }}"
-				{{ if eq $year $y }}aria-current="page"{{ end }}
+				class="no-underline leading-none !m-0 !p-0
+				{{ if eq $year $y }}text-2xl font-bold pointer-events-none" aria-current="page{{ end }}"
 				>{{ $year }}</a
 			>
 		{{ end }}

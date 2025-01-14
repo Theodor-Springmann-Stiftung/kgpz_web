@@ -1,19 +1,26 @@
-<div class="mt-8 flex flex-row w-full">
-	<div class="mx-auto flex flex-row">
-		<div>
-			<input type="search" placeholder="Suche" class="px-2.5 py-1.5 border w-96" />
-		</div>
+<div class="flex flex-row justify-center mt-8">
+	<div class="w-6/12">
+		<input type="search" placeholder="Suche" class="px-2.5 py-1.5 border w-full" />
+	</div>
 
-		<div x-data="{ open: false }">
-			<button class="btn btn-primary" @click="open = !open">Menu</button>
-			<div x-show="open" class="absolute bg-slate-50">
-				<div>
-					<div>Übersicht nach</div>
+	<div x-data="{ open: false }">
+		<button
+			class="ml-2 text-2xl border px-4 h-full"
+			:class="open? 'open bg-slate-200' : 'closed'"
+			@click="open = !open">
+			<i class="ri-menu-line"></i>
+		</button>
+		<div :class="open? 'open' : 'closed'" x-show="open" class="absolute bg-slate-50 px-5 py-3">
+			<div>
+				<div>Übersicht nach</div>
+				<div class="ml-2 flex flex-col gap-y-2 mt-2">
 					<a href="/">Jahrgängen</a>
 					<a href="/akteure/a">Personen</a>
 					<a href="/kategorie/">Betragsarten</a>
 					<a href="/ort/">Orten</a>
 				</div>
+			</div>
+			<div class="flex flex-col gap-y-2 mt-2">
 				<a href="/edition/">Geschichte &amp; Edition der KGPZ</a>
 				<a href="/zitation/">Zitation</a>
 				<a href="/kontakt/">Kontakt</a>
