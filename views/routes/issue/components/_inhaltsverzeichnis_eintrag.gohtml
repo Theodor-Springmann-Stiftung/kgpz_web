@@ -46,7 +46,7 @@
 
 <!-- Notizen -->
 {{ range $annotation := $piece.AnnotationNote.Annotations }}
-	<div>
+	<div class="italic">
 		{{ $annotation.Inner.InnerXML }}
 	</div>
 {{ end }}

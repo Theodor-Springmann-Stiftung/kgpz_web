@@ -5,6 +5,20 @@
 		Zurück zum Jahr
 		{{ $date.Year }}
 	</a>
+
+	<div>
+		{{ if $model.Prev }}
+			<a href="/{{- $model.Prev.Datum.When.Year -}}/{{- $model.Prev.Number.No -}}">
+				&larr; Zurück
+			</a>
+		{{ end }}
+
+		{{ if $model.Next }}
+			<a href="/{{- $model.Next.Datum.When.Year -}}/{{- $model.Next.Number.No -}}">
+				Weiter &rarr;
+			</a>
+		{{ end }}
+	</div>
 </div>
 
 <div>

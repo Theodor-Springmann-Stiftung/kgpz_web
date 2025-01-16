@@ -23,17 +23,46 @@ type PiecesByPage struct {
 // TODO: Next & Prev
 type IssueVM struct {
 	xmlmodels.Issue
+	Next             *xmlmodels.Issue
+	Prev             *xmlmodels.Issue
 	Pieces           PiecesByPage
 	AdditionalPieces PiecesByPage
 }
 
-func NewSingleIssueView(y string, no string, lib *xmlmodels.Library) (*IssueVM, error) {
-	issue := lib.Issues.Item(no + "-" + y)
+func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
+	lib.Issues.Lock()
+	var issue *xmlmodels.Issue = nil
+	var next *xmlmodels.Issue = nil
+	var prev *xmlmodels.Issue = nil
+
+	for i, iss := range lib.Issues.Array {
+		if iss.Datum.When.Year == y && iss.Number.No == no {
+			issue = &iss
+			if i > 0 {
+				prev = &lib.Issues.Array[i-1]
+			}
+			if i < len(lib.Issues.Array)-1 {
+				next = &lib.Issues.Array[i+1]
+			}
+		}
+	}
+
 	if issue == nil {
 		return nil, fmt.Errorf("No issue found for %v-%v", y, no)
 	}
 
-	sivm := IssueVM{Issue: *issue}
+	var Next *xmlmodels.Issue = nil
+	var Prev *xmlmodels.Issue = nil
+	if next != nil {
+		Next = &*next
+	}
+	if prev != nil {
+		Prev = &*prev
+	}
+
+	sivm := IssueVM{Issue: *issue, Next: Next, Prev: Prev}
+
+	lib.Issues.Unlock()
 	ppi, ppa, err := PiecesForIsssue(lib, *issue)
 	if err != nil {
 		return nil, err

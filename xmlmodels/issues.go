@@ -39,12 +39,13 @@ func (i Issue) Keys() []string {
 	}
 
 	res := make([]string, 2)
+	res = append(res, i.Reference())
+
 	date := i.Datum.When.String()
 	if date != "" {
 		res = append(res, date)
 	}
 
-	res = append(res, i.Reference())
 	i.keys = res
 
 	return res
@@ -55,7 +56,7 @@ func (i Issue) Year() int {
 }
 
 func (i Issue) Reference() string {
-	return strconv.Itoa(i.Number.No) + "-" + strconv.Itoa(i.Datum.When.Year)
+	return strconv.Itoa(i.Datum.When.Year) + "-" + strconv.Itoa(i.Number.No)
 }
 
 func (i Issue) String() string {
