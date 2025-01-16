@@ -57,12 +57,10 @@ func (e *Engine) funcs() error {
 	e.AddFunc("Safe", functions.Safe)
 
 	// Embedding of file contents
-	functions.ClearEmbedCache()
-	e.AddFunc("EmbedSafe", functions.EmbedSafe(views.StaticFS))
-	e.AddFunc("Embed", functions.Embed(views.StaticFS))
-
-	// Embedding of XSLT files
-	e.AddFunc("EmbedXSLT", functions.EmbedXSLT(views.StaticFS))
+	embedder := functions.NewEmbedder(views.StaticFS)
+	e.AddFunc("EmbedSafe", embedder.EmbedSafe())
+	e.AddFunc("Embed", embedder.Embed())
+	e.AddFunc("EmbedXSLT", embedder.EmbedXSLT())
 
 	return nil
 }

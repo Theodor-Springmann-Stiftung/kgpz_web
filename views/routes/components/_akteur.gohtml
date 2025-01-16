@@ -58,6 +58,19 @@
 							<a href="{{ $url.Address }}" target="_blank">{{ $url.Chardata }}</a>
 						</div>
 					{{ end }}
+
+					{{ $pieces := LookupPieces $w.Item }}
+					{{ if len $pieces }}
+						<div>
+							{{ range $_, $p := $pieces }}
+								{{- range $_, $i := $p.Item.IssueRefs -}}
+									<div>
+										<a href="/{{ $i.When }}/{{ $i.Nr }}">{{ $i.Nr }}/{{ $i.When }}</a>
+									</div>
+								{{- end -}}
+							{{ end }}
+						</div>
+					{{ end }}
 				{{ end }}
 			</div>
 		{{ end }}

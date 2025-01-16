@@ -1,15 +1,14 @@
 {{ $model := .model }}
 
 
-<div>Inhalt</div>
 <div>
 	{{ range  $page := $model.Pieces.Pages }}
-		<div>
-			<div>Seite {{ $page }}</div>
-
+		<div class="pt-4">
+			<div class="">Seite {{ $page }}</div>
+			<ol class="list-disc" >
 			{{ range $piece := (index $model.Pieces.Items $page) }}
+				<li class="ml-0" >
 				{{ template "_inhaltsverzeichnis_eintrag" $piece }}
-
 
 				<!-- Links zu anderen Teilen: -->
 				{{ if gt (len $piece.IssueRefs) 1 }}
@@ -33,9 +32,11 @@
 						</ol>
 					</div>
 				{{ end }}
-
+				</li>
 			{{ end }}
 
+
+		<!-- Pages end -->
 		</div>
 	{{ end }}
 </div>

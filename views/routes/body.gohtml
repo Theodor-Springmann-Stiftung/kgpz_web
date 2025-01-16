@@ -16,18 +16,20 @@
 
 <div class="grid grid-cols-11 gap-x-2 gap-y-4 pt-8">
 	{{ range $index, $month := .model.Issues }}
+
+		<!-- Month Header -->
 		<div class="col-span-1 text-right py-1 px-2.5">
-			<!-- Month Header -->
 			{{ $first := index $month 0 }}
 			<h2 class="text-lg">{{ (MonthName $first.Datum.When.Month) }}</h2>
 		</div>
+
 		<!-- Issues -->
 		<div class="col-span-10 grid grid-cols-subgrid">
 			{{ range $issue := $month }}
 				<div class="col-span-1 bg-slate-100 px-2 py-1.5">
 					{{ $date := $issue.Datum.When }}
 					<a class="!no-underline" href="/{{ $y }}/{{ $issue.Number.No }}">
-						<div>
+						<div class="">
 							{{ $issue.Number.No }}
 						</div>
 

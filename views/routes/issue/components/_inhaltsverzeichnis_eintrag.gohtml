@@ -1,20 +1,50 @@
 {{ $piece := . }}
-Eintrag!
+
 
 <!-- Autor(en) -->
-{{ $authorset := false }}
-<div class="authors">
-	{{ range $agentref := $piece.AgentRefs }}
-		{{ if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) }}
-			{{ $agent := GetAgent $agentref.Ref }}
-			<!-- NOT IMPLEMENTED: Multiple agent names -->
-			{{- if gt (len $agent.Names) 0 -}}
-				<div class="author inline-block">{{- index $agent.Names 0 -}}</div>
+{{ if $piece.AgentRefs }}
+	<div class="authors">
+		{{ range $agentref := $piece.AgentRefs }}
+			{{ if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) }}
+				{{ $agent := GetAgent $agentref.Ref }}
+				{{- if gt (len $agent.Names) 0 -}}
+					<a href="/akteure/{{ $agentref.Ref }}" class="inline-block">
+						{{- index $agent.Names 0 -}}
+					</a>
+				{{ end }}
+			{{ end }}
+		{{ end }}
+	</div>
+{{ end }}
+
+
+<!-- Kategorien -->
+<div class="">
+	<!-- Einzelkategorien -->
+	{{ if $piece.CategoryRefs }}
+		{{ range $catref := $piece.CategoryRefs }}
+			{{ $category := GetCategory $catref.Ref }}
+			{{- if gt (len $category.Names) 0 -}}
+				<div class="category inline-block">{{- index $category.Names 0 -}}</div>
+			{{ end }}
+		{{ end }}
+	{{ end }}
+
+
+	<!-- Kategorie Werk -->
+	{{ if $piece.WorkRefs }}
+		{{ range $workref := $piece.WorkRefs }}
+			{{ $work := GetWork $workref.Ref }}
+			{{- if $work.PreferredTitle -}}
+				<div class="category inline-block">{{- index $work.PreferredTitle -}}</div>
+			{{- else if $work.Citation.Title -}}
+				<div class="category inline-block">{{- index $work.Citation.Title -}}</div>
 			{{ end }}
 		{{ end }}
 	{{ end }}
 </div>
 
+<!-- Notizen -->
 {{ range $annotation := $piece.AnnotationNote.Annotations }}
 	<div>
 		{{ $annotation.Inner.InnerXML }}

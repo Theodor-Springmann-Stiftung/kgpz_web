@@ -67,9 +67,22 @@ func (p Piece) ReferencesIssue(y, no int) (*IssueRef, bool) {
 	return nil, false
 }
 
+// INFO: we can't use a pointer reciever here, the interface won't allow it
 func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 	refs := make(xmlprovider.ResolvingMap[Piece])
 	x := CategoryRef{}
+
+	for _, ref := range p.CategoryRefs {
+		if ref.Category != "" {
+			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+				Item:       &p,
+				Reference:  ref.Category,
+				Cert:       !ref.Unsicher,
+				Conjecture: false,
+				Comment:    ref.Inner.InnerXML,
+			})
+		}
+	}
 
 	for _, ref := range p.IssueRefs {
 		if ref.When.Year == 0 || ref.Nr == 0 {
@@ -77,6 +90,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 		}
 		if ref.Category != "" {
 			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
 				Conjecture: false,
@@ -84,6 +98,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 			})
 		}
 		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+			Item:       &p,
 			Reference:  strconv.Itoa(ref.When.Year) + "-" + strconv.Itoa(ref.Nr),
 			Category:   ref.Category,
 			Cert:       !ref.Unsicher,
@@ -96,6 +111,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 	for _, ref := range p.PlaceRefs {
 		if ref.Category != "" {
 			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
 				Conjecture: false,
@@ -103,6 +119,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 			})
 		}
 		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+			Item:       &p,
 			Reference:  ref.Ref,
 			Category:   ref.Category,
 			Cert:       !ref.Unsicher,
@@ -115,6 +132,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 	for _, ref := range p.AgentRefs {
 		if ref.Category != "" {
 			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
 				Conjecture: false,
@@ -122,6 +140,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 			})
 		}
 		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+			Item:       &p,
 			Reference:  ref.Ref,
 			Category:   ref.Category,
 			Cert:       !ref.Unsicher,
@@ -134,6 +153,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 	for _, ref := range p.WorkRefs {
 		if ref.Category != "" {
 			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
 				Conjecture: false,
@@ -141,6 +161,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 			})
 		}
 		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+			Item:       &p,
 			Reference:  ref.Ref,
 			Category:   ref.Category,
 			Cert:       !ref.Unsicher,
@@ -152,6 +173,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 	for _, ref := range p.PieceRefs {
 		if ref.Category != "" {
 			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
 				Conjecture: false,
@@ -160,6 +182,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 			})
 		}
 		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+			Item:       &p,
 			Reference:  ref.Ref,
 			Category:   ref.Category,
 			Cert:       !ref.Unsicher,

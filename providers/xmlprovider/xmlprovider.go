@@ -125,6 +125,8 @@ func (p *XMLProvider[T]) Cleanup(latest ParseMeta) {
 		p.Array = append(p.Array, *item)
 		p.addResolvable(*item)
 	}
+
+	slices.SortFunc(p.Array, Sort)
 }
 
 func (p *XMLProvider[T]) addResolvable(item T) {
