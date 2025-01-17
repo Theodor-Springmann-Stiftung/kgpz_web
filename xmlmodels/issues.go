@@ -34,19 +34,13 @@ func (i Issue) Name() string {
 }
 
 func (i Issue) Keys() []string {
-	if len(i.keys) > 0 {
-		return i.keys
-	}
-
-	res := make([]string, 2)
+	res := make([]string, 0, 2)
 	res = append(res, i.Reference())
 
 	date := i.Datum.When.String()
 	if date != "" {
 		res = append(res, date)
 	}
-
-	i.keys = res
 
 	return res
 }

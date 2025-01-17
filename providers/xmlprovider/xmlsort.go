@@ -1,7 +1,6 @@
 package xmlprovider
 
 import (
-	"log"
 	"strconv"
 	"strings"
 )
@@ -48,6 +47,8 @@ func Sort[T XMLItem](i, j T) int {
 		}
 
 		int_b, err := strconv.Atoi(sort_b[i])
+		if err != nil {
+
 			if item < sort_b[i] {
 				return -1
 			}

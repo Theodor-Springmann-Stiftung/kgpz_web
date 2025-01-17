@@ -2,11 +2,11 @@
 {{ $date := .model.Datum.When }}
 <div>
 	<a href="/{{- $date.Year -}}">
-		Zurück zum Jahr
+		Zum Jahr
 		{{ $date.Year }}
 	</a>
 
-	<div>
+	<div class="flex flex-row gap-x-2">
 		{{ if $model.Prev }}
 			<a href="/{{- $model.Prev.Datum.When.Year -}}/{{- $model.Prev.Number.No -}}">
 				&larr; Zurück
