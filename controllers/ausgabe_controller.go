@@ -37,6 +37,6 @@ func GetIssue(kgpz *xmlmodels.Library) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		return c.Render("/issue/", fiber.Map{"model": issue, "year": yi, "issue": di})
+		return c.Render("/ausgabe/", fiber.Map{"model": issue, "year": yi, "issue": di})
 	}
 }

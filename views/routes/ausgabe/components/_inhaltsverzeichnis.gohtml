@@ -1,0 +1,96 @@
+{{ $model := .model }}
+
+
+<div class="max-w-[22rem] bg-slate-100 px-6 py-4 hyphens-auto">
+	{{- if $model.Pieces.Pages -}}
+		<div>
+			{{ range  $page := $model.Pieces.Pages }}
+				<div class="pt-4 first:pt-0 hyphens-auto">
+					<div class="font-bold">Seite {{ $page }}</div>
+					<ul class="">
+						{{ range $piece := (index $model.Pieces.Items $page) }}
+							<li class="ml-0">
+								{{ template "_inhaltsverzeichnis_eintrag" $piece }}
+
+
+								<!-- Links zu anderen Teilen: -->
+								{{ if gt (len $piece.IssueRefs) 1 }}
+									<div>
+										{{ len $piece.IssueRefs }} Teile:
+										<div>
+											{{ range $issue := $piece.IssueRefs }}
+												<li>
+													<a
+														href="/{{- $issue.When -}}/{{- $issue.Nr -}}"
+														{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
+															$model.Datum.When.Year)
+														-}}
+															aria-current="page"
+														{{ end }}>
+														{{- $issue.When.Year }} Nr.
+														{{ $issue.Nr -}}
+													</a>
+												</li>
+											{{ end }}
+										</div>
+									</div>
+								{{ end }}
+							</li>
+						{{ end }}
+
+
+						<!-- Pages end -->
+					</ul>
+				</div>
+			{{- end -}}
+		</div>
+	{{- end -}}
+
+
+	<!-- Beilagen -->
+	{{- if $model.AdditionalPieces.Pages -}}
+		<div class="mt-8">
+			<div>Beilage</div>
+			{{ range  $page := $model.AdditionalPieces.Pages }}
+				<div class="pt-4 first:pt-0 ">
+					<div class="">Seite {{ $page }}</div>
+					<ul class="list-disc list-inside">
+						{{ range $piece := (index $model.AdditionalPieces.Items $page) }}
+							<li class="ml-0">
+								{{ template "_inhaltsverzeichnis_eintrag" $piece }}
+
+
+								<!-- Links zu anderen Teilen: -->
+								{{ if gt (len $piece.IssueRefs) 1 }}
+									<div>
+										{{ len $piece.IssueRefs }} Teile:
+										<div>
+											{{ range $issue := $piece.IssueRefs }}
+												<li>
+													<a
+														href="/{{- $issue.When -}}/{{- $issue.Nr -}}"
+														{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
+															$model.Datum.When.Year)
+														-}}
+															aria-current="page"
+														{{ end }}>
+														{{- $issue.When.Year }} Nr.
+														{{ $issue.Nr -}}
+													</a>
+												</li>
+											{{ end }}
+										</div>
+									</div>
+								{{ end }}
+							</li>
+						{{ end }}
+
+
+						<!-- Pages end -->
+					</ul>
+				</div>
+			{{- end -}}
+		</div>
+	{{- end -}}
+
+</div>
