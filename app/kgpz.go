@@ -1,6 +1,7 @@
 package app
 
 import (
+	"os"
 	"sync"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
@@ -11,15 +12,14 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/etag"
 )
 
-// INFO: this holds all the stuff specific to the KGPZ application
-// It implements Map(*fiber.App) error, so it can be used as a MuxProvider
 // It also implements Funcs() map[string]interface{} to map funcs to a template engine
 // It is meant to be constructed once and then used as a singleton.
 
 const (
-	ASSETS_URL_PREFIX = "/assets"
+	IMG_PREFIX = "/img/"
 
 	EDITION_URL  = "/edition/"
 	PRIVACY_URL  = "/datenschutz/"
@@ -64,6 +64,20 @@ func NewKGPZ(config *providers.ConfigProvider) (*KGPZ, error) {
 	}
 
 	return kgpz, nil
+}
+
+func (k *KGPZ) Pre(srv *fiber.App) error {
+
+	// Check if folder exists and if yes, serve image files from i
+	if _, err := os.Stat(k.Config.Config.ImgPath); err == nil {
+		fs := os.DirFS(k.Config.Config.ImgPath)
+		srv.Use(IMG_PREFIX, etag.New())
+		srv.Use(IMG_PREFIX, helpers.StaticHandler(&fs))
+	} else {
+		logging.Info("Image folder not found. Skipping image serving.")
+	}
+
+	return nil
 }
 
 func (k *KGPZ) Init() error {

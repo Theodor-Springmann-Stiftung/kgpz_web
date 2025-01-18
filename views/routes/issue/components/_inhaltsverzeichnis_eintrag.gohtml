@@ -30,18 +30,45 @@
 		{{ end }}
 	{{ end }}
 
+	{{- if $piece.Title -}}
+		<div class="">{{- index $piece.Title 0 -}}</div>
+	{{- else if $piece.Incipit -}}
+		<div class="">{{- index $piece.Incipit 0 -}}</div>
+	{{- end -}}
+
+	{{- if $piece.PlaceRefs -}}
+		{{ $place := GetPlace (index $piece.PlaceRefs 0).Ref }}
+		{{- if gt (len $place.Names) 0 -}}
+			<div class="">{{- index $place.Names 0 -}}</div>
+		{{- end -}}
+	{{- end -}}
+
 
 	<!-- Kategorie Werk -->
 	{{ if $piece.WorkRefs }}
 		{{ range $workref := $piece.WorkRefs }}
 			{{ $work := GetWork $workref.Ref }}
+			<!-- What we do depends on the category -->
+			{{- $kat := $workref.Category }}
+			{{- if not $kat }}
+				{{- $kat = "rezension" -}}
+			{{- end -}}
+
+			{{- $category := GetCategory $kat -}}
+			{{- if gt (len $category.Names) 0 -}}
+				<div class="category inline-block">{{- index $category.Names 0 -}}</div>
+			{{- end -}}
+
 			{{- if $work.PreferredTitle -}}
-				<div class="category inline-block">{{- index $work.PreferredTitle -}}</div>
+				<div class="">{{- $work.PreferredTitle -}}</div>
 			{{- else if $work.Citation.Title -}}
-				<div class="category inline-block">{{- index $work.Citation.Title -}}</div>
-			{{ end }}
-		{{ end }}
-	{{ end }}
+				<div class="">{{- $work.Citation.Title -}}</div>
+			{{- else -}}
+				<div class="">{{- $work.Citation.Chardata -}}</div>
+			{{- end -}}
+
+		{{- end -}}
+	{{- end -}}
 </div>
 
 <!-- Notizen -->

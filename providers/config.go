@@ -17,6 +17,7 @@ const (
 	DEFAULT_GIT_DIR = "data_git"
 	DEFAULT_GND_DIR = "cache_gnd"
 	DEFAULT_GEO_DIR = "cache_geo"
+	DEFAULT_IMG_DIR = "data_bilder"
 
 	DEFAULT_PORT  = "8080"
 	DEFAULT_ADDR  = "localhost"
@@ -37,6 +38,7 @@ type Config struct {
 	FolderPath      string `json:"folder_path" envconfig:"FOLDER_PATH"`
 	GNDPath         string `json:"gnd_path" envconfig:"GND_PATH"`
 	GeoPath         string `json:"geo_path" envconfig:"GEO_PATH"`
+	ImgPath         string `json:"img_path" envconfig:"IMG_PATH"`
 	WebHookEndpoint string `json:"webhook_endpoint" envconfig:"WEBHOOK_ENDPOINT"`
 	WebHookSecret   string `json:"webhook_secret" envconfig:"WEBHOOK_SECRET"`
 	Debug           bool   `json:"debug" envconfig:"DEBUG"`
@@ -108,6 +110,10 @@ func readDefaults(cfg *Config) *Config {
 
 	if strings.TrimSpace(cfg.Port) == "" {
 		cfg.Port = DEFAULT_PORT
+	}
+
+	if strings.TrimSpace(cfg.ImgPath) == "" {
+		cfg.ImgPath = DEFAULT_IMG_DIR
 	}
 
 	return cfg

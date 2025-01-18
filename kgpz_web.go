@@ -56,6 +56,7 @@ func Init(cfg *providers.ConfigProvider) (*App, error) {
 	server := server.Create(cfg, engine)
 
 	server.AddPre(engine)
+	server.AddPre(kgpz)
 	server.AddMux(kgpz)
 
 	return &App{KGPZ: kgpz, Server: server, Config: cfg, Engine: engine}, nil

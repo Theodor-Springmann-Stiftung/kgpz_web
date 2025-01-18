@@ -4,6 +4,7 @@ bin/
 data_git/
 cache_geo/
 cache_gnd/
+data_bilder/
 config.json
 out.log
 kgpz_web
