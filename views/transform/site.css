@@ -1,6 +1,32 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --font-script: Rancho, ui-serif;
+  --font-sans: 'Source Sans 3', 'Merriweather Sans', ui-sans-serif;
+  --font-serif: 'Merriweather', ui-serif;
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@utility font-variant-small-caps {
+  font-variant-caps: small-caps;
+}
 
 @layer base {
 }
@@ -34,14 +60,10 @@
 	}
 
 	a[aria-current="page"] {
-		@apply !text-red-500;
-	}
-
-	.font-variant-small-caps {
-		font-variant-caps: small-caps;
+		@apply text-red-500!;
 	}
 
 	main {
-		@apply flex-grow shrink-0;
+		@apply grow shrink-0;
 	}
 }

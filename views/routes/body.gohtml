@@ -28,7 +28,7 @@
 			{{ range $issue := $month }}
 				<div class="col-span-1 bg-slate-100 px-2 py-1.5">
 					{{ $date := $issue.Datum.When }}
-					<a class="!no-underline" href="/{{ $y }}/{{ $issue.Number.No }}">
+					<a class="no-underline!" href="/{{ $y }}/{{ $issue.Number.No }}">
 						<div class="">
 							{{ $issue.Number.No }}
 						</div>

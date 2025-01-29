@@ -30,7 +30,7 @@
 
 
 			<div class="flex gap-x-2 flex-row">
-				<a href="/akteure/{{ $a.ID }}" class="!no-underline"><i class="ri-links-line"></i></a>
+				<a href="/akteure/{{ $a.ID }}" class="no-underline!"><i class="ri-links-line"></i></a>
 
 				{{- if ne $gnd nil -}}
 					<a href="{{ $a.GND }}" target="_blank">GND &rarr;</a>
