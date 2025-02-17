@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+const (
+	ISSUE_TYPE = "issue"
+)
+
 type Issue struct {
 	XMLName     xml.Name     `xml:"stueck"`
 	Number      Nummer       `xml:"nummer"`
@@ -56,4 +60,23 @@ func (i Issue) Reference() string {
 func (i Issue) String() string {
 	data, _ := json.MarshalIndent(i, "", "  ")
 	return string(data)
+}
+
+func (i Issue) Readable(_ *Library) map[string]interface{} {
+	ret := map[string]interface{}{
+		"ID":     i.ID,
+		"Number": i.Number.No,
+		"Year":   i.Datum.When.Year,
+		"Date":   i.Datum.When.String(),
+	}
+
+	for k, v := range i.AnnotationNote.Readable() {
+		ret[k] = v
+	}
+
+	return ret
+}
+
+func (i Issue) Type() string {
+	return ISSUE_TYPE
 }

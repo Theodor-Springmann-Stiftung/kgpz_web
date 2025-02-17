@@ -34,7 +34,7 @@ func (p ParseMeta) Failed(path string) bool {
 }
 
 // An XMLProvider is a struct that holds holds serialized XML data of a specific type. It combines multiple parses IF a succeeded parse can not serialize the data from a path.
-type XMLProvider[T XMLItem] struct {
+type XMLProvider[T IXMLItem] struct {
 	// INFO: map is type map[string]*T
 	Items sync.Map
 	// INFO: map is type [string]ItemInfo
@@ -50,7 +50,7 @@ type XMLProvider[T XMLItem] struct {
 	Array []T
 }
 
-func NewXMLProvider[T XMLItem]() *XMLProvider[T] {
+func NewXMLProvider[T IXMLItem]() *XMLProvider[T] {
 	return &XMLProvider[T]{Resolver: *NewResolver[T]()}
 }
 
@@ -141,7 +141,7 @@ func (p *XMLProvider[T]) addResolvable(item T) {
 	}
 }
 
-func (p *XMLProvider[T]) ReverseLookup(item XMLItem) []Resolved[T] {
+func (p *XMLProvider[T]) ReverseLookup(item IXMLItem) []Resolved[T] {
 	// INFO: this runs just once for the first key
 	ret := make([]Resolved[T], 0)
 	keys := item.Keys()

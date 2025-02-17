@@ -3,6 +3,7 @@ package xmlmodels
 import (
 	"encoding/xml"
 	"errors"
+	"strings"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/xsdtime"
 )
@@ -38,6 +39,24 @@ type AnnotationNote struct {
 	Notes       []Note       `xml:"vermerk"`
 }
 
+func (an AnnotationNote) Readable() map[string]interface{} {
+	ret := make(map[string]interface{})
+	annnotations := make([]string, len(an.Annotations))
+	for _, a := range an.Annotations {
+		annnotations = append(annnotations, a.Chardata)
+	}
+
+	ret["Annotations"] = strings.Join(annnotations, "; ")
+
+	nots := make([]string, len(an.Notes))
+	for _, n := range an.Notes {
+		nots = append(nots, n.Chardata)
+	}
+
+	ret["Notes"] = strings.Join(nots, "; ")
+	return ret
+}
+
 type Annotation struct {
 	XMLName xml.Name `xml:"anmerkung"`
 	Value
@@ -57,7 +76,7 @@ type Identifier struct {
 
 func (i Identifier) Keys() []string {
 	if len(i.keys) == 0 {
-		i.keys = append(i.keys, i.ID)
+		i.keys = []string{i.ID}
 	}
 	return i.keys
 }
@@ -67,6 +86,19 @@ type Reference struct {
 	Category string `xml:"kat,attr"`
 	Unsicher bool   `xml:"unsicher,attr"`
 	Inner    Inner
+}
+
+func (r Reference) Readable(lib *Library) map[string]interface{} {
+	data := make(map[string]interface{})
+	if r.Category != "" {
+		cat := lib.Categories.Item(r.Category)
+		if cat != nil {
+			data["ReferenceCategory"] = cat.Names
+		}
+	}
+
+	data["ReferenceComment"] = r.Inner.InnerXML
+	return data
 }
 
 type Value struct {

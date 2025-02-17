@@ -41,6 +41,7 @@ type Config struct {
 	GITPath         string `json:"git_path" envconfig:"GIT_PATH"`
 	GNDPath         string `json:"gnd_path" envconfig:"GND_PATH"`
 	GeoPath         string `json:"geo_path" envconfig:"GEO_PATH"`
+	SearchPath      string `json:"search_path" envconfig:"SEARCH_PATH"`
 	ImgPath         string `json:"img_path" envconfig:"IMG_PATH"`
 	WebHookEndpoint string `json:"webhook_endpoint" envconfig:"WEBHOOK_ENDPOINT"`
 	WebHookSecret   string `json:"webhook_secret" envconfig:"WEBHOOK_SECRET"`
@@ -121,6 +122,10 @@ func readDefaults(cfg *Config) *Config {
 
 	if strings.TrimSpace(cfg.ImgPath) == "" {
 		cfg.ImgPath = DEFAULT_IMG_DIR
+	}
+
+	if strings.TrimSpace(cfg.SearchPath) == "" {
+		cfg.SearchPath = DEFAULT_SEARCH_CACHE_DIR
 	}
 
 	return cfg

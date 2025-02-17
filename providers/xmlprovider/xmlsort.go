@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func Sort[T XMLItem](i, j T) int {
+func Sort[T IXMLItem](i, j T) int {
 
 	keys_a := i.Keys()
 	keys_b := j.Keys()

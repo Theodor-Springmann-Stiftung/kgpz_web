@@ -54,3 +54,9 @@ In Kombination:
 
 Anderes:
 - Provinienz in Werk
+
+
+Suche:
+- Phrasensuche
+- AND, OR
+- Groß- und Kleinschreibung ignorieren

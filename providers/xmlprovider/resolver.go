@@ -7,13 +7,13 @@ import (
 	"sync"
 )
 
-type Resolver[T XMLItem] struct {
+type Resolver[T IXMLItem] struct {
 	// INFO: map[type][ID]
 	index map[string]map[string][]Resolved[T]
 	mu    sync.RWMutex
 }
 
-func NewResolver[T XMLItem]() *Resolver[T] {
+func NewResolver[T IXMLItem]() *Resolver[T] {
 	return &Resolver[T]{index: make(map[string]map[string][]Resolved[T])}
 }
 

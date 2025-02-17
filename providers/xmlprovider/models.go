@@ -2,8 +2,11 @@ package xmlprovider
 
 import "fmt"
 
-type XMLItem interface {
+type IXMLItem interface {
 	fmt.Stringer
+	// INFO:
+	// - Keys should be unique
+	// - Keys[0] has the special meaning of the primary key (for FTS etc.)
 	Keys() []string
 	Name() string
 }
@@ -12,13 +15,13 @@ type ILibrary interface {
 	Parse(meta ParseMeta) error
 }
 
-type ResolvingMap[T XMLItem] map[string][]Resolved[T]
+type ResolvingMap[T IXMLItem] map[string][]Resolved[T]
 
-type ReferenceResolver[T XMLItem] interface {
+type ReferenceResolver[T IXMLItem] interface {
 	References() ResolvingMap[T]
 }
 
-type Resolved[T XMLItem] struct {
+type Resolved[T IXMLItem] struct {
 	Item       *T
 	Reference  string
 	Category   string

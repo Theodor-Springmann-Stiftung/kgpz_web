@@ -10,6 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	PIECES_CATEGORY = "piece"
+)
+
 type Piece struct {
 	XMLName      xml.Name      `xml:"beitrag"`
 	IssueRefs    []IssueRef    `xml:"stueck"`
@@ -39,13 +43,14 @@ func (p Piece) Keys() []string {
 		return p.keys
 	}
 
-	ret := make([]string, 2)
+	ret := make([]string, 0, 3)
 	if p.ID != "" {
 		ret = append(ret, p.ID)
 	}
 
 	// TODO: sensible IDs
 	uid := uuid.New()
+	ret = append(ret, uid.String())
 
 	for _, i := range p.IssueRefs {
 		ret = append(ret, strconv.Itoa(i.When.Year)+"-"+strconv.Itoa(i.Nr)+"-"+uid.String())
@@ -211,4 +216,50 @@ func (p Piece) ReferencesWork(id string) (*WorkRef, bool) {
 		}
 	}
 	return nil, false
+}
+
+func (p Piece) Readable(lib *Library) map[string]interface{} {
+	data := make(map[string]interface{})
+	data["Title"] = p.Title
+	data["Incipit"] = p.Incipit
+
+	for k, v := range p.AnnotationNote.Readable() {
+		data[k] = v
+	}
+
+	agents := make([]map[string]interface{}, len(p.AgentRefs))
+	for k, v := range p.AgentRefs {
+		agents[k] = v.Readable(lib)
+	}
+	data["Agents"] = agents
+
+	works := make([]map[string]interface{}, len(p.WorkRefs))
+	for k, v := range p.WorkRefs {
+		works[k] = v.Readable(lib)
+	}
+	data["Works"] = works
+
+	places := make([]map[string]interface{}, len(p.PlaceRefs))
+	for k, v := range p.PlaceRefs {
+		places[k] = v.Readable(lib)
+	}
+	data["Places"] = places
+
+	categories := make([]map[string]interface{}, len(p.CategoryRefs))
+	for k, v := range p.CategoryRefs {
+		categories[k] = v.Readable(lib)
+	}
+	data["Categories"] = categories
+
+	issuerefs := make([]map[string]interface{}, len(p.IssueRefs))
+	for k, v := range p.IssueRefs {
+		issuerefs[k] = v.Readable(lib)
+	}
+	data["Issues"] = issuerefs
+
+	return data
+}
+
+func (p Piece) Type() string {
+	return PIECES_CATEGORY
 }

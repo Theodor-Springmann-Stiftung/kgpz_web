@@ -7,6 +7,10 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
+const (
+	WORKS_CATEGORY = "work"
+)
+
 type Work struct {
 	XMLName        xml.Name   `xml:"werk"`
 	URLs           []URL      `xml:"url"`
@@ -48,4 +52,31 @@ func (w Work) References() xmlprovider.ResolvingMap[Work] {
 func (w Work) String() string {
 	data, _ := json.MarshalIndent(w, "", "  ")
 	return string(data)
+}
+
+func (w Work) Readable(lib *Library) map[string]interface{} {
+	ret := map[string]interface{}{
+		"ID":             w.ID,
+		"PreferredTitle": w.PreferredTitle,
+		"Title":          w.Citation.Title,
+		"Year":           w.Citation.Year,
+		"CitationTitle":  w.Citation.Title,
+	}
+
+	for k, v := range w.AnnotationNote.Readable() {
+		ret[k] = v
+	}
+
+	agents := make([]map[string]interface{}, len(w.AgentRefs))
+	for k, v := range w.AgentRefs {
+		agents[k] = v.Readable(lib)
+	}
+
+	ret["Agents"] = agents
+
+	return ret
+}
+
+func (w Work) Type() string {
+	return WORKS_CATEGORY
 }

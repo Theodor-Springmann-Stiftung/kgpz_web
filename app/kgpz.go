@@ -10,6 +10,7 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/gnd"
+	searchprovider "github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/search"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 	"github.com/gofiber/fiber/v2"
@@ -50,6 +51,7 @@ type KGPZ struct {
 	Repo    *providers.GitProvider
 	GND     *gnd.GNDProvider
 	Library *xmlmodels.Library
+	Search  *searchprovider.SearchProvider
 }
 
 func NewKGPZ(config *providers.ConfigProvider) (*KGPZ, error) {
@@ -68,7 +70,6 @@ func NewKGPZ(config *providers.ConfigProvider) (*KGPZ, error) {
 }
 
 func (k *KGPZ) Pre(srv *fiber.App) error {
-
 	// Check if folder exists and if yes, serve image files from i
 	if _, err := os.Stat(k.Config.Config.ImgPath); err == nil {
 		fs := os.DirFS(k.Config.Config.ImgPath)
@@ -100,8 +101,15 @@ func (k *KGPZ) Init() error {
 		logging.Error(err, "Error reading GND-Cache. Continuing.")
 	}
 
-	go k.Enrich()
+	if sp, err := searchprovider.NewSearchProvider(filepath.Join(k.Config.Config.BaseDIR, k.Config.SearchPath)); err != nil {
+		logging.Error(err, "Error initializing SearchProvider. Continuing without Search.")
+	} else {
+		k.Search = sp
+	}
+
+	k.Enrich()
 	go k.Pull()
+	k.BuildSearchIndex()
 
 	return nil
 }
@@ -179,9 +187,86 @@ func (k *KGPZ) Enrich() error {
 		defer k.fsmu.Unlock()
 		data := xmlmodels.AgentsIntoDataset(k.Library.Agents)
 		k.GND.FetchPersons(data)
-		k.GND.WriteCache(k.Config.GNDPath)
+		k.GND.WriteCache(filepath.Join(k.Config.BaseDIR, k.Config.GNDPath))
 	}()
 
+	return nil
+}
+
+func (k *KGPZ) BuildSearchIndex() error {
+	if k.Library == nil || k.Library.Agents == nil || k.Search == nil {
+		return nil
+	}
+
+	go func() {
+		k.fsmu.Lock()
+		defer k.fsmu.Unlock()
+		wg := new(sync.WaitGroup)
+		wg.Add(6)
+		go func() {
+			for _, agent := range k.Library.Agents.Array {
+				err := k.Search.Index(agent, k.Library)
+				if err != nil {
+					logging.Error(err, "Error indexing agent")
+				}
+			}
+			wg.Done()
+		}()
+
+		go func() {
+			for _, place := range k.Library.Places.Array {
+				err := k.Search.Index(place, k.Library)
+				if err != nil {
+					logging.Error(err, "Error indexing place")
+				}
+			}
+			wg.Done()
+		}()
+
+		go func() {
+			for _, cat := range k.Library.Categories.Array {
+				err := k.Search.Index(cat, k.Library)
+				if err != nil {
+					logging.Error(err, "Error indexing category")
+				}
+			}
+			wg.Done()
+		}()
+
+		go func() {
+			for _, work := range k.Library.Works.Array {
+				err := k.Search.Index(work, k.Library)
+				if err != nil {
+					logging.Error(err, "Error indexing work")
+				}
+			}
+			wg.Done()
+		}()
+
+		go func() {
+			for _, issue := range k.Library.Issues.Array {
+				err := k.Search.Index(issue, k.Library)
+				if err != nil {
+					logging.Error(err, "Error indexing issue")
+				}
+			}
+			wg.Done()
+		}()
+
+		go func() {
+			for _, piece := range k.Library.Pieces.Array {
+				err := k.Search.Index(piece, k.Library)
+				if err != nil {
+					logging.Error(err, "Error indexing piece")
+				}
+			}
+			wg.Done()
+		}()
+
+		wg.Wait()
+		logging.Info("Search index built.")
+
+	}()
 	return nil
 }
 
@@ -226,6 +311,7 @@ func (k *KGPZ) Pull() {
 		logging.ObjDebug(&k.Repo, "Remote changed. Reparsing")
 		k.Serialize()
 		k.Enrich()
+		k.BuildSearchIndex()
 	}
 }
 
