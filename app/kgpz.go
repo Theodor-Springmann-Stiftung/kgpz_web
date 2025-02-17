@@ -2,6 +2,7 @@ package app
 
 import (
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
@@ -83,7 +84,7 @@ func (k *KGPZ) Pre(srv *fiber.App) error {
 func (k *KGPZ) Init() error {
 	if gp, err := providers.NewGitProvider(
 		k.Config.Config.GitURL,
-		k.Config.Config.FolderPath,
+		filepath.Join(k.Config.Config.BaseDIR, k.Config.Config.GITPath),
 		k.Config.Config.GitBranch); err != nil {
 		logging.Error(err, "Error initializing GitProvider. Continuing without Git.")
 	} else {
@@ -107,7 +108,7 @@ func (k *KGPZ) Init() error {
 
 func (k *KGPZ) initGND() error {
 	k.GND = gnd.NewGNDProvider()
-	return k.GND.ReadCache(k.Config.GNDPath)
+	return k.GND.ReadCache(filepath.Join(k.Config.BaseDIR, k.Config.GNDPath))
 }
 
 func (k *KGPZ) Routes(srv *fiber.App) error {
@@ -134,6 +135,18 @@ func (k *KGPZ) Routes(srv *fiber.App) error {
 	srv.Get(PRIVACY_URL, controllers.Get(PRIVACY_URL))
 	srv.Get(CONTACT_URL, controllers.Get(CONTACT_URL))
 	srv.Get(CITATION_URL, controllers.Get(CITATION_URL))
+
+	if k.Config.WebHookSecret != "" && k.Config.WebHookEndpoint != "" {
+		handler, rc := controllers.PostWebhook(k.Config.WebHookSecret)
+		srv.Post(k.Config.WebHookEndpoint, handler)
+		go func() {
+			for signal := range rc {
+				if signal {
+					k.Pull()
+				}
+			}
+		}()
+	}
 
 	return nil
 }
@@ -189,7 +202,7 @@ func (k *KGPZ) Serialize() error {
 		k.Library = xmlmodels.NewLibrary()
 	}
 
-	err := k.Library.Parse(source, k.Config.FolderPath, commit)
+	err := k.Library.Parse(source, filepath.Join(k.Config.BaseDIR, k.Config.GITPath), commit)
 	return err
 }
 

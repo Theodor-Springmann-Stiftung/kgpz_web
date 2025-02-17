@@ -12,6 +12,7 @@ exclude_dir = [
 	"views/node_modules",
 	"tmp",
 	"vendor",
+	"cache",
 	"testdata",
 	"data_git",
 	"cache_gnd",

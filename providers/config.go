@@ -14,10 +14,12 @@ import (
 // WARNING: this is not intended to be used in a multi-threaded environment
 // Instatiate this once on startup before any goroutines are started
 const (
-	DEFAULT_GIT_DIR = "data_git"
-	DEFAULT_GND_DIR = "cache_gnd"
-	DEFAULT_GEO_DIR = "cache_geo"
-	DEFAULT_IMG_DIR = "data_bilder"
+	DEFAULT_DIR              = "cache"
+	DEFAULT_GIT_CACHE_DIR    = "git"
+	DEFAULT_GND_CACHE_DIR    = "gnd"
+	DEFAULT_GEO_CACHE_DIR    = "geo"
+	DEFAULT_SEARCH_CACHE_DIR = "search"
+	DEFAULT_IMG_DIR          = "data_bilder"
 
 	DEFAULT_PORT  = "8080"
 	DEFAULT_ADDR  = "localhost"
@@ -33,9 +35,10 @@ type ConfigProvider struct {
 
 type Config struct {
 	// At least one of these should be set
+	BaseDIR         string `json:"base_dir" envconfig:"BASE_DIR"`
 	GitURL          string `json:"git_url" envconfig:"GIT_URL"`
 	GitBranch       string `json:"git_branch" envconfig:"GIT_BRANCH"`
-	FolderPath      string `json:"folder_path" envconfig:"FOLDER_PATH"`
+	GITPath         string `json:"git_path" envconfig:"GIT_PATH"`
 	GNDPath         string `json:"gnd_path" envconfig:"GND_PATH"`
 	GeoPath         string `json:"geo_path" envconfig:"GEO_PATH"`
 	ImgPath         string `json:"img_path" envconfig:"IMG_PATH"`
@@ -65,8 +68,8 @@ func (c *ConfigProvider) Read() error {
 }
 
 func (c *ConfigProvider) Validate() error {
-	if strings.TrimSpace(c.Config.FolderPath) == "" {
-		return fmt.Errorf("Folder path not set")
+	if strings.TrimSpace(c.Config.BaseDIR) == "" {
+		return fmt.Errorf("Base directory path not set")
 	}
 	return nil
 }
@@ -92,16 +95,20 @@ func readSettingsEnv(cfg *Config) *Config {
 }
 
 func readDefaults(cfg *Config) *Config {
-	if strings.TrimSpace(cfg.FolderPath) == "" {
-		cfg.FolderPath = DEFAULT_GIT_DIR
+	if strings.TrimSpace(cfg.BaseDIR) == "" {
+		cfg.BaseDIR = DEFAULT_DIR
+	}
+
+	if strings.TrimSpace(cfg.GITPath) == "" {
+		cfg.GITPath = DEFAULT_GIT_CACHE_DIR
 	}
 
 	if strings.TrimSpace(cfg.GNDPath) == "" {
-		cfg.GNDPath = DEFAULT_GND_DIR
+		cfg.GNDPath = DEFAULT_GND_CACHE_DIR
 	}
 
 	if strings.TrimSpace(cfg.GeoPath) == "" {
-		cfg.GeoPath = DEFAULT_GEO_DIR
+		cfg.GeoPath = DEFAULT_GEO_CACHE_DIR
 	}
 
 	if strings.TrimSpace(cfg.Address) == "" {
@@ -119,8 +126,10 @@ func readDefaults(cfg *Config) *Config {
 	return cfg
 }
 
-// Implement stringer
 func (c *Config) String() string {
-	return fmt.Sprintf("GitURL: %s\nGitBranch: %s\nFolderPath: %s\nGNDPath: %s\nGeoPath: %s\nWebHookEndpoint: %s\nWebHookSecret: %s\n",
-		c.GitURL, c.GitBranch, c.FolderPath, c.GNDPath, c.GeoPath, c.WebHookEndpoint, c.WebHookSecret)
+	json, err := json.Marshal(c)
+	if err != nil {
+		return "Config: Error marshalling to JSON"
+	}
+	return string(json)
 }

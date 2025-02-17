@@ -2,6 +2,7 @@ KGPZ/
 tmp/
 bin/
 data_git/
+cache/
 cache_geo/
 cache_gnd/
 data_bilder/
