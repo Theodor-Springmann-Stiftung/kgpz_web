@@ -147,7 +147,7 @@ func (p *XMLProvider[T]) ReverseLookup(item IXMLItem) []Resolved[T] {
 	keys := item.Keys()
 
 	for _, key := range keys {
-		r, err := p.Resolver.Get(item.Name(), key)
+		r, err := p.Resolver.Get(item.Type(), key)
 		if err == nil {
 			ret = append(ret, r...)
 		}

@@ -10,9 +10,8 @@ type AgentRef struct {
 	Reference
 }
 
-func (ar AgentRef) Name() string {
-	var x Agent
-	return x.Name()
+func (ar AgentRef) Type() string {
+	return AGENT_TYPE
 }
 
 func (ar AgentRef) Readable(lib *Library) map[string]interface{} {
@@ -49,7 +48,7 @@ func (ir IssueRef) Readable(lib *Library) map[string]interface{} {
 	issuekey := strconv.Itoa(ir.When.Year) + "-" + strconv.Itoa(ir.Nr)
 	issue := lib.Issues.Item(issuekey)
 	if issue != nil {
-		data["IssueDate"] = issue.Datum.When.String()
+		data["IssueDate"] = strconv.Itoa(issue.Datum.When.Day) + "." + strconv.Itoa(issue.Datum.When.Month) + "." + strconv.Itoa(issue.Datum.When.Year)
 	}
 
 	data["IssueNumber"] = ir.Nr
@@ -57,9 +56,8 @@ func (ir IssueRef) Readable(lib *Library) map[string]interface{} {
 	return data
 }
 
-func (ir IssueRef) Name() string {
-	var x Issue
-	return x.Name()
+func (ir IssueRef) Type() string {
+	return ISSUE_TYPE
 }
 
 type PlaceRef struct {
@@ -80,9 +78,8 @@ func (pr *PlaceRef) Readable(lib *Library) map[string]interface{} {
 	return data
 }
 
-func (pr PlaceRef) Name() string {
-	var x Place
-	return x.Name()
+func (pr PlaceRef) Type() string {
+	return PLACE_TYPE
 }
 
 type CategoryRef struct {
@@ -90,9 +87,8 @@ type CategoryRef struct {
 	Reference
 }
 
-func (cr CategoryRef) Name() string {
-	var x Category
-	return x.Name()
+func (cr CategoryRef) Type() string {
+	return CATEGORY_TYPE
 }
 
 func (cr CategoryRef) Readable(lib *Library) map[string]interface{} {
@@ -134,9 +130,8 @@ func (wr WorkRef) Readable(lib *Library) map[string]interface{} {
 	return data
 }
 
-func (wr WorkRef) Name() string {
-	var x Work
-	return x.Name()
+func (wr WorkRef) Type() string {
+	return WORK_TYPE
 }
 
 type PieceRef struct {
@@ -145,7 +140,6 @@ type PieceRef struct {
 	Reference
 }
 
-func (pr PieceRef) Name() string {
-	var x Piece
-	return x.Name()
+func (pr PieceRef) Type() string {
+	return PIECE_TYPE
 }

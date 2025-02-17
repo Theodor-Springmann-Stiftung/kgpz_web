@@ -33,10 +33,6 @@ type Additional struct {
 	Bis     int      `xml:"bis"`
 }
 
-func (i Issue) Name() string {
-	return "issue"
-}
-
 func (i Issue) Keys() []string {
 	res := make([]string, 0, 2)
 	res = append(res, i.Reference())
@@ -67,7 +63,7 @@ func (i Issue) Readable(_ *Library) map[string]interface{} {
 		"ID":     i.ID,
 		"Number": i.Number.No,
 		"Year":   i.Datum.When.Year,
-		"Date":   i.Datum.When.String(),
+		"Date":   strconv.Itoa(i.Datum.When.Day) + "." + strconv.Itoa(i.Datum.When.Month) + "." + strconv.Itoa(i.Datum.When.Year),
 	}
 
 	for k, v := range i.AnnotationNote.Readable() {

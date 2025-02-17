@@ -18,10 +18,6 @@ type Category struct {
 	AnnotationNote
 }
 
-func (c Category) Name() string {
-	return "category"
-}
-
 func (c Category) String() string {
 	data, _ := json.MarshalIndent(c, "", "  ")
 	return string(data)

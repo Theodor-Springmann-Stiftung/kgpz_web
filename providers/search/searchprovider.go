@@ -50,7 +50,31 @@ func (sp *SearchProvider) Index(item ISearchable, lib *xmlmodels.Library) error 
 		return err
 	}
 
-	return i.Index(keys[0], item.Readable(lib))
+	read := item.Readable(lib)
+	return i.Index(keys[0], read)
+}
+
+// TODO: this is sloppy
+func (sp *SearchProvider) LoadIndeces() error {
+	files, err := filepath.Glob(filepath.Join(sp.basepath, "*.bleve"))
+	if err != nil {
+		return err
+	}
+
+	if len(files) == 0 {
+		return errors.New("No indeces found.")
+	}
+
+	for _, file := range files {
+		index, err := bleve.Open(file)
+		if err != nil {
+			return err
+		}
+		typ := filepath.Base(file)
+		typ = typ[:len(typ)-6]
+		sp.indeces.Store(typ, index)
+	}
+	return nil
 }
 
 func (sp *SearchProvider) FindCreateIndex(typ string) (bleve.Index, error) {
@@ -75,6 +99,16 @@ func (sp *SearchProvider) FindCreateIndex(typ string) (bleve.Index, error) {
 	sp.indeces.Store(typ, ind)
 
 	return ind, nil
+}
+
+func (sp *SearchProvider) GetIndex(typ string) (bleve.Index, error) {
+	index, ok := sp.indeces.Load(typ)
+	if !ok {
+		return nil, errors.New("Index not found.")
+	}
+
+	i := index.(bleve.Index)
+	return i, nil
 }
 
 func default_mapping() (*mapping.IndexMappingImpl, error) {

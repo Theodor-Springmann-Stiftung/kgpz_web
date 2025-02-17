@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	WORKS_CATEGORY = "work"
+	WORK_TYPE = "work"
 )
 
 type Work struct {
@@ -19,10 +19,6 @@ type Work struct {
 	AgentRefs      []AgentRef `xml:"akteur"`
 	Identifier
 	AnnotationNote
-}
-
-func (w Work) Name() string {
-	return "work"
 }
 
 type Citation struct {
@@ -37,7 +33,7 @@ func (w Work) References() xmlprovider.ResolvingMap[Work] {
 	refs := make(xmlprovider.ResolvingMap[Work])
 
 	for _, ref := range w.AgentRefs {
-		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Work]{
+		refs[ref.Type()] = append(refs[ref.Type()], xmlprovider.Resolved[Work]{
 			Item:       &w,            // Reference to the current Work item
 			Reference:  ref.Ref,       // Reference ID
 			Category:   ref.Category,  // Category of the reference
@@ -78,5 +74,5 @@ func (w Work) Readable(lib *Library) map[string]interface{} {
 }
 
 func (w Work) Type() string {
-	return WORKS_CATEGORY
+	return WORK_TYPE
 }

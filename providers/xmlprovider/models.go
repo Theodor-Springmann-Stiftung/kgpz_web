@@ -8,7 +8,7 @@ type IXMLItem interface {
 	// - Keys should be unique
 	// - Keys[0] has the special meaning of the primary key (for FTS etc.)
 	Keys() []string
-	Name() string
+	Type() string
 }
 
 type ILibrary interface {

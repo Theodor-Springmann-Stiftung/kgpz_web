@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	PIECES_CATEGORY = "piece"
+	PIECE_TYPE = "piece"
 )
 
 type Piece struct {
@@ -27,10 +27,6 @@ type Piece struct {
 	Title        []string      `xml:"titel"`
 	Identifier
 	AnnotationNote
-}
-
-func (p Piece) Name() string {
-	return "piece"
 }
 
 func (p Piece) String() string {
@@ -79,7 +75,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 
 	for _, ref := range p.CategoryRefs {
 		if ref.Category != "" {
-			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+			refs[x.Type()] = append(refs[x.Type()], xmlprovider.Resolved[Piece]{
 				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
@@ -94,7 +90,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 			continue
 		}
 		if ref.Category != "" {
-			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+			refs[x.Type()] = append(refs[x.Type()], xmlprovider.Resolved[Piece]{
 				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
@@ -102,7 +98,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 				Comment:    ref.Inner.InnerXML,
 			})
 		}
-		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+		refs[ref.Type()] = append(refs[ref.Type()], xmlprovider.Resolved[Piece]{
 			Item:       &p,
 			Reference:  strconv.Itoa(ref.When.Year) + "-" + strconv.Itoa(ref.Nr),
 			Category:   ref.Category,
@@ -115,7 +111,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 
 	for _, ref := range p.PlaceRefs {
 		if ref.Category != "" {
-			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+			refs[x.Type()] = append(refs[x.Type()], xmlprovider.Resolved[Piece]{
 				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
@@ -123,7 +119,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 				Comment:    ref.Inner.InnerXML,
 			})
 		}
-		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+		refs[ref.Type()] = append(refs[ref.Type()], xmlprovider.Resolved[Piece]{
 			Item:       &p,
 			Reference:  ref.Ref,
 			Category:   ref.Category,
@@ -136,7 +132,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 
 	for _, ref := range p.AgentRefs {
 		if ref.Category != "" {
-			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+			refs[x.Type()] = append(refs[x.Type()], xmlprovider.Resolved[Piece]{
 				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
@@ -144,7 +140,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 				Comment:    ref.Inner.InnerXML,
 			})
 		}
-		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+		refs[ref.Type()] = append(refs[ref.Type()], xmlprovider.Resolved[Piece]{
 			Item:       &p,
 			Reference:  ref.Ref,
 			Category:   ref.Category,
@@ -157,7 +153,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 
 	for _, ref := range p.WorkRefs {
 		if ref.Category != "" {
-			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+			refs[x.Type()] = append(refs[x.Type()], xmlprovider.Resolved[Piece]{
 				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
@@ -165,7 +161,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 				Comment:    ref.Inner.InnerXML,
 			})
 		}
-		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+		refs[ref.Type()] = append(refs[ref.Type()], xmlprovider.Resolved[Piece]{
 			Item:       &p,
 			Reference:  ref.Ref,
 			Category:   ref.Category,
@@ -177,7 +173,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 
 	for _, ref := range p.PieceRefs {
 		if ref.Category != "" {
-			refs[x.Name()] = append(refs[x.Name()], xmlprovider.Resolved[Piece]{
+			refs[x.Type()] = append(refs[x.Type()], xmlprovider.Resolved[Piece]{
 				Item:       &p,
 				Reference:  ref.Category,
 				Cert:       !ref.Unsicher,
@@ -186,7 +182,7 @@ func (p Piece) References() xmlprovider.ResolvingMap[Piece] {
 				MetaData:   map[string]string{},
 			})
 		}
-		refs[ref.Name()] = append(refs[ref.Name()], xmlprovider.Resolved[Piece]{
+		refs[ref.Type()] = append(refs[ref.Type()], xmlprovider.Resolved[Piece]{
 			Item:       &p,
 			Reference:  ref.Ref,
 			Category:   ref.Category,
@@ -261,5 +257,5 @@ func (p Piece) Readable(lib *Library) map[string]interface{} {
 }
 
 func (p Piece) Type() string {
-	return PIECES_CATEGORY
+	return PIECE_TYPE
 }

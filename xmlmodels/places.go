@@ -18,10 +18,6 @@ type Place struct {
 	AnnotationNote
 }
 
-func (p Place) Name() string {
-	return "place"
-}
-
 func (p Place) String() string {
 	data, _ := json.MarshalIndent(p, "", "  ")
 	return string(data)

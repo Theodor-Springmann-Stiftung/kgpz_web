@@ -1,6 +1,15 @@
 <div class="flex flex-row justify-center mt-8">
 	<div class="w-6/12">
-		<input type="search" placeholder="Suche" class="px-2.5 py-1.5 border w-full" />
+		<input
+			type="search"
+			name="q"
+			id="search"
+			placeholder="Suche"
+			class="px-2.5 py-1.5 border w-full"
+			hx-get="/suche/?noCache=true"
+			hx-trigger="input changed delay:200ms, keyup[key=='Enter']"
+			hx-select="main"
+			hx-target="main" />
 	</div>
 
 	<div x-data="{ open: false }">
@@ -28,3 +37,15 @@
 		</div>
 	</div>
 </div>
+
+<script>
+	document.body.addEventListener("htmx:configRequest", function (event) {
+		console.log("Before request event triggered");
+		let t = event.detail.elt; // Get the element triggering the request
+
+		if (t.id === "search" && t.value === "") {
+			event.detail.parameters = {};
+			event.detail.path = window.location.pathname + window.location.search;
+		}
+	});
+</script>

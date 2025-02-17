@@ -27,10 +27,11 @@ const (
 	PRIVACY_URL  = "/datenschutz/"
 	CONTACT_URL  = "/kontakt/"
 	CITATION_URL = "/zitation/"
+	SEARCH_URL   = "/suche/"
 
-	INDEX_URL = "/1764"
+	INDEX_URL = "/jahrgang/1764"
 
-	YEAR_OVERVIEW_URL     = "/:year"
+	YEAR_OVERVIEW_URL     = "/jahrgang/:year"
 	PLACE_OVERVIEW_URL    = "/ort/:place"
 	AGENTS_OVERVIEW_URL   = "/akteure/:letterorid"
 	CATEGORY_OVERVIEW_URL = "/kategorie/:category"
@@ -109,7 +110,13 @@ func (k *KGPZ) Init() error {
 
 	k.Enrich()
 	go k.Pull()
-	k.BuildSearchIndex()
+	err := k.Search.LoadIndeces()
+	if err != nil {
+		logging.Error(err, "Error loading search indeces.")
+		k.BuildSearchIndex()
+	} else {
+		logging.Info("Search indeces loaded.")
+	}
 
 	return nil
 }
@@ -125,6 +132,7 @@ func (k *KGPZ) Routes(srv *fiber.App) error {
 		return nil
 	})
 
+	srv.Get(SEARCH_URL, controllers.GetSearch(k.Library, k.Search))
 	srv.Get(PLACE_OVERVIEW_URL, controllers.GetPlace(k.Library))
 	srv.Get(CATEGORY_OVERVIEW_URL, controllers.GetCategory(k.Library))
 	srv.Get(AGENTS_OVERVIEW_URL, controllers.GetAgents(k.Library))

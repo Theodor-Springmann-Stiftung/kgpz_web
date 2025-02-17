@@ -21,10 +21,6 @@ type Agent struct {
 	AnnotationNote
 }
 
-func (a Agent) Name() string {
-	return "agent"
-}
-
 func (a Agent) String() string {
 	data, _ := json.MarshalIndent(a, "", "  ")
 	return string(data)

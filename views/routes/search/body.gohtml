@@ -1,0 +1,22 @@
+{{ $model := .model }}
+
+
+<div id="results">
+	{{ range $i, $agent := $model.Agents.Items }}
+		<div>
+			{{ $agent.String }}
+		</div>
+	{{ end }}
+
+	{{ range $i, $work := $model.Works.Items }}
+		<div>
+			{{ $work.String }}
+		</div>
+	{{ end }}
+
+	{{ range $i, $place := $model.Places.Items }}
+		<div>
+			{{ $place.String }}
+		</div>
+	{{ end }}
+</div>
