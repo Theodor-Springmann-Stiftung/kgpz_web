@@ -34,6 +34,41 @@ func (p Piece) String() string {
 	return string(data)
 }
 
+func (p Piece) Categories() map[string]bool {
+	cats := make(map[string]bool)
+	for _, c := range p.CategoryRefs {
+		cats[c.Category] = true
+	}
+
+	for _, i := range p.IssueRefs {
+		cats[i.Category] = true
+	}
+
+	for _, i := range p.PlaceRefs {
+		cats[i.Category] = true
+	}
+
+	for _, i := range p.AgentRefs {
+		if i.Category == "" {
+			cats["autor"] = true
+		}
+		cats[i.Category] = true
+	}
+
+	for _, i := range p.WorkRefs {
+		if i.Category == "" {
+			cats["rezension"] = true
+		}
+		cats[i.Category] = true
+	}
+
+	for _, i := range p.PieceRefs {
+		cats[i.Category] = true
+	}
+
+	return cats
+}
+
 func (p Piece) Keys() []string {
 	if len(p.keys) > 0 {
 		return p.keys

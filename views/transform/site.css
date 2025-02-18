@@ -1,9 +1,9 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
-  --font-script: Rancho, ui-serif;
-  --font-sans: 'Source Sans 3', 'Merriweather Sans', ui-sans-serif;
-  --font-serif: 'Merriweather', ui-serif;
+	--font-script: Rancho, ui-serif;
+	--font-sans: "Source Sans 3", "Merriweather Sans", ui-sans-serif;
+	--font-serif: "Merriweather", ui-serif;
 }
 
 /*
@@ -15,20 +15,17 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentColor);
+	}
 }
 
 @utility font-variant-small-caps {
-  font-variant-caps: small-caps;
-}
-
-@layer base {
+	font-variant-caps: small-caps;
 }
 
 @layer components {
