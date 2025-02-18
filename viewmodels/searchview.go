@@ -2,12 +2,14 @@ package viewmodels
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/datatypes"
 	searchprovider "github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/search"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 	"github.com/blevesearch/bleve/v2"
+	"github.com/blevesearch/bleve/v2/search/query"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"golang.org/x/text/unicode/norm"
@@ -35,7 +37,16 @@ func NewSearchView(search string, kgpz *xmlmodels.Library, sp *searchprovider.Se
 	search = cases.Lower(language.German).String(search)
 	search = norm.NFKD.String(search)
 
-	query := bleve.NewTermQuery(search)
+	searches := strings.Split(search, " ")
+	queries := make([]query.Query, 0, len(searches))
+	for _, s := range searches {
+		if strings.TrimSpace(s) == "" {
+			continue
+		}
+		queries = append(queries, bleve.NewTermQuery(s))
+	}
+
+	query := bleve.NewConjunctionQuery(queries...)
 	request := bleve.NewSearchRequest(query)
 	request.Size = 100
 

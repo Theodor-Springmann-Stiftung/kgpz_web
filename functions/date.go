@@ -76,6 +76,28 @@ func HRDateShort(date string) string {
 	return ""
 }
 
+func HRDateYear(date string) string {
+	xsdt, err := xsdtime.New(date)
+	if err != nil {
+		return ""
+	}
+
+	t := xsdt.Type()
+	if t == xsdtime.GYear {
+		return strconv.Itoa(xsdt.Year)
+	}
+
+	if t == xsdtime.GYearMonth {
+		return strconv.Itoa(xsdt.Year)
+	}
+
+	if t == xsdtime.Date {
+		return strconv.Itoa(xsdt.Year)
+	}
+
+	return ""
+}
+
 func MonthName(i int) Month {
 	if i > 12 || i < 1 {
 		return TRANSLM[0]

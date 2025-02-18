@@ -49,6 +49,7 @@ func (e *Engine) funcs() error {
 	e.AddFunc("MonthName", functions.MonthName)
 	e.AddFunc("WeekdayName", functions.WeekdayName)
 	e.AddFunc("HRDateShort", functions.HRDateShort)
+	e.AddFunc("HRDateYear", functions.HRDateYear)
 
 	// Strings
 	e.AddFunc("FirstLetter", functions.FirstLetter)

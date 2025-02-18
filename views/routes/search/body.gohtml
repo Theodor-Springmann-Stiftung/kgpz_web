@@ -1,22 +1,133 @@
 {{ $model := .model }}
 
 
-<div id="results">
-	{{ range $i, $agent := $model.Agents.Items }}
-		<div>
-			{{ $agent.String }}
-		</div>
-	{{ end }}
+<div
+	id="results"
+	class="pt-4 grid grid-flow-row-dense gap-x-8 gap-y-10 grid-cols-4 [&>div]:bg-slate-100
+	[&>div]:px-4 [&>div]:py-3">
+	<div class="col-span-1 searchresultcontainer">
+		<h3>Personen</h3>
+		{{ if $model.Agents.Items }}
+			{{ range $i, $agent := $model.Agents.Items }}
+				{{ $gnd := GetGND $agent.GND }}
+				<div class="pt-1">
+					{{- index $agent.Names 0 -}}
+				</div>
+				{{ if $gnd }}
+					<div>
+						{{- if and $gnd.DateOfBirth $gnd.DateOfDeath -}}
+							<div>
+								{{- if $gnd.DateOfBirth -}}
+									{{- HRDateYear (index $gnd.DateOfBirth 0) -}}
+								{{- else -}}
+									[?]
+								{{- end -}}
+								&thinsp;&ndash;&thinsp;
+								{{- if $gnd.DateOfDeath -}}
+									{{- HRDateYear (index $gnd.DateOfDeath 0) -}}
+								{{- else -}}
+									[?]
+								{{- end -}}
+							</div>
+						{{- end -}}
+					</div>
+				{{ end }}
+			{{ end }}
+		{{ else }}
+			<div class="pt-1">Keine Personen gefunden.</div>
+		{{ end }}
+	</div>
 
-	{{ range $i, $work := $model.Works.Items }}
-		<div>
-			{{ $work.String }}
-		</div>
-	{{ end }}
+	<div class="col-span-1 searchresultcontainer">
+		<h3>Orte</h3>
+		{{ if $model.Places.Items }}
+			{{ range $i, $place := $model.Places.Items }}
+				<div class="pt-1">
+					{{- index $place.Names 0 -}}
+				</div>
+			{{ end }}
+		{{ else }}
+			<div class="pt-1">Keine Orte gefunden.</div>
+		{{ end }}
+	</div>
 
-	{{ range $i, $place := $model.Places.Items }}
-		<div>
-			{{ $place.String }}
-		</div>
-	{{ end }}
+	<div class="col-span-1 searchresultcontainer">
+		<h3>Kategorien</h3>
+		{{ if $model.Categories.Items }}
+			{{ range $i, $category := $model.Categories.Items }}
+				<div class="pt-1">
+					{{- index $category.Names 0 -}}
+				</div>
+			{{ end }}
+		{{ else }}
+			<div class="pt-1">Keine Kategorien gefunden.</div>
+		{{ end }}
+	</div>
+
+	<div class="col-span-1 searchresultcontainer">
+		<h3>Ausgaben</h3>
+		{{ if $model.Issues.Items }}
+			{{ range $i, $issue := $model.Issues.Items }}
+				<div class="pt-1">
+					KGPZ
+					{{ $issue.Datum.When.Year }}/{{ $issue.Number.No }}
+					({{ HRDateShort
+						$issue.Datum.When.String
+					}})
+				</div>
+			{{ end }}
+		{{ else }}
+			<div class="pt-1">Keine Ausgaben gefunden.</div>
+		{{ end }}
+	</div>
+
+	<div class="col-span-2 searchresultcontainer">
+		<h3>Werke</h3>
+		{{ if $model.Works.Items }}
+			{{ range $i, $w := $model.Works.Items }}
+				<div class="pt-1">
+					{{- if ne (len $w.Citation.InnerXML ) 0 -}}
+								<script type="application/xml" xslt-template="transform-citation" xslt-onload>
+									<xml>
+										{{- Safe $w.Citation.InnerXML -}}
+									</xml>
+								</script>
+					{{- end -}}
+					{{ range $_, $url := $w.URLs }}
+						<div>
+							<a href="{{ $url.Address }}" target="_blank">{{ $url.Chardata }}</a>
+						</div>
+					{{ end }}
+
+					{{ $pieces := LookupPieces $w }}
+					{{ if len $pieces }}
+						<div>
+							{{ range $_, $p := $pieces }}
+								{{- range $_, $i := $p.Item.IssueRefs -}}
+									<div>
+										<a href="/{{ $i.When }}/{{ $i.Nr }}">{{ $i.Nr }}/{{ $i.When }}</a>
+									</div>
+								{{- end -}}
+							{{ end }}
+						</div>
+					{{ end }}
+				</div>
+			{{ end }}
+		{{ else }}
+			<div class="pt-1">Keine Werke gefunden.</div>
+		{{ end }}
+	</div>
+
+	<div class="col-span-2 searchresultcontainer">
+		<h3>Beiträge</h3>
+		{{ if $model.Pieces.Items }}
+			{{ range $i, $piece := $model.Pieces.Items }}
+				<div class="pt-1">
+					{{ $piece.String }}
+				</div>
+			{{ end }}
+		{{ else }}
+			<div class="pt-1">Keine Beiträge gefunden.</div>
+		{{ end }}
+	</div>
 </div>

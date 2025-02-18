@@ -1,5 +1,4 @@
 {{ if ne (len .model.Search) 1 }}
-
 	{{ $agent := index $.model.Agents .model.Search }}
 	{{ if not $agent }}
 		<div>Agent nicht gefunden: {{ .model.Search }}</div>
@@ -28,5 +27,3 @@
 		{{ template "_akteur" $a }}
 	{{ end }}
 {{ end }}
-
-{{ EmbedXSLT "xslt/transform-citation.xsl" }}
