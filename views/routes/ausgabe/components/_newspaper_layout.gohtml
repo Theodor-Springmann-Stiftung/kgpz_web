@@ -17,7 +17,7 @@
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-image-line text-blue-600"></i>
-<span class="text-sm font-medium text-slate-600 bg-blue-50 px-2 py-1 rounded">{{ $firstPage.PageNumber }}</span>
+<span class="page-indicator text-sm font-medium text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
 						</div>
 					</div>
 <div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
@@ -41,7 +41,7 @@
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-copy-2-line text-green-600"></i>
-<span class="text-sm font-medium text-slate-600 bg-green-50 px-2 py-1 rounded">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
+<span class="page-indicator text-sm font-medium text-slate-600 bg-green-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $middlePage1.PageNumber }}">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
 						</div>
 					</div>
 <div class="double-spread bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
@@ -70,7 +70,7 @@
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-image-line text-blue-600"></i>
-							<span class="text-sm font-medium text-slate-600 bg-blue-50 px-3 py-1 rounded-full">Seite {{ $lastPage.PageNumber }}</span>
+							<span class="page-indicator text-sm font-medium text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $lastPage.PageNumber }}">{{ $lastPage.PageNumber }}</span>
 						</div>
 					</div>
 <div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
@@ -265,6 +265,60 @@
 </style>
 
 <script>
+// Initialize page tracking
+document.addEventListener('DOMContentLoaded', function() {
+	// Get all page containers
+	const pageContainers = document.querySelectorAll('.newspaper-page-container');
+
+	// Set up intersection observer for active page tracking
+	const observer = new IntersectionObserver((entries) => {
+		entries.forEach((entry) => {
+			if (entry.isIntersecting) {
+				// Get page number from the container
+				const pageImg = entry.target.querySelector('img[data-page]');
+				if (pageImg) {
+					const pageNumber = pageImg.getAttribute('data-page');
+					markCurrentPageInInhaltsverzeichnis(pageNumber);
+				}
+			}
+		});
+	}, {
+		rootMargin: '-20% 0px -70% 0px' // Trigger when page is mostly in view
+	});
+
+	// Observe all page containers
+	pageContainers.forEach(container => {
+		observer.observe(container);
+	});
+});
+
+function markCurrentPageInInhaltsverzeichnis(pageNumber) {
+	// Reset all entries in Inhaltsverzeichnis
+	document.querySelectorAll('.inhalts-entry').forEach(entry => {
+		entry.classList.remove('bg-red-100', 'border-red-300');
+		entry.classList.add('bg-slate-50');
+	});
+
+	// Find and highlight the current page entry
+	const pageEntry = document.querySelector(`.inhalts-entry[data-page="${pageNumber}"]`);
+	if (pageEntry) {
+		pageEntry.classList.remove('bg-slate-50');
+		pageEntry.classList.add('bg-red-100', 'border-red-300');
+	}
+
+	// Also highlight page indicators
+	document.querySelectorAll('.page-indicator').forEach(indicator => {
+		indicator.classList.remove('bg-red-500', 'text-white');
+		indicator.classList.add('bg-blue-50', 'text-slate-600');
+	});
+
+	const pageIndicator = document.querySelector(`.page-indicator[data-page="${pageNumber}"]`);
+	if (pageIndicator) {
+		pageIndicator.classList.remove('bg-blue-50', 'bg-green-50', 'text-slate-600');
+		pageIndicator.classList.add('bg-red-500', 'text-white');
+	}
+}
+
 function enlargePage(imgElement, pageNumber, isFromSpread) {
 	const modal = document.getElementById('pageModal');
 	const modalImage = document.getElementById('modalImage');
@@ -274,8 +328,8 @@ function enlargePage(imgElement, pageNumber, isFromSpread) {
 
 	modal.classList.remove('hidden');
 
-	// Highlight current page in Inhaltsverzeichnis if you implement that
-	// markCurrentPage(pageNumber);
+	// Mark current page when enlarged
+	markCurrentPageInInhaltsverzeichnis(pageNumber);
 }
 
 function closeModal() {

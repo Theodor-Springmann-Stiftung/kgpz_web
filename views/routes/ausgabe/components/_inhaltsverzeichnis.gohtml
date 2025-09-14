@@ -16,7 +16,7 @@
 					</div>
 					<div class="space-y-3">
 						{{ range $piece := (index $model.Pieces.Items $page) }}
-						<div class="py-2 px-3 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200">
+						<div class="inhalts-entry py-2 px-3 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200" data-page="{{ $page }}">
 							{{ template "_inhaltsverzeichnis_eintrag" $piece }}
 
 
@@ -71,7 +71,7 @@
 					</div>
 					<div class="space-y-3">
 						{{ range $piece := (index $model.AdditionalPieces.Items $page) }}
-						<div class="py-2 px-3 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200">
+						<div class="inhalts-entry py-2 px-3 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200" data-page="{{ $page }}">
 							{{ template "_inhaltsverzeichnis_eintrag" $piece }}
 
 

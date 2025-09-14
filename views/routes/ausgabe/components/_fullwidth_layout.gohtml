@@ -1,0 +1,164 @@
+{{ $model := .model }}
+
+<div class="w-full min-h-screen">
+	<!-- Navigation Bar -->
+	<div class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm mb-6">
+		<div class="max-w-7xl mx-auto px-4 py-4">
+			<div class="flex items-center justify-between">
+				<div class="flex items-center space-x-4">
+					{{ template "_title_nav" . }}
+				</div>
+				<div class="flex items-center space-x-3">
+					<!-- Navigation buttons -->
+					<button onclick="scrollToPreviousPage()" class="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+						<i class="ri-arrow-up-line mr-1"></i>
+						Vorherige Seite
+					</button>
+					<button onclick="scrollToNextPage()" class="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+						<i class="ri-arrow-down-line mr-1"></i>
+						Nächste Seite
+					</button>
+					{{ if $model.Images.AdditionalPages }}
+						<button onclick="scrollToBeilage()" class="flex items-center px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-md transition-colors">
+							<i class="ri-attachment-line mr-1"></i>
+							Zu Beilage
+						</button>
+					{{ end }}
+					<!-- Switch back to sidebar layout -->
+					<a href="?layout=sidebar" class="flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors">
+						<i class="ri-sidebar-unfold-line mr-1"></i>
+						Seitenleiste
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="max-w-7xl mx-auto px-4">
+		<div class="flex flex-col lg:flex-row gap-6 w-full">
+			<!-- Left side: Collapsible Inhaltsverzeichnis -->
+			<div class="lg:w-1/4 xl:w-1/5 flex-shrink-0">
+				<div class="lg:sticky lg:top-24 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+					{{ template "_inhaltsverzeichnis" . }}
+				</div>
+			</div>
+
+			<!-- Right side: Full-width Newspaper pages -->
+			<div class="lg:w-3/4 xl:w-4/5 flex-1">
+				{{ template "_newspaper_layout" . }}
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+let currentPageContainers = [];
+let currentActiveIndex = 0;
+
+// Initialize page tracking for full-width layout
+document.addEventListener('DOMContentLoaded', function() {
+	// Get all page containers
+	currentPageContainers = document.querySelectorAll('.newspaper-page-container');
+
+	// Set up intersection observer for active page tracking
+	const observer = new IntersectionObserver((entries) => {
+		entries.forEach((entry) => {
+			if (entry.isIntersecting) {
+				// Get page number from the container
+				const pageImg = entry.target.querySelector('img[data-page]');
+				if (pageImg) {
+					const pageNumber = pageImg.getAttribute('data-page');
+					markCurrentPageInInhaltsverzeichnis(pageNumber);
+				}
+
+				// Update current active index
+				const containerIndex = Array.from(currentPageContainers).indexOf(entry.target);
+				if (containerIndex !== -1) {
+					currentActiveIndex = containerIndex;
+				}
+			}
+		});
+	}, {
+		rootMargin: '-20% 0px -70% 0px' // Trigger when page is mostly in view
+	});
+
+	// Observe all page containers
+	currentPageContainers.forEach(container => {
+		observer.observe(container);
+	});
+});
+
+function scrollToPreviousPage() {
+	if (currentActiveIndex > 0) {
+		currentActiveIndex--;
+		currentPageContainers[currentActiveIndex].scrollIntoView({
+			behavior: 'smooth',
+			block: 'start'
+		});
+	}
+}
+
+function scrollToNextPage() {
+	if (currentActiveIndex < currentPageContainers.length - 1) {
+		currentActiveIndex++;
+		currentPageContainers[currentActiveIndex].scrollIntoView({
+			behavior: 'smooth',
+			block: 'start'
+		});
+	}
+}
+
+function scrollToBeilage() {
+	const beilageElement = document.querySelector('[id^="beilage-"]');
+	if (beilageElement) {
+		beilageElement.scrollIntoView({
+			behavior: 'smooth',
+			block: 'start'
+		});
+	}
+}
+
+function markCurrentPageInInhaltsverzeichnis(pageNumber) {
+	// Reset all entries in Inhaltsverzeichnis
+	document.querySelectorAll('.inhalts-entry').forEach(entry => {
+		entry.classList.remove('bg-red-100', 'border-red-300');
+		entry.classList.add('bg-slate-50');
+	});
+
+	// Find and highlight the current page entry
+	const pageEntry = document.querySelector(`.inhalts-entry[data-page="${pageNumber}"]`);
+	if (pageEntry) {
+		pageEntry.classList.remove('bg-slate-50');
+		pageEntry.classList.add('bg-red-100', 'border-red-300');
+	}
+
+	// Also highlight page indicators
+	document.querySelectorAll('.page-indicator').forEach(indicator => {
+		indicator.classList.remove('bg-red-500', 'text-white');
+		indicator.classList.add('bg-blue-50', 'text-slate-600');
+	});
+
+	const pageIndicator = document.querySelector(`.page-indicator[data-page="${pageNumber}"]`);
+	if (pageIndicator) {
+		pageIndicator.classList.remove('bg-blue-50', 'bg-green-50', 'text-slate-600');
+		pageIndicator.classList.add('bg-red-500', 'text-white');
+	}
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+	if (e.key === 'Escape') {
+		// Close modal if open
+		const modal = document.getElementById('pageModal');
+		if (modal && !modal.classList.contains('hidden')) {
+			modal.classList.add('hidden');
+		}
+	} else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+		e.preventDefault();
+		scrollToPreviousPage();
+	} else if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+		e.preventDefault();
+		scrollToNextPage();
+	}
+});
+</script>
