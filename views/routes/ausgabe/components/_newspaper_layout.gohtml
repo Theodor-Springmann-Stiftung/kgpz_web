@@ -13,11 +13,11 @@
 			{{ if ge $pageCount 1 }}
 				{{ $firstPage := index $pages 0 }}
 				{{ if $firstPage.Available }}
-				<div class="newspaper-page-container">
+				<div class="newspaper-page-container" id="page-{{ $firstPage.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-image-line text-blue-600"></i>
-<span class="page-indicator text-sm font-medium text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
+<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
 						</div>
 					</div>
 <div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
@@ -37,11 +37,11 @@
 				{{ $middlePage1 := index $pages 1 }}
 				{{ $middlePage2 := index $pages 2 }}
 				{{ if and $middlePage1.Available $middlePage2.Available }}
-				<div class="newspaper-page-container">
+				<div class="newspaper-page-container" id="page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-copy-2-line text-green-600"></i>
-<span class="page-indicator text-sm font-medium text-slate-600 bg-green-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $middlePage1.PageNumber }}">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
+							<i class="ri-file-copy-2-line text-blue-600"></i>
+<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $middlePage1.PageNumber }}">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
 						</div>
 					</div>
 <div class="double-spread bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
@@ -66,11 +66,11 @@
 			{{ if ge $pageCount 4 }}
 				{{ $lastPage := index $pages 3 }}
 				{{ if $lastPage.Available }}
-				<div class="newspaper-page-container">
+				<div class="newspaper-page-container" id="page-{{ $lastPage.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-image-line text-blue-600"></i>
-							<span class="page-indicator text-sm font-medium text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $lastPage.PageNumber }}">{{ $lastPage.PageNumber }}</span>
+							<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $lastPage.PageNumber }}">{{ $lastPage.PageNumber }}</span>
 						</div>
 					</div>
 <div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
@@ -102,11 +102,11 @@
 			{{ if ge $pageCount 1 }}
 				{{ $firstPage := index $beilagePages 0 }}
 				{{ if $firstPage.Available }}
-				<div class="newspaper-page-container">
+				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $firstPage.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-image-line text-amber-600"></i>
-<span class="text-sm font-medium text-slate-600 bg-amber-50 px-2 py-1 rounded">{{ $firstPage.PageNumber }}</span>
+<span class="page-indicator page-number-inhalts text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}" data-page-number="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
 						</div>
 					</div>
 <div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
@@ -126,18 +126,25 @@
 				{{ $middlePage1 := index $beilagePages 1 }}
 				{{ $middlePage2 := index $beilagePages 2 }}
 				{{ if and $middlePage1.Available $middlePage2.Available }}
-				<div class="newspaper-page-container">
-					<h4 class="text-sm font-medium mb-2">Beilage {{ $beilageNum }}, Seiten {{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</h4>
-					<div class="double-spread">
+				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}">
+					<div class="mb-3">
+						<div class="flex items-center gap-2 mb-2">
+							<i class="ri-file-copy-2-line text-amber-600 text-sm"></i>
+							<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $middlePage1.PageNumber }}">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
+						</div>
+					</div>
+					<div class="double-spread bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
 						<img src="{{ $middlePage1.ImagePath }}"
 							 alt="Beilage {{ $beilageNum }}, Seite {{ $middlePage1.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer border shadow-md"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
 							 onclick="enlargePage(this, {{ $middlePage1.PageNumber }}, true)"
+							 data-page="{{ $middlePage1.PageNumber }}"
 							 loading="lazy">
 						<img src="{{ $middlePage2.ImagePath }}"
 							 alt="Beilage {{ $beilageNum }}, Seite {{ $middlePage2.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer border shadow-md"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
 							 onclick="enlargePage(this, {{ $middlePage2.PageNumber }}, true)"
+							 data-page="{{ $middlePage2.PageNumber }}"
 							 loading="lazy">
 					</div>
 				</div>
@@ -146,13 +153,19 @@
 				<!-- If only 2 pages, show as spread -->
 				{{ $page2 := index $beilagePages 1 }}
 				{{ if $page2.Available }}
-				<div class="newspaper-page-container">
-					<h4 class="text-sm font-medium mb-2">Beilage {{ $beilageNum }}, Seite {{ $page2.PageNumber }}</h4>
-					<div class="single-page">
+				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page2.PageNumber }}">
+					<div class="mb-3">
+						<div class="flex items-center gap-2 mb-2">
+							<i class="ri-file-image-line text-amber-600"></i>
+							<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page2.PageNumber }}">{{ $page2.PageNumber }}</span>
+						</div>
+					</div>
+					<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
 						<img src="{{ $page2.ImagePath }}"
 							 alt="Beilage {{ $beilageNum }}, Seite {{ $page2.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer border shadow-md"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
 							 onclick="enlargePage(this, {{ $page2.PageNumber }}, false)"
+							 data-page="{{ $page2.PageNumber }}"
 							 loading="lazy">
 					</div>
 				</div>
@@ -163,13 +176,19 @@
 			{{ if ge $pageCount 4 }}
 				{{ $lastPage := index $beilagePages 3 }}
 				{{ if $lastPage.Available }}
-				<div class="newspaper-page-container">
-					<h4 class="text-sm font-medium mb-2">Beilage {{ $beilageNum }}, Seite {{ $lastPage.PageNumber }}</h4>
-					<div class="single-page">
+				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $lastPage.PageNumber }}">
+					<div class="mb-3">
+						<div class="flex items-center gap-2 mb-2">
+							<i class="ri-file-image-line text-amber-600"></i>
+							<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $lastPage.PageNumber }}">{{ $lastPage.PageNumber }}</span>
+						</div>
+					</div>
+					<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
 						<img src="{{ $lastPage.ImagePath }}"
 							 alt="Beilage {{ $beilageNum }}, Seite {{ $lastPage.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer border shadow-md"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
 							 onclick="enlargePage(this, {{ $lastPage.PageNumber }}, false)"
+							 data-page="{{ $lastPage.PageNumber }}"
 							 loading="lazy">
 					</div>
 				</div>
@@ -262,23 +281,55 @@
 		max-width: 100%;
 	}
 }
+
+/* Simple button hover styles */
+button#prevPageBtn:hover:not([style*="display: none"]),
+button#nextPageBtn:hover,
+button#beilageBtn:hover {
+	background-color: rgb(209 213 219) !important; /* gray-300 */
+	color: rgb(55 65 81) !important; /* gray-700 */
+}
+
+button#beilageBtn:hover {
+	background-color: rgb(254 215 170) !important; /* amber-200 */
+	color: rgb(146 64 14) !important; /* amber-800 */
+}
+
 </style>
 
 <script>
-// Initialize page tracking
-document.addEventListener('DOMContentLoaded', function() {
+// Page highlighting state - use window to avoid redeclaration
+window.highlightObserver = window.highlightObserver || null;
+
+// Initialize or reinitialize page highlighting - can be called multiple times
+function initializePageHighlighting() {
+	// Clean up existing observer
+	if (window.highlightObserver) {
+		window.highlightObserver.disconnect();
+		window.highlightObserver = null;
+	}
+
 	// Get all page containers
 	const pageContainers = document.querySelectorAll('.newspaper-page-container');
 
 	// Set up intersection observer for active page tracking
-	const observer = new IntersectionObserver((entries) => {
+	window.highlightObserver = new IntersectionObserver((entries) => {
 		entries.forEach((entry) => {
 			if (entry.isIntersecting) {
-				// Get page number from the container
-				const pageImg = entry.target.querySelector('img[data-page]');
-				if (pageImg) {
-					const pageNumber = pageImg.getAttribute('data-page');
-					markCurrentPageInInhaltsverzeichnis(pageNumber);
+				// Check if this is a double-spread container
+				const doubleSpread = entry.target.querySelector('.double-spread');
+				if (doubleSpread) {
+					// Handle double-spread: highlight both pages
+					const pageImages = entry.target.querySelectorAll('img[data-page]');
+					const pageNumbers = Array.from(pageImages).map(img => img.getAttribute('data-page'));
+					markCurrentPagesInInhaltsverzeichnis(pageNumbers);
+				} else {
+					// Handle single page
+					const pageImg = entry.target.querySelector('img[data-page]');
+					if (pageImg) {
+						const pageNumber = pageImg.getAttribute('data-page');
+						markCurrentPageInInhaltsverzeichnis(pageNumber);
+					}
 				}
 			}
 		});
@@ -288,34 +339,126 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// Observe all page containers
 	pageContainers.forEach(container => {
-		observer.observe(container);
+		window.highlightObserver.observe(container);
 	});
+}
+
+// Initialize highlighting on page load
+document.addEventListener('DOMContentLoaded', initializePageHighlighting);
+
+// More comprehensive HTMX event handling for highlighting
+document.body.addEventListener('htmx:afterSwap', function(event) {
+	console.log('HTMX afterSwap detected, target:', event.detail.target);
+	console.log('Target ID:', event.detail.target.id);
+	console.log('Target classes:', event.detail.target.className);
+
+	// Reinitialize on any content swap that might affect our page
+	setTimeout(() => {
+		console.log('Reinitializing page highlighting...');
+		initializePageHighlighting();
+	}, 100);
+});
+
+document.body.addEventListener('htmx:afterSettle', function(event) {
+	console.log('HTMX afterSettle detected');
+	setTimeout(() => {
+		initializePageHighlighting();
+	}, 200);
+});
+
+// Also try htmx:load event
+document.body.addEventListener('htmx:load', function(event) {
+	console.log('HTMX load detected');
+	setTimeout(() => {
+		initializePageHighlighting();
+	}, 100);
 });
 
 function markCurrentPageInInhaltsverzeichnis(pageNumber) {
-	// Reset all entries in Inhaltsverzeichnis
-	document.querySelectorAll('.inhalts-entry').forEach(entry => {
-		entry.classList.remove('bg-red-100', 'border-red-300');
-		entry.classList.add('bg-slate-50');
+	markCurrentPagesInInhaltsverzeichnis([pageNumber]);
+}
+
+function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
+	// Reset all page numbers in Inhaltsverzeichnis
+	document.querySelectorAll('.page-number-inhalts').forEach(pageNum => {
+		pageNum.classList.remove('text-red-600', 'font-bold');
+		pageNum.classList.add('text-slate-700', 'font-semibold');
+		// Keep original background colors
+		if (!pageNum.classList.contains('bg-amber-50') && !pageNum.classList.contains('bg-blue-50')) {
+			pageNum.classList.add('bg-blue-50');
+		}
 	});
 
-	// Find and highlight the current page entry
-	const pageEntry = document.querySelector(`.inhalts-entry[data-page="${pageNumber}"]`);
-	if (pageEntry) {
-		pageEntry.classList.remove('bg-slate-50');
-		pageEntry.classList.add('bg-red-100', 'border-red-300');
+	// Find and highlight the current page numbers
+	const highlightedElements = [];
+	const highlightedRanges = new Set(); // Track which ranges we've already highlighted
+
+	pageNumbers.forEach(pageNumber => {
+		// Look for all entries that should be highlighted for this page
+		const allPageNumbers = document.querySelectorAll('.page-number-inhalts');
+
+		for (const pageNumElement of allPageNumbers) {
+			const startPage = parseInt(pageNumElement.getAttribute('data-page-number'));
+			const endPage = parseInt(pageNumElement.getAttribute('data-end-page'));
+			const rangeKey = `${startPage}-${endPage}`;
+
+			// Check if this page falls within this range
+			if (pageNumber >= startPage && pageNumber <= endPage) {
+				// Only highlight this range once, even if multiple visible pages fall within it
+				if (!highlightedRanges.has(rangeKey)) {
+					pageNumElement.classList.remove('text-slate-700');
+					pageNumElement.classList.add('text-red-600', 'font-bold');
+					highlightedElements.push(pageNumElement);
+					highlightedRanges.add(rangeKey);
+				}
+			}
+		}
+	});
+
+	// Auto-scroll to first highlighted element if it exists
+	if (highlightedElements.length > 0) {
+		scrollToHighlightedPage(highlightedElements[0]);
 	}
 
 	// Also highlight page indicators
 	document.querySelectorAll('.page-indicator').forEach(indicator => {
-		indicator.classList.remove('bg-red-500', 'text-white');
-		indicator.classList.add('bg-blue-50', 'text-slate-600');
+		indicator.classList.remove('text-red-600', 'font-bold');
+		indicator.classList.add('text-slate-600', 'font-semibold');
+		// Keep original backgrounds
+		if (!indicator.classList.contains('bg-amber-50')) {
+			indicator.classList.add('bg-blue-50');
+		}
 	});
 
-	const pageIndicator = document.querySelector(`.page-indicator[data-page="${pageNumber}"]`);
-	if (pageIndicator) {
-		pageIndicator.classList.remove('bg-blue-50', 'bg-green-50', 'text-slate-600');
-		pageIndicator.classList.add('bg-red-500', 'text-white');
+	// Highlight page indicators for all current pages
+	pageNumbers.forEach(pageNumber => {
+		const pageIndicator = document.querySelector(`.page-indicator[data-page="${pageNumber}"]`);
+		if (pageIndicator) {
+			pageIndicator.classList.remove('text-slate-600');
+			pageIndicator.classList.add('text-red-600', 'font-bold');
+		}
+	});
+}
+
+function scrollToHighlightedPage(element) {
+	// Check if the element is in a scrollable container
+	const inhaltsContainer = element.closest('.lg\\:overflow-y-auto');
+	if (inhaltsContainer) {
+		// Calculate position
+		const containerRect = inhaltsContainer.getBoundingClientRect();
+		const elementRect = element.getBoundingClientRect();
+
+		// Check if element is not fully visible
+		const isAboveContainer = elementRect.top < containerRect.top;
+		const isBelowContainer = elementRect.bottom > containerRect.bottom;
+
+		if (isAboveContainer || isBelowContainer) {
+			// Scroll to make element visible with some padding
+			element.scrollIntoView({
+				behavior: 'smooth',
+				block: 'center'
+			});
+		}
 	}
 }
 
@@ -343,4 +486,267 @@ document.addEventListener('keydown', function(e) {
 		closeModal();
 	}
 });
+
+// Navigation functions and state management - use window to avoid redeclaration
+window.currentPageContainers = window.currentPageContainers || [];
+window.currentActiveIndex = window.currentActiveIndex || 0;
+window.pageObserver = window.pageObserver || null;
+
+// Initialize or reinitialize page tracking - can be called multiple times
+function initializePageTracking() {
+	// Clean up existing observer
+	if (window.pageObserver) {
+		window.pageObserver.disconnect();
+		window.pageObserver = null;
+	}
+
+	// Reset state
+	window.currentPageContainers = Array.from(document.querySelectorAll('.newspaper-page-container'));
+	window.currentActiveIndex = 0;
+	updateButtonStates();
+
+	// Set up new observer
+	const existingObserver = document.querySelector('.newspaper-page-container');
+	if (existingObserver) {
+		let visibleContainers = new Set();
+
+		window.pageObserver = new IntersectionObserver((entries) => {
+			entries.forEach((entry) => {
+				const containerIndex = window.currentPageContainers.indexOf(entry.target);
+				if (containerIndex !== -1) {
+					if (entry.isIntersecting) {
+						visibleContainers.add(containerIndex);
+					} else {
+						visibleContainers.delete(containerIndex);
+					}
+				}
+			});
+
+			// Update currentActiveIndex to the first (topmost) visible container
+			if (visibleContainers.size > 0) {
+				const sortedVisible = Array.from(visibleContainers).sort((a, b) => a - b);
+				const newActiveIndex = sortedVisible[0];
+				if (newActiveIndex !== window.currentActiveIndex) {
+					window.currentActiveIndex = newActiveIndex;
+					updateButtonStates();
+				}
+			}
+		}, {
+			rootMargin: '-20% 0px -70% 0px'
+		});
+
+		window.currentPageContainers.forEach(container => {
+			window.pageObserver.observe(container);
+		});
+	}
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initializePageTracking);
+
+// More comprehensive HTMX event handling for navigation tracking
+document.body.addEventListener('htmx:afterSwap', function(event) {
+	console.log('HTMX afterSwap for navigation tracking');
+	setTimeout(() => {
+		console.log('Reinitializing page tracking...');
+		initializePageTracking();
+	}, 100);
+});
+
+document.body.addEventListener('htmx:afterSettle', function(event) {
+	console.log('HTMX afterSettle for navigation tracking');
+	setTimeout(() => {
+		initializePageTracking();
+	}, 200);
+});
+
+document.body.addEventListener('htmx:load', function(event) {
+	console.log('HTMX load for navigation tracking');
+	setTimeout(() => {
+		initializePageTracking();
+	}, 100);
+});
+
+function scrollToPreviousPage() {
+	if (window.currentActiveIndex > 0) {
+		// Move to previous container that's not currently visible
+		let targetIndex = window.currentActiveIndex - 1;
+
+		// Ensure we go to the previous non-visible container
+		window.currentActiveIndex = targetIndex;
+		window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+			behavior: 'smooth',
+			block: 'start'
+		});
+
+		// Update button states after a brief delay to let intersection observer catch up
+		setTimeout(() => {
+			updateButtonStates();
+		}, 100);
+	}
+}
+
+function scrollToNextPage() {
+	if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
+		// Move to next container that's not currently visible
+		let targetIndex = window.currentActiveIndex + 1;
+
+		// Ensure we go to the next non-visible container
+		window.currentActiveIndex = targetIndex;
+		window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+			behavior: 'smooth',
+			block: 'start'
+		});
+
+		// Update button states after a brief delay to let intersection observer catch up
+		setTimeout(() => {
+			updateButtonStates();
+		}, 100);
+	}
+}
+
+function scrollToBeilage() {
+	// Find the first beilage container
+	const beilageContainer = document.querySelector('[class*="border-t-2 border-amber-200"]');
+	if (beilageContainer) {
+		beilageContainer.scrollIntoView({
+			behavior: 'smooth',
+			block: 'start'
+		});
+	}
+}
+
+function updateButtonStates() {
+	const prevBtn = document.getElementById('prevPageBtn');
+	const nextBtn = document.getElementById('nextPageBtn');
+
+	if (prevBtn) {
+		if (window.currentActiveIndex <= 0) {
+			prevBtn.style.display = 'none';
+		} else {
+			prevBtn.style.display = 'flex';
+		}
+	}
+
+	if (nextBtn) {
+		if (window.currentActiveIndex >= window.currentPageContainers.length - 1) {
+			nextBtn.style.display = 'none';
+		} else {
+			nextBtn.style.display = 'flex';
+		}
+	}
+}
+
+function shareCurrentPage() {
+	const button = document.getElementById('shareLinkBtn');
+
+	// Get current page information
+	let pageInfo = '';
+
+	// Try to get the currently visible page number from active containers
+	if (window.currentActiveIndex !== undefined && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
+		const activeContainer = window.currentPageContainers[window.currentActiveIndex];
+		const pageElement = activeContainer.querySelector('[data-page]');
+		if (pageElement) {
+			const pageNumber = pageElement.getAttribute('data-page');
+			pageInfo = `#page-${pageNumber}`;
+		}
+	}
+
+	// Construct the shareable URL
+	const currentUrl = window.location.origin + window.location.pathname + pageInfo;
+
+	// Try to use Web Share API if available (mobile browsers)
+	if (navigator.share) {
+		navigator.share({
+			title: document.title,
+			url: currentUrl
+		}).catch(err => {
+			console.log('Error sharing:', err);
+			// Fallback to clipboard
+			copyToClipboard(currentUrl, button);
+		});
+	} else {
+		// Fallback: copy to clipboard
+		copyToClipboard(currentUrl, button);
+	}
+}
+
+function copyToClipboard(text, button) {
+	if (navigator.clipboard) {
+		navigator.clipboard.writeText(text).then(() => {
+			// Show temporary notification
+			showNotification('Link kopiert!', 'success', button);
+		}).catch(err => {
+			console.error('Failed to copy:', err);
+			showNotification('Kopieren fehlgeschlagen', 'error', button);
+		});
+	} else {
+		// Fallback for older browsers
+		const textarea = document.createElement('textarea');
+		textarea.value = text;
+		document.body.appendChild(textarea);
+		textarea.select();
+		try {
+			document.execCommand('copy');
+			showNotification('Link kopiert!', 'success', button);
+		} catch (err) {
+			console.error('Fallback copy failed:', err);
+			showNotification('Kopieren fehlgeschlagen', 'error', button);
+		}
+		document.body.removeChild(textarea);
+	}
+}
+
+function generateCitation() {
+	const button = document.getElementById('citationBtn');
+
+	// Get current page and issue information
+	const issueInfo = document.title || 'KGPZ';
+	const currentUrl = window.location.href;
+
+	// Basic citation format (can be expanded later)
+	const currentDate = new Date().toLocaleDateString('de-DE');
+	const citation = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${issueInfo}. Digital verfügbar unter: ${currentUrl} (Zugriff: ${currentDate}).`;
+
+	// Copy citation to clipboard
+	copyToClipboard(citation, button);
+}
+
+function showNotification(message, type = 'success', button) {
+	// Remove any existing notifications
+	const existingNotification = document.getElementById('notification');
+	if (existingNotification) {
+		existingNotification.remove();
+	}
+
+	// Create notification element
+	const notification = document.createElement('div');
+	notification.id = 'notification';
+	notification.className = `fixed px-3 py-2 rounded-md text-white text-sm font-medium z-50 transition-opacity duration-300 ${
+		type === 'success' ? 'bg-green-500' : 'bg-red-500'
+	}`;
+	notification.textContent = message;
+
+	// Position notification next to button if button is provided
+	if (button) {
+		const buttonRect = button.getBoundingClientRect();
+		notification.style.left = `${buttonRect.left - 80}px`; // Position to the left of button
+		notification.style.top = `${buttonRect.top + buttonRect.height / 2 - 20}px`; // Center vertically with button
+	} else {
+		// Fallback to top-right corner
+		notification.className += ' top-4 right-4';
+	}
+
+	// Add to page
+	document.body.appendChild(notification);
+
+	// Auto-remove after 3 seconds
+	setTimeout(() => {
+		notification.style.opacity = '0';
+		setTimeout(() => {
+			notification.remove();
+		}, 300);
+	}, 3000);
+}
 </script>

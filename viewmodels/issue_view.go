@@ -17,10 +17,25 @@ type PieceByIssue struct {
 	xmlmodels.Piece
 	// TODO: this is a bit hacky, but it refences the page number of the piece in the issue
 	Reference xmlmodels.IssueRef
+	// Indicates if this is a continuation from a previous page
+	IsContinuation bool
 }
 
 type PiecesByPage struct {
 	Items map[int][]PieceByIssue
+	Pages []int
+}
+
+// GroupedPieceByIssue represents a piece that may span multiple consecutive pages
+type GroupedPieceByIssue struct {
+	PieceByIssue
+	StartPage int
+	EndPage   int // Same as StartPage if not grouped
+}
+
+// GroupedPiecesByPage holds pieces grouped by consecutive pages when identical
+type GroupedPiecesByPage struct {
+	Items map[int][]GroupedPieceByIssue
 	Pages []int
 }
 
@@ -31,9 +46,9 @@ type IssuePage struct {
 }
 
 type IssueImages struct {
-	MainPages        []IssuePage
-	AdditionalPages  map[int][]IssuePage // Beilage number -> pages
-	HasImages        bool
+	MainPages       []IssuePage
+	AdditionalPages map[int][]IssuePage // Beilage number -> pages
+	HasImages       bool
 }
 
 type ImageFile struct {
@@ -47,9 +62,9 @@ type ImageFile struct {
 }
 
 type ImageRegistry struct {
-	Files          []ImageFile
-	ByYearIssue    map[string][]ImageFile // "year-issue" -> files
-	ByYearPage     map[string]ImageFile   // "year-page" -> file
+	Files       []ImageFile
+	ByYearIssue map[string][]ImageFile // "year-issue" -> files
+	ByYearPage  map[string]ImageFile   // "year-page" -> file
 }
 
 var imageRegistry *ImageRegistry
@@ -59,8 +74,8 @@ type IssueVM struct {
 	xmlmodels.Issue
 	Next             *xmlmodels.Issue
 	Prev             *xmlmodels.Issue
-	Pieces           PiecesByPage
-	AdditionalPieces PiecesByPage
+	Pieces           GroupedPiecesByPage
+	AdditionalPieces GroupedPiecesByPage
 	Images           IssueImages
 }
 
@@ -106,8 +121,9 @@ func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
 	slices.Sort(ppi.Pages)
 	slices.Sort(ppa.Pages)
 
-	sivm.Pieces = ppi
-	sivm.AdditionalPieces = ppa
+	// Group consecutive continuation pieces
+	sivm.Pieces = GroupConsecutiveContinuations(ppi)
+	sivm.AdditionalPieces = GroupConsecutiveContinuations(ppa)
 
 	images, err := LoadIssueImages(*issue)
 	if err != nil {
@@ -130,11 +146,24 @@ func PiecesForIsssue(lib *xmlmodels.Library, issue xmlmodels.Issue) (PiecesByPag
 
 	for _, piece := range lib.Pieces.Array {
 		if d, ok := piece.ReferencesIssue(year, issue.Number.No); ok {
-			p := PieceByIssue{Piece: piece, Reference: *d}
+			// Add main entry on starting page
+			p := PieceByIssue{Piece: piece, Reference: *d, IsContinuation: false}
 			if d.Beilage > 0 {
 				functions.MapArrayInsert(ppa.Items, d.Von, p)
 			} else {
 				functions.MapArrayInsert(ppi.Items, d.Von, p)
+			}
+
+			// Add continuation entries for subsequent pages (if Bis > Von)
+			if d.Bis > d.Von {
+				for page := d.Von + 1; page <= d.Bis; page++ {
+					pContinuation := PieceByIssue{Piece: piece, Reference: *d, IsContinuation: true}
+					if d.Beilage > 0 {
+						functions.MapArrayInsert(ppa.Items, page, pContinuation)
+					} else {
+						functions.MapArrayInsert(ppi.Items, page, pContinuation)
+					}
+				}
 			}
 		}
 	}
@@ -143,6 +172,144 @@ func PiecesForIsssue(lib *xmlmodels.Library, issue xmlmodels.Issue) (PiecesByPag
 	ppa.Pages = slices.Collect(maps.Keys(ppa.Items))
 
 	return ppi, ppa, nil
+}
+
+// pagesHaveIdenticalContent checks if two pages have the same pieces (ignoring continuation status)
+func pagesHaveIdenticalContent(items1, items2 []PieceByIssue) bool {
+	if len(items1) != len(items2) {
+		return false
+	}
+
+	// Create maps for comparison (ignore IsContinuation flag)
+	pieces1 := make(map[string]bool)
+	pieces2 := make(map[string]bool)
+
+	for _, piece := range items1 {
+		// Use piece ID and reference range as key (ignore continuation status)
+		key := piece.ID + "|" + strconv.Itoa(piece.Reference.Von) + "|" + strconv.Itoa(piece.Reference.Bis)
+		pieces1[key] = true
+	}
+
+	for _, piece := range items2 {
+		key := piece.ID + "|" + strconv.Itoa(piece.Reference.Von) + "|" + strconv.Itoa(piece.Reference.Bis)
+		pieces2[key] = true
+	}
+
+	// Check if maps are identical
+	for key := range pieces1 {
+		if !pieces2[key] {
+			return false
+		}
+	}
+
+	for key := range pieces2 {
+		if !pieces1[key] {
+			return false
+		}
+	}
+
+	return true
+}
+
+// pageContainsOnlyContinuations checks if a page contains only continuation pieces
+func pageContainsOnlyContinuations(pageItems []PieceByIssue) bool {
+	if len(pageItems) == 0 {
+		return false
+	}
+
+	for _, piece := range pageItems {
+		if !piece.IsContinuation {
+			return false
+		}
+	}
+	return true
+}
+
+// GroupConsecutiveContinuations groups consecutive pages where next page only contains continuations
+func GroupConsecutiveContinuations(pieces PiecesByPage) GroupedPiecesByPage {
+	grouped := GroupedPiecesByPage{
+		Items: make(map[int][]GroupedPieceByIssue),
+		Pages: []int{},
+	}
+
+	if len(pieces.Pages) == 0 {
+		return grouped
+	}
+
+	// Sort pages to ensure correct order
+	sortedPages := make([]int, len(pieces.Pages))
+	copy(sortedPages, pieces.Pages)
+	slices.Sort(sortedPages)
+
+	processedPages := make(map[int]bool)
+
+	for _, page := range sortedPages {
+		if processedPages[page] {
+			continue
+		}
+
+		pageItems := pieces.Items[page]
+		startPage := page
+		endPage := page
+
+		// Keep extending the group while next page contains only continuations
+		for checkPage := endPage + 1; ; checkPage++ {
+			// Only proceed if this page exists in our data
+			if _, exists := pieces.Items[checkPage]; !exists {
+				break
+			}
+
+			// Only proceed if this page hasn't been processed yet
+			if processedPages[checkPage] {
+				break
+			}
+
+			checkPageItems := pieces.Items[checkPage]
+
+			// Group if the next page contains ONLY continuations
+			if pageContainsOnlyContinuations(checkPageItems) {
+				endPage = checkPage
+				processedPages[checkPage] = true
+				// Continue to check if next page also contains only continuations
+			} else {
+				break
+			}
+		}
+
+		// Create grouped items with proper ordering (continuations first)
+		groupedItems := []GroupedPieceByIssue{}
+
+		// First add all continuation pieces
+		for _, piece := range pageItems {
+			if piece.IsContinuation {
+				groupedItems = append(groupedItems, GroupedPieceByIssue{
+					PieceByIssue: piece,
+					StartPage:    startPage,
+					EndPage:      endPage,
+				})
+			}
+		}
+
+		// Then add all non-continuation pieces
+		for _, piece := range pageItems {
+			if !piece.IsContinuation {
+				groupedItems = append(groupedItems, GroupedPieceByIssue{
+					PieceByIssue: piece,
+					StartPage:    startPage,
+					EndPage:      endPage,
+				})
+			}
+		}
+
+		if len(groupedItems) > 0 {
+			grouped.Items[startPage] = groupedItems
+			grouped.Pages = append(grouped.Pages, startPage)
+		}
+		processedPages[page] = true
+	}
+
+	slices.Sort(grouped.Pages)
+	return grouped
 }
 
 func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
@@ -204,39 +371,23 @@ func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
 		}
 	}
 
-	// Create beilage pages - match with beilage page ranges
-	for _, additional := range issue.Additionals {
+	// Create beilage pages - use ALL detected beilage files regardless of XML definitions
+	if len(beilageFiles) > 0 {
 		beilagePages := make([]IssuePage, 0)
 
-		for page := additional.Von; page <= additional.Bis; page++ {
-			var foundFile *ImageFile
-
-			// Look for beilage files that match this page number
-			for _, file := range beilageFiles {
-				if file.Page == page {
-					foundFile = &file
-					break
-				}
-			}
-
-			if foundFile != nil {
-				images.HasImages = true
-				beilagePages = append(beilagePages, IssuePage{
-					PageNumber: page,
-					ImagePath:  foundFile.Path,
-					Available:  true,
-				})
-			} else {
-				beilagePages = append(beilagePages, IssuePage{
-					PageNumber: page,
-					ImagePath:  "",
-					Available:  false,
-				})
-			}
+		// Add ALL beilage files found for this issue
+		for _, file := range beilageFiles {
+			images.HasImages = true
+			beilagePages = append(beilagePages, IssuePage{
+				PageNumber: file.Page,
+				ImagePath:  file.Path,
+				Available:  true,
+			})
 		}
 
 		if len(beilagePages) > 0 {
-			images.AdditionalPages[additional.Nummer] = beilagePages
+			// Use beilage number 1 as default
+			images.AdditionalPages[1] = beilagePages
 		}
 	}
 

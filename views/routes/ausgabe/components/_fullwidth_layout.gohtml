@@ -64,11 +64,20 @@ document.addEventListener('DOMContentLoaded', function() {
 	const observer = new IntersectionObserver((entries) => {
 		entries.forEach((entry) => {
 			if (entry.isIntersecting) {
-				// Get page number from the container
-				const pageImg = entry.target.querySelector('img[data-page]');
-				if (pageImg) {
-					const pageNumber = pageImg.getAttribute('data-page');
-					markCurrentPageInInhaltsverzeichnis(pageNumber);
+				// Check if this is a double-spread container
+				const doubleSpread = entry.target.querySelector('.double-spread');
+				if (doubleSpread) {
+					// Handle double-spread: highlight both pages
+					const pageImages = entry.target.querySelectorAll('img[data-page]');
+					const pageNumbers = Array.from(pageImages).map(img => img.getAttribute('data-page'));
+					markCurrentPagesInInhaltsverzeichnis(pageNumbers);
+				} else {
+					// Handle single page
+					const pageImg = entry.target.querySelector('img[data-page]');
+					if (pageImg) {
+						const pageNumber = pageImg.getAttribute('data-page');
+						markCurrentPageInInhaltsverzeichnis(pageNumber);
+					}
 				}
 
 				// Update current active index
@@ -119,17 +128,52 @@ function scrollToBeilage() {
 }
 
 function markCurrentPageInInhaltsverzeichnis(pageNumber) {
-	// Reset all entries in Inhaltsverzeichnis
-	document.querySelectorAll('.inhalts-entry').forEach(entry => {
-		entry.classList.remove('bg-red-100', 'border-red-300');
-		entry.classList.add('bg-slate-50');
+	markCurrentPagesInInhaltsverzeichnis([pageNumber]);
+}
+
+function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
+	// Reset all page numbers in Inhaltsverzeichnis
+	document.querySelectorAll('.page-number-inhalts').forEach(pageNum => {
+		pageNum.classList.remove('bg-red-500', 'text-white');
+		pageNum.classList.add('text-slate-700');
+		// Restore original background colors
+		if (pageNum.classList.contains('bg-amber-50')) {
+			// Keep amber background for Beilage pages
+		} else {
+			pageNum.classList.remove('bg-amber-50');
+			pageNum.classList.add('bg-blue-50');
+		}
 	});
 
-	// Find and highlight the current page entry
-	const pageEntry = document.querySelector(`.inhalts-entry[data-page="${pageNumber}"]`);
-	if (pageEntry) {
-		pageEntry.classList.remove('bg-slate-50');
-		pageEntry.classList.add('bg-red-100', 'border-red-300');
+	// Find and highlight the current page numbers
+	const highlightedElements = [];
+	const highlightedRanges = new Set(); // Track which ranges we've already highlighted
+
+	pageNumbers.forEach(pageNumber => {
+		// Look for all entries that should be highlighted for this page
+		const allPageNumbers = document.querySelectorAll('.page-number-inhalts');
+
+		for (const pageNumElement of allPageNumbers) {
+			const startPage = parseInt(pageNumElement.getAttribute('data-page-number'));
+			const endPage = parseInt(pageNumElement.getAttribute('data-end-page'));
+			const rangeKey = `${startPage}-${endPage}`;
+
+			// Check if this page falls within this range
+			if (pageNumber >= startPage && pageNumber <= endPage) {
+				// Only highlight this range once, even if multiple visible pages fall within it
+				if (!highlightedRanges.has(rangeKey)) {
+					pageNumElement.classList.remove('bg-blue-50', 'bg-amber-50', 'text-slate-700');
+					pageNumElement.classList.add('bg-red-500', 'text-white');
+					highlightedElements.push(pageNumElement);
+					highlightedRanges.add(rangeKey);
+				}
+			}
+		}
+	});
+
+	// Auto-scroll to first highlighted element if it exists
+	if (highlightedElements.length > 0) {
+		scrollToHighlightedPage(highlightedElements[0]);
 	}
 
 	// Also highlight page indicators
@@ -138,10 +182,35 @@ function markCurrentPageInInhaltsverzeichnis(pageNumber) {
 		indicator.classList.add('bg-blue-50', 'text-slate-600');
 	});
 
-	const pageIndicator = document.querySelector(`.page-indicator[data-page="${pageNumber}"]`);
-	if (pageIndicator) {
-		pageIndicator.classList.remove('bg-blue-50', 'bg-green-50', 'text-slate-600');
-		pageIndicator.classList.add('bg-red-500', 'text-white');
+	// Highlight page indicators for all current pages
+	pageNumbers.forEach(pageNumber => {
+		const pageIndicator = document.querySelector(`.page-indicator[data-page="${pageNumber}"]`);
+		if (pageIndicator) {
+			pageIndicator.classList.remove('bg-blue-50', 'bg-green-50', 'bg-amber-50', 'text-slate-600');
+			pageIndicator.classList.add('bg-red-500', 'text-white');
+		}
+	});
+}
+
+function scrollToHighlightedPage(element) {
+	// Check if the element is in a scrollable container
+	const inhaltsContainer = element.closest('.lg\\:overflow-y-auto');
+	if (inhaltsContainer) {
+		// Calculate position
+		const containerRect = inhaltsContainer.getBoundingClientRect();
+		const elementRect = element.getBoundingClientRect();
+
+		// Check if element is not fully visible
+		const isAboveContainer = elementRect.top < containerRect.top;
+		const isBelowContainer = elementRect.bottom > containerRect.bottom;
+
+		if (isAboveContainer || isBelowContainer) {
+			// Scroll to make element visible with some padding
+			element.scrollIntoView({
+				behavior: 'smooth',
+				block: 'center'
+			});
+		}
 	}
 }
 
@@ -161,4 +230,117 @@ document.addEventListener('keydown', function(e) {
 		scrollToNextPage();
 	}
 });
+
+function shareCurrentPage() {
+	const button = document.getElementById('shareLinkBtn');
+
+	// Get current page information
+	let pageInfo = '';
+
+	// Try to get the currently visible page number from active containers
+	if (window.currentActiveIndex !== undefined && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
+		const activeContainer = window.currentPageContainers[window.currentActiveIndex];
+		const pageElement = activeContainer.querySelector('[data-page]');
+		if (pageElement) {
+			const pageNumber = pageElement.getAttribute('data-page');
+			pageInfo = `#page-${pageNumber}`;
+		}
+	}
+
+	// Construct the shareable URL
+	const currentUrl = window.location.origin + window.location.pathname + pageInfo;
+
+	// Try to use Web Share API if available (mobile browsers)
+	if (navigator.share) {
+		navigator.share({
+			title: document.title,
+			url: currentUrl
+		}).catch(err => {
+			console.log('Error sharing:', err);
+			// Fallback to clipboard
+			copyToClipboard(currentUrl, button);
+		});
+	} else {
+		// Fallback: copy to clipboard
+		copyToClipboard(currentUrl, button);
+	}
+}
+
+function copyToClipboard(text, button) {
+	if (navigator.clipboard) {
+		navigator.clipboard.writeText(text).then(() => {
+			// Show temporary notification
+			showNotification('Link kopiert!', 'success', button);
+		}).catch(err => {
+			console.error('Failed to copy:', err);
+			showNotification('Kopieren fehlgeschlagen', 'error', button);
+		});
+	} else {
+		// Fallback for older browsers
+		const textarea = document.createElement('textarea');
+		textarea.value = text;
+		document.body.appendChild(textarea);
+		textarea.select();
+		try {
+			document.execCommand('copy');
+			showNotification('Link kopiert!', 'success', button);
+		} catch (err) {
+			console.error('Fallback copy failed:', err);
+			showNotification('Kopieren fehlgeschlagen', 'error', button);
+		}
+		document.body.removeChild(textarea);
+	}
+}
+
+function generateCitation() {
+	const button = document.getElementById('citationBtn');
+
+	// Get current page and issue information
+	const issueInfo = document.title || 'KGPZ';
+	const currentUrl = window.location.href;
+
+	// Basic citation format (can be expanded later)
+	const currentDate = new Date().toLocaleDateString('de-DE');
+	const citation = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${issueInfo}. Digital verfügbar unter: ${currentUrl} (Zugriff: ${currentDate}).`;
+
+	// Copy citation to clipboard
+	copyToClipboard(citation, button);
+}
+
+function showNotification(message, type = 'success', button) {
+	// Remove any existing notifications
+	const existingNotification = document.getElementById('notification');
+	if (existingNotification) {
+		existingNotification.remove();
+	}
+
+	// Create notification element
+	const notification = document.createElement('div');
+	notification.id = 'notification';
+	notification.className = `fixed px-3 py-2 rounded-md text-white text-sm font-medium z-50 transition-opacity duration-300 ${
+		type === 'success' ? 'bg-green-500' : 'bg-red-500'
+	}`;
+	notification.textContent = message;
+
+	// Position notification next to button if button is provided
+	if (button) {
+		const buttonRect = button.getBoundingClientRect();
+		notification.style.left = `${buttonRect.left - 80}px`; // Position to the left of button
+		notification.style.top = `${buttonRect.top + buttonRect.height / 2 - 20}px`; // Center vertically with button
+	} else {
+		// Fallback to top-right corner
+		notification.className += ' top-4 right-4';
+	}
+
+	// Add to page
+	document.body.appendChild(notification);
+
+	// Auto-remove after 3 seconds
+	setTimeout(() => {
+		notification.style.opacity = '0';
+		setTimeout(() => {
+			notification.remove();
+		}, 300);
+	}, 3000);
+}
 </script>
