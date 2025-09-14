@@ -6,6 +6,7 @@ cache/
 cache_geo/
 cache_gnd/
 data_bilder/
+pictures/
 config.json
 out.log
 kgpz_web

@@ -1,79 +1,288 @@
-{{ $piece := . }}
+{{- $piece := . -}}
 
+<div class="entry-description leading-relaxed mb-2">
+{{- $hasRezension := false -}}
+{{- $hasWeltnachrichten := false -}}
+{{- $hasEinkommendeFremde := false -}}
+{{- $hasWechselkurse := false -}}
+{{- $hasBuecher := false -}}
+{{- $hasLokalanzeigen := false -}}
+{{- $hasLokalnachrichten := false -}}
+{{- $hasLotterie := false -}}
+{{- $hasGedicht := false -}}
+{{- $hasVorladung := false -}}
+{{- $hasAuszug := false -}}
+{{- $hasAufsatz := false -}}
+{{- $hasGelehrteNachrichten := false -}}
+{{- $hasTheaterkritik := false -}}
+{{- $hasUebersetzung := false -}}
+{{- $hasKommentar := false -}}
+{{- $hasNachruf := false -}}
+{{- $hasReplik := false -}}
+{{- $hasProklamation := false -}}
+{{- $hasIneigenersache := false -}}
+{{- $hasBrief := false -}}
+{{- $hasAnzeige := false -}}
+{{- $hasDesertionsliste := false -}}
+{{- $hasNotenblatt := false -}}
+{{- $hasVorlesungsverzeichnis := false -}}
+{{- $hasErzaehlung := false -}}
+{{- $hasNachtrag := false -}}
+{{- $hasPanegyrik := false -}}
+{{- $hasKriminalanzeige := false -}}
+{{- $hasAbbildung := false -}}
+{{- $hasRezepte := false -}}
+{{- $hasKorrektur := false -}}
 
-<!-- Autor(en) -->
-{{ if $piece.AgentRefs }}
-	<div class="authors">
-		{{ range $agentref := $piece.AgentRefs }}
-			{{ if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) }}
-				{{ $agent := GetAgent $agentref.Ref }}
-				{{- if gt (len $agent.Names) 0 -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="inline-block">
-						{{- index $agent.Names 0 -}}
-					</a>
-				{{ end }}
-			{{ end }}
-		{{ end }}
-	</div>
-{{ end }}
+{{- range $catref := $piece.CategoryRefs -}}
+	{{- if eq $catref.Ref "rezension" -}}{{- $hasRezension = true -}}{{- end -}}
+	{{- if eq $catref.Ref "weltnachrichten" -}}{{- $hasWeltnachrichten = true -}}{{- end -}}
+	{{- if eq $catref.Ref "einkommende-fremde" -}}{{- $hasEinkommendeFremde = true -}}{{- end -}}
+	{{- if eq $catref.Ref "wechselkurse" -}}{{- $hasWechselkurse = true -}}{{- end -}}
+	{{- if eq $catref.Ref "buecher" -}}{{- $hasBuecher = true -}}{{- end -}}
+	{{- if eq $catref.Ref "lokalanzeigen" -}}{{- $hasLokalanzeigen = true -}}{{- end -}}
+	{{- if eq $catref.Ref "lokalnachrichten" -}}{{- $hasLokalnachrichten = true -}}{{- end -}}
+	{{- if eq $catref.Ref "lotterie" -}}{{- $hasLotterie = true -}}{{- end -}}
+	{{- if eq $catref.Ref "gedicht" -}}{{- $hasGedicht = true -}}{{- end -}}
+	{{- if eq $catref.Ref "vorladung" -}}{{- $hasVorladung = true -}}{{- end -}}
+	{{- if eq $catref.Ref "auszug" -}}{{- $hasAuszug = true -}}{{- end -}}
+	{{- if eq $catref.Ref "aufsatz" -}}{{- $hasAufsatz = true -}}{{- end -}}
+	{{- if eq $catref.Ref "gelehrte-nachrichten" -}}{{- $hasGelehrteNachrichten = true -}}{{- end -}}
+	{{- if eq $catref.Ref "theaterkritik" -}}{{- $hasTheaterkritik = true -}}{{- end -}}
+	{{- if eq $catref.Ref "uebersetzung" -}}{{- $hasUebersetzung = true -}}{{- end -}}
+	{{- if eq $catref.Ref "kommentar" -}}{{- $hasKommentar = true -}}{{- end -}}
+	{{- if eq $catref.Ref "nachruf" -}}{{- $hasNachruf = true -}}{{- end -}}
+	{{- if eq $catref.Ref "replik" -}}{{- $hasReplik = true -}}{{- end -}}
+	{{- if eq $catref.Ref "proklamation" -}}{{- $hasProklamation = true -}}{{- end -}}
+	{{- if eq $catref.Ref "ineigenersache" -}}{{- $hasIneigenersache = true -}}{{- end -}}
+	{{- if eq $catref.Ref "brief" -}}{{- $hasBrief = true -}}{{- end -}}
+	{{- if eq $catref.Ref "anzeige" -}}{{- $hasAnzeige = true -}}{{- end -}}
+	{{- if eq $catref.Ref "desertionsliste" -}}{{- $hasDesertionsliste = true -}}{{- end -}}
+	{{- if eq $catref.Ref "notenblatt" -}}{{- $hasNotenblatt = true -}}{{- end -}}
+	{{- if eq $catref.Ref "vorlesungsverzeichnis" -}}{{- $hasVorlesungsverzeichnis = true -}}{{- end -}}
+	{{- if eq $catref.Ref "erzaehlung" -}}{{- $hasErzaehlung = true -}}{{- end -}}
+	{{- if eq $catref.Ref "nachtrag" -}}{{- $hasNachtrag = true -}}{{- end -}}
+	{{- if eq $catref.Ref "panegyrik" -}}{{- $hasPanegyrik = true -}}{{- end -}}
+	{{- if eq $catref.Ref "kriminalanzeige" -}}{{- $hasKriminalanzeige = true -}}{{- end -}}
+	{{- if eq $catref.Ref "abbildung" -}}{{- $hasAbbildung = true -}}{{- end -}}
+	{{- if eq $catref.Ref "rezepte" -}}{{- $hasRezepte = true -}}{{- end -}}
+	{{- if eq $catref.Ref "korrektur" -}}{{- $hasKorrektur = true -}}{{- end -}}
+{{- end -}}
 
+{{- range $workref := $piece.WorkRefs -}}
+	{{- $kat := $workref.Category -}}
+	{{- if not $kat -}}{{- $kat = "rezension" -}}{{- end -}}
+	{{- if eq $kat "rezension" -}}{{- $hasRezension = true -}}{{- end -}}
+	{{- if eq $kat "auszug" -}}{{- $hasAuszug = true -}}{{- end -}}
+	{{- if eq $kat "theaterkritik" -}}{{- $hasTheaterkritik = true -}}{{- end -}}
+	{{- if eq $kat "uebersetzung" -}}{{- $hasUebersetzung = true -}}{{- end -}}
+	{{- if eq $kat "kommentar" -}}{{- $hasKommentar = true -}}{{- end -}}
+	{{- if eq $kat "anzeige" -}}{{- $hasAnzeige = true -}}{{- end -}}
+	{{- if eq $kat "replik" -}}{{- $hasReplik = true -}}{{- end -}}
+{{- end -}}
 
-<!-- Kategorien -->
-<div class="">
-	<!-- Einzelkategorien -->
-	{{ if $piece.CategoryRefs }}
-		{{ range $catref := $piece.CategoryRefs }}
-			{{ $category := GetCategory $catref.Ref }}
-			{{- if gt (len $category.Names) 0 -}}
-				<div class="category inline-block">{{- index $category.Names 0 -}}</div>
-			{{ end }}
-		{{ end }}
-	{{ end }}
-
-	{{- if $piece.Title -}}
-		<div class="">{{- index $piece.Title 0 -}}</div>
-	{{- else if $piece.Incipit -}}
-		<div class="">{{- index $piece.Incipit 0 -}}</div>
+{{- $place := "" -}}
+{{- if $piece.PlaceRefs -}}
+	{{- $placeObj := GetPlace (index $piece.PlaceRefs 0).Ref -}}
+	{{- if gt (len $placeObj.Names) 0 -}}
+		{{- $place = index $placeObj.Names 0 -}}
 	{{- end -}}
+{{- end -}}
 
-	{{- if $piece.PlaceRefs -}}
-		{{ $place := GetPlace (index $piece.PlaceRefs 0).Ref }}
-		{{- if gt (len $place.Names) 0 -}}
-			<div class="">{{- index $place.Names 0 -}}</div>
+{{- $title := "" -}}
+{{- if $piece.Title -}}
+	{{- $title = index $piece.Title 0 -}}
+{{- else if $piece.Incipit -}}
+	{{- $title = index $piece.Incipit 0 -}}
+{{- end -}}
+
+{{- $workTitle := "" -}}
+{{- $workAuthorName := "" -}}
+{{- $workAuthorID := "" -}}
+{{- if $piece.WorkRefs -}}
+	{{- $work := GetWork (index $piece.WorkRefs 0).Ref -}}
+	{{- if $work.PreferredTitle -}}
+		{{- $workTitle = $work.PreferredTitle -}}
+	{{- else if $work.Citation.Title -}}
+		{{- $workTitle = $work.Citation.Title -}}
+	{{- else if $work.Citation.Chardata -}}
+		{{- $workTitle = $work.Citation.Chardata -}}
+	{{- end -}}
+	{{- /* Get work author */ -}}
+	{{- if $work.AgentRefs -}}
+		{{- range $workAgentRef := $work.AgentRefs -}}
+			{{- if (or (eq $workAgentRef.Category "") (eq $workAgentRef.Category "autor")) -}}
+				{{- $workAgent := GetAgent $workAgentRef.Ref -}}
+				{{- if and $workAgent (gt (len $workAgent.Names) 0) -}}
+					{{- $workAuthorName = index $workAgent.Names 0 -}}
+					{{- $workAuthorID = $workAgentRef.Ref -}}
+					{{- break -}}
+				{{- end -}}
+			{{- end -}}
 		{{- end -}}
 	{{- end -}}
+{{- end -}}
 
+{{- /* Generate natural text descriptions */ -}}
 
-	<!-- Kategorie Werk -->
-	{{ if $piece.WorkRefs }}
-		{{ range $workref := $piece.WorkRefs }}
-			{{ $work := GetWork $workref.Ref }}
-			<!-- What we do depends on the category -->
-			{{- $kat := $workref.Category }}
-			{{- if not $kat }}
-				{{- $kat = "rezension" -}}
+{{- if $hasRezension -}}
+	{{- $authorFound := false -}}
+	{{- range $agentref := $piece.AgentRefs -}}
+		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+			{{- $agent := GetAgent $agentref.Ref -}}
+			{{- if gt (len $agent.Names) 0 -}}
+				<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>{{ if $workTitle }}, Rezension: <em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ else if $title }}, Rezension: <em>{{ $title }}</em>{{ else }}, Rezension{{ end }}{{ if $place }} ({{ $place }}){{ end }}
+				{{- $authorFound = true -}}
+				{{- break -}}
 			{{- end -}}
-
-			{{- $category := GetCategory $kat -}}
-			{{- if gt (len $category.Names) 0 -}}
-				<div class="category inline-block">{{- index $category.Names 0 -}}</div>
-			{{- end -}}
-
-			{{- if $work.PreferredTitle -}}
-				<div class="">{{- $work.PreferredTitle -}}</div>
-			{{- else if $work.Citation.Title -}}
-				<div class="">{{- $work.Citation.Title -}}</div>
-			{{- else -}}
-				<div class="">{{- $work.Citation.Chardata -}}</div>
-			{{- end -}}
-
 		{{- end -}}
 	{{- end -}}
+	{{- if not $authorFound -}}
+		Rezension{{ if $workTitle }}: <em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ else if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $place }} ({{ $place }}){{ end }}
+	{{- end -}}
+
+{{- else if $hasWeltnachrichten -}}
+	Politische Nachrichten aus aller Welt
+
+{{- else if $hasEinkommendeFremde -}}
+	{{- if $hasLokalnachrichten -}}Lokale Meldungen über einreisende Fremde{{- else if $hasNachruf -}}Nachruf und Einreiseliste{{- else -}}Einreiseliste{{- end -}}{{ if $place }} für {{ $place }}{{ end }}
+
+{{- else if $hasWechselkurse -}}
+	Wechselkurse{{ if $place }} in {{ $place }}{{ end }}
+
+{{- else if $hasBuecher -}}
+	Bücheranzeigen{{ if $title }}: {{ $title }}{{ end }}
+
+{{- else if $hasLokalanzeigen -}}
+	{{ if $hasNachruf }}Todesanzeige{{ else }}Lokalanzeige{{ end }}{{ if $place }} aus {{ $place }}{{ end }}{{ if $title }}: {{ $title }}{{ end }}
+
+{{- else if $hasLokalnachrichten -}}
+	{{ if $hasLotterie }}Lotterienachrichten{{ else if $hasNachruf }}Nachrufe{{ else if $hasTheaterkritik }}Theaternachrichten{{ else if $hasPanegyrik }}Festlichkeiten{{ else }}Lokalnachrichten{{ end }}{{ if $place }} aus {{ $place }}{{ end }}
+
+{{- else if $hasGedicht -}}
+	{{- $authorFound := false -}}
+	{{- range $agentref := $piece.AgentRefs -}}
+		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+			{{- $agent := GetAgent $agentref.Ref -}}
+			{{- if gt (len $agent.Names) 0 -}}
+				<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>, {{ if $hasKommentar }}Gedicht mit Kommentar{{ else if $hasUebersetzung }}Gedichtübersetzung{{ else if $hasGelehrteNachrichten }}Gedicht zu gelehrten Angelegenheiten{{ else }}Gedicht{{ end }}{{ if $title }}: „{{ $title }}"{{ end }}
+				{{- $authorFound = true -}}
+				{{- break -}}
+			{{- end -}}
+		{{- end -}}
+	{{- end -}}
+	{{- if not $authorFound -}}
+		{{ if $hasKommentar }}Gedicht mit Kommentar{{ else if $hasUebersetzung }}Gedichtübersetzung{{ else if $hasGelehrteNachrichten }}Gedicht zu gelehrten Angelegenheiten{{ else }}Gedicht{{ end }}{{ if $title }}: „{{ $title }}"{{ end }}
+	{{- end -}}
+
+{{- else if $hasVorladung -}}
+	Gerichtliche Vorladung{{ if $place }} in {{ $place }}{{ end }}{{ if $title }}: {{ $title }}{{ end }}
+
+{{- else if $hasAufsatz -}}
+	{{- $authorFound := false -}}
+	{{- range $agentref := $piece.AgentRefs -}}
+		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+			{{- $agent := GetAgent $agentref.Ref -}}
+			{{- if gt (len $agent.Names) 0 -}}
+				<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>, {{ if $hasReplik }}Erwiderung{{ else if $hasUebersetzung }}Übersetzung{{ else if $hasNachruf }}Nachruf{{ else if $hasKommentar }}Kommentar{{ else if $hasRezepte }}Rezepte und Anleitungen{{ else }}Aufsatz{{ end }}{{ if $title }}: „{{ $title }}"{{ end }}
+				{{- $authorFound = true -}}
+				{{- break -}}
+			{{- end -}}
+		{{- end -}}
+	{{- end -}}
+	{{- if not $authorFound -}}
+		{{ if $hasReplik }}Erwiderung{{ else if $hasUebersetzung }}Übersetzung{{ else if $hasNachruf }}Nachruf{{ else if $hasKommentar }}Kommentar{{ else if $hasRezepte }}Rezepte und Anleitungen{{ else }}Aufsatz{{ end }}{{ if $title }}: „{{ $title }}"{{ end }}
+	{{- end -}}
+
+{{- else if $hasGelehrteNachrichten -}}
+	{{ if $hasTheaterkritik }}Theaterkritik{{ else if $hasKommentar }}Gelehrter Kommentar{{ else }}Gelehrte Nachrichten{{ end }}{{ if $place }} aus {{ $place }}{{ end }}
+
+{{- else if $hasTheaterkritik -}}
+	{{- $authorFound := false -}}
+	{{- range $agentref := $piece.AgentRefs -}}
+		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+			{{- $agent := GetAgent $agentref.Ref -}}
+			{{- if gt (len $agent.Names) 0 -}}
+				<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>, Theaterkritik{{ if $workTitle }} zu <em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ else if $title }} zu <em>{{ $title }}</em>{{ end }}{{ if $place }} ({{ $place }}){{ end }}
+				{{- $authorFound = true -}}
+				{{- break -}}
+			{{- end -}}
+		{{- end -}}
+	{{- end -}}
+	{{- if not $authorFound -}}
+		Theaterkritik{{ if $workTitle }} zu <em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ else if $title }} zu <em>{{ $title }}</em>{{ end }}{{ if $place }} ({{ $place }}){{ end }}
+	{{- end -}}
+
+{{- else if $hasProklamation -}}
+	Amtliche Proklamation{{ if $title }}: {{ $title }}{{ end }}
+
+{{- else if $hasIneigenersache -}}
+	{{ if $hasKommentar }}{{ if $hasNachtrag }}Ergänzender Kommentar{{ else }}Redaktioneller Kommentar{{ end }}{{ else if $hasReplik }}Redaktionelle Stellungnahme{{ else }}Anmerkung der Redaktion{{ end }}{{ if $title }}: {{ $title }}{{ end }}
+
+{{- else if $hasBrief -}}
+	{{ if $hasNachruf }}Kondolenzbrief{{ else }}Leserbrief{{ end }}{{- $authorFound := false -}}{{- range $agentref := $piece.AgentRefs -}}{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}{{- $agent := GetAgent $agentref.Ref -}}{{- if gt (len $agent.Names) 0 -}} von <a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>{{- $authorFound = true -}}{{- break -}}{{- end -}}{{- end -}}{{- end -}}{{ if $place }} aus {{ $place }}{{ end }}
+
+{{- else if $hasDesertionsliste -}}
+	Desertionsliste{{ if $place }} für {{ $place }}{{ end }}
+
+{{- else if $hasNotenblatt -}}
+	{{ if $hasNachtrag }}Ergänztes {{ end }}Notenblatt{{ if $title }}: {{ $title }}{{ end }}
+
+{{- else if $hasVorlesungsverzeichnis -}}
+	Vorlesungsverzeichnis{{ if $place }} der Universität {{ $place }}{{ end }}
+
+{{- else if $hasErzaehlung -}}
+	{{- $authorFound := false -}}
+	{{- range $agentref := $piece.AgentRefs -}}
+		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+			{{- $agent := GetAgent $agentref.Ref -}}
+			{{- if gt (len $agent.Names) 0 -}}
+				<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>, {{ if $hasUebersetzung }}Übersetzung einer Erzählung{{ else }}Erzählung{{ end }}{{ if $title }}: „{{ $title }}"{{ end }}
+				{{- $authorFound = true -}}
+				{{- break -}}
+			{{- end -}}
+		{{- end -}}
+	{{- end -}}
+	{{- if not $authorFound -}}
+		{{ if $hasUebersetzung }}Übersetzung einer Erzählung{{ else }}Erzählung{{ end }}{{ if $title }}: „{{ $title }}"{{ end }}
+	{{- end -}}
+
+{{- else if $hasAbbildung -}}
+	{{ if $hasAufsatz }}Illustrierter Aufsatz{{ else }}Abbildung{{ end }}{{ if $title }}: {{ $title }}{{ end }}
+
+{{- else if $hasKriminalanzeige -}}
+	Kriminalanzeige{{ if $place }} aus {{ $place }}{{ end }}
+
+{{- else if $hasKorrektur -}}
+	Korrektur{{ if $title }}: {{ $title }}{{ end }}
+
+{{- else if $hasAnzeige -}}
+	{{ if $hasAuszug }}{{ if $hasGedicht }}Gedichtauszug{{ else }}Textauszug{{ end }}{{ else }}Anzeige{{ end }}{{ if $title }}: {{ $title }}{{ end }}
+
+{{- else if $hasAuszug -}}
+	Auszug{{ if $title }}: „{{ $title }}"{{ end }}{{ if $workTitle }} aus <em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ end }}
+
+{{- else -}}
+	{{- $authorFound := false -}}
+	{{- range $agentref := $piece.AgentRefs -}}
+		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+			{{- $agent := GetAgent $agentref.Ref -}}
+			{{- if gt (len $agent.Names) 0 -}}
+				<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>{{ if $title }}: {{ $title }}{{ end }}{{ if $workTitle }}{{ if $title }} aus {{ end }}<em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ end }}
+				{{- $authorFound = true -}}
+				{{- break -}}
+			{{- end -}}
+		{{- end -}}
+	{{- end -}}
+	{{- if not $authorFound -}}
+		{{ if $title }}{{ $title }}{{ end }}{{ if $workTitle }}{{ if $title }} aus {{ end }}<em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ else if not $title }}Beitrag ohne Titel{{ end }}
+	{{- end -}}
+
+{{- end -}}
 </div>
 
-<!-- Notizen -->
-{{ range $annotation := $piece.AnnotationNote.Annotations }}
-	<div class="italic">
-		{{ $annotation.Inner.InnerXML }}
-	</div>
-{{ end }}
+{{- range $annotation := $piece.AnnotationNote.Annotations -}}
+<div class="italic text-xs mt-1 text-slate-600">
+	{{ $annotation.Inner.InnerXML }}
+</div>
+{{- end -}}

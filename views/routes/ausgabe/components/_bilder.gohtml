@@ -1,0 +1,41 @@
+{{ $model := .model }}
+{{ $images := $model.Images }}
+{{ if $images.HasImages }}
+<div class="mt-6">
+	<h3 class="text-lg font-medium mb-4">Seiten der Ausgabe</h3>
+
+	{{- if $images.MainPages }}
+	<div class="mb-6">
+		<h4 class="text-md font-medium mb-2">Hauptausgabe</h4>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			{{- range $images.MainPages -}}
+				{{- if .Available -}}
+				<div class="border rounded-lg p-2">
+					<h5 class="text-sm font-medium mb-2">Seite {{ .PageNumber }}</h5>
+					<img src="{{ .ImagePath }}" alt="Seite {{ .PageNumber }}" class="w-full h-auto border" loading="lazy">
+				</div>
+				{{- end -}}
+			{{- end -}}
+		</div>
+	</div>
+	{{- end }}
+
+	{{- range $beilageNum, $pages := $images.AdditionalPages -}}
+		{{- if $pages }}
+		<div class="mb-6">
+			<h4 class="text-md font-medium mb-2">Beilage {{ $beilageNum }}</h4>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				{{- range $pages -}}
+					{{- if .Available -}}
+					<div class="border rounded-lg p-2">
+						<h5 class="text-sm font-medium mb-2">Seite {{ .PageNumber }}</h5>
+						<img src="{{ .ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ .PageNumber }}" class="w-full h-auto border" loading="lazy">
+					</div>
+					{{- end -}}
+				{{- end -}}
+			</div>
+		</div>
+		{{- end -}}
+	{{- end -}}
+</div>
+{{ end }}

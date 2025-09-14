@@ -1,0 +1,292 @@
+{{ $model := .model }}
+{{ $images := $model.Images }}
+
+<div class="space-y-8 h-full relative" id="newspaper-content">
+	<!-- Main Issue Pages -->
+	{{ if $images.MainPages }}
+		{{ $pages := $images.MainPages }}
+		{{ $pageCount := len $pages }}
+
+		<div class="space-y-6">
+
+			<!-- First page (single) -->
+			{{ if ge $pageCount 1 }}
+				{{ $firstPage := index $pages 0 }}
+				{{ if $firstPage.Available }}
+				<div class="newspaper-page-container">
+					<div class="mb-3">
+						<div class="flex items-center gap-2 mb-2">
+							<i class="ri-file-image-line text-blue-600"></i>
+<span class="text-sm font-medium text-slate-600 bg-blue-50 px-2 py-1 rounded">{{ $firstPage.PageNumber }}</span>
+						</div>
+					</div>
+<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+						<img src="{{ $firstPage.ImagePath }}"
+							 alt="Seite {{ $firstPage.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+							 onclick="enlargePage(this, {{ $firstPage.PageNumber }}, false)"
+							 data-page="{{ $firstPage.PageNumber }}"
+							 loading="lazy">
+					</div>
+				</div>
+				{{ end }}
+			{{ end }}
+
+			<!-- Middle pages (double spread) -->
+			{{ if ge $pageCount 4 }}
+				{{ $middlePage1 := index $pages 1 }}
+				{{ $middlePage2 := index $pages 2 }}
+				{{ if and $middlePage1.Available $middlePage2.Available }}
+				<div class="newspaper-page-container">
+					<div class="mb-3">
+						<div class="flex items-center gap-2 mb-2">
+							<i class="ri-file-copy-2-line text-green-600"></i>
+<span class="text-sm font-medium text-slate-600 bg-green-50 px-2 py-1 rounded">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
+						</div>
+					</div>
+<div class="double-spread bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+						<img src="{{ $middlePage1.ImagePath }}"
+							 alt="Seite {{ $middlePage1.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+							 onclick="enlargePage(this, {{ $middlePage1.PageNumber }}, true)"
+							 data-page="{{ $middlePage1.PageNumber }}"
+							 loading="lazy">
+						<img src="{{ $middlePage2.ImagePath }}"
+							 alt="Seite {{ $middlePage2.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+							 onclick="enlargePage(this, {{ $middlePage2.PageNumber }}, true)"
+							 data-page="{{ $middlePage2.PageNumber }}"
+							 loading="lazy">
+					</div>
+				</div>
+				{{ end }}
+			{{ end }}
+
+			<!-- Last page (single) -->
+			{{ if ge $pageCount 4 }}
+				{{ $lastPage := index $pages 3 }}
+				{{ if $lastPage.Available }}
+				<div class="newspaper-page-container">
+					<div class="mb-3">
+						<div class="flex items-center gap-2 mb-2">
+							<i class="ri-file-image-line text-blue-600"></i>
+							<span class="text-sm font-medium text-slate-600 bg-blue-50 px-3 py-1 rounded-full">Seite {{ $lastPage.PageNumber }}</span>
+						</div>
+					</div>
+<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+						<img src="{{ $lastPage.ImagePath }}"
+							 alt="Seite {{ $lastPage.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+							 onclick="enlargePage(this, {{ $lastPage.PageNumber }}, false)"
+							 data-page="{{ $lastPage.PageNumber }}"
+							 loading="lazy">
+					</div>
+				</div>
+				{{ end }}
+			{{ end }}
+		</div>
+	{{ end }}
+
+	<!-- Beilage Pages -->
+	{{ range $beilageNum, $beilagePages := $images.AdditionalPages }}
+		{{ if $beilagePages }}
+		<div class="space-y-6 mt-12 pt-8 border-t-2 border-amber-200">
+			<!-- Header for beilage -->
+			<div class="flex items-center gap-3 mb-6">
+				<i class="ri-attachment-line text-2xl text-amber-600"></i>
+				<h2 class="text-xl font-semibold text-slate-800">Beilage {{ $beilageNum }}</h2>
+			</div>
+			{{ $pageCount := len $beilagePages }}
+
+			<!-- First page of beilage -->
+			{{ if ge $pageCount 1 }}
+				{{ $firstPage := index $beilagePages 0 }}
+				{{ if $firstPage.Available }}
+				<div class="newspaper-page-container">
+					<div class="mb-3">
+						<div class="flex items-center gap-2 mb-2">
+							<i class="ri-file-image-line text-amber-600"></i>
+<span class="text-sm font-medium text-slate-600 bg-amber-50 px-2 py-1 rounded">{{ $firstPage.PageNumber }}</span>
+						</div>
+					</div>
+<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+						<img src="{{ $firstPage.ImagePath }}"
+							 alt="Beilage {{ $beilageNum }}, Seite {{ $firstPage.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+							 onclick="enlargePage(this, {{ $firstPage.PageNumber }}, false)"
+							 data-page="{{ $firstPage.PageNumber }}"
+							 loading="lazy">
+					</div>
+				</div>
+				{{ end }}
+			{{ end }}
+
+			<!-- If beilage has 4+ pages, show middle spread -->
+			{{ if ge $pageCount 4 }}
+				{{ $middlePage1 := index $beilagePages 1 }}
+				{{ $middlePage2 := index $beilagePages 2 }}
+				{{ if and $middlePage1.Available $middlePage2.Available }}
+				<div class="newspaper-page-container">
+					<h4 class="text-sm font-medium mb-2">Beilage {{ $beilageNum }}, Seiten {{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</h4>
+					<div class="double-spread">
+						<img src="{{ $middlePage1.ImagePath }}"
+							 alt="Beilage {{ $beilageNum }}, Seite {{ $middlePage1.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer border shadow-md"
+							 onclick="enlargePage(this, {{ $middlePage1.PageNumber }}, true)"
+							 loading="lazy">
+						<img src="{{ $middlePage2.ImagePath }}"
+							 alt="Beilage {{ $beilageNum }}, Seite {{ $middlePage2.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer border shadow-md"
+							 onclick="enlargePage(this, {{ $middlePage2.PageNumber }}, true)"
+							 loading="lazy">
+					</div>
+				</div>
+				{{ end }}
+			{{ else if eq $pageCount 2 }}
+				<!-- If only 2 pages, show as spread -->
+				{{ $page2 := index $beilagePages 1 }}
+				{{ if $page2.Available }}
+				<div class="newspaper-page-container">
+					<h4 class="text-sm font-medium mb-2">Beilage {{ $beilageNum }}, Seite {{ $page2.PageNumber }}</h4>
+					<div class="single-page">
+						<img src="{{ $page2.ImagePath }}"
+							 alt="Beilage {{ $beilageNum }}, Seite {{ $page2.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer border shadow-md"
+							 onclick="enlargePage(this, {{ $page2.PageNumber }}, false)"
+							 loading="lazy">
+					</div>
+				</div>
+				{{ end }}
+			{{ end }}
+
+			<!-- Last page of beilage (if 4+ pages) -->
+			{{ if ge $pageCount 4 }}
+				{{ $lastPage := index $beilagePages 3 }}
+				{{ if $lastPage.Available }}
+				<div class="newspaper-page-container">
+					<h4 class="text-sm font-medium mb-2">Beilage {{ $beilageNum }}, Seite {{ $lastPage.PageNumber }}</h4>
+					<div class="single-page">
+						<img src="{{ $lastPage.ImagePath }}"
+							 alt="Beilage {{ $beilageNum }}, Seite {{ $lastPage.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer border shadow-md"
+							 onclick="enlargePage(this, {{ $lastPage.PageNumber }}, false)"
+							 loading="lazy">
+					</div>
+				</div>
+				{{ end }}
+			{{ end }}
+		</div>
+		{{ end }}
+	{{ end }}
+</div>
+
+<!-- Modal for enlarged view - positioned within newspaper content -->
+<div id="pageModal" class="absolute inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center backdrop-blur-sm" onclick="closeModal()">
+	<div class="relative max-w-full max-h-full p-4">
+<img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+		<button onclick="closeModal()" class="absolute top-2 right-2 text-white bg-slate-800 bg-opacity-80 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-100 transition-all duration-200">
+			<i class="ri-close-line text-xl"></i>
+		</button>
+	</div>
+</div>
+
+<style>
+.newspaper-page-container {
+	margin-bottom: 2rem;
+}
+
+.single-page {
+	display: flex;
+	justify-content: center;
+}
+
+.single-page .newspaper-page-image {
+	max-width: min(400px, 100%);
+	width: 100%;
+	height: auto;
+}
+
+.double-spread {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	width: 100%;
+}
+
+.double-spread .newspaper-page-image {
+	max-width: min(350px, 48%);
+	width: 100%;
+	height: auto;
+	flex: 1;
+}
+
+/* Larger screens - maximize available space */
+@media (min-width: 1280px) {
+	.single-page .newspaper-page-image {
+		max-width: min(600px, 100%);
+	}
+
+	.double-spread .newspaper-page-image {
+		max-width: min(500px, 48%);
+	}
+}
+
+/* Very wide screens - take advantage of the full width */
+@media (min-width: 1536px) {
+	.single-page .newspaper-page-image {
+		max-width: min(700px, 100%);
+	}
+
+	.double-spread .newspaper-page-image {
+		max-width: min(600px, 48%);
+	}
+}
+
+/* Medium screens */
+@media (max-width: 1024px) {
+	.double-spread {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.double-spread .newspaper-page-image {
+		max-width: 400px;
+		width: 100%;
+	}
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+	.single-page .newspaper-page-image,
+	.double-spread .newspaper-page-image {
+		max-width: 100%;
+	}
+}
+</style>
+
+<script>
+function enlargePage(imgElement, pageNumber, isFromSpread) {
+	const modal = document.getElementById('pageModal');
+	const modalImage = document.getElementById('modalImage');
+
+	modalImage.src = imgElement.src;
+	modalImage.alt = imgElement.alt;
+
+	modal.classList.remove('hidden');
+
+	// Highlight current page in Inhaltsverzeichnis if you implement that
+	// markCurrentPage(pageNumber);
+}
+
+function closeModal() {
+	const modal = document.getElementById('pageModal');
+	modal.classList.add('hidden');
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+	if (e.key === 'Escape') {
+		closeModal();
+	}
+});
+</script>
