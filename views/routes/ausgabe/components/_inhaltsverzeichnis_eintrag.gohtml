@@ -132,15 +132,15 @@
 	{{- range $agentref := $piece.AgentRefs -}}
 		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 			{{- $agent := GetAgent $agentref.Ref -}}
-			{{- if gt (len $agent.Names) 0 -}}
-				{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>{{ if $workTitle }}, Rezension: <em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ else if $title }}, Rezension: <em>{{ $title }}</em>{{ else }}, Rezension{{ end }}{{ if $place }} ({{ $place }}){{ end }}
+			{{- if and $agent (gt (len $agent.Names) 0) -}}
+				{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>{{ if $workTitle }}, Rezension: <em>{{ $workTitle }}</em>{{ if $workAuthorName }}{{ if $workAuthorID }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ else }} von {{ $workAuthorName }}{{ end }}{{ end }}{{ else if $title }}, Rezension: <em>{{ $title }}</em>{{ else }}, Rezension{{ end }}{{ if $place }} ({{ $place }}){{ end }}
 				{{- $authorFound = true -}}
 				{{- break -}}
 			{{- end -}}
 		{{- end -}}
 	{{- end -}}
 	{{- if not $authorFound -}}
-		{{ Safe $fortsPrefix }}Rezension{{ if $workTitle }}: <em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ else if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $place }} ({{ $place }}){{ end }}
+		{{ Safe $fortsPrefix }}Rezension{{ if $workTitle }}: <em>{{ $workTitle }}</em>{{ if $workAuthorName }}{{ if $workAuthorID }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ else }} von {{ $workAuthorName }}{{ end }}{{ end }}{{ else if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $place }} ({{ $place }}){{ end }}
 	{{- end -}}
 
 {{- else if $hasWeltnachrichten -}}
@@ -166,7 +166,7 @@
 	{{- range $agentref := $piece.AgentRefs -}}
 		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 			{{- $agent := GetAgent $agentref.Ref -}}
-			{{- if gt (len $agent.Names) 0 -}}
+			{{- if and $agent (gt (len $agent.Names) 0) -}}
 				<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>, {{ if $hasKommentar }}Gedicht mit Kommentar{{ else if $hasUebersetzung }}Gedichtübersetzung{{ else if $hasGelehrteNachrichten }}Gedicht zu gelehrten Angelegenheiten{{ else }}Gedicht{{ end }}{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
 				{{- $authorFound = true -}}
 				{{- break -}}
@@ -185,7 +185,7 @@
 	{{- range $agentref := $piece.AgentRefs -}}
 		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 			{{- $agent := GetAgent $agentref.Ref -}}
-			{{- if gt (len $agent.Names) 0 -}}
+			{{- if and $agent (gt (len $agent.Names) 0) -}}
 				{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>, {{ if $hasReplik }}Erwiderung{{ else if $hasUebersetzung }}Übersetzung{{ else if $hasNachruf }}Nachruf{{ else if $hasKommentar }}Kommentar{{ else if $hasRezepte }}Rezepte und Anleitungen{{ else }}Aufsatz{{ end }}{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
 				{{- $authorFound = true -}}
 				{{- break -}}
@@ -204,7 +204,7 @@
 	{{- range $agentref := $piece.AgentRefs -}}
 		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 			{{- $agent := GetAgent $agentref.Ref -}}
-			{{- if gt (len $agent.Names) 0 -}}
+			{{- if and $agent (gt (len $agent.Names) 0) -}}
 				{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>, Theaterkritik{{ if $workTitle }} zu <em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ else if $title }} zu <em>{{ $title }}</em>{{ end }}{{ if $place }} ({{ $place }}){{ end }}
 				{{- $authorFound = true -}}
 				{{- break -}}
@@ -222,7 +222,7 @@
 	{{ Safe $fortsPrefix }}{{ if $hasKommentar }}{{ if $hasNachtrag }}Ergänzender Kommentar{{ else }}Redaktioneller Kommentar{{ end }}{{ else if $hasReplik }}Redaktionelle Stellungnahme{{ else }}Anmerkung der Redaktion{{ end }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}
 
 {{- else if $hasBrief -}}
-	{{ Safe $fortsPrefix }}{{ if $hasNachruf }}Kondolenzbrief{{ else }}Leserbrief{{ end }}{{- $authorFound := false -}}{{- range $agentref := $piece.AgentRefs -}}{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}{{- $agent := GetAgent $agentref.Ref -}}{{- if gt (len $agent.Names) 0 -}} von <a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>{{- $authorFound = true -}}{{- break -}}{{- end -}}{{- end -}}{{- end -}}{{ if $place }} aus {{ $place }}{{ end }}
+	{{ Safe $fortsPrefix }}{{ if $hasNachruf }}Kondolenzbrief{{ else }}Leserbrief{{ end }}{{- $authorFound := false -}}{{- range $agentref := $piece.AgentRefs -}}{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}{{- $agent := GetAgent $agentref.Ref -}}{{- if and $agent (gt (len $agent.Names) 0) -}} von <a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>{{- $authorFound = true -}}{{- break -}}{{- end -}}{{- end -}}{{- end -}}{{ if $place }} aus {{ $place }}{{ end }}
 
 {{- else if $hasDesertionsliste -}}
 	{{ Safe $fortsPrefix }}Desertionsliste{{ if $place }} für {{ $place }}{{ end }}
@@ -238,7 +238,7 @@
 	{{- range $agentref := $piece.AgentRefs -}}
 		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 			{{- $agent := GetAgent $agentref.Ref -}}
-			{{- if gt (len $agent.Names) 0 -}}
+			{{- if and $agent (gt (len $agent.Names) 0) -}}
 				{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>, {{ if $hasUebersetzung }}Übersetzung einer Erzählung{{ else }}Erzählung{{ end }}{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
 				{{- $authorFound = true -}}
 				{{- break -}}
@@ -269,7 +269,7 @@
 	{{- range $agentref := $piece.AgentRefs -}}
 		{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 			{{- $agent := GetAgent $agentref.Ref -}}
-			{{- if gt (len $agent.Names) 0 -}}
+			{{- if and $agent (gt (len $agent.Names) 0) -}}
 				{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $workTitle }}{{ if $title }} aus {{ end }}<em>{{ $workTitle }}</em>{{ if $workAuthorName }} von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>{{ end }}{{ end }}
 				{{- $authorFound = true -}}
 				{{- break -}}

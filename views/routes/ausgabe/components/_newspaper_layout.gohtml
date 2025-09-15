@@ -37,7 +37,7 @@
 				{{ $middlePage1 := index $pages 1 }}
 				{{ $middlePage2 := index $pages 2 }}
 				{{ if and $middlePage1.Available $middlePage2.Available }}
-				<div class="newspaper-page-container" id="page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}">
+				<div class="newspaper-page-container" id="page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}" data-pages="{{ $middlePage1.PageNumber }},{{ $middlePage2.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-copy-2-line text-blue-600"></i>
@@ -106,7 +106,7 @@
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-image-line text-amber-600"></i>
-<span class="page-indicator page-number-inhalts text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}" data-page-number="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
+<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
 						</div>
 					</div>
 <div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
@@ -126,7 +126,7 @@
 				{{ $middlePage1 := index $beilagePages 1 }}
 				{{ $middlePage2 := index $beilagePages 2 }}
 				{{ if and $middlePage1.Available $middlePage2.Available }}
-				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}">
+				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}" data-pages="{{ $middlePage1.PageNumber }},{{ $middlePage2.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-copy-2-line text-amber-600 text-sm"></i>
@@ -379,13 +379,55 @@ function markCurrentPageInInhaltsverzeichnis(pageNumber) {
 }
 
 function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
+	console.log('markCurrentPagesInInhaltsverzeichnis called with:', pageNumbers);
+	
+	// Reset all page container borders to default
+	document.querySelectorAll('[data-page-container]').forEach(container => {
+		if (container.hasAttribute('data-beilage')) {
+			container.classList.remove('border-red-500');
+			container.classList.add('border-amber-400');
+		} else {
+			container.classList.remove('border-red-500');
+			container.classList.add('border-slate-300');
+		}
+	});
+	
 	// Reset all page numbers in Inhaltsverzeichnis
 	document.querySelectorAll('.page-number-inhalts').forEach(pageNum => {
 		pageNum.classList.remove('text-red-600', 'font-bold');
 		pageNum.classList.add('text-slate-700', 'font-semibold');
+		pageNum.style.textDecoration = '';
+		pageNum.style.pointerEvents = '';
+		// Restore hover effects
+		if (pageNum.classList.contains('bg-blue-50')) {
+			pageNum.classList.add('hover:bg-blue-100');
+		} else if (pageNum.classList.contains('bg-amber-50')) {
+			pageNum.classList.add('hover:bg-amber-100');
+		}
 		// Keep original background colors
 		if (!pageNum.classList.contains('bg-amber-50') && !pageNum.classList.contains('bg-blue-50')) {
 			pageNum.classList.add('bg-blue-50');
+		}
+	});
+
+	// Reset all containers and links in Inhaltsverzeichnis
+	document.querySelectorAll('.inhalts-entry').forEach(container => {
+		container.classList.add('hover:bg-slate-100');
+		container.style.cursor = '';
+	});
+	
+	document.querySelectorAll('.inhalts-entry .author-link').forEach(link => {
+		link.style.textDecoration = '';
+		link.style.pointerEvents = '';
+		link.classList.remove('no-underline');
+	});
+	
+	document.querySelectorAll('.inhalts-entry a[href*="/"]').forEach(link => {
+		link.style.textDecoration = '';
+		link.style.pointerEvents = '';
+		link.classList.remove('no-underline');
+		if (link.classList.contains('bg-blue-50')) {
+			link.classList.add('hover:bg-blue-100');
 		}
 	});
 
@@ -394,6 +436,8 @@ function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
 	const highlightedRanges = new Set(); // Track which ranges we've already highlighted
 
 	pageNumbers.forEach(pageNumber => {
+		// Convert pageNumber to integer for comparison
+		const currentPageNum = parseInt(pageNumber);
 		// Look for all entries that should be highlighted for this page
 		const allPageNumbers = document.querySelectorAll('.page-number-inhalts');
 
@@ -403,13 +447,50 @@ function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
 			const rangeKey = `${startPage}-${endPage}`;
 
 			// Check if this page falls within this range
-			if (pageNumber >= startPage && pageNumber <= endPage) {
+			if (currentPageNum >= startPage && currentPageNum <= endPage) {
 				// Only highlight this range once, even if multiple visible pages fall within it
 				if (!highlightedRanges.has(rangeKey)) {
-					pageNumElement.classList.remove('text-slate-700');
+					pageNumElement.classList.remove('text-slate-700', 'hover:bg-blue-100', 'hover:bg-amber-100');
 					pageNumElement.classList.add('text-red-600', 'font-bold');
+					pageNumElement.style.textDecoration = 'none';
+					pageNumElement.style.pointerEvents = 'none';
 					highlightedElements.push(pageNumElement);
 					highlightedRanges.add(rangeKey);
+
+					// Highlight the page container's left border
+					const pageContainer = document.querySelector(`[data-page-container="${startPage}"]`);
+					if (pageContainer) {
+						pageContainer.classList.remove('border-slate-300', 'border-amber-400');
+						pageContainer.classList.add('border-red-500');
+					}
+
+					// Also make links in the current article non-clickable and remove hover effects
+					const parentEntry = pageNumElement.closest('.mb-4');
+					if (parentEntry) {
+						// Remove hover effects from the container
+						const entryContainers = parentEntry.querySelectorAll('.inhalts-entry');
+						entryContainers.forEach(container => {
+							container.classList.remove('hover:bg-slate-100');
+							container.style.cursor = 'default';
+						});
+						
+						// Make all links non-clickable and remove underlines
+						parentEntry.querySelectorAll('.author-link').forEach(link => {
+							link.style.textDecoration = 'none';
+							link.style.pointerEvents = 'none';
+							link.classList.add('no-underline');
+						});
+						
+						// Also handle issue reference links
+						parentEntry.querySelectorAll('a[href*="/"]').forEach(link => {
+							if (link.getAttribute('aria-current') === 'page') {
+								link.style.textDecoration = 'none';
+								link.style.pointerEvents = 'none';
+								link.classList.add('no-underline');
+								link.classList.remove('hover:bg-blue-100');
+							}
+						});
+					}
 				}
 			}
 		}
@@ -662,7 +743,6 @@ function shareCurrentPage() {
 			title: document.title,
 			url: currentUrl
 		}).catch(err => {
-			console.log('Error sharing:', err);
 			// Fallback to clipboard
 			copyToClipboard(currentUrl, button);
 		});
@@ -675,11 +755,9 @@ function shareCurrentPage() {
 function copyToClipboard(text, button) {
 	if (navigator.clipboard) {
 		navigator.clipboard.writeText(text).then(() => {
-			// Show temporary notification
-			showNotification('Link kopiert!', 'success', button);
+			showSimplePopup(button, 'Link kopiert!');
 		}).catch(err => {
-			console.error('Failed to copy:', err);
-			showNotification('Kopieren fehlgeschlagen', 'error', button);
+			showSimplePopup(button, 'Kopieren fehlgeschlagen');
 		});
 	} else {
 		// Fallback for older browsers
@@ -688,15 +766,16 @@ function copyToClipboard(text, button) {
 		document.body.appendChild(textarea);
 		textarea.select();
 		try {
-			document.execCommand('copy');
-			showNotification('Link kopiert!', 'success', button);
+			const successful = document.execCommand('copy');
+			showSimplePopup(button, successful ? 'Link kopiert!' : 'Kopieren fehlgeschlagen');
 		} catch (err) {
-			console.error('Fallback copy failed:', err);
-			showNotification('Kopieren fehlgeschlagen', 'error', button);
+			showSimplePopup(button, 'Kopieren fehlgeschlagen');
+		} finally {
+			document.body.removeChild(textarea);
 		}
-		document.body.removeChild(textarea);
 	}
 }
+
 
 function generateCitation() {
 	const button = document.getElementById('citationBtn');
@@ -709,44 +788,175 @@ function generateCitation() {
 	const currentDate = new Date().toLocaleDateString('de-DE');
 	const citation = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${issueInfo}. Digital verfügbar unter: ${currentUrl} (Zugriff: ${currentDate}).`;
 
-	// Copy citation to clipboard
-	copyToClipboard(citation, button);
+	// Copy to clipboard
+	if (navigator.clipboard) {
+		navigator.clipboard.writeText(citation).then(() => {
+			showSimplePopup(button, 'Zitation kopiert!');
+		}).catch(err => {
+			showSimplePopup(button, 'Kopieren fehlgeschlagen');
+		});
+	} else {
+		// Fallback for older browsers
+		const textarea = document.createElement('textarea');
+		textarea.value = citation;
+		document.body.appendChild(textarea);
+		textarea.select();
+		try {
+			const successful = document.execCommand('copy');
+			showSimplePopup(button, successful ? 'Zitation kopiert!' : 'Kopieren fehlgeschlagen');
+		} catch (err) {
+			showSimplePopup(button, 'Kopieren fehlgeschlagen');
+		} finally {
+			document.body.removeChild(textarea);
+		}
+	}
 }
 
-function showNotification(message, type = 'success', button) {
-	// Remove any existing notifications
-	const existingNotification = document.getElementById('notification');
-	if (existingNotification) {
-		existingNotification.remove();
+function showSimplePopup(button, message) {
+	// Remove any existing popup
+	const existingPopup = document.querySelector('.simple-popup');
+	if (existingPopup) {
+		existingPopup.remove();
 	}
 
-	// Create notification element
-	const notification = document.createElement('div');
-	notification.id = 'notification';
-	notification.className = `fixed px-3 py-2 rounded-md text-white text-sm font-medium z-50 transition-opacity duration-300 ${
-		type === 'success' ? 'bg-green-500' : 'bg-red-500'
-	}`;
-	notification.textContent = message;
+	// Create popup element
+	const popup = document.createElement('div');
+	popup.className = 'simple-popup';
+	popup.textContent = message;
+	
+	// Style the popup
+	popup.style.cssText = `
+		position: fixed;
+		background: #374151;
+		color: white;
+		padding: 6px 12px;
+		border-radius: 6px;
+		font-size: 13px;
+		font-weight: 500;
+		z-index: 1000;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		white-space: nowrap;
+	`;
 
-	// Position notification next to button if button is provided
-	if (button) {
-		const buttonRect = button.getBoundingClientRect();
-		notification.style.left = `${buttonRect.left - 80}px`; // Position to the left of button
-		notification.style.top = `${buttonRect.top + buttonRect.height / 2 - 20}px`; // Center vertically with button
-	} else {
-		// Fallback to top-right corner
-		notification.className += ' top-4 right-4';
-	}
+	// Position popup next to button
+	const buttonRect = button.getBoundingClientRect();
+	const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+	const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+	
+	popup.style.left = (buttonRect.left + scrollLeft - 10) + 'px';
+	popup.style.top = (buttonRect.bottom + scrollTop + 8) + 'px';
 
 	// Add to page
-	document.body.appendChild(notification);
+	document.body.appendChild(popup);
 
-	// Auto-remove after 3 seconds
+	// Fade in
 	setTimeout(() => {
-		notification.style.opacity = '0';
+		popup.style.opacity = '1';
+	}, 10);
+
+	// Auto-remove after 2 seconds
+	setTimeout(() => {
+		popup.style.opacity = '0';
 		setTimeout(() => {
-			notification.remove();
-		}, 300);
-	}, 3000);
+			if (popup.parentNode) {
+				popup.remove();
+			}
+		}, 200);
+	}, 2000);
 }
+
+// Handle hash navigation to scroll to specific pages
+function scrollToPageFromHash() {
+	const hash = window.location.hash;
+	let pageNumber = '';
+	let targetContainer = null;
+	
+	if (hash.startsWith('#page-')) {
+		pageNumber = hash.replace('#page-', '');
+		
+		// Try to find exact page container first
+		targetContainer = document.getElementById(`page-${pageNumber}`);
+		
+		// If not found, try to find container that contains this page
+		if (!targetContainer) {
+			// Look for double-spread containers that contain this page
+			const containers = document.querySelectorAll('.newspaper-page-container[data-pages]');
+			for (const container of containers) {
+				const pages = container.getAttribute('data-pages');
+				if (pages && pages.split(',').includes(pageNumber)) {
+					targetContainer = container;
+					break;
+				}
+			}
+		}
+		
+		// If still not found, try beilage containers
+		if (!targetContainer) {
+			targetContainer = document.getElementById(`beilage-1-page-${pageNumber}`) || 
+							 document.getElementById(`beilage-2-page-${pageNumber}`) ||
+							 document.querySelector(`[id*="beilage"][id*="page-${pageNumber}"]`);
+		}
+	} else if (hash.startsWith('#beilage-')) {
+		// Handle beilage-specific hashes like #beilage-1-page-101
+		const match = hash.match(/#beilage-(\d+)-page-(\d+)/);
+		if (match) {
+			const beilageNum = match[1];
+			pageNumber = match[2];
+			targetContainer = document.getElementById(`beilage-${beilageNum}-page-${pageNumber}`);
+		}
+	}
+	
+	if (targetContainer && pageNumber) {
+		setTimeout(() => {
+			targetContainer.scrollIntoView({
+				behavior: 'smooth',
+				block: 'start'
+			});
+			
+			// Highlight the specific page in the table of contents
+			markCurrentPageInInhaltsverzeichnis(pageNumber);
+		}, 300);
+	}
+}
+
+// Function to copy page permalink
+function copyPagePermalink(pageNumber, button, isBeilage = false) {
+	let pageFragment = '';
+	if (isBeilage) {
+		pageFragment = `#beilage-1-page-${pageNumber}`;
+	} else {
+		pageFragment = `#page-${pageNumber}`;
+	}
+	
+	const currentUrl = window.location.origin + window.location.pathname + pageFragment;
+	
+	// Copy to clipboard
+	if (navigator.clipboard) {
+		navigator.clipboard.writeText(currentUrl).then(() => {
+			showSimplePopup(button, 'Link kopiert!');
+		}).catch(err => {
+			showSimplePopup(button, 'Kopieren fehlgeschlagen');
+		});
+	} else {
+		// Fallback for older browsers
+		const textarea = document.createElement('textarea');
+		textarea.value = currentUrl;
+		document.body.appendChild(textarea);
+		textarea.select();
+		try {
+			const successful = document.execCommand('copy');
+			showSimplePopup(button, successful ? 'Link kopiert!' : 'Kopieren fehlgeschlagen');
+		} catch (err) {
+			showSimplePopup(button, 'Kopieren fehlgeschlagen');
+		} finally {
+			document.body.removeChild(textarea);
+		}
+	}
+}
+
+// Initialize hash handling
+document.addEventListener('DOMContentLoaded', scrollToPageFromHash);
+window.addEventListener('hashchange', scrollToPageFromHash);
 </script>
