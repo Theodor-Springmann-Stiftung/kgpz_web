@@ -10,6 +10,7 @@ import numpy as np
 from PIL import Image, ImageEnhance
 import os
 import argparse
+import json
 from pathlib import Path
 
 
@@ -289,10 +290,21 @@ if __name__ == "__main__":
                        choices=['denoise', 'contrast', 'background', 'sharpen'],
                        default=['denoise', 'contrast', 'background', 'sharpen'],
                        help="Processing steps to apply")
+    parser.add_argument("--config", help="JSON config file with custom parameters")
 
     args = parser.parse_args()
 
-    cleaner = NewspaperImageCleaner()
+    # Load config if provided
+    config = None
+    if args.config and os.path.exists(args.config):
+        with open(args.config, 'r') as f:
+            config = json.load(f)
+        # Convert list back to tuple if needed
+        if config and 'clahe_grid_size' in config:
+            config['clahe_grid_size'] = tuple(config['clahe_grid_size'])
+        print(f"Loaded config from: {args.config}")
+
+    cleaner = NewspaperImageCleaner(config)
 
     if args.directory:
         output_dir = args.output or "cleaned_images"

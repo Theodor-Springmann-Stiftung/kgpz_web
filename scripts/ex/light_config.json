@@ -1,0 +1,12 @@
+{
+    "bilateral_d": 3,
+    "bilateral_sigma_color": 50,
+    "bilateral_sigma_space": 30,
+    "denoise_h": 3,
+    "morph_kernel_size": 1,
+    "clahe_clip_limit": 1.2,
+    "gamma": 1.05,
+    "unsharp_amount": 1.1,
+    "unsharp_radius": 0.8,
+    "unsharp_threshold": 0
+}
