@@ -1,0 +1,56 @@
+# Python Virtual Environment
+venv/
+env/
+.env
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Generated/processed images
+demo_*
+cleaned_*
+comparison_*
+*_cleaned_*
+*_comparison_*
+
+# Processing outputs
+cleaned/
+output/
+results/
+
+# Configuration files (may contain sensitive settings)
+config.json
+*.config.json
+custom_*.json
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Test outputs
+test_*
+sample_output/
+
+# Large source images (uncomment if you don't want to track originals)
+# *.jpg
+# *.jpeg
+# *.png
+# *.tif
+# *.tiff
