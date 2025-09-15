@@ -27,7 +27,7 @@
 					</div>
 					<div class="space-y-0">
 						{{ range $groupedPiece := (index $model.Pieces.Items $page) }}
-						<div class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200" data-page="{{ $page }}">
+						<div class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200{{ if $groupedPiece.PieceByIssue.IsContinuation }} continuation-entry hidden{{ end }}" data-page="{{ $page }}"{{ if $groupedPiece.PieceByIssue.IsContinuation }} data-is-continuation="true"{{ end }}>
 							{{ template "_inhaltsverzeichnis_eintrag" $groupedPiece.PieceByIssue }}
 
 
@@ -90,7 +90,7 @@
 					</div>
 					<div class="space-y-1">
 						{{ range $groupedPiece := (index $model.AdditionalPieces.Items $page) }}
-						<div class="inhalts-entry py-2 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200" data-page="{{ $page }}">
+						<div class="inhalts-entry py-2 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200{{ if $groupedPiece.PieceByIssue.IsContinuation }} continuation-entry hidden{{ end }}" data-page="{{ $page }}"{{ if $groupedPiece.PieceByIssue.IsContinuation }} data-is-continuation="true"{{ end }}>
 							{{ template "_inhaltsverzeichnis_eintrag" $groupedPiece.PieceByIssue }}
 
 

@@ -392,6 +392,11 @@ function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
 		}
 	});
 	
+	// Hide all continuation entries by default
+	document.querySelectorAll('.continuation-entry').forEach(entry => {
+		entry.classList.add('hidden');
+	});
+	
 	// Reset all page numbers in Inhaltsverzeichnis
 	document.querySelectorAll('.page-number-inhalts').forEach(pageNum => {
 		pageNum.classList.remove('text-red-600', 'font-bold');
@@ -462,6 +467,12 @@ function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
 					if (pageContainer) {
 						pageContainer.classList.remove('border-slate-300', 'border-amber-400');
 						pageContainer.classList.add('border-red-500');
+						
+						// Show continuation entries for this visible page
+						const continuationEntries = pageContainer.querySelectorAll('.continuation-entry[data-page="' + startPage + '"]');
+						continuationEntries.forEach(entry => {
+							entry.classList.remove('hidden');
+						});
 					}
 
 					// Also make links in the current article non-clickable and remove hover effects
