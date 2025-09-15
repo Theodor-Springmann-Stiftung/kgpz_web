@@ -16,7 +16,7 @@
 				<div class="newspaper-page-container" id="page-{{ $firstPage.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-image-line text-blue-600"></i>
+							<i class="ri-file-text-line text-black"></i>
 <span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
 						</div>
 					</div>
@@ -40,7 +40,7 @@
 				<div class="newspaper-page-container" id="page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}" data-pages="{{ $middlePage1.PageNumber }},{{ $middlePage2.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-copy-2-line text-blue-600"></i>
+							<i class="ri-file-text-line text-black" style="transform: scaleX(-1); margin-right: -8px;"></i><i class="ri-file-text-line text-black"></i>
 <span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $middlePage1.PageNumber }}">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
 						</div>
 					</div>
@@ -69,7 +69,7 @@
 				<div class="newspaper-page-container" id="page-{{ $lastPage.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-image-line text-blue-600"></i>
+							<i class="ri-file-text-line text-black" style="transform: scaleX(-1);"></i>
 							<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $lastPage.PageNumber }}">{{ $lastPage.PageNumber }}</span>
 						</div>
 					</div>
@@ -105,7 +105,7 @@
 				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $firstPage.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-image-line text-amber-600"></i>
+							<i class="ri-file-text-line text-amber-600"></i>
 <span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
 						</div>
 					</div>
@@ -129,7 +129,7 @@
 				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}" data-pages="{{ $middlePage1.PageNumber }},{{ $middlePage2.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-copy-2-line text-amber-600 text-sm"></i>
+							<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1); margin-right: -8px;"></i><i class="ri-file-text-line text-amber-600"></i>
 							<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $middlePage1.PageNumber }}">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
 						</div>
 					</div>
@@ -156,7 +156,7 @@
 				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page2.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-image-line text-amber-600"></i>
+							<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1);"></i>
 							<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page2.PageNumber }}">{{ $page2.PageNumber }}</span>
 						</div>
 					</div>
@@ -179,7 +179,7 @@
 				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $lastPage.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-image-line text-amber-600"></i>
+							<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1);"></i>
 							<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $lastPage.PageNumber }}">{{ $lastPage.PageNumber }}</span>
 						</div>
 					</div>

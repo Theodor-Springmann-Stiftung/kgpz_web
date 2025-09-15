@@ -51,6 +51,11 @@ func (e *Engine) funcs() error {
 	e.AddFunc("HRDateShort", functions.HRDateShort)
 	e.AddFunc("HRDateYear", functions.HRDateYear)
 
+	// Math
+	e.AddFunc("sub", func(a, b int) int { return a - b })
+	e.AddFunc("add", func(a, b int) int { return a + b })
+	e.AddFunc("mod", func(a, b int) int { return a % b })
+
 	// Strings
 	e.AddFunc("FirstLetter", functions.FirstLetter)
 	e.AddFunc("Upper", strings.ToUpper)

@@ -12,7 +12,22 @@
 				<div class="mb-6 first:mb-0 pl-4 border-l-4 border-slate-300" data-page-container="{{ $page }}">
 					<div class="flex items-center justify-between gap-2 mb-2">
 						<div class="flex items-center gap-2">
-							<i class="ri-file-text-line text-blue-600 text-sm"></i>
+							{{ $allPages := $model.Pieces.Pages }}
+							{{ $firstPage := index $allPages 0 }}
+							{{ $lastPageIndex := sub (len $allPages) 1 }}
+							{{ $lastPage := index $allPages $lastPageIndex }}
+							{{ if eq $page $firstPage }}
+								<i class="ri-file-text-line text-black text-sm"></i>
+							{{ else if eq $page $lastPage }}
+								<i class="ri-file-text-line text-black text-sm" style="transform: scaleX(-1);"></i>
+							{{ else }}
+								{{ $isEvenPage := eq (mod $page 2) 0 }}
+								{{ if $isEvenPage }}
+									<i class="ri-file-text-line text-black text-sm" style="transform: scaleX(-1); margin-right: -8px;"></i><i class="ri-file-text-line text-slate-400 text-sm"></i>
+								{{ else }}
+									<i class="ri-file-text-line text-slate-400 text-sm" style="transform: scaleX(-1); margin-right: -8px;"></i><i class="ri-file-text-line text-black text-sm"></i>
+								{{ end }}
+							{{ end }}
 							{{ $pageItems := (index $model.Pieces.Items $page) }}
 							{{ $maxEndPage := $page }}
 							{{ range $groupedPiece := $pageItems }}{{ if gt $groupedPiece.EndPage $maxEndPage }}{{ $maxEndPage = $groupedPiece.EndPage }}{{ end }}{{ end }}
@@ -75,7 +90,22 @@
 				<div class="mb-6 first:mb-0 pl-4 border-l-4 border-amber-400" data-page-container="{{ $page }}" data-beilage="true">
 					<div class="flex items-center justify-between gap-2 mb-2">
 						<div class="flex items-center gap-2">
-							<i class="ri-file-text-line text-amber-600 text-sm"></i>
+							{{ $allBeilagePages := $model.AdditionalPieces.Pages }}
+							{{ $firstBeilagePage := index $allBeilagePages 0 }}
+							{{ $lastBeilagePageIndex := sub (len $allBeilagePages) 1 }}
+							{{ $lastBeilagePage := index $allBeilagePages $lastBeilagePageIndex }}
+							{{ if eq $page $firstBeilagePage }}
+								<i class="ri-file-text-line text-amber-600 text-sm"></i>
+							{{ else if eq $page $lastBeilagePage }}
+								<i class="ri-file-text-line text-amber-600 text-sm" style="transform: scaleX(-1);"></i>
+							{{ else }}
+								{{ $isEvenPage := eq (mod $page 2) 0 }}
+								{{ if $isEvenPage }}
+									<i class="ri-file-text-line text-amber-600 text-sm" style="transform: scaleX(-1); margin-right: -8px;"></i><i class="ri-file-text-line text-slate-400 text-sm"></i>
+								{{ else }}
+									<i class="ri-file-text-line text-slate-400 text-sm" style="transform: scaleX(-1); margin-right: -8px;"></i><i class="ri-file-text-line text-amber-600 text-sm"></i>
+								{{ end }}
+							{{ end }}
 							{{ $pageItems := (index $model.AdditionalPieces.Items $page) }}
 							{{ $maxEndPage := $page }}
 							{{ range $groupedPiece := $pageItems }}{{ if gt $groupedPiece.EndPage $maxEndPage }}{{ $maxEndPage = $groupedPiece.EndPage }}{{ end }}{{ end }}
