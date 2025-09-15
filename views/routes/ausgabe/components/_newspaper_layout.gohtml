@@ -7,78 +7,103 @@
 		{{ $pages := $images.MainPages }}
 		{{ $pageCount := len $pages }}
 
-		<div class="space-y-6">
-
-			<!-- First page (single) -->
+		<!-- 2-column grid with proper empty spaces -->
+		<div class="grid grid-cols-2 gap-4">
+			<!-- Page 1: Left, Row 1 -->
 			{{ if ge $pageCount 1 }}
-				{{ $firstPage := index $pages 0 }}
-				{{ if $firstPage.Available }}
-				<div class="newspaper-page-container" id="page-{{ $firstPage.PageNumber }}">
+				{{ $page1 := index $pages 0 }}
+				{{ if $page1.Available }}
+				<div class="newspaper-page-container" id="page-{{ $page1.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-text-line text-black"></i>
-<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
+							<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page1.PageNumber }}">{{ $page1.PageNumber }}</span>
 						</div>
 					</div>
-<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-						<img src="{{ $firstPage.ImagePath }}"
-							 alt="Seite {{ $firstPage.PageNumber }}"
+					<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+						<img src="{{ $page1.ImagePath }}"
+							 alt="Seite {{ $page1.PageNumber }}"
 							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $firstPage.PageNumber }}, false)"
-							 data-page="{{ $firstPage.PageNumber }}"
+							 onclick="enlargePage(this, {{ $page1.PageNumber }}, false)"
+							 data-page="{{ $page1.PageNumber }}"
 							 loading="lazy">
 					</div>
 				</div>
 				{{ end }}
 			{{ end }}
 
-			<!-- Middle pages (double spread) -->
-			{{ if ge $pageCount 4 }}
-				{{ $middlePage1 := index $pages 1 }}
-				{{ $middlePage2 := index $pages 2 }}
-				{{ if and $middlePage1.Available $middlePage2.Available }}
-				<div class="newspaper-page-container" id="page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}" data-pages="{{ $middlePage1.PageNumber }},{{ $middlePage2.PageNumber }}">
-					<div class="mb-3">
-						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-text-line text-black" style="transform: scaleX(-1); margin-right: -8px;"></i><i class="ri-file-text-line text-black"></i>
-<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $middlePage1.PageNumber }}">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
-						</div>
+			<!-- Empty space: Right, Row 1 -->
+			<div></div>
+
+			<!-- Common header for pages 2 and 3 -->
+			{{ if and (ge $pageCount 2) (ge $pageCount 3) }}
+				{{ $page2 := index $pages 1 }}
+				{{ $page3 := index $pages 2 }}
+				{{ if and $page2.Available $page3.Available }}
+				<div class="col-span-2 mb-2">
+					<div class="flex items-center justify-center gap-2 mb-4">
+						<i class="ri-file-text-line text-black" style="transform: scaleX(-1);"></i>
+						<i class="ri-file-text-line text-black"></i>
+						<span class="text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded">{{ $page2.PageNumber }}-{{ $page3.PageNumber }}</span>
 					</div>
-<div class="double-spread bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-						<img src="{{ $middlePage1.ImagePath }}"
-							 alt="Seite {{ $middlePage1.PageNumber }}"
+				</div>
+				{{ end }}
+			{{ end }}
+
+			<!-- Page 2: Left, Row 2 -->
+			{{ if ge $pageCount 2 }}
+				{{ $page2 := index $pages 1 }}
+				{{ if $page2.Available }}
+				<div class="newspaper-page-container" id="page-{{ $page2.PageNumber }}">
+					<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+						<img src="{{ $page2.ImagePath }}"
+							 alt="Seite {{ $page2.PageNumber }}"
 							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $middlePage1.PageNumber }}, true)"
-							 data-page="{{ $middlePage1.PageNumber }}"
-							 loading="lazy">
-						<img src="{{ $middlePage2.ImagePath }}"
-							 alt="Seite {{ $middlePage2.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $middlePage2.PageNumber }}, true)"
-							 data-page="{{ $middlePage2.PageNumber }}"
+							 onclick="enlargePage(this, {{ $page2.PageNumber }}, false)"
+							 data-page="{{ $page2.PageNumber }}"
 							 loading="lazy">
 					</div>
 				</div>
 				{{ end }}
 			{{ end }}
 
-			<!-- Last page (single) -->
+			<!-- Page 3: Right, Row 2 -->
+			{{ if ge $pageCount 3 }}
+				{{ $page3 := index $pages 2 }}
+				{{ if $page3.Available }}
+				<div class="newspaper-page-container" id="page-{{ $page3.PageNumber }}">
+					<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+						<img src="{{ $page3.ImagePath }}"
+							 alt="Seite {{ $page3.PageNumber }}"
+							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+							 onclick="enlargePage(this, {{ $page3.PageNumber }}, false)"
+							 data-page="{{ $page3.PageNumber }}"
+							 loading="lazy">
+					</div>
+				</div>
+				{{ end }}
+			{{ end }}
+
+			<!-- Empty space: Left, Row 3 -->
+			<div></div>
+
+			<!-- Page 4: Right, Row 3 -->
 			{{ if ge $pageCount 4 }}
-				{{ $lastPage := index $pages 3 }}
-				{{ if $lastPage.Available }}
-				<div class="newspaper-page-container" id="page-{{ $lastPage.PageNumber }}">
+				{{ $page4 := index $pages 3 }}
+				{{ if $page4.Available }}
+				<div class="newspaper-page-container" id="page-{{ $page4.PageNumber }}">
 					<div class="mb-3">
 						<div class="flex items-center gap-2 mb-2">
 							<i class="ri-file-text-line text-black" style="transform: scaleX(-1);"></i>
-							<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $lastPage.PageNumber }}">{{ $lastPage.PageNumber }}</span>
+							<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page4.PageNumber }}">{{ $page4.PageNumber }}</span>
 						</div>
 					</div>
-<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-						<img src="{{ $lastPage.ImagePath }}"
-							 alt="Seite {{ $lastPage.PageNumber }}"
+					<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+						<img src="{{ $page4.ImagePath }}"
+							 alt="Seite {{ $page4.PageNumber }}"
 							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $lastPage.PageNumber }}, false)"
-							 data-page="{{ $lastPage.PageNumber }}"
+							 onclick="enlargePage(this, {{ $page4.PageNumber }}, false)"
+							 data-page="{{ $page4.PageNumber }}"
 							 loading="lazy">
 					</div>
 				</div>
@@ -90,7 +115,7 @@
 	<!-- Beilage Pages -->
 	{{ range $beilageNum, $beilagePages := $images.AdditionalPages }}
 		{{ if $beilagePages }}
-		<div class="space-y-6 mt-12 pt-8 border-t-2 border-amber-200">
+		<div class="mt-12 pt-8 border-t-2 border-amber-200">
 			<!-- Header for beilage -->
 			<div class="flex items-center gap-3 mb-6">
 				<i class="ri-attachment-line text-2xl text-amber-600"></i>
@@ -98,102 +123,109 @@
 			</div>
 			{{ $pageCount := len $beilagePages }}
 
-			<!-- First page of beilage -->
-			{{ if ge $pageCount 1 }}
-				{{ $firstPage := index $beilagePages 0 }}
-				{{ if $firstPage.Available }}
-				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $firstPage.PageNumber }}">
-					<div class="mb-3">
-						<div class="flex items-center gap-2 mb-2">
+			<!-- 2-column grid with proper empty spaces -->
+			<div class="grid grid-cols-2 gap-4">
+				<!-- Page 1: Left, Row 1 -->
+				{{ if ge $pageCount 1 }}
+					{{ $page1 := index $beilagePages 0 }}
+					{{ if $page1.Available }}
+					<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page1.PageNumber }}">
+						<div class="mb-3">
+							<div class="flex items-center gap-2 mb-2">
+								<i class="ri-file-text-line text-amber-600"></i>
+								<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page1.PageNumber }}">{{ $page1.PageNumber }}</span>
+							</div>
+						</div>
+						<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+							<img src="{{ $page1.ImagePath }}"
+								 alt="Beilage {{ $beilageNum }}, Seite {{ $page1.PageNumber }}"
+								 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+								 onclick="enlargePage(this, {{ $page1.PageNumber }}, false)"
+								 data-page="{{ $page1.PageNumber }}"
+								 loading="lazy">
+						</div>
+					</div>
+					{{ end }}
+				{{ end }}
+
+				<!-- Empty space: Right, Row 1 -->
+				<div></div>
+
+				<!-- Common header for pages 2 and 3 -->
+				{{ if and (ge $pageCount 2) (ge $pageCount 3) }}
+					{{ $page2 := index $beilagePages 1 }}
+					{{ $page3 := index $beilagePages 2 }}
+					{{ if and $page2.Available $page3.Available }}
+					<div class="col-span-2 mb-2">
+						<div class="flex items-center justify-center gap-2 mb-4">
+							<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1);"></i>
 							<i class="ri-file-text-line text-amber-600"></i>
-<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $firstPage.PageNumber }}">{{ $firstPage.PageNumber }}</span>
+							<span class="text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded">{{ $page2.PageNumber }}-{{ $page3.PageNumber }}</span>
 						</div>
 					</div>
-<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-						<img src="{{ $firstPage.ImagePath }}"
-							 alt="Beilage {{ $beilageNum }}, Seite {{ $firstPage.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $firstPage.PageNumber }}, false)"
-							 data-page="{{ $firstPage.PageNumber }}"
-							 loading="lazy">
-					</div>
-				</div>
+					{{ end }}
 				{{ end }}
-			{{ end }}
 
-			<!-- If beilage has 4+ pages, show middle spread -->
-			{{ if ge $pageCount 4 }}
-				{{ $middlePage1 := index $beilagePages 1 }}
-				{{ $middlePage2 := index $beilagePages 2 }}
-				{{ if and $middlePage1.Available $middlePage2.Available }}
-				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}" data-pages="{{ $middlePage1.PageNumber }},{{ $middlePage2.PageNumber }}">
-					<div class="mb-3">
-						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1); margin-right: -8px;"></i><i class="ri-file-text-line text-amber-600"></i>
-							<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $middlePage1.PageNumber }}">{{ $middlePage1.PageNumber }}-{{ $middlePage2.PageNumber }}</span>
+				<!-- Page 2: Left, Row 2 -->
+				{{ if ge $pageCount 2 }}
+					{{ $page2 := index $beilagePages 1 }}
+					{{ if $page2.Available }}
+					<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page2.PageNumber }}">
+						<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+							<img src="{{ $page2.ImagePath }}"
+								 alt="Beilage {{ $beilageNum }}, Seite {{ $page2.PageNumber }}"
+								 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+								 onclick="enlargePage(this, {{ $page2.PageNumber }}, false)"
+								 data-page="{{ $page2.PageNumber }}"
+								 loading="lazy">
 						</div>
 					</div>
-					<div class="double-spread bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-						<img src="{{ $middlePage1.ImagePath }}"
-							 alt="Beilage {{ $beilageNum }}, Seite {{ $middlePage1.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $middlePage1.PageNumber }}, true)"
-							 data-page="{{ $middlePage1.PageNumber }}"
-							 loading="lazy">
-						<img src="{{ $middlePage2.ImagePath }}"
-							 alt="Beilage {{ $beilageNum }}, Seite {{ $middlePage2.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $middlePage2.PageNumber }}, true)"
-							 data-page="{{ $middlePage2.PageNumber }}"
-							 loading="lazy">
-					</div>
-				</div>
+					{{ end }}
 				{{ end }}
-			{{ else if eq $pageCount 2 }}
-				<!-- If only 2 pages, show as spread -->
-				{{ $page2 := index $beilagePages 1 }}
-				{{ if $page2.Available }}
-				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page2.PageNumber }}">
-					<div class="mb-3">
-						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1);"></i>
-							<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page2.PageNumber }}">{{ $page2.PageNumber }}</span>
-						</div>
-					</div>
-					<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-						<img src="{{ $page2.ImagePath }}"
-							 alt="Beilage {{ $beilageNum }}, Seite {{ $page2.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $page2.PageNumber }}, false)"
-							 data-page="{{ $page2.PageNumber }}"
-							 loading="lazy">
-					</div>
-				</div>
-				{{ end }}
-			{{ end }}
 
-			<!-- Last page of beilage (if 4+ pages) -->
-			{{ if ge $pageCount 4 }}
-				{{ $lastPage := index $beilagePages 3 }}
-				{{ if $lastPage.Available }}
-				<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $lastPage.PageNumber }}">
-					<div class="mb-3">
-						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1);"></i>
-							<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $lastPage.PageNumber }}">{{ $lastPage.PageNumber }}</span>
+				<!-- Page 3: Right, Row 2 -->
+				{{ if ge $pageCount 3 }}
+					{{ $page3 := index $beilagePages 2 }}
+					{{ if $page3.Available }}
+					<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page3.PageNumber }}">
+						<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+							<img src="{{ $page3.ImagePath }}"
+								 alt="Beilage {{ $beilageNum }}, Seite {{ $page3.PageNumber }}"
+								 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+								 onclick="enlargePage(this, {{ $page3.PageNumber }}, false)"
+								 data-page="{{ $page3.PageNumber }}"
+								 loading="lazy">
 						</div>
 					</div>
-					<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-						<img src="{{ $lastPage.ImagePath }}"
-							 alt="Beilage {{ $beilageNum }}, Seite {{ $lastPage.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $lastPage.PageNumber }}, false)"
-							 data-page="{{ $lastPage.PageNumber }}"
-							 loading="lazy">
-					</div>
-				</div>
+					{{ end }}
 				{{ end }}
-			{{ end }}
+
+				<!-- Empty space: Left, Row 3 -->
+				<div></div>
+
+				<!-- Page 4: Right, Row 3 -->
+				{{ if ge $pageCount 4 }}
+					{{ $page4 := index $beilagePages 3 }}
+					{{ if $page4.Available }}
+					<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page4.PageNumber }}">
+						<div class="mb-3">
+							<div class="flex items-center gap-2 mb-2">
+								<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1);"></i>
+								<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page4.PageNumber }}">{{ $page4.PageNumber }}</span>
+							</div>
+						</div>
+						<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+							<img src="{{ $page4.ImagePath }}"
+								 alt="Beilage {{ $beilageNum }}, Seite {{ $page4.PageNumber }}"
+								 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
+								 onclick="enlargePage(this, {{ $page4.PageNumber }}, false)"
+								 data-page="{{ $page4.PageNumber }}"
+								 loading="lazy">
+						</div>
+					</div>
+					{{ end }}
+				{{ end }}
+			</div>
 		</div>
 		{{ end }}
 	{{ end }}
