@@ -4,6 +4,35 @@
 	--font-script: Rancho, ui-serif;
 	--font-sans: "Source Sans 3", "Merriweather Sans", ui-sans-serif;
 	--font-serif: "Merriweather", ui-serif;
+
+	/* Custom Black Colors */
+	--color-abyss: #0b1215;
+	--color-shadow: #0f171f;
+	--color-eclipse: #0b0b0b;
+	--color-storm: #020c1a;
+	--color-deep: #011122;
+	--color-obsidian: #161616;
+}
+/* Alternative approach using pseudo-element for better browser support */
+body::before {
+	content: "";
+	position: fixed;
+	/* Extend beyond viewport to ensure full coverage after transformations */
+	top: -50%;
+	left: -50%;
+	right: -50%;
+	bottom: -50%;
+	z-index: -1;
+
+	/* Your WebP pattern */
+	background-image: url("skyscraper.webp");
+	background-size: 100px 100px;
+	background-repeat: repeat;
+	background-position: center;
+
+	/* Apply transformations here */
+	transform: rotate(15deg) skew(10deg) scale(3);
+	opacity: 0.4;
 }
 
 /*

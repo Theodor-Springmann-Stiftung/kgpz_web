@@ -10,8 +10,10 @@ import (
 // An implementation of the xsd 1.1 datatypes:
 // date, gDay, gMonth, gMonthDay, gYear, gYearMonth.
 
-type XSDDatetype int
-type Seperator byte
+type (
+	XSDDatetype int
+	Seperator   byte
+)
 
 const (
 	DEFAULT_YEAR  = 0
@@ -37,6 +39,11 @@ const (
 	GYear
 	GMonthDay
 	GYearMonth
+)
+
+var (
+	MonthNameShort = []string{"Jan", "Feb", "März", "Apr", "Mai", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"}
+	MonthName      = []string{"Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"}
 )
 
 type XSDDate struct {
@@ -121,6 +128,20 @@ func (d XSDDate) String() string {
 	}
 
 	return s
+}
+
+func (d *XSDDate) MonthName() string {
+	if d.Month == 0 {
+		return ""
+	}
+	return MonthName[d.Month-1]
+}
+
+func (d *XSDDate) MonthNameShort() string {
+	if d.Month == 0 {
+		return ""
+	}
+	return MonthNameShort[d.Month-1]
 }
 
 func (d *XSDDate) UnmarshalText(text []byte) error {

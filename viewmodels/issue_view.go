@@ -26,23 +26,28 @@ type PiecesByPage struct {
 	Pages []int
 }
 
-// GroupedPieceByIssue represents a piece that may span multiple consecutive pages
-type GroupedPieceByIssue struct {
+// IndividualPieceByIssue represents a piece with metadata for individual page display
+type IndividualPieceByIssue struct {
 	PieceByIssue
-	StartPage int
-	EndPage   int // Same as StartPage if not grouped
+	IssueRefs []xmlmodels.IssueRef // All issues this piece appears in
+	PageIcon  string               // Icon type: "first", "last", "even", "odd"
 }
 
-// GroupedPiecesByPage holds pieces grouped by consecutive pages when identical
-type GroupedPiecesByPage struct {
-	Items map[int][]GroupedPieceByIssue
+// IndividualPiecesByPage holds pieces as individual page entries
+type IndividualPiecesByPage struct {
+	Items map[int][]IndividualPieceByIssue
 	Pages []int
 }
 
 type IssuePage struct {
-	PageNumber int
-	ImagePath  string
-	Available  bool
+	PageNumber  int
+	ImagePath   string
+	Available   bool
+	GridColumn  int    // 1 or 2 for left/right positioning
+	GridRow     int    // Row number in grid
+	HasHeader   bool   // Whether this page has a double-spread header
+	HeaderText  string // Text for double-spread header
+	PageIcon    string // Icon type: "first", "last", "even", "odd"
 }
 
 type IssueImages struct {
@@ -72,11 +77,12 @@ var imageRegistry *ImageRegistry
 // TODO: Next & Prev
 type IssueVM struct {
 	xmlmodels.Issue
-	Next             *xmlmodels.Issue
-	Prev             *xmlmodels.Issue
-	Pieces           GroupedPiecesByPage
-	AdditionalPieces GroupedPiecesByPage
-	Images           IssueImages
+	Next                 *xmlmodels.Issue
+	Prev                 *xmlmodels.Issue
+	Pieces               IndividualPiecesByPage
+	AdditionalPieces     IndividualPiecesByPage
+	Images               IssueImages
+	HasBeilageButton     bool   // Whether to show beilage navigation button
 }
 
 func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
@@ -122,14 +128,15 @@ func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
 	slices.Sort(ppa.Pages)
 
 	// Group consecutive continuation pieces
-	sivm.Pieces = GroupConsecutiveContinuations(ppi)
-	sivm.AdditionalPieces = GroupConsecutiveContinuations(ppa)
+	sivm.Pieces = CreateIndividualPagesWithMetadata(ppi, lib)
+	sivm.AdditionalPieces = CreateIndividualPagesWithMetadata(ppa, lib)
 
 	images, err := LoadIssueImages(*issue)
 	if err != nil {
 		return nil, err
 	}
 	sivm.Images = images
+	sivm.HasBeilageButton = len(sivm.AdditionalPieces.Pages) > 0
 
 	return &sivm, nil
 }
@@ -211,105 +218,157 @@ func pagesHaveIdenticalContent(items1, items2 []PieceByIssue) bool {
 	return true
 }
 
-// pageContainsOnlyContinuations checks if a page contains only continuation pieces
-func pageContainsOnlyContinuations(pageItems []PieceByIssue) bool {
-	if len(pageItems) == 0 {
-		return false
-	}
 
-	for _, piece := range pageItems {
-		if !piece.IsContinuation {
-			return false
-		}
-	}
-	return true
-}
-
-// GroupConsecutiveContinuations groups consecutive pages where next page only contains continuations
-func GroupConsecutiveContinuations(pieces PiecesByPage) GroupedPiecesByPage {
-	grouped := GroupedPiecesByPage{
-		Items: make(map[int][]GroupedPieceByIssue),
+// CreateIndividualPagesWithMetadata creates individual page entries with metadata
+func CreateIndividualPagesWithMetadata(pieces PiecesByPage, lib *xmlmodels.Library) IndividualPiecesByPage {
+	individual := IndividualPiecesByPage{
+		Items: make(map[int][]IndividualPieceByIssue),
 		Pages: []int{},
 	}
 
 	if len(pieces.Pages) == 0 {
-		return grouped
+		return individual
 	}
 
-	// Sort pages to ensure correct order
-	sortedPages := make([]int, len(pieces.Pages))
-	copy(sortedPages, pieces.Pages)
-	slices.Sort(sortedPages)
-
-	processedPages := make(map[int]bool)
-
-	for _, page := range sortedPages {
-		if processedPages[page] {
-			continue
-		}
-
+	// Process each page individually
+	for _, page := range pieces.Pages {
 		pageItems := pieces.Items[page]
-		startPage := page
-		endPage := page
-
-		// Keep extending the group while next page contains only continuations
-		for checkPage := endPage + 1; ; checkPage++ {
-			// Only proceed if this page exists in our data
-			if _, exists := pieces.Items[checkPage]; !exists {
-				break
-			}
-
-			// Only proceed if this page hasn't been processed yet
-			if processedPages[checkPage] {
-				break
-			}
-
-			checkPageItems := pieces.Items[checkPage]
-
-			// Group if the next page contains ONLY continuations
-			if pageContainsOnlyContinuations(checkPageItems) {
-				endPage = checkPage
-				processedPages[checkPage] = true
-				// Continue to check if next page also contains only continuations
-			} else {
-				break
-			}
-		}
-
-		// Create grouped items with proper ordering (continuations first)
-		groupedItems := []GroupedPieceByIssue{}
+		individualItems := []IndividualPieceByIssue{}
 
 		// First add all continuation pieces
 		for _, piece := range pageItems {
 			if piece.IsContinuation {
-				groupedItems = append(groupedItems, GroupedPieceByIssue{
+				individualPiece := IndividualPieceByIssue{
 					PieceByIssue: piece,
-					StartPage:    startPage,
-					EndPage:      endPage,
-				})
+					IssueRefs:    getPieceIssueRefs(piece.Piece, lib),
+					PageIcon:     determinePageIcon(page, pieces.Pages),
+				}
+				individualItems = append(individualItems, individualPiece)
 			}
 		}
 
 		// Then add all non-continuation pieces
 		for _, piece := range pageItems {
 			if !piece.IsContinuation {
-				groupedItems = append(groupedItems, GroupedPieceByIssue{
+				individualPiece := IndividualPieceByIssue{
 					PieceByIssue: piece,
-					StartPage:    startPage,
-					EndPage:      endPage,
-				})
+					IssueRefs:    getPieceIssueRefs(piece.Piece, lib),
+					PageIcon:     determinePageIcon(page, pieces.Pages),
+				}
+				individualItems = append(individualItems, individualPiece)
 			}
 		}
 
-		if len(groupedItems) > 0 {
-			grouped.Items[startPage] = groupedItems
-			grouped.Pages = append(grouped.Pages, startPage)
+		if len(individualItems) > 0 {
+			individual.Items[page] = individualItems
+			individual.Pages = append(individual.Pages, page)
 		}
-		processedPages[page] = true
 	}
 
-	slices.Sort(grouped.Pages)
-	return grouped
+	slices.Sort(individual.Pages)
+	return individual
+}
+
+
+// determinePageIcon determines the icon type for a page based on newspaper layout positioning
+func determinePageIcon(pageNum int, allPages []int) string {
+	if len(allPages) == 0 {
+		return "first"
+	}
+
+	slices.Sort(allPages)
+	firstPage := allPages[0]
+	lastPage := allPages[len(allPages)-1]
+
+	// Newspaper layout logic based on physical page positioning
+	if pageNum == firstPage {
+		return "first"  // Front page - normal icon
+	} else if pageNum == lastPage {
+		return "last"   // Back page - mirrored icon
+	} else {
+		// For middle pages in a 4-page newspaper layout:
+		// Page 2 (left side of middle spread) should be "even"
+		// Page 3 (right side of middle spread) should be "odd"
+		// But we need to consider the actual page position in layout
+		if pageNum == firstPage+1 {
+			return "even"  // Page 2 - black + mirrored grey
+		} else if pageNum == lastPage-1 {
+			return "odd"   // Page 3 - grey + black
+		} else {
+			// For newspapers with more than 4 pages, use alternating pattern
+			if pageNum%2 == 0 {
+				return "even"
+			} else {
+				return "odd"
+			}
+		}
+	}
+}
+
+// getPieceIssueRefs gets all issue references for a piece
+func getPieceIssueRefs(piece xmlmodels.Piece, lib *xmlmodels.Library) []xmlmodels.IssueRef {
+	refs := []xmlmodels.IssueRef{}
+
+	for _, ref := range piece.IssueRefs {
+		refs = append(refs, ref)
+	}
+
+	return refs
+}
+
+// calculateGridLayout calculates grid positioning for newspaper pages
+func calculateGridLayout(pages []IssuePage) []IssuePage {
+	if len(pages) == 0 {
+		return pages
+	}
+
+	result := make([]IssuePage, len(pages))
+	copy(result, pages)
+
+	for i := range result {
+		page := &result[i]
+		pageNum := i + 1 // 1-based page numbers
+
+		// Determine grid position based on newspaper layout logic
+		switch pageNum {
+		case 1:
+			// Page 1: Left, Row 1
+			page.GridColumn = 1
+			page.GridRow = 1
+			page.PageIcon = "first"
+		case 2, 3:
+			// Pages 2-3: Double spread with header, Row 2
+			if pageNum == 2 {
+				page.GridColumn = 1
+				page.HasHeader = true
+				page.HeaderText = fmt.Sprintf("%d-%d", pageNum, pageNum+1)
+			} else {
+				page.GridColumn = 2
+			}
+			page.GridRow = 2
+			page.PageIcon = determinePageIconForLayout(pageNum)
+		case 4:
+			// Page 4: Right, Row 3
+			page.GridColumn = 2
+			page.GridRow = 3
+			page.PageIcon = "last"
+		default:
+			// Handle additional pages if needed
+			page.GridColumn = ((pageNum - 1) % 2) + 1
+			page.GridRow = ((pageNum - 1) / 2) + 1
+			page.PageIcon = determinePageIconForLayout(pageNum)
+		}
+	}
+
+	return result
+}
+
+// determinePageIconForLayout determines icon for layout positioning
+func determinePageIconForLayout(pageNum int) string {
+	if pageNum%2 == 0 {
+		return "even"
+	}
+	return "odd"
 }
 
 func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
@@ -386,9 +445,16 @@ func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
 		}
 
 		if len(beilagePages) > 0 {
+			// Calculate grid layout for beilage pages
+			beilagePages = calculateGridLayout(beilagePages)
 			// Use beilage number 1 as default
 			images.AdditionalPages[1] = beilagePages
 		}
+	}
+
+	// Calculate grid layout for main pages
+	if len(images.MainPages) > 0 {
+		images.MainPages = calculateGridLayout(images.MainPages)
 	}
 
 	return images, nil

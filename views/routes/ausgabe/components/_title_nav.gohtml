@@ -1,39 +1,46 @@
 {{ $model := .model }}
 {{ $date := .model.Datum.When }}
-<div class="sticky top-4 mb-12 z-10">
-	<!-- Header with year link left, nav buttons right -->
-	<div class="flex items-center justify-between mb-3">
-		<a href="/jahrgang/{{- $date.Year -}}"
-		   class="inline-flex items-center gap-1 text-black hover:text-slate-700 text-base font-medium">
-			<i class="ri-calendar-line"></i>
-			{{ $date.Year }}
-		</a>
+<!-- Header with year link left, nav buttons right -->
+<div class="flex items-center justify-between mb-3">
+	<a
+		href="/jahrgang/{{- $date.Year -}}"
+		class="inline-flex items-center gap-1 text-black hover:text-slate-700 text-base font-medium">
+		<i class="ri-calendar-line"></i>
+		{{ $date.Year }}
+	</a>
 
-		<div class="flex flex-row gap-x-1">
-			{{ if $model.Prev }}
-				<a href="/{{- $model.Prev.Datum.When.Year -}}/{{- $model.Prev.Number.No -}}"
-				   class="inline-flex items-center justify-center w-7 h-7 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors">
-					<i class="ri-arrow-left-line text-sm"></i>
-				</a>
-			{{ end }}
+	<div class="flex flex-row gap-x-1">
+		{{ if $model.Prev }}
+			<a
+				href="/{{- $model.Prev.Datum.When.Year -}}/{{- $model.Prev.Number.No -}}"
+				class="inline-flex items-center justify-center w-7 h-7 bg-slate-100 text-slate-700 rounded
+				hover:bg-slate-200 transition-colors no-underline font-bold">
+				<i class="ri-arrow-left-line text-sm"></i>
+			</a>
+		{{ end }}
 
-			{{ if $model.Next }}
-				<a href="/{{- $model.Next.Datum.When.Year -}}/{{- $model.Next.Number.No -}}"
-				   class="inline-flex items-center justify-center w-7 h-7 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors">
-					<i class="ri-arrow-right-line text-sm"></i>
-				</a>
-			{{ end }}
-		</div>
+		{{ if $model.Next }}
+			<a
+				href="/{{- $model.Next.Datum.When.Year -}}/{{- $model.Next.Number.No -}}"
+				class="inline-flex items-center justify-center w-7 h-7 bg-slate-100 text-slate-700 rounded
+				hover:bg-slate-200 transition-colors no-underline font-bold">
+				<i class="ri-arrow-right-line text-sm"></i>
+			</a>
+		{{ end }}
 	</div>
+</div>
 
-	<!-- Issue title and date -->
-	<div class="border-t border-slate-200 pt-3">
-		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-1">
-				<i class="ri-newspaper-line text-lg text-slate-600"></i>
-				<h1 class="text-lg font-semibold text-slate-800">{{ $date.Year }}&#8201;/&#8201;{{ $model.Number.No }}</h1>
-			</div>
-			<div class="text-base font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded">{{ printf "%.2s" (WeekdayName $date.Weekday) }} {{ $date.Day }}.{{ $date.Month }}.</div>
+<!-- Issue title and date -->
+<div class="border-t border-slate-200 pt-3 mb-4">
+	<div class="flex items-center justify-between">
+		<div class="flex items-center gap-1">
+			<h1 class="text-lg font-semibold text-slate-800">
+				{{ $model.Number.No }}&#8201;/&#8201;{{ $date.Year }}
+			</h1>
+		</div>
+		<div class="text-base font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded">
+			<span class="pr-1">{{ printf "%.2s" (WeekdayName $date.Weekday) }}</span>
+			<b>{{ $date.Day }}. {{ $date.MonthNameShort }}</b>
 		</div>
 	</div>
 </div>

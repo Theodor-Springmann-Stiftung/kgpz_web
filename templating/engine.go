@@ -41,6 +41,22 @@ func NewEngine(layouts, templates *fs.FS) *Engine {
 	return &e
 }
 
+// PageIcon renders the appropriate icon HTML for a page based on its icon type
+func PageIcon(iconType string) template.HTML {
+	switch iconType {
+	case "first":
+		return template.HTML(`<i class="ri-file-text-line text-black text-sm"></i>`)
+	case "last":
+		return template.HTML(`<i class="ri-file-text-line text-black text-sm" style="transform: scaleX(-1); display: inline-block;"></i>`)
+	case "even":
+		return template.HTML(`<i class="ri-file-text-line text-black text-sm" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-slate-400 text-sm"></i>`)
+	case "odd":
+		return template.HTML(`<i class="ri-file-text-line text-slate-400 text-sm" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-black text-sm" ></i>`)
+	default:
+		return template.HTML(`<i class="ri-file-text-line text-black text-sm"></i>`)
+	}
+}
+
 func (e *Engine) funcs() error {
 	e.mu.Lock()
 	e.mu.Unlock()
@@ -55,6 +71,16 @@ func (e *Engine) funcs() error {
 	e.AddFunc("sub", func(a, b int) int { return a - b })
 	e.AddFunc("add", func(a, b int) int { return a + b })
 	e.AddFunc("mod", func(a, b int) int { return a % b })
+	e.AddFunc("seq", func(start, end int) []int {
+		if start > end {
+			return []int{}
+		}
+		result := make([]int, end-start+1)
+		for i := range result {
+			result[i] = start + i
+		}
+		return result
+	})
 
 	// Strings
 	e.AddFunc("FirstLetter", functions.FirstLetter)
@@ -67,6 +93,9 @@ func (e *Engine) funcs() error {
 	e.AddFunc("EmbedSafe", embedder.EmbedSafe())
 	e.AddFunc("Embed", embedder.Embed())
 	e.AddFunc("EmbedXSLT", embedder.EmbedXSLT())
+
+	// Page icons for ausgabe templates
+	e.AddFunc("PageIcon", PageIcon)
 
 	return nil
 }

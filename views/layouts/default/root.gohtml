@@ -30,30 +30,16 @@
 	</head>
 
 	<body class="w-full" hx-ext="response-targets" hx-boost="true">
+		{{ template "_header" . }}
 		<div class="container flex flex-col min-h-screen max-w-(--breakpoint-2xl) mx-auto">
-			<header>
-				{{ block "_header" . }}
-					<!-- Default app header... -->
-				{{ end }}
-			</header>
-
-			<div>
-				{{ block "_menu" . }}
-					<!-- Default app menu... -->
-				{{ end }}
-			</div>
-
 			<main class="">
 				{{ block "body" . }}
 					<!-- Default app body... -->
 				{{ end }}
 			</main>
-
-			<footer>
-				{{ block "_footer" . }}
-				{{ end }}
-			</footer>
 		</div>
+		{{ block "_footer" . }}
+		{{ end }}
 
 		{{ EmbedXSLT "xslt/transform-citation.xsl" }}
 	</body>

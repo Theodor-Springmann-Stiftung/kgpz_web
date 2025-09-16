@@ -7,868 +7,1093 @@
 		{{ $pages := $images.MainPages }}
 		{{ $pageCount := len $pages }}
 
-		<!-- 2-column grid with proper empty spaces -->
+		<!-- Dynamic 2-column grid for arbitrary page count -->
 		<div class="grid grid-cols-2 gap-4">
-			<!-- Page 1: Left, Row 1 -->
-			{{ if ge $pageCount 1 }}
-				{{ $page1 := index $pages 0 }}
-				{{ if $page1.Available }}
-				<div class="newspaper-page-container" id="page-{{ $page1.PageNumber }}">
-					<div class="mb-3">
-						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-text-line text-black"></i>
-							<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page1.PageNumber }}">{{ $page1.PageNumber }}</span>
+			{{ range $index, $page := $pages }}
+				{{ if $page.Available }}
+					{{ $pageIndex := $index }}
+					{{ $isFirstPage := eq $pageIndex 0 }}
+					{{ $isLastPage := eq $pageIndex (sub $pageCount 1) }}
+					{{ $isOddPosition := eq (mod $pageIndex 2) 0 }}
+					{{ $isEvenPosition := eq (mod $pageIndex 2) 1 }}
+
+					{{ if $isFirstPage }}
+						<!-- Page 1: Always left column -->
+						<div class="newspaper-page-container" id="page-{{ $page.PageNumber }}">
+							<!-- Page indicator row - right aligned for first page -->
+							<div class="flex justify-end items-center gap-1 mb-2">
+								<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+									<i class="ri-share-line text-xs"></i>
+								</button>
+								<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+									<i class="ri-file-text-line text-xs"></i>
+								</button>
+								<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+									{{ $page.PageNumber }}
+									<i class="ri-file-text-line text-black text-sm"></i>
+								</span>
+							</div>
+							<div class="single-page bg-white p-4 rounded border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+								<img src="{{ $page.ImagePath }}" alt="Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+							</div>
 						</div>
-					</div>
-					<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-						<img src="{{ $page1.ImagePath }}"
-							 alt="Seite {{ $page1.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $page1.PageNumber }}, false)"
-							 data-page="{{ $page1.PageNumber }}"
-							 loading="lazy">
-					</div>
-				</div>
-				{{ end }}
-			{{ end }}
-
-			<!-- Empty space: Right, Row 1 -->
-			<div></div>
-
-			<!-- Common header for pages 2 and 3 -->
-			{{ if and (ge $pageCount 2) (ge $pageCount 3) }}
-				{{ $page2 := index $pages 1 }}
-				{{ $page3 := index $pages 2 }}
-				{{ if and $page2.Available $page3.Available }}
-				<div class="col-span-2 mb-2">
-					<div class="flex items-center justify-center gap-2 mb-4">
-						<i class="ri-file-text-line text-black" style="transform: scaleX(-1);"></i>
-						<i class="ri-file-text-line text-black"></i>
-						<span class="text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded">{{ $page2.PageNumber }}-{{ $page3.PageNumber }}</span>
-					</div>
-				</div>
-				{{ end }}
-			{{ end }}
-
-			<!-- Page 2: Left, Row 2 -->
-			{{ if ge $pageCount 2 }}
-				{{ $page2 := index $pages 1 }}
-				{{ if $page2.Available }}
-				<div class="newspaper-page-container" id="page-{{ $page2.PageNumber }}">
-					<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-						<img src="{{ $page2.ImagePath }}"
-							 alt="Seite {{ $page2.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $page2.PageNumber }}, false)"
-							 data-page="{{ $page2.PageNumber }}"
-							 loading="lazy">
-					</div>
-				</div>
-				{{ end }}
-			{{ end }}
-
-			<!-- Page 3: Right, Row 2 -->
-			{{ if ge $pageCount 3 }}
-				{{ $page3 := index $pages 2 }}
-				{{ if $page3.Available }}
-				<div class="newspaper-page-container" id="page-{{ $page3.PageNumber }}">
-					<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-						<img src="{{ $page3.ImagePath }}"
-							 alt="Seite {{ $page3.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $page3.PageNumber }}, false)"
-							 data-page="{{ $page3.PageNumber }}"
-							 loading="lazy">
-					</div>
-				</div>
-				{{ end }}
-			{{ end }}
-
-			<!-- Empty space: Left, Row 3 -->
-			<div></div>
-
-			<!-- Page 4: Right, Row 3 -->
-			{{ if ge $pageCount 4 }}
-				{{ $page4 := index $pages 3 }}
-				{{ if $page4.Available }}
-				<div class="newspaper-page-container" id="page-{{ $page4.PageNumber }}">
-					<div class="mb-3">
-						<div class="flex items-center gap-2 mb-2">
-							<i class="ri-file-text-line text-black" style="transform: scaleX(-1);"></i>
-							<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page4.PageNumber }}">{{ $page4.PageNumber }}</span>
+						<!-- Empty space after first page -->
+						<div></div>
+					{{ else if $isLastPage }}
+						<!-- Last page: Always right column with empty space before -->
+						<div></div>
+						<div class="newspaper-page-container" id="page-{{ $page.PageNumber }}">
+							<!-- Page indicator row - left aligned for last page -->
+							<div class="flex justify-start items-center gap-1 mb-2">
+								<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+									<i class="ri-file-text-line text-black text-sm"></i>
+									{{ $page.PageNumber }}
+								</span>
+								<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+									<i class="ri-share-line text-xs"></i>
+								</button>
+								<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+									<i class="ri-file-text-line text-xs"></i>
+								</button>
+							</div>
+							<div class="single-page bg-white p-4 rounded border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+								<img src="{{ $page.ImagePath }}" alt="Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+							</div>
 						</div>
-					</div>
-					<div class="single-page bg-white p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-						<img src="{{ $page4.ImagePath }}"
-							 alt="Seite {{ $page4.PageNumber }}"
-							 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-							 onclick="enlargePage(this, {{ $page4.PageNumber }}, false)"
-							 data-page="{{ $page4.PageNumber }}"
-							 loading="lazy">
-					</div>
-				</div>
+					{{ else }}
+						<!-- Middle pages: Even pages (index 1,3,5...) left column, Odd pages (index 2,4,6...) right column -->
+						{{ if $isEvenPosition }}
+							<!-- Even-indexed pages: Left column -->
+							<div class="newspaper-page-container" id="page-{{ $page.PageNumber }}">
+								<!-- Page indicator row - right aligned for even-indexed pages -->
+								<div class="flex justify-end items-center gap-1 mb-2">
+									<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+										<i class="ri-share-line text-xs"></i>
+									</button>
+									<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+										<i class="ri-file-text-line text-xs"></i>
+									</button>
+									<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+										{{ $page.PageNumber }}
+										<i class="ri-file-text-line text-black text-sm scale-x-[-1]"></i>
+									</span>
+								</div>
+								<div class="single-page bg-white p-4 rounded border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+									<img src="{{ $page.ImagePath }}" alt="Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+								</div>
+							</div>
+						{{ else }}
+							<!-- Odd-indexed pages: Right column -->
+							<div class="newspaper-page-container" id="page-{{ $page.PageNumber }}">
+								<!-- Page indicator row - left aligned for odd-indexed pages -->
+								<div class="flex justify-start items-center gap-1 mb-2">
+									<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+										<i class="ri-file-text-line text-black text-sm"></i>
+										{{ $page.PageNumber }}
+									</span>
+									<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+										<i class="ri-share-line text-xs"></i>
+									</button>
+									<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+										<i class="ri-file-text-line text-xs"></i>
+									</button>
+								</div>
+								<div class="single-page bg-white p-4 rounded border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+									<img src="{{ $page.ImagePath }}" alt="Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+								</div>
+							</div>
+						{{ end }}
+					{{ end }}
 				{{ end }}
 			{{ end }}
 		</div>
 	{{ end }}
 
+
 	<!-- Beilage Pages -->
 	{{ range $beilageNum, $beilagePages := $images.AdditionalPages }}
 		{{ if $beilagePages }}
-		<div class="mt-12 pt-8 border-t-2 border-amber-200">
-			<!-- Header for beilage -->
-			<div class="flex items-center gap-3 mb-6">
-				<i class="ri-attachment-line text-2xl text-amber-600"></i>
-				<h2 class="text-xl font-semibold text-slate-800">Beilage {{ $beilageNum }}</h2>
+			<div class="mt-12 pt-8 border-t-2 border-amber-200">
+				<!-- Header for beilage -->
+				<div class="flex items-center gap-3 mb-6 bg-amber-50 px-4 py-3 rounded border border-amber-200">
+					<i class="ri-attachment-line text-2xl text-amber-600"></i>
+					<h2 class="text-xl font-semibold text-slate-800">Beilage</h2>
+				</div>
+				{{ $pageCount := len $beilagePages }}
+
+				<!-- Dynamic layout for Beilage pages -->
+				{{ if eq $pageCount 2 }}
+					<!-- Special case: 2 pages side by side -->
+					<div class="grid grid-cols-2 gap-4">
+						{{ range $index, $page := $beilagePages }}
+							{{ if $page.Available }}
+								<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
+									<!-- Page indicator row - left aligned for first page, right for second -->
+									<div class="flex {{ if eq $index 0 }}justify-start{{ else }}justify-end{{ end }} items-center gap-1 mb-2">
+										{{ if eq $index 0 }}
+											<!-- Left page: page indicator first, then buttons -->
+											<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+												<i class="ri-file-text-line text-amber-600 text-sm"></i>
+												{{ $page.PageNumber }}
+											</span>
+											<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+												<i class="ri-share-line text-xs"></i>
+											</button>
+											<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+												<i class="ri-file-text-line text-xs"></i>
+											</button>
+										{{ else }}
+											<!-- Right page: buttons first, then page indicator -->
+											<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+												<i class="ri-share-line text-xs"></i>
+											</button>
+											<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+												<i class="ri-file-text-line text-xs"></i>
+											</button>
+											<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+												{{ $page.PageNumber }}
+												<i class="ri-file-text-line text-amber-600 text-sm"></i>
+											</span>
+										{{ end }}
+									</div>
+									<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+										<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+									</div>
+								</div>
+							{{ end }}
+						{{ end }}
+					</div>
+				{{ else }}
+					<!-- Standard newspaper layout for 4+ pages -->
+					<div class="grid grid-cols-2 gap-4">
+						{{ range $index, $page := $beilagePages }}
+							{{ if $page.Available }}
+								{{ $pageIndex := $index }}
+								{{ $isFirstPage := eq $pageIndex 0 }}
+								{{ $isLastPage := eq $pageIndex (sub $pageCount 1) }}
+								{{ $isOddPosition := eq (mod $pageIndex 2) 0 }}
+								{{ $isEvenPosition := eq (mod $pageIndex 2) 1 }}
+
+								{{ if $isFirstPage }}
+									<!-- Page 1: Always left column -->
+									<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
+										<!-- Page indicator row - right aligned for Beilage first page -->
+										<div class="flex justify-end items-center gap-1 mb-2">
+											<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+												<i class="ri-share-line text-xs"></i>
+											</button>
+											<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+												<i class="ri-file-text-line text-xs"></i>
+											</button>
+											<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+												{{ $page.PageNumber }}
+												<i class="ri-file-text-line text-amber-600 text-sm"></i>
+											</span>
+										</div>
+										<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+											<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+										</div>
+									</div>
+									<!-- Empty space after first page -->
+									<div></div>
+								{{ else if $isLastPage }}
+									<!-- Last page: Always right column with empty space before -->
+									<div></div>
+									<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
+										<!-- Page indicator row - left aligned for Beilage last page -->
+										<div class="flex justify-start items-center gap-1 mb-2">
+											<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+												<i class="ri-file-text-line text-amber-600 text-sm"></i>
+												{{ $page.PageNumber }}
+											</span>
+											<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+												<i class="ri-share-line text-xs"></i>
+											</button>
+											<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+												<i class="ri-file-text-line text-xs"></i>
+											</button>
+										</div>
+										<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+											<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+										</div>
+									</div>
+								{{ else }}
+									<!-- Middle pages: Even pages left column, Odd pages right column -->
+									{{ if $isEvenPosition }}
+										<!-- Even-indexed pages: Left column -->
+										<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
+											<!-- Page indicator row - right aligned for Beilage even-indexed pages -->
+											<div class="flex justify-end items-center gap-1 mb-2">
+												<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+													<i class="ri-share-line text-xs"></i>
+												</button>
+												<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+													<i class="ri-file-text-line text-xs"></i>
+												</button>
+												<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+													{{ $page.PageNumber }}
+													<i class="ri-file-text-line text-amber-600 text-sm scale-x-[-1]"></i>
+												</span>
+											</div>
+											<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+												<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+											</div>
+										</div>
+									{{ else }}
+										<!-- Odd-indexed pages: Right column -->
+										<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
+											<!-- Page indicator row - left aligned for Beilage odd-indexed pages -->
+											<div class="flex justify-start items-center gap-1 mb-2">
+												<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+													<i class="ri-file-text-line text-amber-600 text-sm"></i>
+													{{ $page.PageNumber }}
+												</span>
+												<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+													<i class="ri-share-line text-xs"></i>
+												</button>
+												<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+													<i class="ri-file-text-line text-xs"></i>
+												</button>
+											</div>
+											<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
+												<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+											</div>
+										</div>
+									{{ end }}
+								{{ end }}
+							{{ end }}
+						{{ end }}
+					</div>
+				{{ end }}
 			</div>
-			{{ $pageCount := len $beilagePages }}
-
-			<!-- 2-column grid with proper empty spaces -->
-			<div class="grid grid-cols-2 gap-4">
-				<!-- Page 1: Left, Row 1 -->
-				{{ if ge $pageCount 1 }}
-					{{ $page1 := index $beilagePages 0 }}
-					{{ if $page1.Available }}
-					<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page1.PageNumber }}">
-						<div class="mb-3">
-							<div class="flex items-center gap-2 mb-2">
-								<i class="ri-file-text-line text-amber-600"></i>
-								<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page1.PageNumber }}">{{ $page1.PageNumber }}</span>
-							</div>
-						</div>
-						<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-							<img src="{{ $page1.ImagePath }}"
-								 alt="Beilage {{ $beilageNum }}, Seite {{ $page1.PageNumber }}"
-								 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-								 onclick="enlargePage(this, {{ $page1.PageNumber }}, false)"
-								 data-page="{{ $page1.PageNumber }}"
-								 loading="lazy">
-						</div>
-					</div>
-					{{ end }}
-				{{ end }}
-
-				<!-- Empty space: Right, Row 1 -->
-				<div></div>
-
-				<!-- Common header for pages 2 and 3 -->
-				{{ if and (ge $pageCount 2) (ge $pageCount 3) }}
-					{{ $page2 := index $beilagePages 1 }}
-					{{ $page3 := index $beilagePages 2 }}
-					{{ if and $page2.Available $page3.Available }}
-					<div class="col-span-2 mb-2">
-						<div class="flex items-center justify-center gap-2 mb-4">
-							<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1);"></i>
-							<i class="ri-file-text-line text-amber-600"></i>
-							<span class="text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded">{{ $page2.PageNumber }}-{{ $page3.PageNumber }}</span>
-						</div>
-					</div>
-					{{ end }}
-				{{ end }}
-
-				<!-- Page 2: Left, Row 2 -->
-				{{ if ge $pageCount 2 }}
-					{{ $page2 := index $beilagePages 1 }}
-					{{ if $page2.Available }}
-					<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page2.PageNumber }}">
-						<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-							<img src="{{ $page2.ImagePath }}"
-								 alt="Beilage {{ $beilageNum }}, Seite {{ $page2.PageNumber }}"
-								 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-								 onclick="enlargePage(this, {{ $page2.PageNumber }}, false)"
-								 data-page="{{ $page2.PageNumber }}"
-								 loading="lazy">
-						</div>
-					</div>
-					{{ end }}
-				{{ end }}
-
-				<!-- Page 3: Right, Row 2 -->
-				{{ if ge $pageCount 3 }}
-					{{ $page3 := index $beilagePages 2 }}
-					{{ if $page3.Available }}
-					<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page3.PageNumber }}">
-						<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-							<img src="{{ $page3.ImagePath }}"
-								 alt="Beilage {{ $beilageNum }}, Seite {{ $page3.PageNumber }}"
-								 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-								 onclick="enlargePage(this, {{ $page3.PageNumber }}, false)"
-								 data-page="{{ $page3.PageNumber }}"
-								 loading="lazy">
-						</div>
-					</div>
-					{{ end }}
-				{{ end }}
-
-				<!-- Empty space: Left, Row 3 -->
-				<div></div>
-
-				<!-- Page 4: Right, Row 3 -->
-				{{ if ge $pageCount 4 }}
-					{{ $page4 := index $beilagePages 3 }}
-					{{ if $page4.Available }}
-					<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page4.PageNumber }}">
-						<div class="mb-3">
-							<div class="flex items-center gap-2 mb-2">
-								<i class="ri-file-text-line text-amber-600" style="transform: scaleX(-1);"></i>
-								<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300" data-page="{{ $page4.PageNumber }}">{{ $page4.PageNumber }}</span>
-							</div>
-						</div>
-						<div class="single-page bg-white p-4 rounded-lg border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-							<img src="{{ $page4.ImagePath }}"
-								 alt="Beilage {{ $beilageNum }}, Seite {{ $page4.PageNumber }}"
-								 class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200"
-								 onclick="enlargePage(this, {{ $page4.PageNumber }}, false)"
-								 data-page="{{ $page4.PageNumber }}"
-								 loading="lazy">
-						</div>
-					</div>
-					{{ end }}
-				{{ end }}
-			</div>
-		</div>
 		{{ end }}
 	{{ end }}
 </div>
 
 <!-- Modal for enlarged view - positioned within newspaper content -->
-<div id="pageModal" class="absolute inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center backdrop-blur-sm" onclick="closeModal()">
+<div
+	id="pageModal"
+	class="absolute inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center backdrop-blur-sm"
+	onclick="closeModal()">
 	<div class="relative max-w-full max-h-full p-4">
-<img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
-		<button onclick="closeModal()" class="absolute top-2 right-2 text-white bg-slate-800 bg-opacity-80 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-100 transition-all duration-200">
+		<img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg" />
+		<button
+			onclick="closeModal()"
+			class="absolute top-2 right-2 text-white bg-slate-800 bg-opacity-80 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-100 transition-all duration-200">
 			<i class="ri-close-line text-xl"></i>
 		</button>
 	</div>
 </div>
 
 <style>
-.newspaper-page-container {
-	margin-bottom: 2rem;
-}
+	/* Essential styles that cannot be represented in Tailwind */
+	.newspaper-page-container {
+		margin-bottom: 2rem;
+	}
 
-.single-page {
-	display: flex;
-	justify-content: center;
-}
+	/* Page header backdrop blur */
+	.newspaper-page-container .absolute .page-indicator {
+		pointer-events: auto;
+		backdrop-filter: blur(2px);
+	}
 
-.single-page .newspaper-page-image {
-	max-width: min(400px, 100%);
-	width: 100%;
-	height: auto;
-}
+	/* Responsive header scaling */
+	@media (max-width: 768px) {
+		.newspaper-page-container .absolute {
+			transform: scale(0.9);
+		}
+	}
 
-.double-spread {
-	display: flex;
-	gap: 1rem;
-	justify-content: center;
-	width: 100%;
-}
+	/* Image size constraints with Tailwind utilities */
+	.single-page {
+		display: flex;
+		justify-content: center;
+	}
 
-.double-spread .newspaper-page-image {
-	max-width: min(350px, 48%);
-	width: 100%;
-	height: auto;
-	flex: 1;
-}
-
-/* Larger screens - maximize available space */
-@media (min-width: 1280px) {
 	.single-page .newspaper-page-image {
-		max-width: min(600px, 100%);
-	}
-
-	.double-spread .newspaper-page-image {
-		max-width: min(500px, 48%);
-	}
-}
-
-/* Very wide screens - take advantage of the full width */
-@media (min-width: 1536px) {
-	.single-page .newspaper-page-image {
-		max-width: min(700px, 100%);
-	}
-
-	.double-spread .newspaper-page-image {
-		max-width: min(600px, 48%);
-	}
-}
-
-/* Medium screens */
-@media (max-width: 1024px) {
-	.double-spread {
-		flex-direction: column;
-		align-items: center;
-	}
-
-	.double-spread .newspaper-page-image {
-		max-width: 400px;
+		max-width: min(400px, 100%);
 		width: 100%;
+		height: auto;
 	}
-}
 
-/* Mobile */
-@media (max-width: 640px) {
-	.single-page .newspaper-page-image,
-	.double-spread .newspaper-page-image {
-		max-width: 100%;
+	/* Larger screens */
+	@media (min-width: 1280px) {
+		.single-page .newspaper-page-image {
+			max-width: min(600px, 100%);
+		}
 	}
-}
 
-/* Simple button hover styles */
-button#prevPageBtn:hover:not([style*="display: none"]),
-button#nextPageBtn:hover,
-button#beilageBtn:hover {
-	background-color: rgb(209 213 219) !important; /* gray-300 */
-	color: rgb(55 65 81) !important; /* gray-700 */
-}
+	/* Very wide screens */
+	@media (min-width: 1536px) {
+		.single-page .newspaper-page-image {
+			max-width: min(700px, 100%);
+		}
+	}
 
-button#beilageBtn:hover {
-	background-color: rgb(254 215 170) !important; /* amber-200 */
-	color: rgb(146 64 14) !important; /* amber-800 */
-}
+	/* Mobile constraints */
+	@media (max-width: 640px) {
+		.single-page .newspaper-page-image {
+			max-width: 100%;
+		}
+	}
 
+	/* Navigation button hover styles */
+	button#prevPageBtn:hover:not([style*="display: none"]),
+	button#nextPageBtn:hover,
+	button#beilageBtn:hover {
+		background-color: rgb(209 213 219) !important; /* gray-300 */
+		color: rgb(55 65 81) !important; /* gray-700 */
+	}
+
+	button#beilageBtn:hover {
+		background-color: rgb(254 215 170) !important; /* amber-200 */
+		color: rgb(146 64 14) !important; /* amber-800 */
+	}
 </style>
 
 <script>
-// Page highlighting state - use window to avoid redeclaration
-window.highlightObserver = window.highlightObserver || null;
+	// Simple page highlighting - no grouping complexity
+	window.highlightObserver = window.highlightObserver || null;
 
-// Initialize or reinitialize page highlighting - can be called multiple times
-function initializePageHighlighting() {
-	// Clean up existing observer
-	if (window.highlightObserver) {
-		window.highlightObserver.disconnect();
-		window.highlightObserver = null;
+	function initializePageHighlighting() {
+		// Clean up existing observer
+		if (window.highlightObserver) {
+			window.highlightObserver.disconnect();
+			window.highlightObserver = null;
+		}
+
+		// Get all page containers
+		const pageContainers = document.querySelectorAll(".newspaper-page-container");
+
+		// Set up intersection observer for active page tracking
+		window.highlightObserver = new IntersectionObserver(
+			(entries) => {
+				checkAndHighlightVisiblePages();
+			},
+			{
+				rootMargin: "-20% 0px -70% 0px",
+			},
+		);
+
+		// Observe all page containers
+		pageContainers.forEach((container) => {
+			window.highlightObserver.observe(container);
+		});
 	}
 
-	// Get all page containers
-	const pageContainers = document.querySelectorAll('.newspaper-page-container');
+	function checkAndHighlightVisiblePages() {
+		const visiblePageNumbers = [];
+		const allPageContainers = document.querySelectorAll(".newspaper-page-container");
 
-	// Set up intersection observer for active page tracking
-	window.highlightObserver = new IntersectionObserver((entries) => {
-		entries.forEach((entry) => {
-			if (entry.isIntersecting) {
-				// Check if this is a double-spread container
-				const doubleSpread = entry.target.querySelector('.double-spread');
-				if (doubleSpread) {
-					// Handle double-spread: highlight both pages
-					const pageImages = entry.target.querySelectorAll('img[data-page]');
-					const pageNumbers = Array.from(pageImages).map(img => img.getAttribute('data-page'));
-					markCurrentPagesInInhaltsverzeichnis(pageNumbers);
-				} else {
-					// Handle single page
-					const pageImg = entry.target.querySelector('img[data-page]');
-					if (pageImg) {
-						const pageNumber = pageImg.getAttribute('data-page');
-						markCurrentPageInInhaltsverzeichnis(pageNumber);
+		// Find visible page numbers
+		allPageContainers.forEach((container) => {
+			const containerRect = container.getBoundingClientRect();
+			const viewportHeight = window.innerHeight;
+
+			const visibleTop = Math.max(containerRect.top, 0);
+			const visibleBottom = Math.min(containerRect.bottom, viewportHeight);
+			const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+			const containerHeight = containerRect.height;
+
+			const visibilityRatio = visibleHeight / containerHeight;
+			const isVisible = visibilityRatio >= 0.5;
+
+			const pageImg = container.querySelector("img[data-page]");
+			const pageNumber = pageImg ? pageImg.getAttribute("data-page") : "unknown";
+
+			if (isVisible && pageImg && pageNumber && !visiblePageNumbers.includes(pageNumber)) {
+				visiblePageNumbers.push(pageNumber);
+			}
+		});
+
+		// Show continuations only for visible pages
+		showContinuationsForVisiblePages(visiblePageNumbers);
+
+		// Highlight visible pages
+		if (visiblePageNumbers.length > 0) {
+			markCurrentPagesInInhaltsverzeichnis(visiblePageNumbers);
+		}
+	}
+
+	function showContinuationsForVisiblePages(visiblePageNumbers) {
+		// Hide all continuation entries by default
+		document.querySelectorAll(".continuation-entry").forEach((entry) => {
+			entry.style.display = "none";
+		});
+
+		// Show continuation entries only for visible pages
+		visiblePageNumbers.forEach((pageNumber) => {
+			const pageEntry = document.querySelector(`[data-page-container="${pageNumber}"]`);
+			if (pageEntry) {
+				const continuationEntries = pageEntry.querySelectorAll(".continuation-entry");
+				continuationEntries.forEach((entry) => {
+					entry.style.display = "";
+				});
+			}
+		});
+
+		// Update work titles based on highlighted state
+		updateWorkTitles(visiblePageNumbers);
+
+		// Update page entry visibility after showing/hiding continuations
+		updatePageEntryVisibility();
+	}
+
+	function updateWorkTitles(visiblePageNumbers) {
+		// Reset all work titles to short form
+		document.querySelectorAll(".work-title").forEach((titleElement) => {
+			const shortTitle = titleElement.getAttribute("data-short-title");
+			if (shortTitle) {
+				titleElement.textContent = shortTitle;
+			}
+		});
+
+		// Update work titles to full form for highlighted pages
+		visiblePageNumbers.forEach((pageNumber) => {
+			const pageEntry = document.querySelector(`[data-page-container="${pageNumber}"]`);
+			if (pageEntry) {
+				const workTitles = pageEntry.querySelectorAll(".work-title");
+				workTitles.forEach((titleElement) => {
+					const fullTitle = titleElement.getAttribute("data-full-title");
+					if (fullTitle && fullTitle !== titleElement.getAttribute("data-short-title")) {
+						titleElement.textContent = fullTitle;
 					}
+				});
+			}
+		});
+	}
+
+	function updatePageEntryVisibility() {
+		// Check each page entry to see if it has any visible content
+		document.querySelectorAll(".page-entry").forEach((pageEntry) => {
+			const allEntries = pageEntry.querySelectorAll(".inhalts-entry");
+			let hasVisibleContent = false;
+
+			// Check if any entry is visible
+			allEntries.forEach((entry) => {
+				const computedStyle = window.getComputedStyle(entry);
+				if (computedStyle.display !== "none") {
+					hasVisibleContent = true;
+				}
+			});
+
+			// Hide the entire page entry if it has no visible content
+			if (hasVisibleContent) {
+				pageEntry.style.display = "";
+			} else {
+				pageEntry.style.display = "none";
+			}
+		});
+	}
+
+	// Initialize highlighting on page load
+	document.addEventListener("DOMContentLoaded", initializePageHighlighting);
+
+	// Trigger highlighting on scroll
+	window.scrollTimeout = window.scrollTimeout || null;
+	window.addEventListener("scroll", function () {
+		clearTimeout(window.scrollTimeout);
+		window.scrollTimeout = setTimeout(() => {
+			checkAndHighlightVisiblePages();
+			updateButtonStates(); // Update button states including Beilage toggle
+		}, 50);
+	});
+
+	// HTMX event handling
+	document.body.addEventListener("htmx:afterSwap", function (event) {
+		setTimeout(() => {
+			initializePageHighlighting();
+		}, 100);
+	});
+
+	document.body.addEventListener("htmx:afterSettle", function (event) {
+		setTimeout(() => {
+			initializePageHighlighting();
+		}, 200);
+	});
+
+	document.body.addEventListener("htmx:load", function (event) {
+		setTimeout(() => {
+			initializePageHighlighting();
+		}, 100);
+	});
+
+	function markCurrentPageInInhaltsverzeichnis(pageNumber) {
+		markCurrentPagesInInhaltsverzeichnis([pageNumber]);
+	}
+
+	function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
+		console.log("markCurrentPagesInInhaltsverzeichnis called with:", pageNumbers);
+
+		// Reset all page container borders to default
+		document.querySelectorAll("[data-page-container]").forEach((container) => {
+			if (container.hasAttribute("data-beilage")) {
+				container.classList.remove("border-red-500");
+				container.classList.add("border-amber-400");
+			} else {
+				container.classList.remove("border-red-500");
+				container.classList.add("border-slate-300");
+			}
+		});
+
+		// Reset all page numbers in Inhaltsverzeichnis
+		document.querySelectorAll(".page-number-inhalts").forEach((pageNum) => {
+			pageNum.classList.remove("text-red-600", "font-bold");
+			pageNum.classList.add("text-slate-700", "font-semibold");
+			pageNum.style.textDecoration = "";
+			pageNum.style.pointerEvents = "";
+			// Restore hover effects
+			if (pageNum.classList.contains("bg-blue-50")) {
+				pageNum.classList.add("hover:bg-blue-100");
+			} else if (pageNum.classList.contains("bg-amber-50")) {
+				pageNum.classList.add("hover:bg-amber-100");
+			}
+			// Keep original background colors
+			if (!pageNum.classList.contains("bg-amber-50") && !pageNum.classList.contains("bg-blue-50")) {
+				pageNum.classList.add("bg-blue-50");
+			}
+		});
+
+		// Reset all containers and links in Inhaltsverzeichnis
+		document.querySelectorAll(".inhalts-entry").forEach((container) => {
+			container.classList.add("hover:bg-slate-100");
+			container.style.cursor = "";
+		});
+
+		document.querySelectorAll('.inhalts-entry a[href*="/"]').forEach((link) => {
+			link.classList.remove("no-underline");
+			if (link.classList.contains("bg-blue-50")) {
+				link.classList.add("hover:bg-blue-100");
+			}
+		});
+
+		// Find and highlight the current page numbers
+		const highlightedElements = [];
+
+		pageNumbers.forEach((pageNumber) => {
+			// Find the exact page entry for this page number
+			const pageNumElement = document.querySelector(
+				`.page-number-inhalts[data-page-number="${pageNumber}"]`,
+			);
+
+			if (pageNumElement) {
+				// Highlight the page number
+				pageNumElement.classList.remove(
+					"text-slate-700",
+					"hover:bg-blue-100",
+					"hover:bg-amber-100",
+				);
+				pageNumElement.classList.add("text-red-600", "font-bold");
+				pageNumElement.style.textDecoration = "none";
+				pageNumElement.style.pointerEvents = "none";
+				highlightedElements.push(pageNumElement);
+
+				// Highlight the page container's left border
+				const pageContainer = document.querySelector(`[data-page-container="${pageNumber}"]`);
+				if (pageContainer) {
+					pageContainer.classList.remove("border-slate-300", "border-amber-400");
+					pageContainer.classList.add("border-red-500");
+				}
+
+				// Make links in the current page non-clickable and remove hover effects
+				const parentEntry = pageNumElement.closest(".page-entry");
+				if (parentEntry) {
+					// Remove hover effects from the container
+					const entryContainers = parentEntry.querySelectorAll(".inhalts-entry");
+					entryContainers.forEach((container) => {
+						container.classList.remove("hover:bg-slate-100");
+						container.style.cursor = "default";
+					});
+
+					// Also handle issue reference links
+					parentEntry.querySelectorAll('a[href*="/"]').forEach((link) => {
+						if (link.getAttribute("aria-current") === "page") {
+							link.style.textDecoration = "none";
+							link.style.pointerEvents = "none";
+							link.classList.add("no-underline");
+							link.classList.remove("hover:bg-blue-100");
+						}
+					});
 				}
 			}
 		});
-	}, {
-		rootMargin: '-20% 0px -70% 0px' // Trigger when page is mostly in view
-	});
 
-	// Observe all page containers
-	pageContainers.forEach(container => {
-		window.highlightObserver.observe(container);
-	});
-}
-
-// Initialize highlighting on page load
-document.addEventListener('DOMContentLoaded', initializePageHighlighting);
-
-// More comprehensive HTMX event handling for highlighting
-document.body.addEventListener('htmx:afterSwap', function(event) {
-	console.log('HTMX afterSwap detected, target:', event.detail.target);
-	console.log('Target ID:', event.detail.target.id);
-	console.log('Target classes:', event.detail.target.className);
-
-	// Reinitialize on any content swap that might affect our page
-	setTimeout(() => {
-		console.log('Reinitializing page highlighting...');
-		initializePageHighlighting();
-	}, 100);
-});
-
-document.body.addEventListener('htmx:afterSettle', function(event) {
-	console.log('HTMX afterSettle detected');
-	setTimeout(() => {
-		initializePageHighlighting();
-	}, 200);
-});
-
-// Also try htmx:load event
-document.body.addEventListener('htmx:load', function(event) {
-	console.log('HTMX load detected');
-	setTimeout(() => {
-		initializePageHighlighting();
-	}, 100);
-});
-
-function markCurrentPageInInhaltsverzeichnis(pageNumber) {
-	markCurrentPagesInInhaltsverzeichnis([pageNumber]);
-}
-
-function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
-	console.log('markCurrentPagesInInhaltsverzeichnis called with:', pageNumbers);
-	
-	// Reset all page container borders to default
-	document.querySelectorAll('[data-page-container]').forEach(container => {
-		if (container.hasAttribute('data-beilage')) {
-			container.classList.remove('border-red-500');
-			container.classList.add('border-amber-400');
-		} else {
-			container.classList.remove('border-red-500');
-			container.classList.add('border-slate-300');
+		// Auto-scroll to first highlighted element if it exists
+		if (highlightedElements.length > 0) {
+			scrollToHighlightedPage(highlightedElements[0]);
 		}
-	});
-	
-	// Hide all continuation entries by default
-	document.querySelectorAll('.continuation-entry').forEach(entry => {
-		entry.classList.add('hidden');
-	});
-	
-	// Reset all page numbers in Inhaltsverzeichnis
-	document.querySelectorAll('.page-number-inhalts').forEach(pageNum => {
-		pageNum.classList.remove('text-red-600', 'font-bold');
-		pageNum.classList.add('text-slate-700', 'font-semibold');
-		pageNum.style.textDecoration = '';
-		pageNum.style.pointerEvents = '';
-		// Restore hover effects
-		if (pageNum.classList.contains('bg-blue-50')) {
-			pageNum.classList.add('hover:bg-blue-100');
-		} else if (pageNum.classList.contains('bg-amber-50')) {
-			pageNum.classList.add('hover:bg-amber-100');
+
+		// Also highlight page indicators
+		document.querySelectorAll(".page-indicator").forEach((indicator) => {
+			indicator.classList.remove("text-red-600", "font-bold");
+			indicator.classList.add("text-slate-600", "font-semibold");
+			// Keep original backgrounds
+			if (!indicator.classList.contains("bg-amber-50")) {
+				indicator.classList.add("bg-blue-50");
+			}
+		});
+
+		// Highlight page indicators for all current pages
+		pageNumbers.forEach((pageNumber) => {
+			const pageIndicator = document.querySelector(`.page-indicator[data-page="${pageNumber}"]`);
+			if (pageIndicator) {
+				pageIndicator.classList.remove("text-slate-600");
+				pageIndicator.classList.add("text-red-600", "font-bold");
+			}
+		});
+	}
+
+	function scrollToHighlightedPage(element) {
+		// Check if the element is in a scrollable container
+		const inhaltsContainer = element.closest(".lg\\:overflow-y-auto");
+		if (inhaltsContainer) {
+			// Calculate position
+			const containerRect = inhaltsContainer.getBoundingClientRect();
+			const elementRect = element.getBoundingClientRect();
+
+			// Check if element is not fully visible
+			const isAboveContainer = elementRect.top < containerRect.top;
+			const isBelowContainer = elementRect.bottom > containerRect.bottom;
+
+			if (isAboveContainer || isBelowContainer) {
+				// Scroll to make element visible with some padding
+				element.scrollIntoView({
+					behavior: "smooth",
+					block: "center",
+				});
+			}
 		}
-		// Keep original background colors
-		if (!pageNum.classList.contains('bg-amber-50') && !pageNum.classList.contains('bg-blue-50')) {
-			pageNum.classList.add('bg-blue-50');
+	}
+
+	function enlargePage(imgElement, pageNumber, isFromSpread) {
+		const modal = document.getElementById("pageModal");
+		const modalImage = document.getElementById("modalImage");
+
+		modalImage.src = imgElement.src;
+		modalImage.alt = imgElement.alt;
+
+		modal.classList.remove("hidden");
+
+		// Mark current page when enlarged
+		markCurrentPageInInhaltsverzeichnis(pageNumber);
+	}
+
+	function closeModal() {
+		const modal = document.getElementById("pageModal");
+		modal.classList.add("hidden");
+	}
+
+	// Close modal on Escape key
+	document.addEventListener("keydown", function (e) {
+		if (e.key === "Escape") {
+			closeModal();
 		}
 	});
 
-	// Reset all containers and links in Inhaltsverzeichnis
-	document.querySelectorAll('.inhalts-entry').forEach(container => {
-		container.classList.add('hover:bg-slate-100');
-		container.style.cursor = '';
-	});
-	
-	document.querySelectorAll('.inhalts-entry .author-link').forEach(link => {
-		link.style.textDecoration = '';
-		link.style.pointerEvents = '';
-		link.classList.remove('no-underline');
-	});
-	
-	document.querySelectorAll('.inhalts-entry a[href*="/"]').forEach(link => {
-		link.style.textDecoration = '';
-		link.style.pointerEvents = '';
-		link.classList.remove('no-underline');
-		if (link.classList.contains('bg-blue-50')) {
-			link.classList.add('hover:bg-blue-100');
+	// Navigation functions and state management - use window to avoid redeclaration
+	window.currentPageContainers = window.currentPageContainers || [];
+	window.currentActiveIndex = window.currentActiveIndex || 0;
+	window.pageObserver = window.pageObserver || null;
+
+	// Initialize or reinitialize page tracking - can be called multiple times
+	function initializePageTracking() {
+		// Clean up existing observer
+		if (window.pageObserver) {
+			window.pageObserver.disconnect();
+			window.pageObserver = null;
 		}
-	});
 
-	// Find and highlight the current page numbers
-	const highlightedElements = [];
-	const highlightedRanges = new Set(); // Track which ranges we've already highlighted
+		// Reset state
+		window.currentPageContainers = Array.from(
+			document.querySelectorAll(".newspaper-page-container"),
+		);
+		window.currentActiveIndex = 0;
+		updateButtonStates();
 
-	pageNumbers.forEach(pageNumber => {
-		// Convert pageNumber to integer for comparison
-		const currentPageNum = parseInt(pageNumber);
-		// Look for all entries that should be highlighted for this page
-		const allPageNumbers = document.querySelectorAll('.page-number-inhalts');
+		// Set up new observer
+		const existingObserver = document.querySelector(".newspaper-page-container");
+		if (existingObserver) {
+			let visibleContainers = new Set();
 
-		for (const pageNumElement of allPageNumbers) {
-			const startPage = parseInt(pageNumElement.getAttribute('data-page-number'));
-			const endPage = parseInt(pageNumElement.getAttribute('data-end-page'));
-			const rangeKey = `${startPage}-${endPage}`;
-
-			// Check if this page falls within this range
-			if (currentPageNum >= startPage && currentPageNum <= endPage) {
-				// Only highlight this range once, even if multiple visible pages fall within it
-				if (!highlightedRanges.has(rangeKey)) {
-					pageNumElement.classList.remove('text-slate-700', 'hover:bg-blue-100', 'hover:bg-amber-100');
-					pageNumElement.classList.add('text-red-600', 'font-bold');
-					pageNumElement.style.textDecoration = 'none';
-					pageNumElement.style.pointerEvents = 'none';
-					highlightedElements.push(pageNumElement);
-					highlightedRanges.add(rangeKey);
-
-					// Highlight the page container's left border
-					const pageContainer = document.querySelector(`[data-page-container="${startPage}"]`);
-					if (pageContainer) {
-						pageContainer.classList.remove('border-slate-300', 'border-amber-400');
-						pageContainer.classList.add('border-red-500');
-						
-						// Show continuation entries for this visible page
-						const continuationEntries = pageContainer.querySelectorAll('.continuation-entry[data-page="' + startPage + '"]');
-						continuationEntries.forEach(entry => {
-							entry.classList.remove('hidden');
-						});
-					}
-
-					// Also make links in the current article non-clickable and remove hover effects
-					const parentEntry = pageNumElement.closest('.mb-4');
-					if (parentEntry) {
-						// Remove hover effects from the container
-						const entryContainers = parentEntry.querySelectorAll('.inhalts-entry');
-						entryContainers.forEach(container => {
-							container.classList.remove('hover:bg-slate-100');
-							container.style.cursor = 'default';
-						});
-						
-						// Make all links non-clickable and remove underlines
-						parentEntry.querySelectorAll('.author-link').forEach(link => {
-							link.style.textDecoration = 'none';
-							link.style.pointerEvents = 'none';
-							link.classList.add('no-underline');
-						});
-						
-						// Also handle issue reference links
-						parentEntry.querySelectorAll('a[href*="/"]').forEach(link => {
-							if (link.getAttribute('aria-current') === 'page') {
-								link.style.textDecoration = 'none';
-								link.style.pointerEvents = 'none';
-								link.classList.add('no-underline');
-								link.classList.remove('hover:bg-blue-100');
+			window.pageObserver = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						const containerIndex = window.currentPageContainers.indexOf(entry.target);
+						if (containerIndex !== -1) {
+							if (entry.isIntersecting) {
+								visibleContainers.add(containerIndex);
+							} else {
+								visibleContainers.delete(containerIndex);
 							}
-						});
+						}
+					});
+
+					// Update currentActiveIndex to the first (topmost) visible container
+					if (visibleContainers.size > 0) {
+						const sortedVisible = Array.from(visibleContainers).sort((a, b) => a - b);
+						const newActiveIndex = sortedVisible[0];
+						if (newActiveIndex !== window.currentActiveIndex) {
+							window.currentActiveIndex = newActiveIndex;
+							updateButtonStates();
+						}
 					}
+				},
+				{
+					rootMargin: "-20% 0px -70% 0px",
+				},
+			);
+
+			window.currentPageContainers.forEach((container) => {
+				window.pageObserver.observe(container);
+			});
+		}
+	}
+
+	// Initialize on page load
+	document.addEventListener("DOMContentLoaded", initializePageTracking);
+
+	// More comprehensive HTMX event handling for navigation tracking
+	document.body.addEventListener("htmx:afterSwap", function (event) {
+		console.log("HTMX afterSwap for navigation tracking");
+		setTimeout(() => {
+			console.log("Reinitializing page tracking...");
+			initializePageTracking();
+		}, 100);
+	});
+
+	document.body.addEventListener("htmx:afterSettle", function (event) {
+		console.log("HTMX afterSettle for navigation tracking");
+		setTimeout(() => {
+			initializePageTracking();
+		}, 200);
+	});
+
+	document.body.addEventListener("htmx:load", function (event) {
+		console.log("HTMX load for navigation tracking");
+		setTimeout(() => {
+			initializePageTracking();
+		}, 100);
+	});
+
+	function scrollToPreviousPage() {
+		if (window.currentActiveIndex > 0) {
+			// Find the first page that's not currently visible
+			let targetIndex = -1;
+
+			// Check which pages are currently visible
+			const visibleIndexes = [];
+			window.currentPageContainers.forEach((container, index) => {
+				const containerRect = container.getBoundingClientRect();
+				const viewportHeight = window.innerHeight;
+
+				const visibleTop = Math.max(containerRect.top, 0);
+				const visibleBottom = Math.min(containerRect.bottom, viewportHeight);
+				const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+				const containerHeight = containerRect.height;
+
+				const visibilityRatio = visibleHeight / containerHeight;
+				if (visibilityRatio >= 0.3) { // Consider visible if 30% or more is showing
+					visibleIndexes.push(index);
+				}
+			});
+
+			// Find the first non-visible page before the current visible range
+			const minVisibleIndex = Math.min(...visibleIndexes);
+			for (let i = minVisibleIndex - 1; i >= 0; i--) {
+				if (!visibleIndexes.includes(i)) {
+					targetIndex = i;
+					break;
 				}
 			}
-		}
-	});
 
-	// Auto-scroll to first highlighted element if it exists
-	if (highlightedElements.length > 0) {
-		scrollToHighlightedPage(highlightedElements[0]);
-	}
+			// If no non-visible page found, go to the page just before the visible range
+			if (targetIndex === -1 && minVisibleIndex > 0) {
+				targetIndex = minVisibleIndex - 1;
+			}
 
-	// Also highlight page indicators
-	document.querySelectorAll('.page-indicator').forEach(indicator => {
-		indicator.classList.remove('text-red-600', 'font-bold');
-		indicator.classList.add('text-slate-600', 'font-semibold');
-		// Keep original backgrounds
-		if (!indicator.classList.contains('bg-amber-50')) {
-			indicator.classList.add('bg-blue-50');
-		}
-	});
+			if (targetIndex >= 0) {
+				window.currentActiveIndex = targetIndex;
+				window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
 
-	// Highlight page indicators for all current pages
-	pageNumbers.forEach(pageNumber => {
-		const pageIndicator = document.querySelector(`.page-indicator[data-page="${pageNumber}"]`);
-		if (pageIndicator) {
-			pageIndicator.classList.remove('text-slate-600');
-			pageIndicator.classList.add('text-red-600', 'font-bold');
-		}
-	});
-}
-
-function scrollToHighlightedPage(element) {
-	// Check if the element is in a scrollable container
-	const inhaltsContainer = element.closest('.lg\\:overflow-y-auto');
-	if (inhaltsContainer) {
-		// Calculate position
-		const containerRect = inhaltsContainer.getBoundingClientRect();
-		const elementRect = element.getBoundingClientRect();
-
-		// Check if element is not fully visible
-		const isAboveContainer = elementRect.top < containerRect.top;
-		const isBelowContainer = elementRect.bottom > containerRect.bottom;
-
-		if (isAboveContainer || isBelowContainer) {
-			// Scroll to make element visible with some padding
-			element.scrollIntoView({
-				behavior: 'smooth',
-				block: 'center'
-			});
-		}
-	}
-}
-
-function enlargePage(imgElement, pageNumber, isFromSpread) {
-	const modal = document.getElementById('pageModal');
-	const modalImage = document.getElementById('modalImage');
-
-	modalImage.src = imgElement.src;
-	modalImage.alt = imgElement.alt;
-
-	modal.classList.remove('hidden');
-
-	// Mark current page when enlarged
-	markCurrentPageInInhaltsverzeichnis(pageNumber);
-}
-
-function closeModal() {
-	const modal = document.getElementById('pageModal');
-	modal.classList.add('hidden');
-}
-
-// Close modal on Escape key
-document.addEventListener('keydown', function(e) {
-	if (e.key === 'Escape') {
-		closeModal();
-	}
-});
-
-// Navigation functions and state management - use window to avoid redeclaration
-window.currentPageContainers = window.currentPageContainers || [];
-window.currentActiveIndex = window.currentActiveIndex || 0;
-window.pageObserver = window.pageObserver || null;
-
-// Initialize or reinitialize page tracking - can be called multiple times
-function initializePageTracking() {
-	// Clean up existing observer
-	if (window.pageObserver) {
-		window.pageObserver.disconnect();
-		window.pageObserver = null;
-	}
-
-	// Reset state
-	window.currentPageContainers = Array.from(document.querySelectorAll('.newspaper-page-container'));
-	window.currentActiveIndex = 0;
-	updateButtonStates();
-
-	// Set up new observer
-	const existingObserver = document.querySelector('.newspaper-page-container');
-	if (existingObserver) {
-		let visibleContainers = new Set();
-
-		window.pageObserver = new IntersectionObserver((entries) => {
-			entries.forEach((entry) => {
-				const containerIndex = window.currentPageContainers.indexOf(entry.target);
-				if (containerIndex !== -1) {
-					if (entry.isIntersecting) {
-						visibleContainers.add(containerIndex);
-					} else {
-						visibleContainers.delete(containerIndex);
-					}
-				}
-			});
-
-			// Update currentActiveIndex to the first (topmost) visible container
-			if (visibleContainers.size > 0) {
-				const sortedVisible = Array.from(visibleContainers).sort((a, b) => a - b);
-				const newActiveIndex = sortedVisible[0];
-				if (newActiveIndex !== window.currentActiveIndex) {
-					window.currentActiveIndex = newActiveIndex;
+				// Update button states after a brief delay to let intersection observer catch up
+				setTimeout(() => {
 					updateButtonStates();
+				}, 100);
+			}
+		}
+	}
+
+	function scrollToNextPage() {
+		if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
+			// Find the first page that's not currently visible
+			let targetIndex = -1;
+
+			// Check which pages are currently visible
+			const visibleIndexes = [];
+			window.currentPageContainers.forEach((container, index) => {
+				const containerRect = container.getBoundingClientRect();
+				const viewportHeight = window.innerHeight;
+
+				const visibleTop = Math.max(containerRect.top, 0);
+				const visibleBottom = Math.min(containerRect.bottom, viewportHeight);
+				const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+				const containerHeight = containerRect.height;
+
+				const visibilityRatio = visibleHeight / containerHeight;
+				if (visibilityRatio >= 0.3) { // Consider visible if 30% or more is showing
+					visibleIndexes.push(index);
+				}
+			});
+
+			// Find the first non-visible page after the current visible range
+			const maxVisibleIndex = Math.max(...visibleIndexes);
+			for (let i = maxVisibleIndex + 1; i < window.currentPageContainers.length; i++) {
+				if (!visibleIndexes.includes(i)) {
+					targetIndex = i;
+					break;
 				}
 			}
-		}, {
-			rootMargin: '-20% 0px -70% 0px'
-		});
 
-		window.currentPageContainers.forEach(container => {
-			window.pageObserver.observe(container);
-		});
+			// If no non-visible page found, go to the page just after the visible range
+			if (targetIndex === -1 && maxVisibleIndex < window.currentPageContainers.length - 1) {
+				targetIndex = maxVisibleIndex + 1;
+			}
+
+			if (targetIndex >= 0 && targetIndex < window.currentPageContainers.length) {
+				window.currentActiveIndex = targetIndex;
+				window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
+
+				// Update button states after a brief delay to let intersection observer catch up
+				setTimeout(() => {
+					updateButtonStates();
+				}, 100);
+			}
+		}
 	}
-}
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', initializePageTracking);
+	function scrollToBeilage() {
+		// Check if we're currently viewing a Beilage section
+		const isViewingBeilage = isCurrentlyInBeilageSection();
 
-// More comprehensive HTMX event handling for navigation tracking
-document.body.addEventListener('htmx:afterSwap', function(event) {
-	console.log('HTMX afterSwap for navigation tracking');
-	setTimeout(() => {
-		console.log('Reinitializing page tracking...');
-		initializePageTracking();
-	}, 100);
-});
-
-document.body.addEventListener('htmx:afterSettle', function(event) {
-	console.log('HTMX afterSettle for navigation tracking');
-	setTimeout(() => {
-		initializePageTracking();
-	}, 200);
-});
-
-document.body.addEventListener('htmx:load', function(event) {
-	console.log('HTMX load for navigation tracking');
-	setTimeout(() => {
-		initializePageTracking();
-	}, 100);
-});
-
-function scrollToPreviousPage() {
-	if (window.currentActiveIndex > 0) {
-		// Move to previous container that's not currently visible
-		let targetIndex = window.currentActiveIndex - 1;
-
-		// Ensure we go to the previous non-visible container
-		window.currentActiveIndex = targetIndex;
-		window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
-			behavior: 'smooth',
-			block: 'start'
-		});
-
-		// Update button states after a brief delay to let intersection observer catch up
-		setTimeout(() => {
-			updateButtonStates();
-		}, 100);
-	}
-}
-
-function scrollToNextPage() {
-	if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
-		// Move to next container that's not currently visible
-		let targetIndex = window.currentActiveIndex + 1;
-
-		// Ensure we go to the next non-visible container
-		window.currentActiveIndex = targetIndex;
-		window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
-			behavior: 'smooth',
-			block: 'start'
-		});
-
-		// Update button states after a brief delay to let intersection observer catch up
-		setTimeout(() => {
-			updateButtonStates();
-		}, 100);
-	}
-}
-
-function scrollToBeilage() {
-	// Find the first beilage container
-	const beilageContainer = document.querySelector('[class*="border-t-2 border-amber-200"]');
-	if (beilageContainer) {
-		beilageContainer.scrollIntoView({
-			behavior: 'smooth',
-			block: 'start'
-		});
-	}
-}
-
-function updateButtonStates() {
-	const prevBtn = document.getElementById('prevPageBtn');
-	const nextBtn = document.getElementById('nextPageBtn');
-
-	if (prevBtn) {
-		if (window.currentActiveIndex <= 0) {
-			prevBtn.style.display = 'none';
+		if (isViewingBeilage) {
+			// Go back to main issue (first main page)
+			const firstMainPage = document.querySelector('#newspaper-content .newspaper-page-container');
+			if (firstMainPage) {
+				firstMainPage.scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
+			}
 		} else {
-			prevBtn.style.display = 'flex';
+			// Go to first beilage container
+			const beilageContainer = document.querySelector('[class*="border-t-2 border-amber-200"]');
+			if (beilageContainer) {
+				beilageContainer.scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
+			}
 		}
 	}
 
-	if (nextBtn) {
-		if (window.currentActiveIndex >= window.currentPageContainers.length - 1) {
-			nextBtn.style.display = 'none';
+	function isCurrentlyInBeilageSection() {
+		// Check which pages are currently visible
+		const visibleIndexes = [];
+		window.currentPageContainers.forEach((container, index) => {
+			const containerRect = container.getBoundingClientRect();
+			const viewportHeight = window.innerHeight;
+
+			const visibleTop = Math.max(containerRect.top, 0);
+			const visibleBottom = Math.min(containerRect.bottom, viewportHeight);
+			const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+			const containerHeight = containerRect.height;
+
+			const visibilityRatio = visibleHeight / containerHeight;
+			if (visibilityRatio >= 0.3) { // Consider visible if 30% or more is showing
+				visibleIndexes.push(index);
+			}
+		});
+
+		// Check if any visible page is a Beilage page
+		for (const index of visibleIndexes) {
+			const container = window.currentPageContainers[index];
+			if (container && container.id && container.id.includes('beilage-')) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	function updateButtonStates() {
+		const prevBtn = document.getElementById("prevPageBtn");
+		const nextBtn = document.getElementById("nextPageBtn");
+		const beilageBtn = document.getElementById("beilageBtn");
+
+		if (prevBtn) {
+			if (window.currentActiveIndex <= 0) {
+				prevBtn.style.display = "none";
+			} else {
+				prevBtn.style.display = "flex";
+			}
+		}
+
+		if (nextBtn) {
+			if (window.currentActiveIndex >= window.currentPageContainers.length - 1) {
+				nextBtn.style.display = "none";
+			} else {
+				nextBtn.style.display = "flex";
+			}
+		}
+
+		// Update Beilage button based on current location
+		if (beilageBtn) {
+			const isViewingBeilage = isCurrentlyInBeilageSection();
+			const icon = beilageBtn.querySelector('i');
+
+			if (isViewingBeilage) {
+				// Show "Go to Main Issue" state - use gray styling
+				beilageBtn.title = "Zur Hauptausgabe";
+				beilageBtn.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer";
+				if (icon) {
+					icon.className = "ri-file-text-line text-lg lg:text-xl";
+				}
+			} else {
+				// Show "Go to Beilage" state - use amber styling
+				beilageBtn.title = "Zu Beilage";
+				beilageBtn.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer";
+				if (icon) {
+					icon.className = "ri-attachment-line text-lg lg:text-xl";
+				}
+			}
+		}
+	}
+
+	function shareCurrentPage() {
+		const button = document.getElementById("shareLinkBtn");
+
+		// Get current page information
+		let pageInfo = "";
+
+		// Try to get the currently visible page number from active containers
+		if (
+			window.currentActiveIndex !== undefined &&
+			window.currentPageContainers &&
+			window.currentPageContainers[window.currentActiveIndex]
+		) {
+			const activeContainer = window.currentPageContainers[window.currentActiveIndex];
+			const pageElement = activeContainer.querySelector("[data-page]");
+			if (pageElement) {
+				const pageNumber = pageElement.getAttribute("data-page");
+				pageInfo = `#page-${pageNumber}`;
+			}
+		}
+
+		// Construct the shareable URL
+		const currentUrl = window.location.origin + window.location.pathname + pageInfo;
+
+		// Try to use Web Share API if available (mobile browsers)
+		if (navigator.share) {
+			navigator
+				.share({
+					title: document.title,
+					url: currentUrl,
+				})
+				.catch((err) => {
+					// Fallback to clipboard
+					copyToClipboard(currentUrl, button);
+				});
 		} else {
-			nextBtn.style.display = 'flex';
-		}
-	}
-}
-
-function shareCurrentPage() {
-	const button = document.getElementById('shareLinkBtn');
-
-	// Get current page information
-	let pageInfo = '';
-
-	// Try to get the currently visible page number from active containers
-	if (window.currentActiveIndex !== undefined && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
-		const activeContainer = window.currentPageContainers[window.currentActiveIndex];
-		const pageElement = activeContainer.querySelector('[data-page]');
-		if (pageElement) {
-			const pageNumber = pageElement.getAttribute('data-page');
-			pageInfo = `#page-${pageNumber}`;
-		}
-	}
-
-	// Construct the shareable URL
-	const currentUrl = window.location.origin + window.location.pathname + pageInfo;
-
-	// Try to use Web Share API if available (mobile browsers)
-	if (navigator.share) {
-		navigator.share({
-			title: document.title,
-			url: currentUrl
-		}).catch(err => {
-			// Fallback to clipboard
+			// Fallback: copy to clipboard
 			copyToClipboard(currentUrl, button);
-		});
-	} else {
-		// Fallback: copy to clipboard
-		copyToClipboard(currentUrl, button);
-	}
-}
-
-function copyToClipboard(text, button) {
-	if (navigator.clipboard) {
-		navigator.clipboard.writeText(text).then(() => {
-			showSimplePopup(button, 'Link kopiert!');
-		}).catch(err => {
-			showSimplePopup(button, 'Kopieren fehlgeschlagen');
-		});
-	} else {
-		// Fallback for older browsers
-		const textarea = document.createElement('textarea');
-		textarea.value = text;
-		document.body.appendChild(textarea);
-		textarea.select();
-		try {
-			const successful = document.execCommand('copy');
-			showSimplePopup(button, successful ? 'Link kopiert!' : 'Kopieren fehlgeschlagen');
-		} catch (err) {
-			showSimplePopup(button, 'Kopieren fehlgeschlagen');
-		} finally {
-			document.body.removeChild(textarea);
 		}
 	}
-}
 
-
-function generateCitation() {
-	const button = document.getElementById('citationBtn');
-
-	// Get current page and issue information
-	const issueInfo = document.title || 'KGPZ';
-	const currentUrl = window.location.href;
-
-	// Basic citation format (can be expanded later)
-	const currentDate = new Date().toLocaleDateString('de-DE');
-	const citation = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${issueInfo}. Digital verfügbar unter: ${currentUrl} (Zugriff: ${currentDate}).`;
-
-	// Copy to clipboard
-	if (navigator.clipboard) {
-		navigator.clipboard.writeText(citation).then(() => {
-			showSimplePopup(button, 'Zitation kopiert!');
-		}).catch(err => {
-			showSimplePopup(button, 'Kopieren fehlgeschlagen');
-		});
-	} else {
-		// Fallback for older browsers
-		const textarea = document.createElement('textarea');
-		textarea.value = citation;
-		document.body.appendChild(textarea);
-		textarea.select();
-		try {
-			const successful = document.execCommand('copy');
-			showSimplePopup(button, successful ? 'Zitation kopiert!' : 'Kopieren fehlgeschlagen');
-		} catch (err) {
-			showSimplePopup(button, 'Kopieren fehlgeschlagen');
-		} finally {
-			document.body.removeChild(textarea);
+	function copyToClipboard(text, button) {
+		if (navigator.clipboard) {
+			navigator.clipboard
+				.writeText(text)
+				.then(() => {
+					showSimplePopup(button, "Link kopiert!");
+				})
+				.catch((err) => {
+					showSimplePopup(button, "Kopieren fehlgeschlagen");
+				});
+		} else {
+			// Fallback for older browsers
+			const textarea = document.createElement("textarea");
+			textarea.value = text;
+			document.body.appendChild(textarea);
+			textarea.select();
+			try {
+				const successful = document.execCommand("copy");
+				showSimplePopup(button, successful ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+			} catch (err) {
+				showSimplePopup(button, "Kopieren fehlgeschlagen");
+			} finally {
+				document.body.removeChild(textarea);
+			}
 		}
 	}
-}
 
-function showSimplePopup(button, message) {
-	// Remove any existing popup
-	const existingPopup = document.querySelector('.simple-popup');
-	if (existingPopup) {
-		existingPopup.remove();
+	function generateCitation() {
+		const button = document.getElementById("citationBtn");
+
+		// Get current page and issue information
+		const issueInfo = document.title || "KGPZ";
+		const currentUrl = window.location.href;
+
+		// Basic citation format (can be expanded later)
+		const currentDate = new Date().toLocaleDateString("de-DE");
+		const citation = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${issueInfo}. Digital verfügbar unter: ${currentUrl} (Zugriff: ${currentDate}).`;
+
+		// Copy to clipboard
+		if (navigator.clipboard) {
+			navigator.clipboard
+				.writeText(citation)
+				.then(() => {
+					showSimplePopup(button, "Zitation kopiert!");
+				})
+				.catch((err) => {
+					showSimplePopup(button, "Kopieren fehlgeschlagen");
+				});
+		} else {
+			// Fallback for older browsers
+			const textarea = document.createElement("textarea");
+			textarea.value = citation;
+			document.body.appendChild(textarea);
+			textarea.select();
+			try {
+				const successful = document.execCommand("copy");
+				showSimplePopup(button, successful ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+			} catch (err) {
+				showSimplePopup(button, "Kopieren fehlgeschlagen");
+			} finally {
+				document.body.removeChild(textarea);
+			}
+		}
 	}
 
-	// Create popup element
-	const popup = document.createElement('div');
-	popup.className = 'simple-popup';
-	popup.textContent = message;
-	
-	// Style the popup
-	popup.style.cssText = `
+	function showSimplePopup(button, message) {
+		// Remove any existing popup
+		const existingPopup = document.querySelector(".simple-popup");
+		if (existingPopup) {
+			existingPopup.remove();
+		}
+
+		// Create popup element
+		const popup = document.createElement("div");
+		popup.className = "simple-popup";
+		popup.textContent = message;
+
+		// Style the popup
+		popup.style.cssText = `
 		position: fixed;
 		background: #374151;
 		color: white;
@@ -883,123 +1108,182 @@ function showSimplePopup(button, message) {
 		white-space: nowrap;
 	`;
 
-	// Position popup next to button
-	const buttonRect = button.getBoundingClientRect();
-	const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-	const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-	
-	popup.style.left = (buttonRect.left + scrollLeft - 10) + 'px';
-	popup.style.top = (buttonRect.bottom + scrollTop + 8) + 'px';
+		// Position popup next to button
+		const buttonRect = button.getBoundingClientRect();
+		const viewportHeight = window.innerHeight;
+		const viewportWidth = window.innerWidth;
 
-	// Add to page
-	document.body.appendChild(popup);
+		// Calculate position relative to viewport (since we're using fixed positioning)
+		let left = buttonRect.left - 10;
+		let top = buttonRect.bottom + 8;
 
-	// Fade in
-	setTimeout(() => {
-		popup.style.opacity = '1';
-	}, 10);
+		// Ensure popup doesn't go off-screen
+		const popupWidth = 120; // Estimated popup width
+		const popupHeight = 32; // Estimated popup height
 
-	// Auto-remove after 2 seconds
-	setTimeout(() => {
-		popup.style.opacity = '0';
+		// Adjust horizontal position if too far right
+		if (left + popupWidth > viewportWidth) {
+			left = buttonRect.right - popupWidth + 10;
+		}
+
+		// Adjust vertical position if too far down (show above button instead)
+		if (top + popupHeight > viewportHeight) {
+			top = buttonRect.top - popupHeight - 8;
+		}
+
+		popup.style.left = Math.max(5, left) + "px";
+		popup.style.top = Math.max(5, top) + "px";
+
+		// Add to page
+		document.body.appendChild(popup);
+
+		// Fade in
 		setTimeout(() => {
-			if (popup.parentNode) {
-				popup.remove();
-			}
-		}, 200);
-	}, 2000);
-}
+			popup.style.opacity = "1";
+		}, 10);
 
-// Handle hash navigation to scroll to specific pages
-function scrollToPageFromHash() {
-	const hash = window.location.hash;
-	let pageNumber = '';
-	let targetContainer = null;
-	
-	if (hash.startsWith('#page-')) {
-		pageNumber = hash.replace('#page-', '');
-		
-		// Try to find exact page container first
-		targetContainer = document.getElementById(`page-${pageNumber}`);
-		
-		// If not found, try to find container that contains this page
-		if (!targetContainer) {
-			// Look for double-spread containers that contain this page
-			const containers = document.querySelectorAll('.newspaper-page-container[data-pages]');
-			for (const container of containers) {
-				const pages = container.getAttribute('data-pages');
-				if (pages && pages.split(',').includes(pageNumber)) {
-					targetContainer = container;
-					break;
+		// Auto-remove after 2 seconds
+		setTimeout(() => {
+			popup.style.opacity = "0";
+			setTimeout(() => {
+				if (popup.parentNode) {
+					popup.remove();
+				}
+			}, 200);
+		}, 2000);
+	}
+
+	// Handle hash navigation to scroll to specific pages
+	function scrollToPageFromHash() {
+		const hash = window.location.hash;
+		let pageNumber = "";
+		let targetContainer = null;
+
+		if (hash.startsWith("#page-")) {
+			pageNumber = hash.replace("#page-", "");
+
+			// Try to find exact page container first
+			targetContainer = document.getElementById(`page-${pageNumber}`);
+
+			// If not found, try to find container that contains this page
+			if (!targetContainer) {
+				// Look for double-spread containers that contain this page
+				const containers = document.querySelectorAll(".newspaper-page-container[data-pages]");
+				for (const container of containers) {
+					const pages = container.getAttribute("data-pages");
+					if (pages && pages.split(",").includes(pageNumber)) {
+						targetContainer = container;
+						break;
+					}
 				}
 			}
-		}
-		
-		// If still not found, try beilage containers
-		if (!targetContainer) {
-			targetContainer = document.getElementById(`beilage-1-page-${pageNumber}`) || 
-							 document.getElementById(`beilage-2-page-${pageNumber}`) ||
-							 document.querySelector(`[id*="beilage"][id*="page-${pageNumber}"]`);
-		}
-	} else if (hash.startsWith('#beilage-')) {
-		// Handle beilage-specific hashes like #beilage-1-page-101
-		const match = hash.match(/#beilage-(\d+)-page-(\d+)/);
-		if (match) {
-			const beilageNum = match[1];
-			pageNumber = match[2];
-			targetContainer = document.getElementById(`beilage-${beilageNum}-page-${pageNumber}`);
-		}
-	}
-	
-	if (targetContainer && pageNumber) {
-		setTimeout(() => {
-			targetContainer.scrollIntoView({
-				behavior: 'smooth',
-				block: 'start'
-			});
-			
-			// Highlight the specific page in the table of contents
-			markCurrentPageInInhaltsverzeichnis(pageNumber);
-		}, 300);
-	}
-}
 
-// Function to copy page permalink
-function copyPagePermalink(pageNumber, button, isBeilage = false) {
-	let pageFragment = '';
-	if (isBeilage) {
-		pageFragment = `#beilage-1-page-${pageNumber}`;
-	} else {
-		pageFragment = `#page-${pageNumber}`;
-	}
-	
-	const currentUrl = window.location.origin + window.location.pathname + pageFragment;
-	
-	// Copy to clipboard
-	if (navigator.clipboard) {
-		navigator.clipboard.writeText(currentUrl).then(() => {
-			showSimplePopup(button, 'Link kopiert!');
-		}).catch(err => {
-			showSimplePopup(button, 'Kopieren fehlgeschlagen');
-		});
-	} else {
-		// Fallback for older browsers
-		const textarea = document.createElement('textarea');
-		textarea.value = currentUrl;
-		document.body.appendChild(textarea);
-		textarea.select();
-		try {
-			const successful = document.execCommand('copy');
-			showSimplePopup(button, successful ? 'Link kopiert!' : 'Kopieren fehlgeschlagen');
-		} catch (err) {
-			showSimplePopup(button, 'Kopieren fehlgeschlagen');
-		} finally {
-			document.body.removeChild(textarea);
+			// If still not found, try beilage containers
+			if (!targetContainer) {
+				targetContainer =
+					document.getElementById(`beilage-1-page-${pageNumber}`) ||
+					document.getElementById(`beilage-2-page-${pageNumber}`) ||
+					document.querySelector(`[id*="beilage"][id*="page-${pageNumber}"]`);
+			}
+		} else if (hash.startsWith("#beilage-")) {
+			// Handle beilage-specific hashes like #beilage-1-page-101
+			const match = hash.match(/#beilage-(\d+)-page-(\d+)/);
+			if (match) {
+				const beilageNum = match[1];
+				pageNumber = match[2];
+				targetContainer = document.getElementById(`beilage-${beilageNum}-page-${pageNumber}`);
+			}
+		}
+
+		if (targetContainer && pageNumber) {
+			setTimeout(() => {
+				targetContainer.scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
+
+				// Highlight the specific page in the table of contents
+				markCurrentPageInInhaltsverzeichnis(pageNumber);
+			}, 300);
 		}
 	}
-}
 
-// Initialize hash handling
-document.addEventListener('DOMContentLoaded', scrollToPageFromHash);
-window.addEventListener('hashchange', scrollToPageFromHash);
+	// Function to copy page permalink
+	function copyPagePermalink(pageNumber, button, isBeilage = false) {
+		let pageFragment = "";
+		if (isBeilage) {
+			pageFragment = `#beilage-1-page-${pageNumber}`;
+		} else {
+			pageFragment = `#page-${pageNumber}`;
+		}
+
+		const currentUrl = window.location.origin + window.location.pathname + pageFragment;
+
+		// Copy to clipboard
+		if (navigator.clipboard) {
+			navigator.clipboard
+				.writeText(currentUrl)
+				.then(() => {
+					showSimplePopup(button, "Link kopiert!");
+				})
+				.catch((err) => {
+					showSimplePopup(button, "Kopieren fehlgeschlagen");
+				});
+		} else {
+			// Fallback for older browsers
+			const textarea = document.createElement("textarea");
+			textarea.value = currentUrl;
+			document.body.appendChild(textarea);
+			textarea.select();
+			try {
+				const successful = document.execCommand("copy");
+				showSimplePopup(button, successful ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+			} catch (err) {
+				showSimplePopup(button, "Kopieren fehlgeschlagen");
+			} finally {
+				document.body.removeChild(textarea);
+			}
+		}
+	}
+
+	// Initialize hash handling
+	document.addEventListener("DOMContentLoaded", scrollToPageFromHash);
+	window.addEventListener("hashchange", scrollToPageFromHash);
+
+	// Page-specific share and citation functions
+	function generatePageCitation(pageNumber, button) {
+		// Get current issue information
+		const issueInfo = document.title || "KGPZ";
+		const currentUrl = `${window.location.origin}${window.location.pathname}#page-${pageNumber}`;
+
+		// Basic citation format for specific page
+		const currentDate = new Date().toLocaleDateString("de-DE");
+		const citation = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${issueInfo}, Seite ${pageNumber}. Digital verfügbar unter: ${currentUrl} (Zugriff: ${currentDate}).`;
+
+		// Copy to clipboard
+		if (navigator.clipboard) {
+			navigator.clipboard
+				.writeText(citation)
+				.then(() => {
+					showSimplePopup(button, "Zitation kopiert!");
+				})
+				.catch((err) => {
+					showSimplePopup(button, "Kopieren fehlgeschlagen");
+				});
+		} else {
+			// Fallback for older browsers
+			const textarea = document.createElement("textarea");
+			textarea.value = citation;
+			document.body.appendChild(textarea);
+			textarea.select();
+			try {
+				const successful = document.execCommand("copy");
+				showSimplePopup(button, successful ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+			} catch (err) {
+				showSimplePopup(button, "Kopieren fehlgeschlagen");
+			} finally {
+				document.body.removeChild(textarea);
+			}
+		}
+	}
 </script>

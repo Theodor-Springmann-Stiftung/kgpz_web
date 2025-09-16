@@ -13,10 +13,10 @@ The application follows a modular Go architecture:
 - **Main Application**: `kgpz_web.go` - Entry point and application lifecycle management
 - **App Core**: `app/kgpz.go` - Core business logic and data processing
 - **Controllers**: Route handlers for different content types (issues, agents, places, categories, search)
-- **View Models**: Data structures for template rendering (`viewmodels/`)
+- **View Models**: Data structures for template rendering with pre-processed business logic (`viewmodels/`)
 - **XML Models**: Data structures for parsing source XML files (`xmlmodels/`)
 - **Providers**: External service integrations (Git, GND, XML parsing, search)
-- **Templating**: Custom template engine with Go template integration
+- **Templating**: Custom template engine with Go template integration and helper functions
 - **Views**: Frontend assets and templates in `views/` directory
 
 ### Key Components
@@ -24,7 +24,7 @@ The application follows a modular Go architecture:
 1. **Data Sources**: XML files from Git repository containing historical newspaper metadata
 2. **Search**: Full-text search powered by Bleve search engine
 3. **External Integrations**: GND (Gemeinsame Normdatei) for person metadata, Geonames for place data
-4. **Template System**: Custom engine supporting layouts and partials with embedded filesystem
+4. **Template System**: Custom engine supporting layouts and partials with embedded filesystem and helper functions
 
 ## Development Commands
 
@@ -154,10 +154,12 @@ Each route has dedicated `head.gohtml` and `body.gohtml` files following Go temp
 - HTMX-powered interactions for dynamic content loading
 
 **Template Features**:
-- Go template syntax with custom functions from `app/kgpz.go`
+- Go template syntax with custom functions from `templating/engine.go`
 - Block template inheritance system
 - HTMX integration for progressive enhancement
 - Conditional development/production asset loading
+- Template helper functions for UI components (PageIcon, BeilagePageIcon)
+- Pre-processed view models to minimize template logic
 
 ### Frontend Assets
 
@@ -187,6 +189,34 @@ The root template conditionally loads assets based on environment:
 - Module imports: ES6 modules with `setup()` function from compiled scripts
 - Deferred loading: HTMX and Alpine.js loaded with `defer` attribute
 
+## Template Architecture & Best Practices
+
+### View Model Philosophy
+The application follows a **logic-in-Go, presentation-in-templates** approach:
+
+- **View Models** (`viewmodels/issue_view.go`): Pre-process all business logic, calculations, and data transformations
+- **Templates**: Focus purely on presentation using pre-calculated data
+- **Helper Functions** (`templating/engine.go`): Reusable UI components and formatting
+
+### Key View Model Features
+- **Pre-calculated metadata**: Page icons, grid layouts, visibility flags
+- **Grouped data structures**: Complex relationships resolved in Go
+- **Template helpers**: `PageIcon()`, `BeilagePageIcon()` for consistent UI components
+
+### Template Organization
+**Ausgabe (Issue) Templates**:
+- `body.gohtml`: Main layout structure with conditional rendering
+- `components/_inhaltsverzeichnis.gohtml`: Table of contents with pre-processed page data
+- `components/_newspaper_layout.gohtml`: Newspaper page grid with absolute positioning
+- `components/_bilder.gohtml`: Simple image gallery fallback
+- Interactive highlighting system with intersection observer and scroll detection
+
+### JavaScript Integration
+- **Progressive Enhancement**: HTMX + Alpine.js for interactivity
+- **Real-time Highlighting**: Intersection Observer API with scroll fallback
+- **Page Navigation**: Smooth scrolling with visibility detection
+- **Responsive Design**: Mobile-optimized with proper touch interactions
+
 ## Development Workflow
 
 1. Backend changes: Modify Go files, restart server
@@ -194,3 +224,8 @@ The root template conditionally loads assets based on environment:
 3. CSS changes: Run `npm run css` or `npm run tailwind` in views directory
 4. JavaScript changes: Edit `transform/main.js`, run `npm run build`
 5. Full rebuild: `go build` for backend, `npm run build` for frontend assets
+
+### Adding New Template Logic
+1. **First**: Add business logic to view models in Go
+2. **Second**: Create reusable template helper functions if needed
+3. **Last**: Use pre-processed data in templates for presentation only
