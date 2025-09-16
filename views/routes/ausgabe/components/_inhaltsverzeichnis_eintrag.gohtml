@@ -150,14 +150,14 @@
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link"
+					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600"
 						>{{ index $agent.Names 0 }}</a
 					>,
 					<span class="review-format"
 						>Rezension von:
 						{{ if $workAuthorName }}
 							{{- if $workAuthorID -}}
-								<a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>
+								<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>
 							{{- else -}}
 								{{ $workAuthorName }}
 							{{- end -}},
@@ -173,8 +173,8 @@
 							<em>{{ $title }}</em>
 						{{ else }}
 							[Werk unbekannt]
-						{{ end }}{{ if $place }}({{ $place }}){{ end }}</span
-					>
+						{{ end }}</span
+					>{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 					{{- $authorFound = true -}}
 					{{- break -}}
 				{{- end -}}
@@ -185,7 +185,7 @@
 				>Rezension von:
 				{{ if $workAuthorName }}
 					{{- if $workAuthorID -}}
-						<a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>
+						<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>
 					{{- else -}}
 						{{ $workAuthorName }}
 					{{- end -}},
@@ -201,8 +201,8 @@
 					<em>{{ $title }}</em>
 				{{ else }}
 					[Werk unbekannt]
-				{{ end }}{{ if $place }}({{ $place }}){{ end }}</span
-			>
+				{{ end }}</span
+			>{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 		{{- end -}}
 
 	{{- else if $hasWeltnachrichten -}}
@@ -214,11 +214,10 @@
 			Nachruf und Einreiseliste
 		{{- else -}}
 			Einreiseliste
-		{{- end -}}
-		{{ if $place }}für {{ $place }}{{ end }}
+		{{- end -}}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasWechselkurse -}}
-		Wechselkurse{{ if $place }}in {{ $place }}{{ end }}
+		Wechselkurse{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasBuecher -}}
 		Bücheranzeigen{{ if $title }}: <em>{{ $title }}</em>{{ end }}
@@ -228,8 +227,7 @@
 			Todesanzeige
 		{{ else }}
 			Lokalanzeige
-		{{ end }}
-		{{ if $place }}aus {{ $place }}{{ end }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}
+		{{ end }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasLokalnachrichten -}}
 		{{ if $hasLotterie }}
@@ -242,8 +240,7 @@
 			Festlichkeiten
 		{{ else }}
 			Lokalnachrichten
-		{{ end }}
-		{{ if $place }}aus {{ $place }}{{ end }}
+		{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasGedicht -}}
 		{{- $authorFound := false -}}
@@ -251,7 +248,7 @@
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a>,
+					<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
 					{{ if $hasKommentar }}
 						Gedicht mit Kommentar
 					{{ else if $hasUebersetzung }}
@@ -279,8 +276,7 @@
 		{{- end -}}
 
 	{{- else if $hasVorladung -}}
-		Gerichtliche
-		Vorladung{{ if $place }}in {{ $place }}{{ end }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}
+		Gerichtliche Vorladung{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasAufsatz -}}
 		{{- $authorFound := false -}}
@@ -288,7 +284,7 @@
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link"
+					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600"
 						>{{ index $agent.Names 0 }}</a
 					>,
 					{{ if $hasReplik }}
@@ -332,8 +328,7 @@
 			Gelehrter Kommentar
 		{{ else }}
 			Gelehrte Nachrichten
-		{{ end }}
-		{{ if $place }}aus {{ $place }}{{ end }}
+		{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasTheaterkritik -}}
 		{{- $authorFound := false -}}
@@ -341,17 +336,17 @@
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link"
+					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600"
 						>{{ index $agent.Names 0 }}</a
 					>,
 					Theaterkritik{{ if $workTitle }}
 						zu <em>{{ $workTitle }}</em>{{ if $workAuthorName }}
 							von
-							<a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>
+							<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>
 						{{ end }}
 					{{ else if $title }}
 						zu <em>{{ $title }}</em>
-					{{ end }}{{ if $place }}({{ $place }}){{ end }}
+					{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 					{{- $authorFound = true -}}
 					{{- break -}}
 				{{- end -}}
@@ -360,11 +355,11 @@
 		{{- if not $authorFound -}}
 			{{ Safe $fortsPrefix }}Theaterkritik{{ if $workTitle }}
 				zu <em>{{ $workTitle }}</em>{{ if $workAuthorName }}
-					von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>
+					von <a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>
 				{{ end }}
 			{{ else if $title }}
 				zu <em>{{ $title }}</em>
-			{{ end }}{{ if $place }}({{ $place }}){{ end }}
+			{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 		{{- end -}}
 
 	{{- else if $hasProklamation -}}
@@ -391,17 +386,16 @@
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}{{- if and $agent (gt (len $agent.Names) 0) -}}
 					von
-					<a href="/akteure/{{ $agentref.Ref }}" class="author-link">{{ index $agent.Names 0 }}</a
+					<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a
 					>{{- $authorFound = true -}}{{- break -}}
 				{{- end -}}
 
 			{{- end -}}
 
-		{{- end -}}
-		{{ if $place }}aus {{ $place }}{{ end }}
+		{{- end -}}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasDesertionsliste -}}
-		{{ Safe $fortsPrefix }}Desertionsliste{{ if $place }}für {{ $place }}{{ end }}
+		{{ Safe $fortsPrefix }}Desertionsliste{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasNotenblatt -}}
 		{{ Safe $fortsPrefix }}{{ if $hasNachtrag }}Ergänztes{{ end }}Notenblatt{{ if $title }}
@@ -409,7 +403,7 @@
 		{{ end }}
 
 	{{- else if $hasVorlesungsverzeichnis -}}
-		{{ Safe $fortsPrefix }}Vorlesungsverzeichnis{{ if $place }}der Universität {{ $place }}{{ end }}
+		{{ Safe $fortsPrefix }}Vorlesungsverzeichnis{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasErzaehlung -}}
 		{{- $authorFound := false -}}
@@ -417,7 +411,7 @@
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link"
+					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600"
 						>{{ index $agent.Names 0 }}</a
 					>,
 					{{ if $hasUebersetzung }}
@@ -447,7 +441,7 @@
 		{{ if $title }}: <em>{{ $title }}</em>{{ end }}
 
 	{{- else if $hasKriminalanzeige -}}
-		{{ Safe $fortsPrefix }}Kriminalanzeige{{ if $place }}aus {{ $place }}{{ end }}
+		{{ Safe $fortsPrefix }}Kriminalanzeige{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
 	{{- else if $hasKorrektur -}}
 		{{ Safe $fortsPrefix }}Korrektur{{ if $title }}: <em>{{ $title }}</em>{{ end }}
@@ -461,13 +455,12 @@
 		{{ if $title }}: <em>{{ $title }}</em>{{ end }}
 
 	{{- else if $hasAuszug -}}
-		{{ Safe $fortsPrefix }}Auszug{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
-		{{ if $workTitle }}
-			aus <em>{{ $workTitle }}</em>{{ if $workAuthorName }}
-				von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>
-			{{ end }}
-
-		{{ end }}
+		{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>, {{ end }}{{ if $hasUebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
+			<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}{{ if $workTitle }}<em
+				class="work-title"
+				data-short-title="{{ $workTitle }}"
+				{{ if $workTitleFull }}data-full-title="{{ $workTitleFull }}"{{ end }}
+				>{{ $workTitle }}</em>{{ else if $title }}<em>{{ $title }}</em>{{ else }}[Werk unbekannt]{{ end }}
 
 	{{- else -}}
 		{{- $authorFound := false -}}
@@ -475,13 +468,15 @@
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link"
+					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600"
 						>{{ index $agent.Names 0 }}</a
 					>{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-						{{ if $title }}aus{{ end }}<em>{{ $workTitle }}</em>{{ if $workAuthorName }}
-							von
-							<a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>
-						{{ end }}
+						{{ if $title }}, {{ if $hasUebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
+							<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
+							class="work-title"
+							data-short-title="{{ $workTitle }}"
+							{{ if $workTitleFull }}data-full-title="{{ $workTitleFull }}"{{ end }}
+							>{{ $workTitle }}</em>
 					{{ end }}
 					{{- $authorFound = true -}}
 					{{- break -}}
@@ -490,9 +485,12 @@
 		{{- end -}}
 		{{- if not $authorFound -}}
 			{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-				{{ if $title }}aus{{ end }}<em>{{ $workTitle }}</em>{{ if $workAuthorName }}
-					von <a href="/akteure/{{ $workAuthorID }}" class="author-link">{{ $workAuthorName }}</a>
-				{{ end }}
+				{{ if $title }}, {{ if $hasUebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
+					<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
+					class="work-title"
+					data-short-title="{{ $workTitle }}"
+					{{ if $workTitleFull }}data-full-title="{{ $workTitleFull }}"{{ end }}
+					>{{ $workTitle }}</em>
 			{{ else if not $title }}
 				Beitrag ohne Titel
 			{{ end }}

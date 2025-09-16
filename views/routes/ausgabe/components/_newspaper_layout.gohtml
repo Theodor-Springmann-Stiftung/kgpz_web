@@ -7,105 +7,9 @@
 		{{ $pages := $images.MainPages }}
 		{{ $pageCount := len $pages }}
 
-		<!-- Dynamic 2-column grid for arbitrary page count -->
+		<!-- Historical printing layout grid -->
 		<div class="grid grid-cols-2 gap-4">
-			{{ range $index, $page := $pages }}
-				{{ if $page.Available }}
-					{{ $pageIndex := $index }}
-					{{ $isFirstPage := eq $pageIndex 0 }}
-					{{ $isLastPage := eq $pageIndex (sub $pageCount 1) }}
-					{{ $isOddPosition := eq (mod $pageIndex 2) 0 }}
-					{{ $isEvenPosition := eq (mod $pageIndex 2) 1 }}
-
-					{{ if $isFirstPage }}
-						<!-- Page 1: Always left column -->
-						<div class="newspaper-page-container" id="page-{{ $page.PageNumber }}">
-							<!-- Page indicator row - right aligned for first page -->
-							<div class="flex justify-end items-center gap-1 mb-2">
-								<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-									<i class="ri-share-line text-xs"></i>
-								</button>
-								<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-									<i class="ri-file-text-line text-xs"></i>
-								</button>
-								<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-									{{ $page.PageNumber }}
-									<i class="ri-file-text-line text-black text-sm"></i>
-								</span>
-							</div>
-							<div class="single-page bg-white p-4 rounded border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-								<img src="{{ $page.ImagePath }}" alt="Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
-							</div>
-						</div>
-						<!-- Empty space after first page -->
-						<div></div>
-					{{ else if $isLastPage }}
-						<!-- Last page: Always right column with empty space before -->
-						<div></div>
-						<div class="newspaper-page-container" id="page-{{ $page.PageNumber }}">
-							<!-- Page indicator row - left aligned for last page -->
-							<div class="flex justify-start items-center gap-1 mb-2">
-								<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-									<i class="ri-file-text-line text-black text-sm"></i>
-									{{ $page.PageNumber }}
-								</span>
-								<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-									<i class="ri-share-line text-xs"></i>
-								</button>
-								<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-									<i class="ri-file-text-line text-xs"></i>
-								</button>
-							</div>
-							<div class="single-page bg-white p-4 rounded border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-								<img src="{{ $page.ImagePath }}" alt="Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
-							</div>
-						</div>
-					{{ else }}
-						<!-- Middle pages: Even pages (index 1,3,5...) left column, Odd pages (index 2,4,6...) right column -->
-						{{ if $isEvenPosition }}
-							<!-- Even-indexed pages: Left column -->
-							<div class="newspaper-page-container" id="page-{{ $page.PageNumber }}">
-								<!-- Page indicator row - right aligned for even-indexed pages -->
-								<div class="flex justify-end items-center gap-1 mb-2">
-									<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-										<i class="ri-share-line text-xs"></i>
-									</button>
-									<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-										<i class="ri-file-text-line text-xs"></i>
-									</button>
-									<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-										{{ $page.PageNumber }}
-										<i class="ri-file-text-line text-black text-sm scale-x-[-1]"></i>
-									</span>
-								</div>
-								<div class="single-page bg-white p-4 rounded border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-									<img src="{{ $page.ImagePath }}" alt="Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
-								</div>
-							</div>
-						{{ else }}
-							<!-- Odd-indexed pages: Right column -->
-							<div class="newspaper-page-container" id="page-{{ $page.PageNumber }}">
-								<!-- Page indicator row - left aligned for odd-indexed pages -->
-								<div class="flex justify-start items-center gap-1 mb-2">
-									<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-										<i class="ri-file-text-line text-black text-sm"></i>
-										{{ $page.PageNumber }}
-									</span>
-									<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-										<i class="ri-share-line text-xs"></i>
-									</button>
-									<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-										<i class="ri-file-text-line text-xs"></i>
-									</button>
-								</div>
-								<div class="single-page bg-white p-4 rounded border border-slate-200 hover:border-slate-300 transition-colors duration-200">
-									<img src="{{ $page.ImagePath }}" alt="Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
-								</div>
-							</div>
-						{{ end }}
-					{{ end }}
-				{{ end }}
-			{{ end }}
+			{{ template "_historical_layout" (dict "pages" $pages "pageCount" $pageCount "isBeilage" false) }}
 		</div>
 	{{ end }}
 
@@ -113,7 +17,7 @@
 	<!-- Beilage Pages -->
 	{{ range $beilageNum, $beilagePages := $images.AdditionalPages }}
 		{{ if $beilagePages }}
-			<div class="mt-12 pt-8 border-t-2 border-amber-200">
+			<div class="mt-12 pt-8">
 				<!-- Header for beilage -->
 				<div class="flex items-center gap-3 mb-6 bg-amber-50 px-4 py-3 rounded border border-amber-200">
 					<i class="ri-attachment-line text-2xl text-amber-600"></i>
@@ -121,150 +25,10 @@
 				</div>
 				{{ $pageCount := len $beilagePages }}
 
-				<!-- Dynamic layout for Beilage pages -->
-				{{ if eq $pageCount 2 }}
-					<!-- Special case: 2 pages side by side -->
-					<div class="grid grid-cols-2 gap-4">
-						{{ range $index, $page := $beilagePages }}
-							{{ if $page.Available }}
-								<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
-									<!-- Page indicator row - left aligned for first page, right for second -->
-									<div class="flex {{ if eq $index 0 }}justify-start{{ else }}justify-end{{ end }} items-center gap-1 mb-2">
-										{{ if eq $index 0 }}
-											<!-- Left page: page indicator first, then buttons -->
-											<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-												<i class="ri-file-text-line text-amber-600 text-sm"></i>
-												{{ $page.PageNumber }}
-											</span>
-											<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-												<i class="ri-share-line text-xs"></i>
-											</button>
-											<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-												<i class="ri-file-text-line text-xs"></i>
-											</button>
-										{{ else }}
-											<!-- Right page: buttons first, then page indicator -->
-											<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-												<i class="ri-share-line text-xs"></i>
-											</button>
-											<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-												<i class="ri-file-text-line text-xs"></i>
-											</button>
-											<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-												{{ $page.PageNumber }}
-												<i class="ri-file-text-line text-amber-600 text-sm"></i>
-											</span>
-										{{ end }}
-									</div>
-									<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-										<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
-									</div>
-								</div>
-							{{ end }}
-						{{ end }}
-					</div>
-				{{ else }}
-					<!-- Standard newspaper layout for 4+ pages -->
-					<div class="grid grid-cols-2 gap-4">
-						{{ range $index, $page := $beilagePages }}
-							{{ if $page.Available }}
-								{{ $pageIndex := $index }}
-								{{ $isFirstPage := eq $pageIndex 0 }}
-								{{ $isLastPage := eq $pageIndex (sub $pageCount 1) }}
-								{{ $isOddPosition := eq (mod $pageIndex 2) 0 }}
-								{{ $isEvenPosition := eq (mod $pageIndex 2) 1 }}
-
-								{{ if $isFirstPage }}
-									<!-- Page 1: Always left column -->
-									<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
-										<!-- Page indicator row - right aligned for Beilage first page -->
-										<div class="flex justify-end items-center gap-1 mb-2">
-											<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-												<i class="ri-share-line text-xs"></i>
-											</button>
-											<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-												<i class="ri-file-text-line text-xs"></i>
-											</button>
-											<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-												{{ $page.PageNumber }}
-												<i class="ri-file-text-line text-amber-600 text-sm"></i>
-											</span>
-										</div>
-										<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-											<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
-										</div>
-									</div>
-									<!-- Empty space after first page -->
-									<div></div>
-								{{ else if $isLastPage }}
-									<!-- Last page: Always right column with empty space before -->
-									<div></div>
-									<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
-										<!-- Page indicator row - left aligned for Beilage last page -->
-										<div class="flex justify-start items-center gap-1 mb-2">
-											<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-												<i class="ri-file-text-line text-amber-600 text-sm"></i>
-												{{ $page.PageNumber }}
-											</span>
-											<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-												<i class="ri-share-line text-xs"></i>
-											</button>
-											<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-												<i class="ri-file-text-line text-xs"></i>
-											</button>
-										</div>
-										<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-											<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
-										</div>
-									</div>
-								{{ else }}
-									<!-- Middle pages: Even pages left column, Odd pages right column -->
-									{{ if $isEvenPosition }}
-										<!-- Even-indexed pages: Left column -->
-										<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
-											<!-- Page indicator row - right aligned for Beilage even-indexed pages -->
-											<div class="flex justify-end items-center gap-1 mb-2">
-												<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-													<i class="ri-share-line text-xs"></i>
-												</button>
-												<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-													<i class="ri-file-text-line text-xs"></i>
-												</button>
-												<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-													{{ $page.PageNumber }}
-													<i class="ri-file-text-line text-amber-600 text-sm scale-x-[-1]"></i>
-												</span>
-											</div>
-											<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-												<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
-											</div>
-										</div>
-									{{ else }}
-										<!-- Odd-indexed pages: Right column -->
-										<div class="newspaper-page-container" id="beilage-{{ $beilageNum }}-page-{{ $page.PageNumber }}">
-											<!-- Page indicator row - left aligned for Beilage odd-indexed pages -->
-											<div class="flex justify-start items-center gap-1 mb-2">
-												<span class="page-indicator text-sm font-bold text-slate-600 bg-amber-50 px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
-													<i class="ri-file-text-line text-amber-600 text-sm"></i>
-													{{ $page.PageNumber }}
-												</span>
-												<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this, true)" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
-													<i class="ri-share-line text-xs"></i>
-												</button>
-												<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
-													<i class="ri-file-text-line text-xs"></i>
-												</button>
-											</div>
-											<div class="single-page bg-white p-4 rounded border border-amber-200 hover:border-amber-300 transition-colors duration-200">
-												<img src="{{ $page.ImagePath }}" alt="Beilage {{ $beilageNum }}, Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-md hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
-											</div>
-										</div>
-									{{ end }}
-								{{ end }}
-							{{ end }}
-						{{ end }}
-					</div>
-				{{ end }}
+				<!-- Historical printing layout grid for Beilage -->
+				<div class="grid grid-cols-2 gap-4">
+					{{ template "_historical_layout" (dict "pages" $beilagePages "pageCount" $pageCount "isBeilage" true) }}
+				</div>
 			</div>
 		{{ end }}
 	{{ end }}
@@ -1287,3 +1051,119 @@
 		}
 	}
 </script>
+
+<!-- Historical printing layout template -->
+{{ define "_historical_layout" }}
+	{{ $pages := .pages }}
+	{{ $pageCount := .pageCount }}
+	{{ $isBeilage := .isBeilage }}
+
+	{{ if eq $pageCount 2 }}
+		<!-- 2 pages: [1] [2] -->
+		{{ template "_render_page" (dict "page" (index $pages 0) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 1) "position" "right" "isBeilage" $isBeilage) }}
+	{{ else if eq $pageCount 4 }}
+		<!-- 4 pages: [1] [_] \n [2] [3] \n [_] [4] -->
+		{{ template "_render_page" (dict "page" (index $pages 0) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_empty" "" }}
+		{{ template "_render_page" (dict "page" (index $pages 1) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 2) "position" "right" "isBeilage" $isBeilage) }}
+		{{ template "_render_empty" "" }}
+		{{ template "_render_page" (dict "page" (index $pages 3) "position" "right" "isBeilage" $isBeilage) }}
+	{{ else if eq $pageCount 6 }}
+		<!-- 6 pages: [1] [_] \n [2] [3] \n [_] [4] \n [5] [6] -->
+		{{ template "_render_page" (dict "page" (index $pages 0) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_empty" "" }}
+		{{ template "_render_page" (dict "page" (index $pages 1) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 2) "position" "right" "isBeilage" $isBeilage) }}
+		{{ template "_render_empty" "" }}
+		{{ template "_render_page" (dict "page" (index $pages 3) "position" "right" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 4) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 5) "position" "right" "isBeilage" $isBeilage) }}
+	{{ else if eq $pageCount 8 }}
+		<!-- 8 pages: [1] [_] \n [2] [3] \n [4] [5] \n [6] [_] \n [_] [7] \n [8] [_] -->
+		{{ template "_render_page" (dict "page" (index $pages 0) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_empty" "" }}
+		{{ template "_render_page" (dict "page" (index $pages 1) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 2) "position" "right" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 3) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 4) "position" "right" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 5) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_empty" "" }}
+		{{ template "_render_empty" "" }}
+		{{ template "_render_page" (dict "page" (index $pages 6) "position" "right" "isBeilage" $isBeilage) }}
+		{{ template "_render_page" (dict "page" (index $pages 7) "position" "left" "isBeilage" $isBeilage) }}
+		{{ template "_render_empty" "" }}
+	{{ else }}
+		<!-- Fallback: side by side layout for other page counts -->
+		{{ range $index, $page := $pages }}
+			{{ if eq (mod $index 2) 0 }}
+				{{ template "_render_page" (dict "page" $page "position" "left" "isBeilage" $isBeilage) }}
+			{{ else }}
+				{{ template "_render_page" (dict "page" $page "position" "right" "isBeilage" $isBeilage) }}
+			{{ end }}
+		{{ end }}
+	{{ end }}
+{{ end }}
+
+<!-- Page rendering template -->
+{{ define "_render_page" }}
+	{{ $page := .page }}
+	{{ $position := .position }}
+	{{ $isBeilage := .isBeilage }}
+	{{ $isLeft := eq $position "left" }}
+	{{ $borderColor := "border-slate-200" }}
+	{{ $hoverColor := "hover:border-slate-300" }}
+	{{ $bgColor := "bg-blue-50" }}
+	{{ $idPrefix := "page" }}
+	{{ $linkPrefix := "" }}
+
+	{{ if $isBeilage }}
+		{{ $borderColor = "border-amber-200" }}
+		{{ $hoverColor = "hover:border-amber-300" }}
+		{{ $bgColor = "bg-amber-50" }}
+		{{ $idPrefix = "beilage-1-page" }}
+		{{ $linkPrefix = "#beilage-1-page-" }}
+	{{ else }}
+		{{ $linkPrefix = "#page-" }}
+	{{ end }}
+
+	<div class="newspaper-page-container" id="{{ $idPrefix }}-{{ $page.PageNumber }}">
+		<!-- Page indicator row -->
+		<div class="flex {{ if $isLeft }}justify-end{{ else }}justify-start{{ end }} items-center gap-1 mb-2">
+			{{ if $isLeft }}
+				<!-- Left page: buttons then page number -->
+				<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this{{ if $isBeilage }}, true{{ end }})" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+					<i class="ri-share-line text-xs"></i>
+				</button>
+				<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+					<i class="ri-file-text-line text-xs"></i>
+				</button>
+				<span class="page-indicator text-sm font-bold text-slate-600 {{ $bgColor }} px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+					{{ $page.PageNumber }}
+					<i class="ri-file-text-line {{ if $isBeilage }}text-amber-600{{ else }}text-black{{ end }} text-sm scale-x-[-1]"></i>
+				</span>
+			{{ else }}
+				<!-- Right page: page number then buttons -->
+				<span class="page-indicator text-sm font-bold text-slate-600 {{ $bgColor }} px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1" data-page="{{ $page.PageNumber }}">
+					<i class="ri-file-text-line {{ if $isBeilage }}text-amber-600{{ else }}text-black{{ end }} text-sm"></i>
+					{{ $page.PageNumber }}
+				</span>
+				<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this{{ if $isBeilage }}, true{{ end }})" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
+					<i class="ri-share-line text-xs"></i>
+				</button>
+				<button onclick="generatePageCitation('{{ $page.PageNumber }}', this)" class="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Zitation für Seite {{ $page.PageNumber }} generieren">
+					<i class="ri-file-text-line text-xs"></i>
+				</button>
+			{{ end }}
+		</div>
+		<div class="single-page bg-white p-4 rounded border {{ $borderColor }} {{ $hoverColor }} transition-colors duration-200">
+			<img src="{{ $page.ImagePath }}" alt="{{ if $isBeilage }}Beilage 1, {{ end }}Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-pointer rounded-sm hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+		</div>
+	</div>
+{{ end }}
+
+<!-- Empty space template -->
+{{ define "_render_empty" }}
+	<div class="newspaper-empty-space"></div>
+{{ end }}

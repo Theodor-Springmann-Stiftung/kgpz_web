@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -127,15 +128,15 @@ func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
 	slices.Sort(ppi.Pages)
 	slices.Sort(ppa.Pages)
 
-	// Group consecutive continuation pieces
-	sivm.Pieces = CreateIndividualPagesWithMetadata(ppi, lib)
-	sivm.AdditionalPieces = CreateIndividualPagesWithMetadata(ppa, lib)
-
 	images, err := LoadIssueImages(*issue)
 	if err != nil {
 		return nil, err
 	}
 	sivm.Images = images
+
+	// Group consecutive continuation pieces, including empty pages from images
+	sivm.Pieces = CreateIndividualPagesWithMetadata(ppi, lib)
+	sivm.AdditionalPieces = CreateIndividualPagesWithMetadataIncludingEmpty(ppa, lib, images.AdditionalPages)
 	sivm.HasBeilageButton = len(sivm.AdditionalPieces.Pages) > 0
 
 	return &sivm, nil
@@ -218,6 +219,54 @@ func pagesHaveIdenticalContent(items1, items2 []PieceByIssue) bool {
 	return true
 }
 
+// sortPiecesOnPage sorts pieces on a given page according to the ordering rules:
+// 1. Continuation pieces come first
+// 2. Within the same category (continuation/new), pieces are sorted by Order field if > 0
+// 3. If no Order field or Order = 0, maintain current order
+func sortPiecesOnPage(pieces []PieceByIssue, pageNumber int) []PieceByIssue {
+	if len(pieces) <= 1 {
+		return pieces
+	}
+
+	// Create a copy to avoid modifying the original slice
+	sorted := make([]PieceByIssue, len(pieces))
+	copy(sorted, pieces)
+
+	sort.Slice(sorted, func(i, j int) bool {
+		pieceA := sorted[i]
+		pieceB := sorted[j]
+
+		// Rule 1: Continuation pieces come before new pieces
+		if pieceA.IsContinuation != pieceB.IsContinuation {
+			return pieceA.IsContinuation // true comes before false
+		}
+
+		// Rule 2: Within same category, use Order field if both have valid orders
+		orderA := pieceA.Reference.Order
+		orderB := pieceB.Reference.Order
+
+		// Both have valid orders (> 0)
+		if orderA > 0 && orderB > 0 {
+			return orderA < orderB
+		}
+
+		// Only A has valid order
+		if orderA > 0 && orderB <= 0 {
+			return true
+		}
+
+		// Only B has valid order
+		if orderA <= 0 && orderB > 0 {
+			return false
+		}
+
+		// Rule 3: Neither has valid order, maintain original order
+		// This is automatically handled by the stable sort
+		return false
+	})
+
+	return sorted
+}
 
 // CreateIndividualPagesWithMetadata creates individual page entries with metadata
 func CreateIndividualPagesWithMetadata(pieces PiecesByPage, lib *xmlmodels.Library) IndividualPiecesByPage {
@@ -233,30 +282,20 @@ func CreateIndividualPagesWithMetadata(pieces PiecesByPage, lib *xmlmodels.Libra
 	// Process each page individually
 	for _, page := range pieces.Pages {
 		pageItems := pieces.Items[page]
+
+		// Sort pieces according to the ordering rules
+		sortedPageItems := sortPiecesOnPage(pageItems, page)
+
 		individualItems := []IndividualPieceByIssue{}
 
-		// First add all continuation pieces
-		for _, piece := range pageItems {
-			if piece.IsContinuation {
-				individualPiece := IndividualPieceByIssue{
-					PieceByIssue: piece,
-					IssueRefs:    getPieceIssueRefs(piece.Piece, lib),
-					PageIcon:     determinePageIcon(page, pieces.Pages),
-				}
-				individualItems = append(individualItems, individualPiece)
+		// Convert sorted pieces to individual pieces
+		for _, piece := range sortedPageItems {
+			individualPiece := IndividualPieceByIssue{
+				PieceByIssue: piece,
+				IssueRefs:    getPieceIssueRefs(piece.Piece, lib),
+				PageIcon:     determinePageIcon(page, pieces.Pages),
 			}
-		}
-
-		// Then add all non-continuation pieces
-		for _, piece := range pageItems {
-			if !piece.IsContinuation {
-				individualPiece := IndividualPieceByIssue{
-					PieceByIssue: piece,
-					IssueRefs:    getPieceIssueRefs(piece.Piece, lib),
-					PageIcon:     determinePageIcon(page, pieces.Pages),
-				}
-				individualItems = append(individualItems, individualPiece)
-			}
+			individualItems = append(individualItems, individualPiece)
 		}
 
 		if len(individualItems) > 0 {
@@ -269,6 +308,67 @@ func CreateIndividualPagesWithMetadata(pieces PiecesByPage, lib *xmlmodels.Libra
 	return individual
 }
 
+// CreateIndividualPagesWithMetadataIncludingEmpty creates individual page entries with metadata, including empty pages that have images
+func CreateIndividualPagesWithMetadataIncludingEmpty(pieces PiecesByPage, lib *xmlmodels.Library, imagePages map[int][]IssuePage) IndividualPiecesByPage {
+	individual := IndividualPiecesByPage{
+		Items: make(map[int][]IndividualPieceByIssue),
+		Pages: []int{},
+	}
+
+	// Collect all page numbers that should be included (from pieces and from images)
+	allPageNumbers := make(map[int]bool)
+
+	// Add pages with content
+	for _, page := range pieces.Pages {
+		allPageNumbers[page] = true
+	}
+
+	// Add pages with images (even if they have no content)
+	for _, pages := range imagePages {
+		for _, page := range pages {
+			if page.Available {
+				allPageNumbers[page.PageNumber] = true
+			}
+		}
+	}
+
+	// Create sorted list of all page numbers for icon determination
+	allPagesList := make([]int, 0, len(allPageNumbers))
+	for pageNum := range allPageNumbers {
+		allPagesList = append(allPagesList, pageNum)
+	}
+	slices.Sort(allPagesList)
+
+	// Process each page
+	for pageNum := range allPageNumbers {
+		pageItems := pieces.Items[pageNum]
+
+		if len(pageItems) > 0 {
+			// Page has content - process normally
+			sortedPageItems := sortPiecesOnPage(pageItems, pageNum)
+			individualItems := []IndividualPieceByIssue{}
+
+			for _, piece := range sortedPageItems {
+				individualPiece := IndividualPieceByIssue{
+					PieceByIssue: piece,
+					IssueRefs:    getPieceIssueRefs(piece.Piece, lib),
+					PageIcon:     determinePageIcon(pageNum, allPagesList),
+				}
+				individualItems = append(individualItems, individualPiece)
+			}
+
+			individual.Items[pageNum] = individualItems
+		} else {
+			// Page is empty but has images - create empty entry
+			individual.Items[pageNum] = []IndividualPieceByIssue{}
+		}
+
+		individual.Pages = append(individual.Pages, pageNum)
+	}
+
+	slices.Sort(individual.Pages)
+	return individual
+}
 
 // determinePageIcon determines the icon type for a page based on newspaper layout positioning
 func determinePageIcon(pageNum int, allPages []int) string {

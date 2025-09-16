@@ -33,6 +33,7 @@ type IssueRef struct {
 	Von     int      `xml:"von,attr"`
 	Bis     int      `xml:"bis,attr"`
 	Beilage int      `xml:"beilage,attr"`
+	Order   int      `xml:"order,attr"`
 	DateAttributes
 	Reference // Nicht im Schema
 }

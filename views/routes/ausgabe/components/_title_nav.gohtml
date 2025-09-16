@@ -40,7 +40,7 @@
 		</div>
 		<div class="text-base font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded">
 			<span class="pr-1">{{ printf "%.2s" (WeekdayName $date.Weekday) }}</span>
-			<b>{{ $date.Day }}. {{ $date.MonthNameShort }}</b>
+			{{ $date.Day }}. {{ $date.MonthNameShort }}. <b>{{ $date.Year }}</b>
 		</div>
 	</div>
 </div>

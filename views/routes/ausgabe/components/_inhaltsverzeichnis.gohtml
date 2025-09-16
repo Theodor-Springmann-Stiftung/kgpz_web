@@ -10,8 +10,8 @@
 			</div>
 			{{ range $page := $model.Pieces.Pages }}
 				{{ $pageItems := (index $model.Pieces.Items $page) }}
-				{{ $firstItem := index $pageItems 0 }}
-
+				{{ $firstItem := "" }}
+				{{ if $pageItems }}{{ $firstItem = index $pageItems 0 }}{{ end }}
 
 				<!-- Individual page entry -->
 				<div
@@ -19,16 +19,16 @@
 					data-page-container="{{ $page }}">
 					<div class="flex items-center justify-between gap-2 mb-2">
 						<div class="flex items-center gap-2">
-							<span class="icon-container">{{ PageIcon $firstItem.PageIcon }}</span>
+							<span class="icon-container">{{ if $firstItem }}{{ PageIcon $firstItem.PageIcon }}{{ else }}{{ PageIcon "first" }}{{ end }}</span>
 							<a
 								href="#page-{{ $page }}"
-								class="page-number-inhalts font-bold text-slate-700 bg-blue-50 px-2 py-1 rounded text-sm transition-colors duration-200 hover:bg-blue-100 no-underline"
+								class="page-number-inhalts font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded text-sm transition-colors duration-200 hover:bg-slate-200 no-underline"
 								data-page-number="{{ $page }}">
 								<span class="page-label">{{ $page }}</span>
 							</a>
 						</div>
 						<button
-							class="page-permalink-btn text-slate-400 hover:text-blue-600 text-xs p-1 rounded hover:bg-blue-50 transition-colors duration-200"
+							class="page-permalink-btn text-slate-400 hover:text-slate-700 text-xs p-1 rounded hover:bg-slate-100 transition-colors duration-200"
 							title="Link zu dieser Seite kopieren"
 							onclick="copyPagePermalink('{{ $page }}', this)"
 							data-page="{{ $page }}">
@@ -38,7 +38,8 @@
 
 					<!-- Content area -->
 					<div class="space-y-0">
-						{{ range $individualPiece := $pageItems }}
+						{{ if $pageItems }}
+							{{ range $individualPiece := $pageItems }}
 							<div
 								class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200 {{ if $individualPiece.PieceByIssue.IsContinuation }}
 									continuation-entry
@@ -57,7 +58,7 @@
 								{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
 									<div class="mt-1 pt-1 border-t border-slate-100">
 										<div class="flex items-center flex-wrap gap-1">
-											<i class="ri-links-line text-blue-500 text-sm mr-1"></i>
+											<i class="ri-links-line text-slate-600 text-sm mr-1"></i>
 											{{ range $issue := $individualPiece.IssueRefs }}
 												<a
 													href="/{{- $issue.When -}}/{{- $issue.Nr -}}{{- if $issue.Von -}}
@@ -67,7 +68,7 @@
 															#page-{{ $issue.Von }}
 														{{- end -}}
 													{{- end -}}"
-													class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium hover:bg-blue-100 transition-colors duration-150"
+													class="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-medium hover:bg-slate-200 transition-colors duration-150"
 													{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
 														$model.Datum.When.Year)
 													-}}
@@ -81,6 +82,14 @@
 										</div>
 									</div>
 								{{ end }}
+							</div>
+						{{ end }}
+						{{ else }}
+							<!-- Empty page indicator -->
+							<div class="inhalts-entry py-1 px-0">
+								<div class="entry-description leading-snug mb-1">
+									<span class="italic text-slate-500">Leer</span>
+								</div>
 							</div>
 						{{ end }}
 					</div>
@@ -97,10 +106,17 @@
 				<i class="ri-attachment-line text-amber-600"></i>
 				<h3 class="text-base font-semibold text-slate-800">Beilage</h3>
 			</div>
-			{{ range $page := $model.AdditionalPieces.Pages }}
+			{{ range $pageIndex, $page := $model.AdditionalPieces.Pages }}
 				{{ $pageItems := (index $model.AdditionalPieces.Items $page) }}
-				{{ $firstItem := index $pageItems 0 }}
-
+				{{ $firstItem := "" }}
+				{{ if $pageItems }}{{ $firstItem = index $pageItems 0 }}{{ end }}
+				{{ $allPages := $model.AdditionalPieces.Pages }}
+				{{ $pageCount := len $allPages }}
+				{{ $iconType := "first" }}
+				{{ if eq $pageIndex 0 }}{{ $iconType = "first" }}
+				{{ else if eq $pageIndex (sub $pageCount 1) }}{{ $iconType = "last" }}
+				{{ else if eq (mod $pageIndex 2) 1 }}{{ $iconType = "even" }}
+				{{ else }}{{ $iconType = "odd" }}{{ end }}
 
 				<!-- Individual beilage page entry -->
 				<div
@@ -109,7 +125,7 @@
 					data-beilage="true">
 					<div class="flex items-center justify-between gap-2 mb-2">
 						<div class="flex items-center gap-2">
-							<span class="icon-container">{{ PageIcon $firstItem.PageIcon }}</span>
+							<span class="icon-container">{{ if $firstItem }}{{ PageIcon $firstItem.PageIcon }}{{ else }}{{ PageIcon $iconType }}{{ end }}</span>
 							<a
 								href="#beilage-1-page-{{ $page }}"
 								class="page-number-inhalts font-bold text-slate-700 bg-amber-50 px-2 py-1 rounded text-sm transition-colors duration-200 hover:bg-amber-100 no-underline"
@@ -129,7 +145,8 @@
 
 					<!-- Content area -->
 					<div class="space-y-0">
-						{{ range $individualPiece := $pageItems }}
+						{{ if $pageItems }}
+							{{ range $individualPiece := $pageItems }}
 							<div
 								class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200 {{ if $individualPiece.PieceByIssue.IsContinuation }}
 									continuation-entry
@@ -148,7 +165,7 @@
 								{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
 									<div class="mt-1 pt-1 border-t border-slate-100">
 										<div class="flex items-center flex-wrap gap-1">
-											<i class="ri-links-line text-blue-500 text-sm mr-1"></i>
+											<i class="ri-links-line text-slate-600 text-sm mr-1"></i>
 											{{ range $issue := $individualPiece.IssueRefs }}
 												<a
 													href="/{{- $issue.When -}}/{{- $issue.Nr -}}{{- if $issue.Von -}}
@@ -158,7 +175,7 @@
 															#page-{{ $issue.Von }}
 														{{- end -}}
 													{{- end -}}"
-													class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium hover:bg-blue-100 transition-colors duration-150"
+													class="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-medium hover:bg-slate-200 transition-colors duration-150"
 													{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
 														$model.Datum.When.Year)
 													-}}
@@ -172,6 +189,14 @@
 										</div>
 									</div>
 								{{ end }}
+							</div>
+						{{ end }}
+						{{ else }}
+							<!-- Empty page indicator -->
+							<div class="inhalts-entry py-1 px-0">
+								<div class="entry-description leading-snug mb-1">
+									<span class="italic text-slate-500">Leer</span>
+								</div>
 							</div>
 						{{ end }}
 					</div>
