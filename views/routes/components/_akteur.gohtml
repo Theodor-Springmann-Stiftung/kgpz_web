@@ -67,9 +67,9 @@
 						<div class="flex flex-wrap gap-1 mt-1">
 							{{ range $_, $p := $workPieces }}
 								{{ range $_, $issue := $p.Item.IssueRefs }}
-									<a href="/{{ $issue.When }}/{{ $issue.Nr }}{{ if $issue.Von }}{{ if $issue.Beilage }}#beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}{{ else }}#page-{{ $issue.Von }}{{ end }}{{ end }}" class="inline-block bg-green-50 hover:bg-green-100 text-green-700 hover:text-green-800 px-2 py-1 rounded text-sm transition-colors">
-										{{ $issue.Nr }}/{{ $issue.When }}{{ if $issue.Von }} [S. {{ $issue.Von }}{{ if $issue.Bis }}-{{ $issue.Bis }}{{ end }}]{{ end }}
-									</a>
+									<span class="inline-block bg-green-50 hover:bg-green-100 text-green-700 hover:text-green-800 px-2 py-1 rounded text-sm transition-colors">
+										{{ template "_citation" $issue }}
+									</span>
 								{{ end }}
 							{{ end }}
 						</div>
@@ -87,9 +87,9 @@
 				<div class="flex flex-wrap gap-1 mt-1">
 					{{ range $_, $p := $pieces }}
 						{{ range $_, $issue := $p.Item.IssueRefs }}
-							<a href="/{{ $issue.When }}/{{ $issue.Nr }}{{ if $issue.Von }}{{ if $issue.Beilage }}#beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}{{ else }}#page-{{ $issue.Von }}{{ end }}{{ end }}" class="inline-block bg-green-50 hover:bg-green-100 text-green-700 hover:text-green-800 px-2 py-1 rounded text-sm transition-colors">
-								{{ $issue.Nr }}/{{ $issue.When }}{{ if $issue.Von }} [S. {{ $issue.Von }}{{ if $issue.Bis }}-{{ $issue.Bis }}{{ end }}]{{ end }}
-							</a>
+							<span class="inline-block bg-green-50 hover:bg-green-100 text-green-700 hover:text-green-800 px-2 py-1 rounded text-sm transition-colors">
+								{{ template "_citation" $issue }}
+							</span>
 						{{ end }}
 					{{ end }}
 				</div>

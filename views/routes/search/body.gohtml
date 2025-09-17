@@ -105,7 +105,7 @@
 							{{ range $_, $p := $pieces }}
 								{{- range $_, $i := $p.Item.IssueRefs -}}
 									<div>
-										<a href="/{{ $i.When }}/{{ $i.Nr }}{{ if $i.Von }}{{ if $i.Beilage }}#beilage-{{ $i.Beilage }}-page-{{ $i.Von }}{{ else }}#page-{{ $i.Von }}{{ end }}{{ end }}">{{ $i.Nr }}/{{ $i.When }}</a>
+										{{ template "_citation" $i }}
 									</div>
 								{{- end -}}
 							{{ end }}

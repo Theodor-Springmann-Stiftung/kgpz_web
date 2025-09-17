@@ -73,35 +73,16 @@
 														{{ end }}">
 														<span class="text-black text-xs font-bold">{{ add $index 1 }}</span>
 														<span class="w-px h-3 bg-slate-300 mx-1"></span>
-														<a
-															href="/{{- $issue.When -}}/{{- $issue.Nr -}}{{- if $issue.Von -}}
-																{{- if $issue.Beilage -}}
-																	#beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}
-																{{- else -}}
-																	#page-{{ $issue.Von }}
-																{{- end -}}
-															{{- end -}}"
-															class="text-slate-700 no-underline hover:text-slate-900 {{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
-																text-red-700 pointer-events-none
-															{{ end }}"
-															{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
-																$model.Datum.When.Year)
-															-}}
-																aria-current="page"
-															{{ end }}>
-															{{- $issueKey := printf "%d-%d" $issue.When.Year $issue.Nr -}}
-															{{- $issueData := GetIssue $issueKey -}}
-															{{- if $issueData -}}
-																{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}
-															{{- else -}}
-																{{ $issue.When.Year }} Nr.
-																{{ $issue.Nr }}
-															{{- end -}}
-															{{- if $issue.Von }}
-																S.
-																{{ $issue.Von }}
-															{{- end -}}
-														</a>
+														<span class="{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
+															text-red-700 pointer-events-none
+														{{ end }}"
+														{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
+															$model.Datum.When.Year)
+														-}}
+															aria-current="page"
+														{{ end }}>
+															{{ template "_citation" $issue }}
+														</span>
 													</div>
 												{{ end }}
 											</div>
@@ -210,35 +191,16 @@
 														{{ end }}">
 														<span class="text-black text-xs font-bold">{{ add $index 1 }}</span>
 														<span class="w-px h-3 bg-slate-300 mx-1"></span>
-														<a
-															href="/{{- $issue.When -}}/{{- $issue.Nr -}}{{- if $issue.Von -}}
-																{{- if $issue.Beilage -}}
-																	#beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}
-																{{- else -}}
-																	#page-{{ $issue.Von }}
-																{{- end -}}
-															{{- end -}}"
-															class="text-slate-700 no-underline hover:text-slate-900 {{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
-																text-red-700 pointer-events-none
-															{{ end }}"
-															{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
-																$model.Datum.When.Year)
-															-}}
-																aria-current="page"
-															{{ end }}>
-															{{- $issueKey := printf "%d-%d" $issue.When.Year $issue.Nr -}}
-															{{- $issueData := GetIssue $issueKey -}}
-															{{- if $issueData -}}
-																{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}
-															{{- else -}}
-																{{ $issue.When.Year }} Nr.
-																{{ $issue.Nr }}
-															{{- end -}}
-															{{- if $issue.Von }}
-																S.
-																{{ $issue.Von }}
-															{{- end -}}
-														</a>
+														<span class="{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
+															text-red-700 pointer-events-none
+														{{ end }}"
+														{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
+															$model.Datum.When.Year)
+														-}}
+															aria-current="page"
+														{{ end }}>
+															{{ template "_citation" $issue }}
+														</span>
 													</div>
 												{{ end }}
 											</div>

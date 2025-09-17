@@ -1,0 +1,68 @@
+{{- /*
+    Global citation component for resolving IssueRef elements
+    Usage: {{ template "_citation" $issueRef }}
+
+    Input: xmlmodels.IssueRef with fields:
+    - .Nr (int): Issue number
+    - .Von (int): Starting page
+    - .Bis (int): Ending page (optional)
+    - .Beilage (int): Beilage number (optional)
+    - .When (DateAttributes): Date information
+
+    Outputs: citation text + link with minimal formatting
+    Automatically detects current page and styles accordingly
+*/ -}}
+
+{{- $issue := . -}}
+{{- $issueKey := printf "%d-%d" $issue.When.Year $issue.Nr -}}
+{{- $issueData := GetIssue $issueKey -}}
+{{- $url := printf "/%s/%d" $issue.When $issue.Nr -}}
+<a href="{{- $url -}}{{- if $issue.Von -}}
+{{- if $issue.Beilage -}}
+#beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}
+{{- else -}}
+#page-{{ $issue.Von }}
+{{- end -}}
+{{- end -}}"
+   class="citation-link text-slate-700 no-underline hover:text-slate-900"
+   data-citation-url="{{ $url }}">
+{{- if $issueData -}}
+{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}
+{{- else -}}
+{{ $issue.When.Year }} Nr. {{ $issue.Nr }}
+{{- end -}}
+{{- if $issue.Von }} S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) -}}
+-{{ $issue.Bis }}
+{{- end -}}
+{{- end -}}
+</a>
+
+<script>
+// Check if citation links point to current page (without hash)
+function updateCitationLinks() {
+    const currentPath = window.location.pathname;
+    const citationLinks = document.querySelectorAll('.citation-link[data-citation-url]');
+
+    citationLinks.forEach(link => {
+        const citationUrl = link.getAttribute('data-citation-url');
+        if (citationUrl === currentPath) {
+            // Style as current page: red text, no underline, not clickable
+            link.classList.remove('text-slate-700', 'hover:text-slate-900');
+            link.classList.add('text-red-700', 'pointer-events-none');
+            link.setAttribute('aria-current', 'page');
+        } else {
+            // Reset to default styling for non-current pages
+            link.classList.remove('text-red-700', 'pointer-events-none');
+            link.classList.add('text-slate-700', 'hover:text-slate-900');
+            link.removeAttribute('aria-current');
+        }
+    });
+}
+
+// Run on initial load
+document.addEventListener('DOMContentLoaded', updateCitationLinks);
+
+// Run on HTMX page swaps
+document.addEventListener('htmx:afterSwap', updateCitationLinks);
+document.addEventListener('htmx:afterSettle', updateCitationLinks);
+</script>
