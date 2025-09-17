@@ -13,13 +13,20 @@
 				{{ $firstItem := "" }}
 				{{ if $pageItems }}{{ $firstItem = index $pageItems 0 }}{{ end }}
 
+
 				<!-- Individual page entry -->
 				<div
 					class="mb-6 first:mb-0 pl-4 border-l-4 border-slate-300 page-entry"
 					data-page-container="{{ $page }}">
 					<div class="flex items-center justify-between gap-2 mb-2">
 						<div class="flex items-center gap-2">
-							<span class="icon-container">{{ if $firstItem }}{{ PageIcon $firstItem.PageIcon }}{{ else }}{{ PageIcon "first" }}{{ end }}</span>
+							<span class="icon-container"
+								>{{ if $firstItem }}
+									{{ PageIcon $firstItem.PageIcon }}
+								{{ else }}
+									{{ PageIcon "first" }}
+								{{ end }}</span
+							>
 							<a
 								href="#page-{{ $page }}"
 								class="page-number-inhalts font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded text-sm transition-colors duration-200 hover:bg-slate-200 no-underline"
@@ -40,50 +47,68 @@
 					<div class="space-y-0">
 						{{ if $pageItems }}
 							{{ range $individualPiece := $pageItems }}
-							<div
-								class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200 {{ if $individualPiece.PieceByIssue.IsContinuation }}
-									continuation-entry
-								{{ end }}"
-								data-page="{{ $page }}"
-								{{ if $individualPiece.PieceByIssue.IsContinuation }}
-									data-is-continuation="true"
-								{{ end }}
-								style="{{ if $individualPiece.PieceByIssue.IsContinuation }}
-									display: none;
-								{{ end }}">
-								{{ template "_inhaltsverzeichnis_eintrag" $individualPiece.PieceByIssue }}
+								<div
+									class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200 {{ if $individualPiece.PieceByIssue.IsContinuation }}
+										continuation-entry
+									{{ end }}"
+									data-page="{{ $page }}"
+									{{ if $individualPiece.PieceByIssue.IsContinuation }}
+										data-is-continuation="true"
+									{{ end }}
+									style="{{ if $individualPiece.PieceByIssue.IsContinuation }}
+										display: none;
+									{{ end }}">
+									{{ template "_inhaltsverzeichnis_eintrag" $individualPiece.PieceByIssue }}
 
 
-								<!-- Links zu anderen Teilen: -->
-								{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
-									<div class="mt-1 pt-1 border-t border-slate-100">
-										<div class="flex items-center flex-wrap gap-1">
-											<i class="ri-links-line text-slate-600 text-sm mr-1"></i>
-											{{ range $issue := $individualPiece.IssueRefs }}
-												<a
-													href="/{{- $issue.When -}}/{{- $issue.Nr -}}{{- if $issue.Von -}}
-														{{- if $issue.Beilage -}}
-															#beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}
-														{{- else -}}
-															#page-{{ $issue.Von }}
-														{{- end -}}
-													{{- end -}}"
-													class="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-medium hover:bg-slate-200 transition-colors duration-150"
-													{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
-														$model.Datum.When.Year)
-													-}}
-														aria-current="page"
-													{{ end }}>
-													<i class="ri-calendar-line text-xs"></i>
-													{{- $issue.When.Year }} Nr.
-													{{ $issue.Nr -}}
-												</a>
-											{{ end }}
+									<!-- Links zu anderen Teilen: -->
+									{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
+										<div class="mt-1 pt-1 border-t border-slate-100">
+											<div class="flex items-center flex-wrap gap-1">
+												<i class="ri-links-line text-slate-600 text-sm mr-1"></i>
+												{{ range $index, $issue := $individualPiece.IssueRefs }}
+													<div
+														class="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-md text-xs font-medium hover:bg-slate-200 transition-colors duration-150 {{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
+															bg-red-100 text-red-700
+														{{ end }}">
+														<span class="text-black text-xs font-bold">{{ add $index 1 }}</span>
+														<span class="w-px h-3 bg-slate-300 mx-1"></span>
+														<a
+															href="/{{- $issue.When -}}/{{- $issue.Nr -}}{{- if $issue.Von -}}
+																{{- if $issue.Beilage -}}
+																	#beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}
+																{{- else -}}
+																	#page-{{ $issue.Von }}
+																{{- end -}}
+															{{- end -}}"
+															class="text-slate-700 no-underline hover:text-slate-900 {{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
+																text-red-700 pointer-events-none
+															{{ end }}"
+															{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
+																$model.Datum.When.Year)
+															-}}
+																aria-current="page"
+															{{ end }}>
+															{{- $issueKey := printf "%d-%d" $issue.When.Year $issue.Nr -}}
+															{{- $issueData := GetIssue $issueKey -}}
+															{{- if $issueData -}}
+																{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}
+															{{- else -}}
+																{{ $issue.When.Year }} Nr.
+																{{ $issue.Nr }}
+															{{- end -}}
+															{{- if $issue.Von }}
+																S.
+																{{ $issue.Von }}
+															{{- end -}}
+														</a>
+													</div>
+												{{ end }}
+											</div>
 										</div>
-									</div>
-								{{ end }}
-							</div>
-						{{ end }}
+									{{ end }}
+								</div>
+							{{ end }}
 						{{ else }}
 							<!-- Empty page indicator -->
 							<div class="inhalts-entry py-1 px-0">
@@ -113,10 +138,16 @@
 				{{ $allPages := $model.AdditionalPieces.Pages }}
 				{{ $pageCount := len $allPages }}
 				{{ $iconType := "first" }}
-				{{ if eq $pageIndex 0 }}{{ $iconType = "first" }}
-				{{ else if eq $pageIndex (sub $pageCount 1) }}{{ $iconType = "last" }}
-				{{ else if eq (mod $pageIndex 2) 1 }}{{ $iconType = "even" }}
-				{{ else }}{{ $iconType = "odd" }}{{ end }}
+				{{ if eq $pageIndex 0 }}
+					{{ $iconType = "first" }}
+				{{ else if eq $pageIndex (sub $pageCount 1) }}
+					{{ $iconType = "last" }}
+				{{ else if eq (mod $pageIndex 2) 1 }}
+					{{ $iconType = "even" }}
+				{{ else }}
+					{{ $iconType = "odd" }}
+				{{ end }}
+
 
 				<!-- Individual beilage page entry -->
 				<div
@@ -125,7 +156,13 @@
 					data-beilage="true">
 					<div class="flex items-center justify-between gap-2 mb-2">
 						<div class="flex items-center gap-2">
-							<span class="icon-container">{{ if $firstItem }}{{ PageIcon $firstItem.PageIcon }}{{ else }}{{ PageIcon $iconType }}{{ end }}</span>
+							<span class="icon-container"
+								>{{ if $firstItem }}
+									{{ PageIcon $firstItem.PageIcon }}
+								{{ else }}
+									{{ PageIcon $iconType }}
+								{{ end }}</span
+							>
 							<a
 								href="#beilage-1-page-{{ $page }}"
 								class="page-number-inhalts font-bold text-slate-700 bg-amber-50 px-2 py-1 rounded text-sm transition-colors duration-200 hover:bg-amber-100 no-underline"
@@ -147,50 +184,68 @@
 					<div class="space-y-0">
 						{{ if $pageItems }}
 							{{ range $individualPiece := $pageItems }}
-							<div
-								class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200 {{ if $individualPiece.PieceByIssue.IsContinuation }}
-									continuation-entry
-								{{ end }}"
-								data-page="{{ $page }}"
-								{{ if $individualPiece.PieceByIssue.IsContinuation }}
-									data-is-continuation="true"
-								{{ end }}
-								style="{{ if $individualPiece.PieceByIssue.IsContinuation }}
-									display: none;
-								{{ end }}">
-								{{ template "_inhaltsverzeichnis_eintrag" $individualPiece.PieceByIssue }}
+								<div
+									class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200 {{ if $individualPiece.PieceByIssue.IsContinuation }}
+										continuation-entry
+									{{ end }}"
+									data-page="{{ $page }}"
+									{{ if $individualPiece.PieceByIssue.IsContinuation }}
+										data-is-continuation="true"
+									{{ end }}
+									style="{{ if $individualPiece.PieceByIssue.IsContinuation }}
+										display: none;
+									{{ end }}">
+									{{ template "_inhaltsverzeichnis_eintrag" $individualPiece.PieceByIssue }}
 
 
-								<!-- Links zu anderen Teilen: -->
-								{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
-									<div class="mt-1 pt-1 border-t border-slate-100">
-										<div class="flex items-center flex-wrap gap-1">
-											<i class="ri-links-line text-slate-600 text-sm mr-1"></i>
-											{{ range $issue := $individualPiece.IssueRefs }}
-												<a
-													href="/{{- $issue.When -}}/{{- $issue.Nr -}}{{- if $issue.Von -}}
-														{{- if $issue.Beilage -}}
-															#beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}
-														{{- else -}}
-															#page-{{ $issue.Von }}
-														{{- end -}}
-													{{- end -}}"
-													class="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-medium hover:bg-slate-200 transition-colors duration-150"
-													{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
-														$model.Datum.When.Year)
-													-}}
-														aria-current="page"
-													{{ end }}>
-													<i class="ri-calendar-line text-xs"></i>
-													{{- $issue.When.Year }} Nr.
-													{{ $issue.Nr -}}
-												</a>
-											{{ end }}
+									<!-- Links zu anderen Teilen: -->
+									{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
+										<div class="mt-1 pt-1 border-t border-slate-100">
+											<div class="flex items-center flex-wrap gap-1">
+												<i class="ri-links-line text-slate-600 text-sm mr-1"></i>
+												{{ range $index, $issue := $individualPiece.IssueRefs }}
+													<div
+														class="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-md text-xs font-medium hover:bg-slate-200 transition-colors duration-150 {{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
+															bg-red-100 text-red-700
+														{{ end }}">
+														<span class="text-black text-xs font-bold">{{ add $index 1 }}</span>
+														<span class="w-px h-3 bg-slate-300 mx-1"></span>
+														<a
+															href="/{{- $issue.When -}}/{{- $issue.Nr -}}{{- if $issue.Von -}}
+																{{- if $issue.Beilage -}}
+																	#beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}
+																{{- else -}}
+																	#page-{{ $issue.Von }}
+																{{- end -}}
+															{{- end -}}"
+															class="text-slate-700 no-underline hover:text-slate-900 {{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
+																text-red-700 pointer-events-none
+															{{ end }}"
+															{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
+																$model.Datum.When.Year)
+															-}}
+																aria-current="page"
+															{{ end }}>
+															{{- $issueKey := printf "%d-%d" $issue.When.Year $issue.Nr -}}
+															{{- $issueData := GetIssue $issueKey -}}
+															{{- if $issueData -}}
+																{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}
+															{{- else -}}
+																{{ $issue.When.Year }} Nr.
+																{{ $issue.Nr }}
+															{{- end -}}
+															{{- if $issue.Von }}
+																S.
+																{{ $issue.Von }}
+															{{- end -}}
+														</a>
+													</div>
+												{{ end }}
+											</div>
 										</div>
-									</div>
-								{{ end }}
-							</div>
-						{{ end }}
+									{{ end }}
+								</div>
+							{{ end }}
 						{{ else }}
 							<!-- Empty page indicator -->
 							<div class="inhalts-entry py-1 px-0">

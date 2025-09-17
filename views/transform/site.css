@@ -92,4 +92,72 @@ body::before {
 	main {
 		@apply grow shrink-0;
 	}
+
+	/* =============================
+	   NEWSPAPER LAYOUT STYLES
+	   ============================= */
+
+	/* Essential styles that cannot be represented in Tailwind */
+	.newspaper-page-container {
+		margin-bottom: 2rem;
+	}
+
+	/* Page header backdrop blur */
+	.newspaper-page-container .absolute .page-indicator {
+		pointer-events: auto;
+		backdrop-filter: blur(2px);
+	}
+
+	/* Responsive header scaling */
+	@media (max-width: 768px) {
+		.newspaper-page-container .absolute {
+			transform: scale(0.9);
+		}
+	}
+
+	/* Image size constraints with Tailwind utilities */
+	.single-page {
+		display: flex;
+		justify-content: center;
+	}
+
+	.single-page .newspaper-page-image {
+		max-width: min(400px, 100%);
+		width: 100%;
+		height: auto;
+	}
+
+	/* Larger screens */
+	@media (min-width: 1280px) {
+		.single-page .newspaper-page-image {
+			max-width: min(600px, 100%);
+		}
+	}
+
+	/* Very wide screens */
+	@media (min-width: 1536px) {
+		.single-page .newspaper-page-image {
+			max-width: min(700px, 100%);
+		}
+	}
+
+	/* Mobile constraints */
+	@media (max-width: 640px) {
+		.single-page .newspaper-page-image {
+			max-width: 100%;
+		}
+	}
+
+	/* Navigation button hover styles */
+	button#prevPageBtn:hover:not([style*="display: none"]),
+	button#nextPageBtn:hover,
+	button#beilageBtn:hover {
+		background-color: rgb(209 213 219) !important; /* gray-300 */
+		color: rgb(55 65 81) !important; /* gray-700 */
+	}
+
+	button#beilageBtn:hover {
+		background-color: rgb(254 215 170) !important; /* amber-200 */
+		color: rgb(146 64 14) !important; /* amber-800 */
+	}
 }
