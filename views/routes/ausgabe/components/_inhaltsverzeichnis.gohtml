@@ -28,10 +28,11 @@
 								{{ end }}</span
 							>
 							<a
-								href="#page-{{ $page }}"
-								class="page-number-inhalts font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded text-sm transition-colors duration-200 hover:bg-slate-200 no-underline"
+								href="/{{ $model.Year }}/{{ $model.Number.No }}/{{ $page }}"
+								class="page-number-inhalts font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded text-sm transition-colors duration-200 hover:bg-slate-200 no-underline relative"
 								data-page-number="{{ $page }}">
 								<span class="page-label">{{ $page }}</span>
+								{{ template "_page_link_indicator" (dict "pageNumber" $page "targetPage" $.targetPage) }}
 							</a>
 						</div>
 						<button
@@ -73,21 +74,38 @@
 														{{ end }}">
 														<span class="text-black text-xs font-bold">{{ add $index 1 }}</span>
 														<span class="w-px h-3 bg-slate-300 mx-1"></span>
-														<span class="{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
-															text-red-700 pointer-events-none
-														{{ end }}"
-														{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
-															$model.Datum.When.Year)
-														-}}
-															aria-current="page"
-														{{ end }}>
+														<span
+															class="{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
+																text-red-700 pointer-events-none
+															{{ end }}"
+															{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
+																$model.Datum.When.Year)
+															-}}
+																aria-current="page"
+															{{ end }}>
 															{{ template "_citation" $issue }}
 														</span>
+													</div>
+												{{ end }}
+												<!-- Link zum gesamten Beitrag anzeigen -->
+												{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
+													<div
+														class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
+												hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
+												hover:border-blue-300 rounded text-xs font-medium transition-colors
+												duration-200">
+														<i class="ri-file-copy-2-line text-xs"></i>
+														<a
+															href="{{ GetPieceURL $individualPiece.PieceByIssue.Reference.When.Year $individualPiece.PieceByIssue.Reference.Nr $individualPiece.PieceByIssue.Reference.Von }}"
+															class="">
+															Alle
+														</a>
 													</div>
 												{{ end }}
 											</div>
 										</div>
 									{{ end }}
+
 								</div>
 							{{ end }}
 						{{ else }}
@@ -191,21 +209,38 @@
 														{{ end }}">
 														<span class="text-black text-xs font-bold">{{ add $index 1 }}</span>
 														<span class="w-px h-3 bg-slate-300 mx-1"></span>
-														<span class="{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
-															text-red-700 pointer-events-none
-														{{ end }}"
-														{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
-															$model.Datum.When.Year)
-														-}}
-															aria-current="page"
-														{{ end }}>
+														<span
+															class="{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year $model.Datum.When.Year) -}}
+																text-red-700 pointer-events-none
+															{{ end }}"
+															{{- if and (eq $issue.Nr $model.Number.No) (eq $issue.When.Year
+																$model.Datum.When.Year)
+															-}}
+																aria-current="page"
+															{{ end }}>
 															{{ template "_citation" $issue }}
 														</span>
+													</div>
+												{{ end }}
+												<!-- Link zum gesamten Beitrag anzeigen -->
+												{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
+													<div
+														class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
+												hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
+												hover:border-blue-300 rounded text-xs font-medium transition-colors
+												duration-200">
+														<i class="ri-file-copy-2-line text-xs"></i>
+														<a
+															href="{{ GetPieceURL $individualPiece.PieceByIssue.Reference.When.Year $individualPiece.PieceByIssue.Reference.Nr $individualPiece.PieceByIssue.Reference.Von }}"
+															class="">
+															Alle
+														</a>
 													</div>
 												{{ end }}
 											</div>
 										</div>
 									{{ end }}
+
 								</div>
 							{{ end }}
 						{{ else }}

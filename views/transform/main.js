@@ -379,8 +379,11 @@ function enlargePage(imgElement, pageNumber, isFromSpread) {
 	// Determine if this is a beilage page
 	const isBeilage = imgElement.closest('[data-beilage="true"]') !== null;
 
+	// Get target page from template data if available
+	const targetPage = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
+
 	// Show the page in the viewer
-	viewer.show(imgElement.src, imgElement.alt, pageNumber, isBeilage);
+	viewer.show(imgElement.src, imgElement.alt, pageNumber, isBeilage, targetPage);
 }
 
 function closeModal() {
@@ -659,7 +662,7 @@ function shareCurrentPage() {
 		const pageElement = activeContainer.querySelector("[data-page]");
 		if (pageElement) {
 			const pageNumber = pageElement.getAttribute("data-page");
-			pageInfo = `#page-${pageNumber}`;
+			pageInfo = `/${pageNumber}`;
 		}
 	}
 
@@ -715,11 +718,18 @@ function generateCitation() {
 
 	// Get current page and issue information
 	const issueInfo = document.title || "KGPZ";
-	const currentUrl = window.location.href;
+
+	// Use clean URL without hash fragments
+	let cleanUrl = window.location.origin + window.location.pathname;
+
+	// Remove any hash fragments that might still exist
+	if (cleanUrl.includes('#')) {
+		cleanUrl = cleanUrl.split('#')[0];
+	}
 
 	// Basic citation format (can be expanded later)
 	const currentDate = new Date().toLocaleDateString("de-DE");
-	const citation = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${issueInfo}. Digital verfügbar unter: ${currentUrl} (Zugriff: ${currentDate}).`;
+	const citation = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${issueInfo}. Digital verfügbar unter: ${cleanUrl} (Zugriff: ${currentDate}).`;
 
 	// Copy to clipboard
 	if (navigator.clipboard) {
@@ -821,14 +831,15 @@ function showSimplePopup(button, message) {
 	}, 2000);
 }
 
-// Hash navigation functions
-function scrollToPageFromHash() {
-	const hash = window.location.hash;
+// URL navigation functions
+function scrollToPageFromURL() {
 	let pageNumber = "";
 	let targetContainer = null;
 
-	if (hash.startsWith("#page-")) {
-		pageNumber = hash.replace("#page-", "");
+	// Check if URL ends with a page number (e.g., /1768/42/166)
+	const pathParts = window.location.pathname.split('/');
+	if (pathParts.length >= 4 && !isNaN(pathParts[pathParts.length - 1])) {
+		pageNumber = pathParts[pathParts.length - 1];
 
 		// Try to find exact page container first
 		targetContainer = document.getElementById(`page-${pageNumber}`);
@@ -853,14 +864,6 @@ function scrollToPageFromHash() {
 				document.getElementById(`beilage-2-page-${pageNumber}`) ||
 				document.querySelector(`[id*="beilage"][id*="page-${pageNumber}"]`);
 		}
-	} else if (hash.startsWith("#beilage-")) {
-		// Handle beilage-specific hashes like #beilage-1-page-101
-		const match = hash.match(/#beilage-(\d+)-page-(\d+)/);
-		if (match) {
-			const beilageNum = match[1];
-			pageNumber = match[2];
-			targetContainer = document.getElementById(`beilage-${beilageNum}-page-${pageNumber}`);
-		}
 	}
 
 	if (targetContainer && pageNumber) {
@@ -878,14 +881,26 @@ function scrollToPageFromHash() {
 
 // Page-specific utilities
 function copyPagePermalink(pageNumber, button, isBeilage = false) {
-	let pageFragment = "";
+	let pageUrl = "";
 	if (isBeilage) {
-		pageFragment = `#beilage-1-page-${pageNumber}`;
+		// For beilage pages, still use hash for now until beilage URLs are updated
+		pageUrl = window.location.origin + window.location.pathname + `#beilage-1-page-${pageNumber}`;
 	} else {
-		pageFragment = `#page-${pageNumber}`;
+		// For regular pages, use the new URL format
+		const pathParts = window.location.pathname.split('/');
+		if (pathParts.length >= 3) {
+			// Current URL format: /year/issue or /year/issue/page
+			// New format: /year/issue/page
+			const year = pathParts[1];
+			const issue = pathParts[2];
+			pageUrl = `${window.location.origin}/${year}/${issue}/${pageNumber}`;
+		} else {
+			// Fallback to current URL with page appended
+			pageUrl = window.location.origin + window.location.pathname + `/${pageNumber}`;
+		}
 	}
 
-	const currentUrl = window.location.origin + window.location.pathname + pageFragment;
+	const currentUrl = pageUrl;
 
 	// Copy to clipboard
 	if (navigator.clipboard) {
@@ -917,7 +932,19 @@ function copyPagePermalink(pageNumber, button, isBeilage = false) {
 function generatePageCitation(pageNumber, button) {
 	// Get current issue information
 	const issueInfo = document.title || "KGPZ";
-	const currentUrl = `${window.location.origin}${window.location.pathname}#page-${pageNumber}`;
+
+	// Generate page URL in new format
+	const pathParts = window.location.pathname.split('/');
+	let pageUrl;
+	if (pathParts.length >= 3) {
+		const year = pathParts[1];
+		const issue = pathParts[2];
+		pageUrl = `${window.location.origin}/${year}/${issue}/${pageNumber}`;
+	} else {
+		pageUrl = `${window.location.origin}${window.location.pathname}/${pageNumber}`;
+	}
+
+	const currentUrl = pageUrl;
 
 	// Basic citation format for specific page
 	const currentDate = new Date().toLocaleDateString("de-DE");
@@ -967,9 +994,8 @@ function initializeNewspaperLayout() {
 		}, 50);
 	});
 
-	// Initialize hash handling
-	scrollToPageFromHash();
-	window.addEventListener("hashchange", scrollToPageFromHash);
+	// Initialize URL-based page navigation
+	scrollToPageFromURL();
 
 	// Set up keyboard shortcuts
 	document.addEventListener("keydown", function (e) {
@@ -1065,7 +1091,7 @@ class SinglePageViewer extends HTMLElement {
 								<!-- Page indicator with icon -->
 								<div id="page-indicator" class="text-slate-800 flex items-center gap-3">
 									<span id="page-icon" class="text-lg"></span>
-									<span id="page-number" class="text-2xl font-serif font-bold"></span>
+									<span id="page-number" class="text-lg font-bold bg-blue-50 px-2 py-1 rounded flex items-center gap-1"></span>
 								</div>
 							</div>
 
@@ -1137,7 +1163,7 @@ class SinglePageViewer extends HTMLElement {
 		`;
 	}
 
-	show(imgSrc, imgAlt, pageNumber, isBeilage = false) {
+	show(imgSrc, imgAlt, pageNumber, isBeilage = false, targetPage = 0) {
 		const img = this.querySelector('#single-page-image');
 		const pageNumberSpan = this.querySelector('#page-number');
 		const pageIconSpan = this.querySelector('#page-icon');
@@ -1150,8 +1176,26 @@ class SinglePageViewer extends HTMLElement {
 		this.currentPageNumber = pageNumber;
 		this.currentIsBeilage = isBeilage;
 
-		// Set page number
-		pageNumberSpan.textContent = pageNumber;
+		// Get issue context from document title or URL
+		const issueContext = this.getIssueContext(pageNumber);
+
+		// Set page number with issue context in the box
+		pageNumberSpan.innerHTML = issueContext ? `${issueContext}, ${pageNumber}` : `${pageNumber}`;
+
+		// Add red dot if this is the target page
+		if (targetPage && pageNumber === targetPage) {
+			pageNumberSpan.style.position = 'relative';
+			// Remove any existing red dot
+			const existingDot = pageNumberSpan.querySelector('.target-page-dot');
+			if (existingDot) {
+				existingDot.remove();
+			}
+			// Add new red dot
+			const redDot = document.createElement('span');
+			redDot.className = 'target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10';
+			redDot.title = 'verlinkte Seite';
+			pageNumberSpan.appendChild(redDot);
+		}
 
 		// Set page icon based on position and type
 		const iconType = this.determinePageIconType(pageNumber, isBeilage);
@@ -1414,6 +1458,60 @@ class SinglePageViewer extends HTMLElement {
 		}
 
 		console.log('New classes:', sidebarSpacer.className);
+	}
+
+	// Extract issue context from document title, URL, or page container
+	getIssueContext(pageNumber) {
+		// Determine if we're in a piece view (beitrag) or issue view (ausgabe)
+		const path = window.location.pathname;
+		const isPieceView = path.includes('/beitrag/');
+
+		if (isPieceView) {
+			// For piece view: Return full format "1765 Nr. 2"
+			// Try to get context from page container first (for piece view)
+			const pageContainer = document.querySelector(`[data-page-container="${pageNumber}"]`);
+			if (pageContainer) {
+				// Look for existing page indicator with context
+				const pageIndicator = pageContainer.querySelector('.page-indicator');
+				if (pageIndicator) {
+					const text = pageIndicator.textContent.trim();
+					// Extract year and issue from text like "1768 Nr. 20, 79"
+					const match = text.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+					if (match) {
+						return `${match[1]} Nr. ${match[2]}`;
+					}
+				}
+			}
+
+			// Fallback: Try to extract from document title
+			const title = document.title;
+			const titleMatch = title.match(/(\d{4}).*Nr\.\s*(\d+)/);
+			if (titleMatch) {
+				return `${titleMatch[1]} Nr. ${titleMatch[2]}`;
+			}
+		} else {
+			// For issue view: Return just empty string (page number only)
+			return '';
+		}
+
+		// Final fallback: Try to extract from URL path
+		const urlMatch = path.match(/\/(\d{4})\/(\d+)/);
+		if (urlMatch) {
+			return isPieceView ? `${urlMatch[1]} Nr. ${urlMatch[2]}` : '';
+		}
+
+		// Fallback - try to get from any visible page context
+		const anyPageIndicator = document.querySelector('.page-indicator');
+		if (anyPageIndicator) {
+			const text = anyPageIndicator.textContent.trim();
+			const match = text.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+			if (match) {
+				return `${match[1]} Nr. ${match[2]}`;
+			}
+		}
+
+		// Ultimate fallback
+		return "KGPZ";
 	}
 }
 

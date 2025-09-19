@@ -1,4 +1,4 @@
-<title>KGPZ &ndash; Ausgabe {{ .model.Number.No }}&hairsp;/&hairsp;{{ .model.Year }}</title>
+<title>KGPZ &ndash; {{ if .model.Title }}{{ .model.Title }}{{ else }}Beitrag{{ end }} ({{ len .model.IssueContexts }} Teil{{ if gt (len .model.IssueContexts) 1 }}e{{ end }})</title>
 
 <script>
 // Make template data available to JavaScript
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				block: 'start'
 			});
 
-			// Highlight the page in the Inhaltsverzeichnis
+			// Highlight the page in the Inhaltsverzeichnis if function exists
 			if (typeof markCurrentPageInInhaltsverzeichnis === 'function') {
 				markCurrentPageInInhaltsverzeichnis(targetPage);
 			}

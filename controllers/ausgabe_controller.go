@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
@@ -30,6 +31,18 @@ func GetIssue(kgpz *xmlmodels.Library) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
+		// Handle optional page parameter
+		pageParam := c.Params("page")
+		var targetPage int
+		if pageParam != "" {
+			pi, err := strconv.Atoi(pageParam)
+			if err != nil || pi < 1 {
+				logging.Error(err, "Page is not a valid number")
+				return c.SendStatus(fiber.StatusNotFound)
+			}
+			targetPage = pi
+		}
+
 		issue, err := viewmodels.NewSingleIssueView(yi, di, kgpz)
 
 		if err != nil {
@@ -37,6 +50,14 @@ func GetIssue(kgpz *xmlmodels.Library) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		return c.Render("/ausgabe/", fiber.Map{"model": issue, "year": yi, "issue": di}, "fullwidth")
+		// If a page was specified, validate it exists in this issue
+		if targetPage > 0 {
+			if targetPage < issue.Issue.Von || targetPage > issue.Issue.Bis {
+				logging.Debug(fmt.Sprintf("Page %d not found in issue %d/%d (range: %d-%d)", targetPage, yi, di, issue.Issue.Von, issue.Issue.Bis))
+				return c.SendStatus(fiber.StatusNotFound)
+			}
+		}
+
+		return c.Render("/ausgabe/", fiber.Map{"model": issue, "year": yi, "issue": di, "targetPage": targetPage}, "fullwidth")
 	}
 }

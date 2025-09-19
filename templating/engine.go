@@ -53,8 +53,32 @@ func PageIcon(iconType string) template.HTML {
 		return template.HTML(`<i class="ri-file-text-line text-black text-sm" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-slate-400 text-sm"></i>`)
 	case "odd":
 		return template.HTML(`<i class="ri-file-text-line text-slate-400 text-sm" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-black text-sm" ></i>`)
+	case "single":
+		return template.HTML(`<i class="ri-file-text-line text-black text-sm"></i>`)
 	default:
 		return template.HTML(`<i class="ri-file-text-line text-black text-sm"></i>`)
+	}
+}
+
+// GetPieceURL generates a piece view URL from year, issue number, and page
+func GetPieceURL(year, issueNum, page int) string {
+	pieceID := fmt.Sprintf("%d-%03d-%03d", year, issueNum, page)
+	return "/beitrag/" + pieceID
+}
+
+// IssueContext formats an issue reference into a readable context string
+func IssueContext(issueRef interface{}) string {
+	// Handle both direct IssueRef and map formats
+	switch ref := issueRef.(type) {
+	case map[string]interface{}:
+		if year, ok := ref["year"].(int); ok {
+			if nr, ok := ref["nr"].(int); ok {
+				return fmt.Sprintf("%d Nr. %d", year, nr)
+			}
+		}
+		return "Unbekannte Ausgabe"
+	default:
+		return "Unbekannte Ausgabe"
 	}
 }
 
@@ -113,6 +137,10 @@ func (e *Engine) funcs() error {
 
 	// Page icons for ausgabe templates
 	e.AddFunc("PageIcon", PageIcon)
+
+	// Piece view helpers
+	e.AddFunc("GetPieceURL", GetPieceURL)
+	e.AddFunc("IssueContext", IssueContext)
 
 	return nil
 }

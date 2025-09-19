@@ -37,6 +37,10 @@ const (
 	AGENTS_OVERVIEW_URL   = "/akteure/:letterorid"
 	CATEGORY_OVERVIEW_URL = "/kategorie/:category"
 
+	PIECE_URL     = "/beitrag/:id"
+	PIECE_PAGE_URL = "/beitrag/:id/:page"
+	PAGE_JUMP_URL = "/jump/:year/:page"
+	PAGE_JUMP_FORM_URL = "/jump"
 	ISSSUE_URL    = "/:year/:issue/:page?"
 	ADDITIONS_URL = "/:year/:issue/beilage/:page?"
 )
@@ -147,6 +151,12 @@ func (k *KGPZ) Routes(srv *fiber.App) error {
 	srv.Get(PLACE_OVERVIEW_URL, controllers.GetPlace(k.Library))
 	srv.Get(CATEGORY_OVERVIEW_URL, controllers.GetCategory(k.Library))
 	srv.Get(AGENTS_OVERVIEW_URL, controllers.GetAgents(k.Library))
+	srv.Get(PIECE_PAGE_URL, controllers.GetPieceWithPage(k.Library))
+	srv.Get(PIECE_URL, controllers.GetPiece(k.Library))
+
+	// Page jump routes for direct navigation
+	srv.Get(PAGE_JUMP_URL, controllers.GetPageJump(k.Library))
+	srv.Post(PAGE_JUMP_FORM_URL, controllers.GetPageJumpForm(k.Library))
 
 	// TODO: YEAR_OVERVIEW_URL being /:year is a bad idea, since it captures basically everything,
 	// probably creating problems with static files, and also in case we add a front page later.

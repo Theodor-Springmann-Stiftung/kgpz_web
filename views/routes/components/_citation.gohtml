@@ -21,7 +21,7 @@
 {{- if $issue.Beilage -}}
 #beilage-{{ $issue.Beilage }}-page-{{ $issue.Von }}
 {{- else -}}
-#page-{{ $issue.Von }}
+/{{ $issue.Von }}
 {{- end -}}
 {{- end -}}"
    class="citation-link text-slate-700 no-underline hover:text-slate-900"
@@ -45,7 +45,28 @@ function updateCitationLinks() {
 
     citationLinks.forEach(link => {
         const citationUrl = link.getAttribute('data-citation-url');
+        let isCurrentPage = false;
+
+        // Check for exact match
         if (citationUrl === currentPath) {
+            isCurrentPage = true;
+        } else {
+            // Check if current path is an issue with page number that matches this citation
+            const currentPathMatch = currentPath.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/);
+            const citationUrlMatch = citationUrl.match(/^\/(\d{4})\/(\d+)$/);
+
+            if (currentPathMatch && citationUrlMatch) {
+                const [, currentYear, currentIssue, currentPage] = currentPathMatch;
+                const [, citationYear, citationIssue] = citationUrlMatch;
+
+                // If year and issue match, this citation refers to the current issue
+                if (currentYear === citationYear && currentIssue === citationIssue) {
+                    isCurrentPage = true;
+                }
+            }
+        }
+
+        if (isCurrentPage) {
             // Style as current page: red text, no underline, not clickable
             link.classList.remove('text-slate-700', 'hover:text-slate-900');
             link.classList.add('text-red-700', 'pointer-events-none');

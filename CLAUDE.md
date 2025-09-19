@@ -46,6 +46,8 @@ go fmt ./...
 go vet ./...
 ```
 
+**Note**: The project maintainer handles all Go compilation, testing, and error reporting. Claude Code should not run Go build commands or tests - any Go-related errors will be reported directly by the maintainer.
+
 ### Frontend Assets (from views/ directory)
 ```bash
 cd views/
@@ -124,6 +126,8 @@ views/
 │   ├── kategorie/         # Category pages
 │   ├── kontakt/           # Contact pages
 │   ├── ort/               # Places pages
+│   ├── piece/             # Multi-issue piece pages
+│   │   └── components/    # Piece-specific components (_piece_inhaltsverzeichnis, _piece_sequential_layout)
 │   ├── search/            # Search pages
 │   └── zitation/          # Citation pages
 ├── assets/                # Compiled output assets
@@ -229,3 +233,209 @@ The application follows a **logic-in-Go, presentation-in-templates** approach:
 1. **First**: Add business logic to view models in Go
 2. **Second**: Create reusable template helper functions if needed
 3. **Last**: Use pre-processed data in templates for presentation only
+
+## Multi-Issue Piece View (/beitrag/)
+
+The application supports viewing pieces/articles that span multiple issues through a dedicated piece view interface that aggregates content chronologically.
+
+### URL Structure & Routing
+
+**URL Pattern**: `/beitrag/:id` where ID format is `YYYY-NNN-PPP` (year-issue-page)
+- **Example**: `/beitrag/1768-020-079` (piece starting at year 1768, issue 20, page 79)
+- **Route Definition**: `PIECE_URL = "/beitrag/:id"` in `app/kgpz.go`
+- **Controller**: `controllers.GetPiece(k.Library)` handles piece lookup and rendering
+
+### Architecture & Components
+
+**Controller** (`controllers/piece_controller.go`):
+- Parses YYYY-NNN-PPP ID format using regex pattern matching
+- Looks up pieces by year/issue/page when XML IDs aren't reliable
+- Handles piece aggregation across multiple issues
+- Returns 404 for invalid IDs or non-existent pieces
+
+**View Model** (`viewmodels/piece_view.go`):
+- `PieceVM` struct aggregates data from multiple issues
+- `AllIssueRefs []xmlmodels.IssueRef` - chronologically ordered issue references
+- `AllPages []PiecePageEntry` - sequential page data with image paths
+- Pre-processes page icons, grid layouts, and visibility flags
+- Resolves image paths using registry system
+
+**Template System** (`views/routes/piece/`):
+- `body.gohtml` - Two-column layout with Inhaltsverzeichnis and sequential pages
+- `head.gohtml` - Page metadata and title generation
+- `components/_piece_inhaltsverzeichnis.gohtml` - Table of contents with piece content
+- `components/_piece_sequential_layout.gohtml` - Chronological page display
+
+### Key Features
+
+**Multi-Issue Aggregation**:
+- Pieces spanning multiple issues are unified in a single view
+- Chronological ordering preserves reading sequence across issue boundaries
+- Issue context (year/number) displayed with each page for reference
+
+**Component Reuse**:
+- Reuses `_inhaltsverzeichnis_eintrag` template for consistent content display
+- Integrates with existing `_newspaper_layout` components for single-page viewer
+- Shares highlighting system and navigation patterns with issue view
+
+**Sequential Layout**:
+- Two-column responsive design: Inhaltsverzeichnis (1/3) + Page Layout (2/3)
+- Left-aligned page indicators with format: `[icon] YYYY Nr. XX, PageNum`
+- No grid constraints - simple sequential flow for multi-issue reading
+
+**Highlighting System Integration**:
+- Uses same intersection observer system as issue view (`main.js`)
+- Page links in Inhaltsverzeichnis turn red when corresponding page is visible
+- Page indicators above images also highlight during scroll
+- Automatic scroll-to-highlighted functionality
+
+### Template Integration
+
+**Helper Functions** (`templating/engine.go`):
+- `GetPieceURL(year, issueNum, page int) string` - generates piece URLs
+- Reuses existing `PageIcon()` for consistent icon display
+- `getImagePathFromRegistry()` for proper image path resolution
+
+**Data Attributes for JavaScript**:
+- `data-page-container` on page containers for scroll detection
+- `data-page-number` on Inhaltsverzeichnis links for highlighting
+- `newspaper-page-container` class for intersection observer
+- `inhalts-entry` class for hover and highlighting behavior
+
+**Responsive Behavior**:
+- Mobile: Single column with collapsible Inhaltsverzeichnis
+- Desktop: Fixed two-column layout with sticky table of contents
+- Single-page viewer integration with proper navigation buttons
+
+### Usage Examples
+
+**Linking to Pieces**:
+```gohtml
+<a href="{{ GetPieceURL $piece.Reference.When.Year $piece.Reference.Nr $piece.Reference.Von }}">
+    gesamten beitrag anzeigen
+</a>
+```
+
+**Page Navigation in Inhaltsverzeichnis**:
+```gohtml
+<a href="/{{ $pageEntry.IssueYear }}/{{ $pageEntry.IssueNumber }}/{{ $pageEntry.PageNumber }}"
+   class="page-number-inhalts" data-page-number="{{ $pageEntry.PageNumber }}">
+   {{ $issueRef.When.Day }}.{{ $issueRef.When.Month }}.{{ $issueRef.When.Year }} [Nr. {{ $pageEntry.IssueNumber }}], {{ $pageEntry.PageNumber }}
+</a>
+```
+
+### Error Handling
+
+**Invalid IDs**: Returns 404 for malformed YYYY-NNN-PPP format
+**Missing Pieces**: Returns 404 when piece lookup fails in XML data
+**Missing Images**: Graceful fallback with "Keine Bilder verfügbar" message
+**Cross-Issue Navigation**: Handles pieces spanning non-consecutive issues
+
+## Direct Page Navigation System
+
+The application provides a direct page navigation system that allows users to jump directly to any page by specifying year and page number, regardless of which issue contains that page.
+
+### URL Structure
+
+**New URL Format**: All page links now use path parameters instead of hash fragments:
+- **Before**: `/1771/42#page-166`
+- **After**: `/1771/42/166`
+
+This change applies to all page links throughout the application, including:
+- Page sharing/citation links
+- Inhaltsverzeichnis page navigation
+- Single page viewer navigation
+
+### Page Jump Interface
+
+**Location**: Available on year overview pages (`/jahrgang/:year`)
+
+**Features**:
+- **Year Selection**: Dropdown with all available years (1764-1779)
+- **Page Input**: Numeric input with validation
+- **HTMX Integration**: Real-time error feedback without page reload
+- **Auto-redirect**: Successful lookups redirect to `/year/issue/page`
+
+**URL Patterns**:
+- **Form Submission**: `POST /jump` with form data
+- **Direct URL**: `GET /jump/:year/:page` (redirects to found issue)
+
+### Error Handling
+
+**Comprehensive Validation**:
+- **Invalid Year**: Years outside 1764-1779 range
+- **Invalid Page**: Non-numeric or negative page numbers
+- **Page Not Found**: Page doesn't exist in any issue of specified year
+- **Form Preservation**: Error responses maintain user input for correction
+
+**HTMX Error Responses**:
+- Form replaced with error version showing red borders and error messages
+- Specific error targeting (year field vs. page field)
+- Graceful degradation with clear user feedback
+
+### Auto-Scroll Implementation
+
+**URL-Based Navigation**:
+- Pages accessed via `/year/issue/page` auto-scroll to target page
+- JavaScript detects path-based page numbers (not hash fragments)
+- Smooth scrolling with proper timing for layout initialization
+- Automatic highlighting in Inhaltsverzeichnis
+
+**Technical Implementation**:
+```javascript
+// Auto-scroll on page load if targetPage is specified
+const pathParts = window.location.pathname.split('/');
+if (pathParts.length >= 4 && !isNaN(pathParts[pathParts.length - 1])) {
+    const pageNumber = pathParts[pathParts.length - 1];
+    // Scroll to page container and highlight
+}
+```
+
+### Controller Architecture
+
+**Page Jump Controller** (`controllers/page_jump_controller.go`):
+- `FindIssueByYearAndPage()` - Lookup function for issue containing specific page
+- `GetPageJump()` - Handles direct URL navigation (`/jump/:year/:page`)
+- `GetPageJumpForm()` - Handles form submissions (`POST /jump`)
+- Error rendering with HTML form generation
+
+**Issue Controller Updates** (`controllers/ausgabe_controller.go`):
+- Enhanced to handle optional page parameter in `/:year/:issue/:page?`
+- Page validation against issue page ranges
+- Target page passed to template for auto-scroll JavaScript
+
+### Link Generation Updates
+
+**JavaScript Functions** (`views/transform/main.js`):
+- `copyPagePermalink()` - Generates `/year/issue/page` URLs
+- `generatePageCitation()` - Uses new URL format for citations
+- `scrollToPageFromURL()` - URL-based navigation (replaces hash-based)
+
+**Template Integration**:
+- Page links updated throughout templates to use new URL format
+- Maintains backward compatibility for beilage/supplement pages (still uses hash)
+- HTMX navigation preserved with new URL structure
+
+### Usage Examples
+
+**Direct Page Access**:
+```
+http://127.0.0.1:8080/1771/42/166  # Direct link to page 166
+```
+
+**Page Jump Form**:
+```html
+<form hx-post="/jump" hx-swap="outerHTML">
+    <select name="year">...</select>
+    <input type="number" name="page" />
+    <button type="submit">Zur Seite springen</button>
+</form>
+```
+
+**Link Generation**:
+```javascript
+// New format for regular pages
+const pageUrl = `/${year}/${issue}/${pageNumber}`;
+// Old format still used for beilage pages
+const beilageUrl = `${window.location.pathname}#beilage-1-page-${pageNumber}`;
+```

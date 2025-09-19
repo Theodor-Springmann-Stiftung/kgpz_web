@@ -1,0 +1,61 @@
+{{ $model := .model }}
+
+<div class="w-full hyphens-auto">
+	<div class="space-y-4">
+		<!-- Header with icon and type (small) -->
+		<div class="flex items-center gap-2 mb-2">
+			<i class="ri-file-text-line text-slate-600"></i>
+			<h3 class="text-sm font-medium text-slate-600">Einzelbeitrag</h3>
+		</div>
+
+		<!-- Main piece entry -->
+		<div class="mb-6">
+			<!-- Get the first page to generate the actual content description -->
+			{{ if $model.ContinuousPages.Pages }}
+				{{ $firstPageNum := index $model.ContinuousPages.Pages 0 }}
+				{{ $firstPageEntries := index $model.ContinuousPages.Items $firstPageNum }}
+				{{ if $firstPageEntries }}
+					{{ $firstPiece := index $firstPageEntries 0 }}
+					<!-- Actual piece content description (larger) -->
+					<div class="mb-3">
+						<div class="text-base font-semibold text-slate-800 leading-snug">
+							{{ template "_inhaltsverzeichnis_eintrag" $firstPiece.PieceByIssue }}
+						</div>
+					</div>
+				{{ end }}
+			{{ end }}
+
+			<!-- Summary with boxed numbers -->
+			<div class="mb-4">
+				<p class="text-sm text-slate-600">
+					<span class="inline-flex items-center gap-1">
+						<span class="bg-slate-800 text-white px-1.5 py-0.5 rounded text-xs font-bold">{{ $model.TotalPageCount }}</span>
+						Seiten in
+						<span class="bg-slate-800 text-white px-1.5 py-0.5 rounded text-xs font-bold">{{ len $model.IssueContexts }}</span>
+						Ausgaben gefunden:
+					</span>
+				</p>
+			</div>
+
+			<!-- Issue and page links with highlighting data attributes -->
+			<div class="space-y-1">
+				{{ range $pageEntry := $model.AllPages }}
+					<!-- Find the issue ref for this page to get date -->
+					{{ range $issueRef := $model.AllIssueRefs }}
+						{{ if and (eq $issueRef.When.Year $pageEntry.IssueYear) (eq $issueRef.Nr $pageEntry.IssueNumber) (le $issueRef.Von $pageEntry.PageNumber) (ge $issueRef.Bis $pageEntry.PageNumber) }}
+							<div class="inhalts-entry issue-link-entry pl-4 border-l-4 border-slate-300 hover:bg-slate-100">
+								<a href="/{{ $pageEntry.IssueYear }}/{{ $pageEntry.IssueNumber }}/{{ $pageEntry.PageNumber }}"
+								   class="page-number-inhalts text-slate-700 hover:text-red-700 text-sm hover:underline transition-colors duration-200 bg-blue-50 hover:bg-blue-100 relative"
+								   data-page-number="{{ $pageEntry.PageNumber }}">
+									{{ if $issueRef.When.Day }}{{ $issueRef.When.Day }}.{{ end }}{{ if $issueRef.When.Month }}{{ $issueRef.When.Month }}.{{ end }}{{ $issueRef.When.Year }} [Nr. {{ $pageEntry.IssueNumber }}], {{ $pageEntry.PageNumber }}
+									{{ template "_page_link_indicator" (dict "pageNumber" $pageEntry.PageNumber "targetPage" $.targetPage) }}
+								</a>
+							</div>
+							{{ break }}
+						{{ end }}
+					{{ end }}
+				{{ end }}
+			</div>
+		</div>
+	</div>
+</div>
