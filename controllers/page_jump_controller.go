@@ -97,57 +97,27 @@ func GetPageJumpForm(kgpz *xmlmodels.Library) fiber.Handler {
 		year, err := strconv.Atoi(yearStr)
 		if err != nil || year < MINYEAR || year > MAXYEAR {
 			logging.Debug("Invalid year in form: " + yearStr)
-			// Get available years for dropdown (simplified for error case)
-			availableYears := []int{}
-			for y := MINYEAR; y <= MAXYEAR; y++ {
-				availableYears = append(availableYears, y)
-			}
-
-			return c.Status(fiber.StatusBadRequest).SendString(renderPageJumpFormWithError(
-				fmt.Sprintf("Ungültiges Jahr. Bitte wählen Sie ein Jahr zwischen %d und %d.", MINYEAR, MAXYEAR),
-				"",
-				availableYears,
-				MINYEAR,
-				pageStr,
-			))
+			return c.Status(fiber.StatusBadRequest).Render("/errors/jump_error/", fiber.Map{
+				"Message": fmt.Sprintf("Ungültiges Jahr. Bitte wählen Sie ein Jahr zwischen %d und %d.", MINYEAR, MAXYEAR),
+			}, "clear")
 		}
 
 		// Validate page
 		page, err := strconv.Atoi(pageStr)
 		if err != nil || page < 1 {
 			logging.Debug("Invalid page in form: " + pageStr)
-			// Get available years for dropdown
-			availableYears := []int{}
-			for y := MINYEAR; y <= MAXYEAR; y++ {
-				availableYears = append(availableYears, y)
-			}
-
-			return c.Status(fiber.StatusBadRequest).SendString(renderPageJumpFormWithError(
-				"",
-				"Ungültige Seitenzahl. Bitte geben Sie eine positive Zahl ein.",
-				availableYears,
-				year,
-				"",
-			))
+			return c.Status(fiber.StatusBadRequest).Render("/errors/jump_error/", fiber.Map{
+				"Message": "Ungültige Seitenzahl. Bitte geben Sie eine positive Zahl ein.",
+			}, "clear")
 		}
 
 		// Find the issue containing this page
 		issue, err := FindIssueByYearAndPage(year, page, kgpz)
 		if err != nil {
 			logging.Debug(fmt.Sprintf("Page %d not found in year %d: %v", page, year, err))
-			// Get available years for dropdown
-			availableYears := []int{}
-			for y := MINYEAR; y <= MAXYEAR; y++ {
-				availableYears = append(availableYears, y)
-			}
-
-			return c.Status(fiber.StatusNotFound).SendString(renderPageJumpFormWithError(
-				"",
-				fmt.Sprintf("Seite %s wurde in Jahr %s nicht gefunden.", pageStr, yearStr),
-				availableYears,
-				year,
-				pageStr,
-			))
+			return c.Status(fiber.StatusNotFound).Render("/errors/jump_error/", fiber.Map{
+				"Message": fmt.Sprintf("Seite %s wurde in Jahr %s nicht gefunden.", pageStr, yearStr),
+			}, "clear")
 		}
 
 		// Construct the redirect URL
@@ -155,73 +125,10 @@ func GetPageJumpForm(kgpz *xmlmodels.Library) fiber.Handler {
 
 		logging.Debug(fmt.Sprintf("Page jump form: year=%s, page=%s -> %s", yearStr, pageStr, redirectURL))
 
-		// Return HTMX redirect
+		// Clear any existing errors and redirect
 		c.Set("HX-Redirect", redirectURL)
-		return c.SendStatus(fiber.StatusOK)
+		c.Set("HX-Retarget", "#jump-errors")
+		c.Set("HX-Reswap", "innerHTML")
+		return c.SendString("")
 	}
-}
-
-// renderPageJumpFormWithError generates the page jump form HTML with error messages
-func renderPageJumpFormWithError(yearError, pageError string, availableYears []int, currentYear int, pageValue string) string {
-	html := `<form hx-post="/jump" hx-swap="outerHTML" class="space-y-4">
-	<div class="grid grid-cols-2 gap-4">
-		<!-- Year Selection -->
-		<div>
-			<label for="jump-year" class="block text-sm font-medium text-slate-700 mb-1">Jahr</label>
-			<select id="jump-year" name="year" class="w-full px-3 py-2 border `
-
-	if yearError != "" {
-		html += `border-red-300`
-	} else {
-		html += `border-slate-300`
-	}
-
-	html += ` rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">`
-
-	for _, year := range availableYears {
-		html += fmt.Sprintf(`<option value="%d"`, year)
-		if year == currentYear {
-			html += ` selected`
-		}
-		html += fmt.Sprintf(`>%d</option>`, year)
-	}
-
-	html += `</select>`
-
-	if yearError != "" {
-		html += fmt.Sprintf(`<div class="text-red-600 text-sm mt-1">%s</div>`, yearError)
-	}
-
-	html += `</div>
-
-		<!-- Page Input -->
-		<div>
-			<label for="jump-page" class="block text-sm font-medium text-slate-700 mb-1">Seite</label>
-			<input type="number" id="jump-page" name="page" min="1" placeholder="z.B. 42" value="` + pageValue + `" class="w-full px-3 py-2 border `
-
-	if pageError != "" {
-		html += `border-red-300`
-	} else {
-		html += `border-slate-300`
-	}
-
-	html += ` rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">`
-
-	if pageError != "" {
-		html += fmt.Sprintf(`<div class="text-red-600 text-sm mt-1">%s</div>`, pageError)
-	}
-
-	html += `</div>
-	</div>
-
-	<!-- Submit Button -->
-	<div class="text-center">
-		<button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-			<i class="ri-arrow-right-line mr-2"></i>
-			Zur Seite springen
-		</button>
-	</div>
-</form>`
-
-	return html
 }

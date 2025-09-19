@@ -17,6 +17,13 @@ import (
 
 const (
 	ASSETS_URL_PREFIX = "/assets"
+	CLEAR_LAYOUT      = `
+<html>
+<head>
+	{{ block "head" . }}{{ end }}
+</head>
+   {{ block "body" . }}{{ end }}
+</html>`
 )
 
 type Engine struct {
@@ -227,18 +234,26 @@ func (e *Engine) Render(out io.Writer, path string, data interface{}, layout ...
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	var l *template.Template
-	if layout == nil || len(layout) == 0 {
+	if len(layout) == 0 {
 		lay, err := e.LayoutRegistry.Default(&e.FuncMap)
 		if err != nil {
 			return err
 		}
 		l = lay
 	} else {
-		lay, err := e.LayoutRegistry.Layout(layout[0], &e.FuncMap)
-		if err != nil {
-			return err
+		if layout[0] == "clear" {
+			lay, err := template.New("clear").Parse(CLEAR_LAYOUT)
+			if err != nil {
+				return err
+			}
+			l = lay
+		} else {
+			lay, err := e.LayoutRegistry.Layout(layout[0], &e.FuncMap)
+			if err != nil {
+				return err
+			}
+			l = lay
 		}
-		l = lay
 	}
 
 	lay, err := l.Clone()
