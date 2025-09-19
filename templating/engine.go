@@ -10,6 +10,7 @@ import (
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/functions"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/templatefunctions"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/etag"
@@ -148,6 +149,7 @@ func (e *Engine) funcs() error {
 	// Piece view helpers
 	e.AddFunc("GetPieceURL", GetPieceURL)
 	e.AddFunc("IssueContext", IssueContext)
+	e.AddFunc("GetCategoryFlags", templatefunctions.GetCategoryFlags)
 
 	return nil
 }

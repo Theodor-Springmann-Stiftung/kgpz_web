@@ -6,89 +6,7 @@
 
 
 <div class="entry-description leading-snug mb-1">
-	{{- $hasRezension := false -}}
-	{{- $hasWeltnachrichten := false -}}
-	{{- $hasEinkommendeFremde := false -}}
-	{{- $hasWechselkurse := false -}}
-	{{- $hasBuecher := false -}}
-	{{- $hasLokalanzeigen := false -}}
-	{{- $hasLokalnachrichten := false -}}
-	{{- $hasLotterie := false -}}
-	{{- $hasGedicht := false -}}
-	{{- $hasVorladung := false -}}
-	{{- $hasAuszug := false -}}
-	{{- $hasAufsatz := false -}}
-	{{- $hasGelehrteNachrichten := false -}}
-	{{- $hasTheaterkritik := false -}}
-	{{- $hasUebersetzung := false -}}
-	{{- $hasKommentar := false -}}
-	{{- $hasNachruf := false -}}
-	{{- $hasReplik := false -}}
-	{{- $hasProklamation := false -}}
-	{{- $hasIneigenersache := false -}}
-	{{- $hasBrief := false -}}
-	{{- $hasAnzeige := false -}}
-	{{- $hasDesertionsliste := false -}}
-	{{- $hasNotenblatt := false -}}
-	{{- $hasVorlesungsverzeichnis := false -}}
-	{{- $hasErzaehlung := false -}}
-	{{- $hasNachtrag := false -}}
-	{{- $hasPanegyrik := false -}}
-	{{- $hasKriminalanzeige := false -}}
-	{{- $hasAbbildung := false -}}
-	{{- $hasRezepte := false -}}
-	{{- $hasKorrektur := false -}}
-
-	{{- range $catref := $piece.CategoryRefs -}}
-		{{- if eq $catref.Ref "rezension" -}}{{- $hasRezension = true -}}{{- end -}}
-		{{- if eq $catref.Ref "weltnachrichten" -}}{{- $hasWeltnachrichten = true -}}{{- end -}}
-		{{- if eq $catref.Ref "einkommende-fremde" -}}{{- $hasEinkommendeFremde = true -}}{{- end -}}
-		{{- if eq $catref.Ref "wechselkurse" -}}{{- $hasWechselkurse = true -}}{{- end -}}
-		{{- if eq $catref.Ref "buecher" -}}{{- $hasBuecher = true -}}{{- end -}}
-		{{- if eq $catref.Ref "lokalanzeigen" -}}{{- $hasLokalanzeigen = true -}}{{- end -}}
-		{{- if eq $catref.Ref "lokalnachrichten" -}}{{- $hasLokalnachrichten = true -}}{{- end -}}
-		{{- if eq $catref.Ref "lotterie" -}}{{- $hasLotterie = true -}}{{- end -}}
-		{{- if eq $catref.Ref "gedicht" -}}{{- $hasGedicht = true -}}{{- end -}}
-		{{- if eq $catref.Ref "vorladung" -}}{{- $hasVorladung = true -}}{{- end -}}
-		{{- if eq $catref.Ref "auszug" -}}{{- $hasAuszug = true -}}{{- end -}}
-		{{- if eq $catref.Ref "aufsatz" -}}{{- $hasAufsatz = true -}}{{- end -}}
-		{{- if eq $catref.Ref "gelehrte-nachrichten" -}}
-			{{- $hasGelehrteNachrichten = true -}}
-		{{- end -}}
-		{{- if eq $catref.Ref "theaterkritik" -}}{{- $hasTheaterkritik = true -}}{{- end -}}
-		{{- if eq $catref.Ref "uebersetzung" -}}{{- $hasUebersetzung = true -}}{{- end -}}
-		{{- if eq $catref.Ref "kommentar" -}}{{- $hasKommentar = true -}}{{- end -}}
-		{{- if eq $catref.Ref "nachruf" -}}{{- $hasNachruf = true -}}{{- end -}}
-		{{- if eq $catref.Ref "replik" -}}{{- $hasReplik = true -}}{{- end -}}
-		{{- if eq $catref.Ref "proklamation" -}}{{- $hasProklamation = true -}}{{- end -}}
-		{{- if eq $catref.Ref "ineigenersache" -}}{{- $hasIneigenersache = true -}}{{- end -}}
-		{{- if eq $catref.Ref "brief" -}}{{- $hasBrief = true -}}{{- end -}}
-		{{- if eq $catref.Ref "anzeige" -}}{{- $hasAnzeige = true -}}{{- end -}}
-		{{- if eq $catref.Ref "desertionsliste" -}}{{- $hasDesertionsliste = true -}}{{- end -}}
-		{{- if eq $catref.Ref "notenblatt" -}}{{- $hasNotenblatt = true -}}{{- end -}}
-		{{- if eq $catref.Ref "vorlesungsverzeichnis" -}}
-			{{- $hasVorlesungsverzeichnis = true -}}
-		{{- end -}}
-		{{- if eq $catref.Ref "erzaehlung" -}}{{- $hasErzaehlung = true -}}{{- end -}}
-		{{- if eq $catref.Ref "nachtrag" -}}{{- $hasNachtrag = true -}}{{- end -}}
-		{{- if eq $catref.Ref "panegyrik" -}}{{- $hasPanegyrik = true -}}{{- end -}}
-		{{- if eq $catref.Ref "kriminalanzeige" -}}{{- $hasKriminalanzeige = true -}}{{- end -}}
-		{{- if eq $catref.Ref "abbildung" -}}{{- $hasAbbildung = true -}}{{- end -}}
-		{{- if eq $catref.Ref "rezepte" -}}{{- $hasRezepte = true -}}{{- end -}}
-		{{- if eq $catref.Ref "korrektur" -}}{{- $hasKorrektur = true -}}{{- end -}}
-	{{- end -}}
-
-	{{- range $workref := $piece.WorkRefs -}}
-		{{- $kat := $workref.Category -}}
-		{{- if not $kat -}}{{- $kat = "rezension" -}}{{- end -}}
-		{{- if eq $kat "rezension" -}}{{- $hasRezension = true -}}{{- end -}}
-		{{- if eq $kat "auszug" -}}{{- $hasAuszug = true -}}{{- end -}}
-		{{- if eq $kat "theaterkritik" -}}{{- $hasTheaterkritik = true -}}{{- end -}}
-		{{- if eq $kat "uebersetzung" -}}{{- $hasUebersetzung = true -}}{{- end -}}
-		{{- if eq $kat "kommentar" -}}{{- $hasKommentar = true -}}{{- end -}}
-		{{- if eq $kat "anzeige" -}}{{- $hasAnzeige = true -}}{{- end -}}
-		{{- if eq $kat "replik" -}}{{- $hasReplik = true -}}{{- end -}}
-	{{- end -}}
+	{{- $categoryFlags := GetCategoryFlags $piece.Piece -}}
 
 	{{- $place := "" -}}
 	{{- if $piece.PlaceRefs -}}
@@ -144,7 +62,7 @@
 
 	{{- /* Generate natural text descriptions */ -}}
 
-	{{- if $hasRezension -}}
+	{{- if $categoryFlags.Rezension -}}
 		{{- $authorFound := false -}}
 		{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
@@ -205,55 +123,55 @@
 			>{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 		{{- end -}}
 
-	{{- else if $hasWeltnachrichten -}}
+	{{- else if $categoryFlags.Weltnachrichten -}}
 		{{ Safe $fortsPrefix }}Politische Nachrichten aus aller Welt
-	{{- else if $hasEinkommendeFremde -}}
-		{{- if $hasLokalnachrichten -}}
+	{{- else if $categoryFlags.EinkommendeFremde -}}
+		{{- if $categoryFlags.Lokalnachrichten -}}
 			Lokale Meldungen über einreisende Fremde
-		{{- else if $hasNachruf -}}
+		{{- else if $categoryFlags.Nachruf -}}
 			Nachruf und Einreiseliste
 		{{- else -}}
 			Einreiseliste
 		{{- end -}}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasWechselkurse -}}
+	{{- else if $categoryFlags.Wechselkurse -}}
 		Wechselkurse{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasBuecher -}}
+	{{- else if $categoryFlags.Buecher -}}
 		Bücheranzeigen{{ if $title }}: <em>{{ $title }}</em>{{ end }}
 
-	{{- else if $hasLokalanzeigen -}}
-		{{ if $hasNachruf }}
+	{{- else if $categoryFlags.Lokalanzeigen -}}
+		{{ if $categoryFlags.Nachruf }}
 			Todesanzeige
 		{{ else }}
 			Lokalanzeige
 		{{ end }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasLokalnachrichten -}}
-		{{ if $hasLotterie }}
+	{{- else if $categoryFlags.Lokalnachrichten -}}
+		{{ if $categoryFlags.Lotterie }}
 			Lotterienachrichten
-		{{ else if $hasNachruf }}
+		{{ else if $categoryFlags.Nachruf }}
 			Nachrufe
-		{{ else if $hasTheaterkritik }}
+		{{ else if $categoryFlags.Theaterkritik }}
 			Theaternachrichten
-		{{ else if $hasPanegyrik }}
+		{{ else if $categoryFlags.Panegyrik }}
 			Festlichkeiten
 		{{ else }}
 			Lokalnachrichten
 		{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasGedicht -}}
+	{{- else if $categoryFlags.Gedicht -}}
 		{{- $authorFound := false -}}
 		{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
 					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
-					{{ if $hasKommentar }}
+					{{ if $categoryFlags.Kommentar }}
 						Gedicht mit Kommentar
-					{{ else if $hasUebersetzung }}
+					{{ else if $categoryFlags.Uebersetzung }}
 						Gedichtübersetzung
-					{{ else if $hasGelehrteNachrichten }}
+					{{ else if $categoryFlags.GelehrteNachrichten }}
 						Gedicht zu gelehrten Angelegenheiten
 					{{ else }}
 						Gedicht
@@ -264,21 +182,21 @@
 			{{- end -}}
 		{{- end -}}
 		{{- if not $authorFound -}}
-			{{ Safe $fortsPrefix }}{{ if $hasKommentar }}
+			{{ Safe $fortsPrefix }}{{ if $categoryFlags.Kommentar }}
 				Gedicht mit Kommentar
-			{{ else if $hasUebersetzung }}
+			{{ else if $categoryFlags.Uebersetzung }}
 				Gedichtübersetzung
-			{{ else if $hasGelehrteNachrichten }}
+			{{ else if $categoryFlags.GelehrteNachrichten }}
 				Gedicht zu gelehrten Angelegenheiten
 			{{ else }}
 				Gedicht
 			{{ end }}{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
 		{{- end -}}
 
-	{{- else if $hasVorladung -}}
+	{{- else if $categoryFlags.Vorladung -}}
 		Gerichtliche Vorladung{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasAufsatz -}}
+	{{- else if $categoryFlags.Aufsatz -}}
 		{{- $authorFound := false -}}
 		{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
@@ -287,15 +205,15 @@
 					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600"
 						>{{ index $agent.Names 0 }}</a
 					>,
-					{{ if $hasReplik }}
+					{{ if $categoryFlags.Replik }}
 						Erwiderung
-					{{ else if $hasUebersetzung }}
+					{{ else if $categoryFlags.Uebersetzung }}
 						Übersetzung
-					{{ else if $hasNachruf }}
+					{{ else if $categoryFlags.Nachruf }}
 						Nachruf
-					{{ else if $hasKommentar }}
+					{{ else if $categoryFlags.Kommentar }}
 						Kommentar
-					{{ else if $hasRezepte }}
+					{{ else if $categoryFlags.Rezepte }}
 						Rezepte und Anleitungen
 					{{ else }}
 						Aufsatz
@@ -306,31 +224,31 @@
 			{{- end -}}
 		{{- end -}}
 		{{- if not $authorFound -}}
-			{{ Safe $fortsPrefix }}{{ if $hasReplik }}
+			{{ Safe $fortsPrefix }}{{ if $categoryFlags.Replik }}
 				Erwiderung
-			{{ else if $hasUebersetzung }}
+			{{ else if $categoryFlags.Uebersetzung }}
 				Übersetzung
-			{{ else if $hasNachruf }}
+			{{ else if $categoryFlags.Nachruf }}
 				Nachruf
-			{{ else if $hasKommentar }}
+			{{ else if $categoryFlags.Kommentar }}
 				Kommentar
-			{{ else if $hasRezepte }}
+			{{ else if $categoryFlags.Rezepte }}
 				Rezepte und Anleitungen
 			{{ else }}
 				Aufsatz
 			{{ end }}{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
 		{{- end -}}
 
-	{{- else if $hasGelehrteNachrichten -}}
-		{{ Safe $fortsPrefix }}{{ if $hasTheaterkritik }}
+	{{- else if $categoryFlags.GelehrteNachrichten -}}
+		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Theaterkritik }}
 			Theaterkritik
-		{{ else if $hasKommentar }}
+		{{ else if $categoryFlags.Kommentar }}
 			Gelehrter Kommentar
 		{{ else }}
 			Gelehrte Nachrichten
 		{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasTheaterkritik -}}
+	{{- else if $categoryFlags.Theaterkritik -}}
 		{{- $authorFound := false -}}
 		{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
@@ -362,22 +280,22 @@
 			{{ end }}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 		{{- end -}}
 
-	{{- else if $hasProklamation -}}
+	{{- else if $categoryFlags.Proklamation -}}
 		{{ Safe $fortsPrefix }}Amtliche
 		Proklamation{{ if $title }}: <em>{{ $title }}</em>{{ end }}
 
-	{{- else if $hasIneigenersache -}}
-		{{ Safe $fortsPrefix }}{{ if $hasKommentar }}
-			{{ if $hasNachtrag }}Ergänzender Kommentar{{ else }}Redaktioneller Kommentar{{ end }}
-		{{ else if $hasReplik }}
+	{{- else if $categoryFlags.Ineigenersache -}}
+		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Kommentar }}
+			{{ if $categoryFlags.Nachtrag }}Ergänzender Kommentar{{ else }}Redaktioneller Kommentar{{ end }}
+		{{ else if $categoryFlags.Replik }}
 			Redaktionelle Stellungnahme
 		{{ else }}
 			Anmerkung der Redaktion
 		{{ end }}
 		{{ if $title }}: <em>{{ $title }}</em>{{ end }}
 
-	{{- else if $hasBrief -}}
-		{{ Safe $fortsPrefix }}{{ if $hasNachruf }}
+	{{- else if $categoryFlags.Brief -}}
+		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Nachruf }}
 			Kondolenzbrief
 		{{ else }}
 			Leserbrief
@@ -394,18 +312,18 @@
 
 		{{- end -}}{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasDesertionsliste -}}
+	{{- else if $categoryFlags.Desertionsliste -}}
 		{{ Safe $fortsPrefix }}Desertionsliste{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasNotenblatt -}}
-		{{ Safe $fortsPrefix }}{{ if $hasNachtrag }}Ergänztes{{ end }}Notenblatt{{ if $title }}
+	{{- else if $categoryFlags.Notenblatt -}}
+		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Nachtrag }}Ergänztes{{ end }}Notenblatt{{ if $title }}
 			: <em>{{ $title }}</em>
 		{{ end }}
 
-	{{- else if $hasVorlesungsverzeichnis -}}
+	{{- else if $categoryFlags.Vorlesungsverzeichnis -}}
 		{{ Safe $fortsPrefix }}Vorlesungsverzeichnis{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasErzaehlung -}}
+	{{- else if $categoryFlags.Erzaehlung -}}
 		{{- $authorFound := false -}}
 		{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
@@ -414,7 +332,7 @@
 					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600"
 						>{{ index $agent.Names 0 }}</a
 					>,
-					{{ if $hasUebersetzung }}
+					{{ if $categoryFlags.Uebersetzung }}
 						Übersetzung einer Erzählung
 					{{ else }}
 						Erzählung
@@ -425,37 +343,37 @@
 			{{- end -}}
 		{{- end -}}
 		{{- if not $authorFound -}}
-			{{ Safe $fortsPrefix }}{{ if $hasUebersetzung }}
+			{{ Safe $fortsPrefix }}{{ if $categoryFlags.Uebersetzung }}
 				Übersetzung einer Erzählung
 			{{ else }}
 				Erzählung
 			{{ end }}{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
 		{{- end -}}
 
-	{{- else if $hasAbbildung -}}
-		{{ Safe $fortsPrefix }}{{ if $hasAufsatz }}
+	{{- else if $categoryFlags.Abbildung -}}
+		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Aufsatz }}
 			Illustrierter Aufsatz
 		{{ else }}
 			Abbildung
 		{{ end }}
 		{{ if $title }}: <em>{{ $title }}</em>{{ end }}
 
-	{{- else if $hasKriminalanzeige -}}
+	{{- else if $categoryFlags.Kriminalanzeige -}}
 		{{ Safe $fortsPrefix }}Kriminalanzeige{{ if $place }} <span class="place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap">{{ $place }}</span>{{ end }}
 
-	{{- else if $hasKorrektur -}}
+	{{- else if $categoryFlags.Korrektur -}}
 		{{ Safe $fortsPrefix }}Korrektur{{ if $title }}: <em>{{ $title }}</em>{{ end }}
 
-	{{- else if $hasAnzeige -}}
-		{{ Safe $fortsPrefix }}{{ if $hasAuszug }}
-			{{ if $hasGedicht }}Gedichtauszug{{ else }}Textauszug{{ end }}
+	{{- else if $categoryFlags.Anzeige -}}
+		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Auszug }}
+			{{ if $categoryFlags.Gedicht }}Gedichtauszug{{ else }}Textauszug{{ end }}
 		{{ else }}
 			Anzeige
 		{{ end }}
 		{{ if $title }}: <em>{{ $title }}</em>{{ end }}
 
-	{{- else if $hasAuszug -}}
-		{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>, {{ end }}{{ if $hasUebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
+	{{- else if $categoryFlags.Auszug -}}
+		{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 			<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}{{ if $workTitle }}<em
 				class="work-title"
 				data-short-title="{{ $workTitle }}"
@@ -471,7 +389,7 @@
 					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600"
 						>{{ index $agent.Names 0 }}</a
 					>{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-						{{ if $title }}, {{ if $hasUebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
+						{{ if $title }}, {{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
 							<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 							class="work-title"
 							data-short-title="{{ $workTitle }}"
@@ -485,7 +403,7 @@
 		{{- end -}}
 		{{- if not $authorFound -}}
 			{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-				{{ if $title }}, {{ if $hasUebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
+				{{ if $title }}, {{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
 					<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 					class="work-title"
 					data-short-title="{{ $workTitle }}"

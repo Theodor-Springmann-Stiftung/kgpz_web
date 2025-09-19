@@ -15,6 +15,7 @@ type PiecePageEntry struct {
 	IsContinuation bool
 	IssueContext   string // "1764 Nr. 37" for display
 	Available      bool
+	OtherPieces    []IndividualPieceByIssue // Other pieces on the same page
 }
 
 type PieceImages struct {
@@ -77,6 +78,7 @@ func NewPieceView(piece xmlmodels.Piece, lib *xmlmodels.Library) (*PieceVM, erro
 				IsContinuation: pageNum > issueRef.Von || partIndex > 0,
 				IssueContext:   issueContext,
 				Available:      true, // Will be updated when we load images
+				OtherPieces:    []IndividualPieceByIssue{}, // Will be populated later
 			}
 
 			// Get actual image path from registry
@@ -96,6 +98,11 @@ func NewPieceView(piece xmlmodels.Piece, lib *xmlmodels.Library) (*PieceVM, erro
 	// Create template-compatible structure
 	if err := pvm.createContinuousPages(lib); err != nil {
 		return nil, fmt.Errorf("failed to create continuous pages: %w", err)
+	}
+
+	// Populate other pieces on each page
+	if err := pvm.populateOtherPieces(lib); err != nil {
+		return nil, fmt.Errorf("failed to populate other pieces: %w", err)
 	}
 
 	return pvm, nil
@@ -203,4 +210,63 @@ func getImagePathFromRegistry(year, page int) string {
 
 	// Fallback: generate a default path (though this probably won't exist)
 	return fmt.Sprintf("/static/pictures/%d/seite_%d.jpg", year, page)
+}
+
+// populateOtherPieces finds and populates other pieces that appear on the same pages as this piece
+func (pvm *PieceVM) populateOtherPieces(lib *xmlmodels.Library) error {
+	fmt.Printf("DEBUG: Starting populateOtherPieces for piece %s\n", pvm.Piece.ID)
+	for i, pageEntry := range pvm.AllPages {
+		fmt.Printf("DEBUG: Processing page %d from issue %d/%d\n", pageEntry.PageNumber, pageEntry.IssueYear, pageEntry.IssueNumber)
+
+		// Find the issue this page belongs to
+		var issue *xmlmodels.Issue
+		lib.Issues.Lock()
+		for _, iss := range lib.Issues.Array {
+			if iss.Datum.When.Year == pageEntry.IssueYear && iss.Number.No == pageEntry.IssueNumber {
+				issue = &iss
+				break
+			}
+		}
+		lib.Issues.Unlock()
+
+		if issue == nil {
+			fmt.Printf("DEBUG: Issue not found for %d/%d\n", pageEntry.IssueYear, pageEntry.IssueNumber)
+			continue
+		}
+
+		// Get all pieces for this issue using the same approach as the ausgabe view
+		piecesForIssue, _, err := PiecesForIsssue(lib, *issue)
+		if err != nil {
+			fmt.Printf("DEBUG: Error getting pieces for issue: %v\n", err)
+			continue
+		}
+
+		// Create IndividualPiecesByPage using the same function as ausgabe view
+		individualPieces := CreateIndividualPagesWithMetadata(piecesForIssue, lib)
+
+		// Get pieces that appear on this specific page
+		if individualPiecesOnPage, exists := individualPieces.Items[pageEntry.PageNumber]; exists {
+			fmt.Printf("DEBUG: Found %d pieces on page %d\n", len(individualPiecesOnPage), pageEntry.PageNumber)
+			otherPieces := []IndividualPieceByIssue{}
+
+			for _, individualPiece := range individualPiecesOnPage {
+				fmt.Printf("DEBUG: Checking piece %s (current: %s)\n", individualPiece.PieceByIssue.Piece.ID, pvm.Piece.ID)
+				// Skip the current piece itself
+				if individualPiece.PieceByIssue.Piece.ID == pvm.Piece.ID {
+					fmt.Printf("DEBUG: Skipping current piece\n")
+					continue
+				}
+
+				fmt.Printf("DEBUG: Adding other piece %s\n", individualPiece.PieceByIssue.Piece.ID)
+				otherPieces = append(otherPieces, individualPiece)
+			}
+
+			fmt.Printf("DEBUG: Found %d other pieces on page %d\n", len(otherPieces), pageEntry.PageNumber)
+			pvm.AllPages[i].OtherPieces = otherPieces
+		} else {
+			fmt.Printf("DEBUG: No pieces found on page %d\n", pageEntry.PageNumber)
+		}
+	}
+
+	return nil
 }

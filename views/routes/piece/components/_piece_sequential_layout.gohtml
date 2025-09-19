@@ -56,6 +56,23 @@
 								</div>
 							{{ end }}
 						</div>
+
+						<!-- Other pieces on this page -->
+						{{ if $pageEntry.OtherPieces }}
+							<div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
+								<h4 class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+									<i class="ri-file-list-2-line"></i>
+									Außerdem auf dieser Seite:
+								</h4>
+								<div class="space-y-2">
+									{{ range $otherPiece := $pageEntry.OtherPieces }}
+										<div class="text-sm">
+											{{ template "_inhaltsverzeichnis_eintrag" $otherPiece }}
+										</div>
+									{{ end }}
+								</div>
+							</div>
+						{{ end }}
 					</div>
 				{{ end }}
 			</div>
