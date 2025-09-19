@@ -8,14 +8,23 @@
 			<div class="grid grid-cols-2 gap-4">
 				{{ range $pageIndex, $page := $model.Images.AllPages }}
 					{{ $pageEntry := index $model.AllPages $pageIndex }}
-					{{ $issueContext := printf "%d Nr. %d" $pageEntry.IssueYear $pageEntry.IssueNumber }}
+					{{- $issueKey := printf "%d-%d" $pageEntry.IssueYear $pageEntry.IssueNumber -}}
+					{{- $issueData := GetIssue $issueKey -}}
+					{{- $issueContext := "" -}}
+					{{- if $issueData -}}
+						{{- $issueContext = printf "%d.%d.%d Nr. %d" $issueData.Datum.When.Day $issueData.Datum.When.Month $issueData.Datum.When.Year $pageEntry.IssueNumber -}}
+					{{- else -}}
+						{{- $issueContext = printf "%d Nr. %d" $pageEntry.IssueYear $pageEntry.IssueNumber -}}
+					{{- end -}}
 
 					<!-- Page container -->
 					<div class="piece-page-container newspaper-page-container" id="piece-page-{{ $page.PageNumber }}" data-page-container="{{ $page.PageNumber }}">
 						<!-- Page indicator row -->
 						<div class="flex justify-start items-center gap-2 mb-3">
+							<span class="part-number bg-slate-100 text-slate-800 text-sm font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">
+								{{ $pageEntry.PartNumber }}
+							</span>
 							<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 flex items-center gap-1 relative" data-page="{{ $page.PageNumber }}">
-								{{ PageIcon "single" }}
 								{{ $issueContext }}, {{ $page.PageNumber }}
 								{{ template "_page_link_indicator" (dict "pageNumber" $page.PageNumber "targetPage" $.targetPage) }}
 							</span>
@@ -57,22 +66,6 @@
 							{{ end }}
 						</div>
 
-						<!-- Other pieces on this page -->
-						{{ if $pageEntry.OtherPieces }}
-							<div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
-								<h4 class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
-									<i class="ri-file-list-2-line"></i>
-									Außerdem auf dieser Seite:
-								</h4>
-								<div class="space-y-2">
-									{{ range $otherPiece := $pageEntry.OtherPieces }}
-										<div class="text-sm">
-											{{ template "_inhaltsverzeichnis_eintrag" $otherPiece }}
-										</div>
-									{{ end }}
-								</div>
-							</div>
-						{{ end }}
 					</div>
 				{{ end }}
 			</div>

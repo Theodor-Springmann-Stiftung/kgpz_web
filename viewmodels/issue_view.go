@@ -41,14 +41,14 @@ type IndividualPiecesByPage struct {
 }
 
 type IssuePage struct {
-	PageNumber  int
-	ImagePath   string
-	Available   bool
-	GridColumn  int    // 1 or 2 for left/right positioning
-	GridRow     int    // Row number in grid
-	HasHeader   bool   // Whether this page has a double-spread header
-	HeaderText  string // Text for double-spread header
-	PageIcon    string // Icon type: "first", "last", "even", "odd"
+	PageNumber int
+	ImagePath  string
+	Available  bool
+	GridColumn int    // 1 or 2 for left/right positioning
+	GridRow    int    // Row number in grid
+	HasHeader  bool   // Whether this page has a double-spread header
+	HeaderText string // Text for double-spread header
+	PageIcon   string // Icon type: "first", "last", "even", "odd"
 }
 
 type IssueImages struct {
@@ -78,12 +78,12 @@ var imageRegistry *ImageRegistry
 // TODO: Next & Prev
 type IssueVM struct {
 	xmlmodels.Issue
-	Next                 *xmlmodels.Issue
-	Prev                 *xmlmodels.Issue
-	Pieces               IndividualPiecesByPage
-	AdditionalPieces     IndividualPiecesByPage
-	Images               IssueImages
-	HasBeilageButton     bool   // Whether to show beilage navigation button
+	Next             *xmlmodels.Issue
+	Prev             *xmlmodels.Issue
+	Pieces           IndividualPiecesByPage
+	AdditionalPieces IndividualPiecesByPage
+	Images           IssueImages
+	HasBeilageButton bool // Whether to show beilage navigation button
 }
 
 func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
@@ -108,19 +108,10 @@ func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
 		return nil, fmt.Errorf("No issue found for %v-%v", y, no)
 	}
 
-	var Next *xmlmodels.Issue = nil
-	var Prev *xmlmodels.Issue = nil
-	if next != nil {
-		Next = &*next
-	}
-	if prev != nil {
-		Prev = &*prev
-	}
-
-	sivm := IssueVM{Issue: *issue, Next: Next, Prev: Prev}
+	sivm := IssueVM{Issue: *issue, Next: next, Prev: prev}
 
 	lib.Issues.Unlock()
-	ppi, ppa, err := PiecesForIsssue(lib, *issue)
+	ppi, ppa, err := PiecesForIssue(lib, *issue)
 	if err != nil {
 		return nil, err
 	}
@@ -142,13 +133,12 @@ func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
 	return &sivm, nil
 }
 
-func PiecesForIsssue(lib *xmlmodels.Library, issue xmlmodels.Issue) (PiecesByPage, PiecesByPage, error) {
+func PiecesForIssue(lib *xmlmodels.Library, issue xmlmodels.Issue) (PiecesByPage, PiecesByPage, error) {
 	year := issue.Datum.When.Year
 
 	ppi := PiecesByPage{Items: make(map[int][]PieceByIssue)}
 	ppa := PiecesByPage{Items: make(map[int][]PieceByIssue)}
 
-	// TODO: will we have to lock this, if we shutdown the server while loading the library?
 	lib.Pieces.Lock()
 	defer lib.Pieces.Unlock()
 
@@ -382,18 +372,18 @@ func determinePageIcon(pageNum int, allPages []int) string {
 
 	// Newspaper layout logic based on physical page positioning
 	if pageNum == firstPage {
-		return "first"  // Front page - normal icon
+		return "first" // Front page - normal icon
 	} else if pageNum == lastPage {
-		return "last"   // Back page - mirrored icon
+		return "last" // Back page - mirrored icon
 	} else {
 		// For middle pages in a 4-page newspaper layout:
 		// Page 2 (left side of middle spread) should be "even"
 		// Page 3 (right side of middle spread) should be "odd"
 		// But we need to consider the actual page position in layout
 		if pageNum == firstPage+1 {
-			return "even"  // Page 2 - black + mirrored grey
+			return "even" // Page 2 - black + mirrored grey
 		} else if pageNum == lastPage-1 {
-			return "odd"   // Page 3 - grey + black
+			return "odd" // Page 3 - grey + black
 		} else {
 			// For newspapers with more than 4 pages, use alternating pattern
 			if pageNum%2 == 0 {

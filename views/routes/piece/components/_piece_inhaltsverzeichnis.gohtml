@@ -2,10 +2,10 @@
 
 <div class="w-full hyphens-auto">
 	<div class="space-y-4">
-		<!-- Header with icon and type (small) -->
-		<div class="flex items-center gap-2 mb-2">
+		<!-- Header with icon and type -->
+		<div class="flex items-center gap-2 mb-4">
 			<i class="ri-file-text-line text-slate-600"></i>
-			<h3 class="text-sm font-medium text-slate-600">Einzelbeitrag</h3>
+			<h3 class="text-base font-semibold text-slate-800">Einzelbeitrag</h3>
 		</div>
 
 		<!-- Main piece entry -->
@@ -27,29 +27,75 @@
 
 			<!-- Summary with boxed numbers -->
 			<div class="mb-4">
-				<p class="text-sm text-slate-600">
+				<p class="text-slate-600">
 					<span class="inline-flex items-center gap-1">
-						<span class="bg-slate-800 text-white px-1.5 py-0.5 rounded text-xs font-bold">{{ $model.TotalPageCount }}</span>
+						<span class="font-bold">{{ $model.TotalPageCount }}</span>
 						Seiten in
-						<span class="bg-slate-800 text-white px-1.5 py-0.5 rounded text-xs font-bold">{{ len $model.IssueContexts }}</span>
+						<span class="font-bold">{{ len $model.IssueContexts }}</span>
 						Ausgaben gefunden:
 					</span>
 				</p>
 			</div>
 
 			<!-- Issue and page links with highlighting data attributes -->
-			<div class="space-y-1">
+			<div class="space-y-6">
 				{{ range $pageEntry := $model.AllPages }}
 					<!-- Find the issue ref for this page to get date -->
 					{{ range $issueRef := $model.AllIssueRefs }}
 						{{ if and (eq $issueRef.When.Year $pageEntry.IssueYear) (eq $issueRef.Nr $pageEntry.IssueNumber) (le $issueRef.Von $pageEntry.PageNumber) (ge $issueRef.Bis $pageEntry.PageNumber) }}
-							<div class="inhalts-entry issue-link-entry pl-4 border-l-4 border-slate-300 hover:bg-slate-100">
-								<a href="/{{ $pageEntry.IssueYear }}/{{ $pageEntry.IssueNumber }}/{{ $pageEntry.PageNumber }}"
-								   class="page-number-inhalts text-slate-700 hover:text-red-700 text-sm hover:underline transition-colors duration-200 bg-blue-50 hover:bg-blue-100 relative"
-								   data-page-number="{{ $pageEntry.PageNumber }}">
-									{{ if $issueRef.When.Day }}{{ $issueRef.When.Day }}.{{ end }}{{ if $issueRef.When.Month }}{{ $issueRef.When.Month }}.{{ end }}{{ $issueRef.When.Year }} [Nr. {{ $pageEntry.IssueNumber }}], {{ $pageEntry.PageNumber }}
-									{{ template "_page_link_indicator" (dict "pageNumber" $pageEntry.PageNumber "targetPage" $.targetPage) }}
-								</a>
+							<!-- Individual page entry matching issue view style -->
+							<div class="mb-4 pl-4 border-l-4 border-slate-300 page-entry {{ if not $pageEntry.OtherPieces }}py-2{{ end }}"
+								 data-page-container="{{ $pageEntry.PageNumber }}">
+								<div class="flex items-center justify-between gap-2 {{ if $pageEntry.OtherPieces }}mb-2{{ end }}">
+									<div class="flex items-center gap-2">
+										<span class="part-number bg-transparent text-slate-800 text-sm font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">
+											{{ $pageEntry.PartNumber }}
+										</span>
+										<button onclick="document.getElementById('piece-page-{{ $pageEntry.PageNumber }}').scrollIntoView({ behavior: 'smooth', block: 'start' })"
+										   class="page-number-inhalts font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded text-sm transition-colors duration-200 hover:bg-slate-200 cursor-pointer relative"
+										   data-page-number="{{ $pageEntry.PageNumber }}">
+											<span class="page-label">
+												{{- $issueKey := printf "%d-%d" $pageEntry.IssueYear $pageEntry.IssueNumber -}}
+												{{- $issueData := GetIssue $issueKey -}}
+												{{- if $issueData -}}
+													{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }} [Nr. {{ $pageEntry.IssueNumber }}], {{ $pageEntry.PageNumber }}
+												{{- else -}}
+													{{ $pageEntry.IssueYear }} [Nr. {{ $pageEntry.IssueNumber }}], {{ $pageEntry.PageNumber }}
+												{{- end -}}
+											</span>
+											{{ template "_page_link_indicator" (dict "pageNumber" $pageEntry.PageNumber "targetPage" $.targetPage) }}
+										</button>
+										<a href="/{{ $pageEntry.IssueYear }}/{{ $pageEntry.IssueNumber }}"
+										   class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer no-underline"
+										   title="Zur Ausgabe {{ $pageEntry.IssueYear }}/{{ $pageEntry.IssueNumber }} wechseln">
+											<i class="ri-book-open-line text-xs"></i>
+										</a>
+									</div>
+									<button class="page-permalink-btn text-slate-400 hover:text-slate-700 text-xs p-1 rounded hover:bg-slate-100 transition-colors duration-200"
+											title="Link zu dieser Seite kopieren"
+											onclick="copyPagePermalink('{{ $pageEntry.PageNumber }}', this)"
+											data-page="{{ $pageEntry.PageNumber }}">
+										<i class="ri-link text-sm"></i>
+									</button>
+								</div>
+
+								<!-- Content area -->
+								<div class="space-y-0">
+									{{ if $pageEntry.OtherPieces }}
+										{{ range $otherPiece := $pageEntry.OtherPieces }}
+											<div class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200"
+												 data-page="{{ $pageEntry.PageNumber }}">
+												<div class="italic text-slate-600 text-xs mb-1">Außerdem:</div>
+												{{ template "_inhaltsverzeichnis_eintrag" $otherPiece.PieceByIssue }}
+											</div>
+										{{ end }}
+									{{ else }}
+										<!-- Empty but visible entry to prevent JS from hiding the page -->
+										<div class="inhalts-entry py-0 px-0" style="height: 1px; visibility: hidden;">
+											<!-- This empty but visible element prevents updatePageEntryVisibility() from hiding the page -->
+										</div>
+									{{ end }}
+								</div>
 							</div>
 							{{ break }}
 						{{ end }}

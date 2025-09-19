@@ -16,6 +16,7 @@ type PiecePageEntry struct {
 	IssueContext   string // "1764 Nr. 37" for display
 	Available      bool
 	OtherPieces    []IndividualPieceByIssue // Other pieces on the same page
+	PartNumber     int                      // Which part of the piece (1, 2, 3, etc.)
 }
 
 type PieceImages struct {
@@ -25,14 +26,14 @@ type PieceImages struct {
 
 type PieceVM struct {
 	xmlmodels.Piece
-	AllIssueRefs        []xmlmodels.IssueRef       // All issues containing this piece
-	AllPages            []PiecePageEntry           // Flattened chronological page list
-	ContinuousPages     IndividualPiecesByPage     // For template compatibility
-	Images              PieceImages                // All page images across issues
-	TotalPageCount      int
-	Title               string // Extracted piece title
-	MainCategory        string // Primary category
-	IssueContexts       []string // List of issue contexts for display
+	AllIssueRefs    []xmlmodels.IssueRef   // All issues containing this piece
+	AllPages        []PiecePageEntry       // Flattened chronological page list
+	ContinuousPages IndividualPiecesByPage // For template compatibility
+	Images          PieceImages            // All page images across issues
+	TotalPageCount  int
+	Title           string   // Extracted piece title
+	MainCategory    string   // Primary category
+	IssueContexts   []string // List of issue contexts for display
 }
 
 func NewPieceView(piece xmlmodels.Piece, lib *xmlmodels.Library) (*PieceVM, error) {
@@ -77,8 +78,9 @@ func NewPieceView(piece xmlmodels.Piece, lib *xmlmodels.Library) (*PieceVM, erro
 				IssueNumber:    issueRef.Nr,
 				IsContinuation: pageNum > issueRef.Von || partIndex > 0,
 				IssueContext:   issueContext,
-				Available:      true, // Will be updated when we load images
+				Available:      true,                       // Will be updated when we load images
 				OtherPieces:    []IndividualPieceByIssue{}, // Will be populated later
+				PartNumber:     partIndex + 1,              // Part number (1-based)
 			}
 
 			// Get actual image path from registry
@@ -123,7 +125,7 @@ func (pvm *PieceVM) loadImages() error {
 		issuePage := IssuePage{
 			PageNumber: pageEntry.PageNumber,
 			ImagePath:  pageEntry.ImagePath,
-			Available:  true, // Assume available for now
+			Available:  true,     // Assume available for now
 			PageIcon:   "single", // Simplified icon for piece view
 		}
 
@@ -214,7 +216,7 @@ func getImagePathFromRegistry(year, page int) string {
 
 // populateOtherPieces finds and populates other pieces that appear on the same pages as this piece
 func (pvm *PieceVM) populateOtherPieces(lib *xmlmodels.Library) error {
-	fmt.Printf("DEBUG: Starting populateOtherPieces for piece %s\n", pvm.Piece.ID)
+	fmt.Printf("DEBUG: Starting populateOtherPieces for piece %s\n", pvm.Piece.Identifier.ID)
 	for i, pageEntry := range pvm.AllPages {
 		fmt.Printf("DEBUG: Processing page %d from issue %d/%d\n", pageEntry.PageNumber, pageEntry.IssueYear, pageEntry.IssueNumber)
 
@@ -235,14 +237,17 @@ func (pvm *PieceVM) populateOtherPieces(lib *xmlmodels.Library) error {
 		}
 
 		// Get all pieces for this issue using the same approach as the ausgabe view
-		piecesForIssue, _, err := PiecesForIsssue(lib, *issue)
+		piecesForIssue, _, err := PiecesForIssue(lib, *issue)
 		if err != nil {
 			fmt.Printf("DEBUG: Error getting pieces for issue: %v\n", err)
 			continue
 		}
+		fmt.Printf("DEBUG: Found %d total pieces for issue %d/%d\n", len(piecesForIssue.Pages), pageEntry.IssueYear, pageEntry.IssueNumber)
 
 		// Create IndividualPiecesByPage using the same function as ausgabe view
 		individualPieces := CreateIndividualPagesWithMetadata(piecesForIssue, lib)
+		fmt.Printf("DEBUG: CreateIndividualPagesWithMetadata created %d pages with pieces\n", len(individualPieces.Pages))
+		fmt.Printf("DEBUG: Pages with pieces: %v\n", individualPieces.Pages)
 
 		// Get pieces that appear on this specific page
 		if individualPiecesOnPage, exists := individualPieces.Items[pageEntry.PageNumber]; exists {
@@ -250,14 +255,47 @@ func (pvm *PieceVM) populateOtherPieces(lib *xmlmodels.Library) error {
 			otherPieces := []IndividualPieceByIssue{}
 
 			for _, individualPiece := range individualPiecesOnPage {
-				fmt.Printf("DEBUG: Checking piece %s (current: %s)\n", individualPiece.PieceByIssue.Piece.ID, pvm.Piece.ID)
-				// Skip the current piece itself
-				if individualPiece.PieceByIssue.Piece.ID == pvm.Piece.ID {
-					fmt.Printf("DEBUG: Skipping current piece\n")
-					continue
+				// Debug piece information
+				pieceTitle := "no title"
+				if len(individualPiece.PieceByIssue.Piece.Title) > 0 {
+					pieceTitle = individualPiece.PieceByIssue.Piece.Title[0]
+				} else if len(individualPiece.PieceByIssue.Piece.Incipit) > 0 {
+					pieceTitle = individualPiece.PieceByIssue.Piece.Incipit[0]
 				}
 
-				fmt.Printf("DEBUG: Adding other piece %s\n", individualPiece.PieceByIssue.Piece.ID)
+				currentTitle := "no title"
+				if len(pvm.Piece.Title) > 0 {
+					currentTitle = pvm.Piece.Title[0]
+				} else if len(pvm.Piece.Incipit) > 0 {
+					currentTitle = pvm.Piece.Incipit[0]
+				}
+
+				fmt.Printf("DEBUG: Checking piece title='%s' (current title='%s')\n", pieceTitle, currentTitle)
+
+				// Skip the current piece itself - use content-based comparison
+				// Compare by title/incipit and issue references
+				if pieceTitle == currentTitle && pieceTitle != "no title" {
+					// Same title, now check if they have the same issue references
+					foundPieceRef := individualPiece.PieceByIssue.Reference
+					isSamePiece := false
+
+					for _, currentRef := range pvm.Piece.IssueRefs {
+						if currentRef.When.Year == foundPieceRef.When.Year &&
+							currentRef.Nr == foundPieceRef.Nr &&
+							currentRef.Von == foundPieceRef.Von &&
+							currentRef.Bis == foundPieceRef.Bis {
+							isSamePiece = true
+							break
+						}
+					}
+
+					if isSamePiece {
+						fmt.Printf("DEBUG: Skipping current piece (title and issue reference match)\n")
+						continue
+					}
+				}
+
+				fmt.Printf("DEBUG: Adding other piece title='%s'\n", pieceTitle)
 				otherPieces = append(otherPieces, individualPiece)
 			}
 
@@ -270,3 +308,4 @@ func (pvm *PieceVM) populateOtherPieces(lib *xmlmodels.Library) error {
 
 	return nil
 }
+
