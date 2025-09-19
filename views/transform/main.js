@@ -369,16 +369,18 @@ function scrollToHighlightedPage(element) {
 
 // Modal functions
 function enlargePage(imgElement, pageNumber, isFromSpread) {
-	const modal = document.getElementById("pageModal");
-	const modalImage = document.getElementById("modalImage");
+	// Get or create the single page viewer component
+	let viewer = document.querySelector('single-page-viewer');
+	if (!viewer) {
+		viewer = document.createElement('single-page-viewer');
+		document.body.appendChild(viewer);
+	}
 
-	modalImage.src = imgElement.src;
-	modalImage.alt = imgElement.alt;
+	// Determine if this is a beilage page
+	const isBeilage = imgElement.closest('[data-beilage="true"]') !== null;
 
-	modal.classList.remove("hidden");
-
-	// Mark current page when enlarged
-	markCurrentPageInInhaltsverzeichnis(pageNumber);
+	// Show the page in the viewer
+	viewer.show(imgElement.src, imgElement.alt, pageNumber, isBeilage);
 }
 
 function closeModal() {
@@ -1030,5 +1032,379 @@ function setup() {
 		}, 100);
 	});
 }
+
+// Single Page Viewer Web Component
+class SinglePageViewer extends HTMLElement {
+	constructor() {
+		super();
+		// No shadow DOM - use regular DOM to allow Tailwind CSS
+	}
+
+	connectedCallback() {
+		this.innerHTML = `
+			<div class="fixed inset-0 z-50 flex">
+				<!-- Keep Inhaltsverzeichnis area empty/transparent (collapsible) -->
+				<div id="sidebar-spacer" class="lg:w-1/4 xl:w-1/5 flex-shrink-0 transition-all duration-300"></div>
+
+				<!-- Cover the right columns with the zoomed view -->
+				<div class="flex-1 bg-slate-50 overflow-auto">
+					<div class="relative min-h-full flex flex-col">
+						<!-- Header with page info and buttons -->
+						<div class="flex items-center justify-between p-4">
+							<!-- Left: Sidebar toggle and page indicator -->
+							<div class="flex items-center gap-3">
+								<!-- Sidebar toggle button -->
+								<button
+									id="sidebar-toggle-btn"
+									onclick="this.closest('single-page-viewer').toggleSidebar()"
+									class="w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+									title="Inhaltsverzeichnis ein-/ausblenden">
+									<i class="ri-sidebar-unfold-line text-lg font-bold"></i>
+								</button>
+
+								<!-- Page indicator with icon -->
+								<div id="page-indicator" class="text-slate-800 flex items-center gap-3">
+									<span id="page-icon" class="text-lg"></span>
+									<span id="page-number" class="text-2xl font-serif font-bold"></span>
+								</div>
+							</div>
+
+							<!-- Right: Action buttons -->
+							<div class="flex items-center gap-3">
+								<!-- Previous page button -->
+								<button
+									id="prev-page-btn"
+									onclick="this.closest('single-page-viewer').goToPreviousPage()"
+									class="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+									title="Vorherige Seite">
+									<i class="ri-arrow-left-line text-lg font-bold"></i>
+								</button>
+
+								<!-- Next page button -->
+								<button
+									id="next-page-btn"
+									onclick="this.closest('single-page-viewer').goToNextPage()"
+									class="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+									title="Nächste Seite">
+									<i class="ri-arrow-right-line text-lg font-bold"></i>
+								</button>
+
+								<!-- Separator -->
+								<div class="w-px h-6 bg-gray-300"></div>
+
+								<!-- Share button -->
+								<button
+									id="share-btn"
+									onclick="this.closest('single-page-viewer').shareCurrentPage()"
+									class="w-10 h-10 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+									title="Link zu dieser Seite kopieren">
+									<i class="ri-share-line text-lg font-bold"></i>
+								</button>
+
+								<!-- Cite button -->
+								<button
+									id="cite-btn"
+									onclick="this.closest('single-page-viewer').generatePageCitation()"
+									class="w-10 h-10 bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+									title="Zitation für diese Seite generieren">
+									<i class="ri-file-text-line text-lg font-bold"></i>
+								</button>
+
+								<!-- Close button -->
+								<button
+									onclick="this.closest('single-page-viewer').close()"
+									class="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+									title="Schließen">
+									<i class="ri-close-line text-lg font-bold"></i>
+								</button>
+							</div>
+						</div>
+
+						<!-- Image container that can scroll -->
+						<div class="flex-1 flex items-center justify-center p-4 pb-8">
+							<img
+								id="single-page-image"
+								src=""
+								alt=""
+								class="w-full h-auto rounded-lg shadow-2xl"
+							/>
+						</div>
+					</div>
+				</div>
+			</div>
+		`;
+	}
+
+	show(imgSrc, imgAlt, pageNumber, isBeilage = false) {
+		const img = this.querySelector('#single-page-image');
+		const pageNumberSpan = this.querySelector('#page-number');
+		const pageIconSpan = this.querySelector('#page-icon');
+		const pageIndicator = this.querySelector('#page-indicator');
+
+		img.src = imgSrc;
+		img.alt = imgAlt;
+
+		// Store current page info for button actions
+		this.currentPageNumber = pageNumber;
+		this.currentIsBeilage = isBeilage;
+
+		// Set page number
+		pageNumberSpan.textContent = pageNumber;
+
+		// Set page icon based on position and type
+		const iconType = this.determinePageIconType(pageNumber, isBeilage);
+		pageIconSpan.innerHTML = this.getPageIconHTML(iconType);
+
+		// Page indicator styling is now consistent (white background)
+
+		// Update navigation button visibility
+		this.updateNavigationButtons();
+
+		this.style.display = 'block';
+
+		// Prevent background scrolling but allow scrolling within the viewer
+		document.body.style.overflow = 'hidden';
+
+		// Mark current page in Inhaltsverzeichnis
+		markCurrentPageInInhaltsverzeichnis(pageNumber);
+	}
+
+	close() {
+		this.style.display = 'none';
+
+		// Restore background scrolling
+		document.body.style.overflow = '';
+	}
+
+	// Determine page icon type based on page position and whether it's beilage
+	determinePageIconType(pageNumber, isBeilage) {
+		// Get all page containers to determine position
+		const containerSelector = isBeilage ? '.newspaper-page-container[data-beilage="true"]' : '.newspaper-page-container:not([data-beilage])';
+		const pageContainers = Array.from(document.querySelectorAll(containerSelector));
+
+		// Extract page numbers and sort them
+		const allPages = pageContainers
+			.map(container => {
+				const pageAttr = container.getAttribute('data-page-container');
+				return pageAttr ? parseInt(pageAttr) : null;
+			})
+			.filter(p => p !== null)
+			.sort((a, b) => a - b);
+
+		if (allPages.length === 0) {
+			return "first";
+		}
+
+		const firstPage = allPages[0];
+		const lastPage = allPages[allPages.length - 1];
+
+		// Same logic as Go determinePageIcon function
+		if (pageNumber === firstPage) {
+			return "first";  // Front page - normal icon
+		} else if (pageNumber === lastPage) {
+			return "last";   // Back page - mirrored icon
+		} else {
+			// For middle pages in newspaper layout
+			if (pageNumber === firstPage + 1) {
+				return "even";  // Page 2 - black + mirrored grey
+			} else if (pageNumber === lastPage - 1) {
+				return "odd";   // Page 3 - grey + black
+			} else {
+				// For newspapers with more than 4 pages, use alternating pattern
+				if (pageNumber % 2 === 0) {
+					return "even";
+				} else {
+					return "odd";
+				}
+			}
+		}
+	}
+
+	// Generate page icon HTML based on type (same as Go PageIcon function)
+	getPageIconHTML(iconType) {
+		const baseClass = "ri-file-text-line text-lg";
+
+		switch (iconType) {
+			case "first":
+				return `<i class="${baseClass} text-black"></i>`;
+			case "last":
+				return `<i class="${baseClass} text-black" style="transform: scaleX(-1); display: inline-block;"></i>`;
+			case "even":
+				return `<i class="${baseClass} text-black" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="${baseClass} text-slate-400"></i>`;
+			case "odd":
+				return `<i class="${baseClass} text-slate-400" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="${baseClass} text-black"></i>`;
+			default:
+				return `<i class="${baseClass} text-black"></i>`;
+		}
+	}
+
+	// Share current page
+	shareCurrentPage() {
+		if (typeof copyPagePermalink === 'function') {
+			// Use the actual button element
+			const shareBtn = this.querySelector('#share-btn');
+			copyPagePermalink(this.currentPageNumber, shareBtn, this.currentIsBeilage);
+		}
+	}
+
+	// Generate citation for current page
+	generatePageCitation() {
+		if (typeof generatePageCitation === 'function') {
+			// Use the actual button element
+			const citeBtn = this.querySelector('#cite-btn');
+			generatePageCitation(this.currentPageNumber, citeBtn);
+		}
+	}
+
+	// Update navigation button visibility based on available pages
+	updateNavigationButtons() {
+		const prevBtn = this.querySelector('#prev-page-btn');
+		const nextBtn = this.querySelector('#next-page-btn');
+
+		const { prevPage, nextPage } = this.getAdjacentPages();
+
+		// Enable/disable previous page button
+		if (prevPage !== null) {
+			prevBtn.disabled = false;
+			prevBtn.className = prevBtn.className.replace('opacity-50 cursor-not-allowed', '');
+			prevBtn.className = prevBtn.className.replace('bg-gray-50 text-gray-400', 'bg-gray-100 text-gray-700');
+		} else {
+			prevBtn.disabled = true;
+			if (!prevBtn.className.includes('opacity-50')) {
+				prevBtn.className += ' opacity-50 cursor-not-allowed';
+			}
+			prevBtn.className = prevBtn.className.replace('bg-gray-100 text-gray-700', 'bg-gray-50 text-gray-400');
+		}
+
+		// Enable/disable next page button
+		if (nextPage !== null) {
+			nextBtn.disabled = false;
+			nextBtn.className = nextBtn.className.replace('opacity-50 cursor-not-allowed', '');
+			nextBtn.className = nextBtn.className.replace('bg-gray-50 text-gray-400', 'bg-gray-100 text-gray-700');
+		} else {
+			nextBtn.disabled = true;
+			if (!nextBtn.className.includes('opacity-50')) {
+				nextBtn.className += ' opacity-50 cursor-not-allowed';
+			}
+			nextBtn.className = nextBtn.className.replace('bg-gray-100 text-gray-700', 'bg-gray-50 text-gray-400');
+		}
+	}
+
+	// Get previous and next page numbers
+	getAdjacentPages() {
+		// Get all page containers of the same type (main or beilage)
+		let containerSelector;
+		if (this.currentIsBeilage) {
+			containerSelector = '.newspaper-page-container[data-beilage="true"]';
+		} else {
+			containerSelector = '.newspaper-page-container:not([data-beilage])';
+		}
+
+		const pageContainers = Array.from(document.querySelectorAll(containerSelector));
+		console.log('Found containers:', pageContainers.length, 'for', this.currentIsBeilage ? 'beilage' : 'main');
+
+		// Extract page numbers and sort them
+		const allPages = pageContainers
+			.map(container => {
+				const pageAttr = container.getAttribute('data-page-container');
+				const pageNum = pageAttr ? parseInt(pageAttr) : null;
+				console.log('Container page:', pageAttr, 'parsed:', pageNum);
+				return pageNum;
+			})
+			.filter(p => p !== null)
+			.sort((a, b) => a - b);
+
+		console.log('All pages found:', allPages);
+		console.log('Current page:', this.currentPageNumber);
+
+		const currentIndex = allPages.indexOf(this.currentPageNumber);
+		console.log('Current index:', currentIndex);
+
+		let prevPage = null;
+		let nextPage = null;
+
+		if (currentIndex > 0) {
+			prevPage = allPages[currentIndex - 1];
+		}
+
+		if (currentIndex < allPages.length - 1) {
+			nextPage = allPages[currentIndex + 1];
+		}
+
+		console.log('Adjacent pages - prev:', prevPage, 'next:', nextPage);
+		return { prevPage, nextPage };
+	}
+
+	// Navigate to previous page
+	goToPreviousPage() {
+		const { prevPage } = this.getAdjacentPages();
+		if (prevPage !== null) {
+			this.navigateToPage(prevPage);
+		}
+	}
+
+	// Navigate to next page
+	goToNextPage() {
+		const { nextPage } = this.getAdjacentPages();
+		if (nextPage !== null) {
+			this.navigateToPage(nextPage);
+		}
+	}
+
+	// Navigate to a specific page
+	navigateToPage(pageNumber) {
+		// Find the image element for the target page
+		const containerSelector = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : '.newspaper-page-container:not([data-beilage])';
+		const targetContainer = document.querySelector(`${containerSelector}[data-page-container="${pageNumber}"]`);
+
+		if (targetContainer) {
+			const imgElement = targetContainer.querySelector('.newspaper-page-image');
+			if (imgElement) {
+				// Update the current view with the new page
+				this.show(imgElement.src, imgElement.alt, pageNumber, this.currentIsBeilage);
+			}
+		}
+	}
+
+	// Toggle sidebar visibility
+	toggleSidebar() {
+		const sidebarSpacer = this.querySelector('#sidebar-spacer');
+		const toggleBtn = this.querySelector('#sidebar-toggle-btn');
+		const toggleIcon = toggleBtn.querySelector('i');
+
+		// Check if sidebar is currently collapsed by looking at classes
+		const isCollapsed = sidebarSpacer.classList.contains('w-0');
+
+		console.log('Current state - isCollapsed:', isCollapsed);
+		console.log('Current classes:', sidebarSpacer.className);
+
+		if (isCollapsed) {
+			// Sidebar is collapsed, expand it
+			sidebarSpacer.classList.remove('w-0');
+			sidebarSpacer.classList.add('lg:w-1/4', 'xl:w-1/5');
+
+			// Update button to normal state (sidebar visible)
+			toggleBtn.className = 'w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer';
+			toggleIcon.className = 'ri-sidebar-unfold-line text-lg font-bold';
+			toggleBtn.title = 'Inhaltsverzeichnis ausblenden';
+			console.log('Expanding sidebar');
+		} else {
+			// Sidebar is expanded, collapse it
+			sidebarSpacer.classList.remove('lg:w-1/4', 'xl:w-1/5');
+			sidebarSpacer.classList.add('w-0');
+
+			// Update button to active state (sidebar hidden - orange highlight)
+			toggleBtn.className = 'w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer';
+			toggleIcon.className = 'ri-sidebar-fold-line text-lg font-bold';
+			toggleBtn.title = 'Inhaltsverzeichnis einblenden';
+			console.log('Collapsing sidebar');
+		}
+
+		console.log('New classes:', sidebarSpacer.className);
+	}
+}
+
+// Register the web component
+customElements.define('single-page-viewer', SinglePageViewer);
 
 export { setup };

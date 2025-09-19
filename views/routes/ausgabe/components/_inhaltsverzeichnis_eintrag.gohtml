@@ -248,7 +248,7 @@
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
+					{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
 					{{ if $hasKommentar }}
 						Gedicht mit Kommentar
 					{{ else if $hasUebersetzung }}
@@ -264,7 +264,7 @@
 			{{- end -}}
 		{{- end -}}
 		{{- if not $authorFound -}}
-			{{ if $hasKommentar }}
+			{{ Safe $fortsPrefix }}{{ if $hasKommentar }}
 				Gedicht mit Kommentar
 			{{ else if $hasUebersetzung }}
 				Gedichtübersetzung
