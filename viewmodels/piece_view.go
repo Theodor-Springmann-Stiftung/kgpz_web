@@ -255,44 +255,18 @@ func (pvm *PieceVM) populateOtherPieces(lib *xmlmodels.Library) error {
 			otherPieces := []IndividualPieceByIssue{}
 
 			for _, individualPiece := range individualPiecesOnPage {
+				// Skip the current piece itself using comprehensive comparison
+				if IsSamePiece(individualPiece.PieceByIssue.Piece, pvm.Piece) {
+					fmt.Printf("DEBUG: Skipping current piece (comprehensive field match)\n")
+					continue
+				}
+
 				// Debug piece information
 				pieceTitle := "no title"
 				if len(individualPiece.PieceByIssue.Piece.Title) > 0 {
 					pieceTitle = individualPiece.PieceByIssue.Piece.Title[0]
 				} else if len(individualPiece.PieceByIssue.Piece.Incipit) > 0 {
 					pieceTitle = individualPiece.PieceByIssue.Piece.Incipit[0]
-				}
-
-				currentTitle := "no title"
-				if len(pvm.Piece.Title) > 0 {
-					currentTitle = pvm.Piece.Title[0]
-				} else if len(pvm.Piece.Incipit) > 0 {
-					currentTitle = pvm.Piece.Incipit[0]
-				}
-
-				fmt.Printf("DEBUG: Checking piece title='%s' (current title='%s')\n", pieceTitle, currentTitle)
-
-				// Skip the current piece itself - use content-based comparison
-				// Compare by title/incipit and issue references
-				if pieceTitle == currentTitle && pieceTitle != "no title" {
-					// Same title, now check if they have the same issue references
-					foundPieceRef := individualPiece.PieceByIssue.Reference
-					isSamePiece := false
-
-					for _, currentRef := range pvm.Piece.IssueRefs {
-						if currentRef.When.Year == foundPieceRef.When.Year &&
-							currentRef.Nr == foundPieceRef.Nr &&
-							currentRef.Von == foundPieceRef.Von &&
-							currentRef.Bis == foundPieceRef.Bis {
-							isSamePiece = true
-							break
-						}
-					}
-
-					if isSamePiece {
-						fmt.Printf("DEBUG: Skipping current piece (title and issue reference match)\n")
-						continue
-					}
 				}
 
 				fmt.Printf("DEBUG: Adding other piece title='%s'\n", pieceTitle)
@@ -307,5 +281,123 @@ func (pvm *PieceVM) populateOtherPieces(lib *xmlmodels.Library) error {
 	}
 
 	return nil
+}
+
+// IsSamePiece compares two pieces using comprehensive field-by-field heuristics
+// This is a universal method that can be used anywhere in the codebase
+func IsSamePiece(piece1, piece2 xmlmodels.Piece) bool {
+	// 1. Compare titles (all variants)
+	if !equalStringSlices(piece1.Title, piece2.Title) {
+		return false
+	}
+
+	// 2. Compare incipits (all variants)
+	if !equalStringSlices(piece1.Incipit, piece2.Incipit) {
+		return false
+	}
+
+	// 3. Compare issue references (must have identical coverage)
+	if !equalIssueRefs(piece1.IssueRefs, piece2.IssueRefs) {
+		return false
+	}
+
+	// 4. Compare category references
+	if !equalCategoryRefs(piece1.CategoryRefs, piece2.CategoryRefs) {
+		return false
+	}
+
+	// 5. Compare agent references (authors, etc.)
+	if !equalAgentRefs(piece1.AgentRefs, piece2.AgentRefs) {
+		return false
+	}
+
+	// 6. Compare work references
+	if !equalWorkRefs(piece1.WorkRefs, piece2.WorkRefs) {
+		return false
+	}
+
+	// 7. Compare place references
+	if !equalPlaceRefs(piece1.PlaceRefs, piece2.PlaceRefs) {
+		return false
+	}
+
+	return true
+}
+
+// Helper functions for comparing slices and references
+
+func equalStringSlices(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func equalIssueRefs(a, b []xmlmodels.IssueRef) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].When.Year != b[i].When.Year ||
+			a[i].Nr != b[i].Nr ||
+			a[i].Von != b[i].Von ||
+			a[i].Bis != b[i].Bis {
+			return false
+		}
+	}
+	return true
+}
+
+func equalCategoryRefs(a, b []xmlmodels.CategoryRef) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].Ref != b[i].Ref {
+			return false
+		}
+	}
+	return true
+}
+
+func equalAgentRefs(a, b []xmlmodels.AgentRef) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].Ref != b[i].Ref || a[i].Category != b[i].Category {
+			return false
+		}
+	}
+	return true
+}
+
+func equalWorkRefs(a, b []xmlmodels.WorkRef) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].Ref != b[i].Ref {
+			return false
+		}
+	}
+	return true
+}
+
+func equalPlaceRefs(a, b []xmlmodels.PlaceRef) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].Ref != b[i].Ref {
+			return false
+		}
+	}
+	return true
 }
 

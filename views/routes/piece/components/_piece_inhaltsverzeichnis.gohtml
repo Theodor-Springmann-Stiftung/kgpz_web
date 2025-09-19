@@ -82,10 +82,10 @@
 								<!-- Content area -->
 								<div class="space-y-0">
 									{{ if $pageEntry.OtherPieces }}
+										<div class="italic text-slate-600 text-xs pt-1 pb-1">Außerdem:</div>
 										{{ range $otherPiece := $pageEntry.OtherPieces }}
 											<div class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200"
 												 data-page="{{ $pageEntry.PageNumber }}">
-												<div class="italic text-slate-600 text-xs mb-1">Außerdem:</div>
 												{{ template "_inhaltsverzeichnis_eintrag" $otherPiece.PieceByIssue }}
 											</div>
 										{{ end }}

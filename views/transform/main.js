@@ -1064,13 +1064,44 @@ class SinglePageViewer extends HTMLElement {
 	constructor() {
 		super();
 		// No shadow DOM - use regular DOM to allow Tailwind CSS
+		this.resizeObserver = null;
+	}
+
+	// Dynamically detect sidebar width in pixels
+	detectSidebarWidth() {
+		// Find the actual sidebar element in the current layout
+		const sidebar = document.querySelector('.lg\\:w-1\\/4, .lg\\:w-1\\/3, [class*="lg:w-1/"]');
+
+		if (sidebar) {
+			const sidebarRect = sidebar.getBoundingClientRect();
+			const sidebarWidth = sidebarRect.width;
+			console.log('Detected sidebar width:', sidebarWidth, 'px');
+			return `${sidebarWidth}px`;
+		}
+
+		// Fallback: calculate based on viewport width and responsive breakpoints
+		const viewportWidth = window.innerWidth;
+
+		if (viewportWidth < 1024) {
+			// Below lg breakpoint - no sidebar space needed
+			return '0px';
+		} else if (viewportWidth < 1280) {
+			// lg breakpoint: assume 1/4 of viewport (similar to both layouts)
+			return `${Math.floor(viewportWidth * 0.25)}px`;
+		} else {
+			// xl breakpoint: assume 1/5 of viewport (narrower on larger screens)
+			return `${Math.floor(viewportWidth * 0.2)}px`;
+		}
 	}
 
 	connectedCallback() {
+		// Detect sidebar width dynamically
+		const sidebarWidth = this.detectSidebarWidth();
+
 		this.innerHTML = `
 			<div class="fixed inset-0 z-50 flex pointer-events-none">
 				<!-- Keep Inhaltsverzeichnis area empty/transparent (collapsible) -->
-				<div id="sidebar-spacer" class="lg:w-1/4 xl:w-1/5 flex-shrink-0 transition-all duration-300"></div>
+				<div id="sidebar-spacer" style="width: ${sidebarWidth};" class="flex-shrink-0 transition-all duration-300"></div>
 
 				<!-- Cover the right columns with the zoomed view -->
 				<div class="flex-1 bg-slate-50 overflow-auto pointer-events-auto">
@@ -1161,6 +1192,36 @@ class SinglePageViewer extends HTMLElement {
 				</div>
 			</div>
 		`;
+
+		// Set up resize observer to handle window resizing
+		this.setupResizeObserver();
+	}
+
+	// Set up resize observer to dynamically update sidebar width
+	setupResizeObserver() {
+		// Clean up existing observer
+		if (this.resizeObserver) {
+			this.resizeObserver.disconnect();
+		}
+
+		// Create new resize observer
+		this.resizeObserver = new ResizeObserver(() => {
+			this.updateSidebarWidth();
+		});
+
+		// Observe window resizing by watching the document body
+		this.resizeObserver.observe(document.body);
+	}
+
+	// Update sidebar width when window is resized
+	updateSidebarWidth() {
+		const sidebarSpacer = this.querySelector('#sidebar-spacer');
+		if (sidebarSpacer && !sidebarSpacer.style.width.includes('0px')) {
+			// Only update if sidebar is not collapsed (not 0px width)
+			const newWidth = this.detectSidebarWidth();
+			sidebarSpacer.style.width = newWidth;
+			console.log('Updated sidebar width to:', newWidth);
+		}
 	}
 
 	show(imgSrc, imgAlt, pageNumber, isBeilage = false, targetPage = 0) {
@@ -1224,6 +1285,12 @@ class SinglePageViewer extends HTMLElement {
 
 	// Clean up component completely
 	destroy() {
+		// Clean up resize observer
+		if (this.resizeObserver) {
+			this.resizeObserver.disconnect();
+			this.resizeObserver = null;
+		}
+
 		// Restore background scrolling
 		document.body.style.overflow = '';
 
@@ -1429,26 +1496,26 @@ class SinglePageViewer extends HTMLElement {
 		const toggleBtn = this.querySelector('#sidebar-toggle-btn');
 		const toggleIcon = toggleBtn.querySelector('i');
 
-		// Check if sidebar is currently collapsed by looking at classes
-		const isCollapsed = sidebarSpacer.classList.contains('w-0');
+		// Check if sidebar is currently collapsed by looking at width
+		const currentWidth = sidebarSpacer.style.width;
+		const isCollapsed = currentWidth === '0px' || currentWidth === '0';
 
 		console.log('Current state - isCollapsed:', isCollapsed);
-		console.log('Current classes:', sidebarSpacer.className);
+		console.log('Current width:', currentWidth);
 
 		if (isCollapsed) {
 			// Sidebar is collapsed, expand it
-			sidebarSpacer.classList.remove('w-0');
-			sidebarSpacer.classList.add('lg:w-1/4', 'xl:w-1/5');
+			const fullWidth = this.detectSidebarWidth();
+			sidebarSpacer.style.width = fullWidth;
 
 			// Update button to normal state (sidebar visible)
 			toggleBtn.className = 'w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer';
 			toggleIcon.className = 'ri-sidebar-unfold-line text-lg font-bold';
 			toggleBtn.title = 'Inhaltsverzeichnis ausblenden';
-			console.log('Expanding sidebar');
+			console.log('Expanding sidebar to:', fullWidth);
 		} else {
 			// Sidebar is expanded, collapse it
-			sidebarSpacer.classList.remove('lg:w-1/4', 'xl:w-1/5');
-			sidebarSpacer.classList.add('w-0');
+			sidebarSpacer.style.width = '0px';
 
 			// Update button to active state (sidebar hidden - orange highlight)
 			toggleBtn.className = 'w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer';
@@ -1457,7 +1524,7 @@ class SinglePageViewer extends HTMLElement {
 			console.log('Collapsing sidebar');
 		}
 
-		console.log('New classes:', sidebarSpacer.className);
+		console.log('New width:', sidebarSpacer.style.width);
 	}
 
 	// Extract issue context from document title, URL, or page container
