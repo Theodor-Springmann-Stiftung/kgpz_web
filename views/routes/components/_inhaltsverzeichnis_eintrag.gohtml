@@ -420,7 +420,7 @@
 {{- if not $piece.IsContinuation -}}
 	{{- range $annotation := $piece.AnnotationNote.Annotations -}}
 		<div class="italic text-sm mt-0.5 text-slate-600">
-			{{ $annotation.Inner.InnerXML }}
+			{{ Safe $annotation.HTML }}
 		</div>
 	{{- end -}}
 {{- end -}}

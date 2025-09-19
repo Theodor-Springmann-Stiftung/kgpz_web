@@ -29,6 +29,14 @@ type Citation struct {
 	Inner
 }
 
+// HTML returns the HTML-transformed version of the citation
+func (c Citation) HTML() string {
+	if c.Inner.InnerXML != "" {
+		return transformToHTML(c.Inner.InnerXML)
+	}
+	return c.Value.Chardata
+}
+
 func (w Work) References() xmlprovider.ResolvingMap[Work] {
 	refs := make(xmlprovider.ResolvingMap[Work])
 
@@ -57,9 +65,15 @@ func (w Work) Readable(lib *Library) map[string]interface{} {
 		"Title":          w.Citation.Title,
 		"Year":           w.Citation.Year,
 		"CitationTitle":  w.Citation.Title,
+		"CitationHTML":   w.Citation.HTML(),
 	}
 
 	for k, v := range w.AnnotationNote.Readable() {
+		ret[k] = v
+	}
+
+	// Add HTML versions
+	for k, v := range w.AnnotationNote.ReadableHTML() {
 		ret[k] = v
 	}
 
