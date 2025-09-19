@@ -1042,12 +1042,12 @@ class SinglePageViewer extends HTMLElement {
 
 	connectedCallback() {
 		this.innerHTML = `
-			<div class="fixed inset-0 z-50 flex">
+			<div class="fixed inset-0 z-50 flex pointer-events-none">
 				<!-- Keep Inhaltsverzeichnis area empty/transparent (collapsible) -->
 				<div id="sidebar-spacer" class="lg:w-1/4 xl:w-1/5 flex-shrink-0 transition-all duration-300"></div>
 
 				<!-- Cover the right columns with the zoomed view -->
-				<div class="flex-1 bg-slate-50 overflow-auto">
+				<div class="flex-1 bg-slate-50 overflow-auto pointer-events-auto">
 					<div class="relative min-h-full flex flex-col">
 						<!-- Header with page info and buttons -->
 						<div class="flex items-center justify-between p-4">
@@ -1126,7 +1126,9 @@ class SinglePageViewer extends HTMLElement {
 								id="single-page-image"
 								src=""
 								alt=""
-								class="w-full h-auto rounded-lg shadow-2xl"
+								class="w-full h-auto rounded-lg shadow-2xl cursor-pointer"
+								onclick="this.closest('single-page-viewer').close()"
+								title="Klicken zum Schließen"
 							/>
 						</div>
 					</div>
@@ -1174,6 +1176,17 @@ class SinglePageViewer extends HTMLElement {
 
 		// Restore background scrolling
 		document.body.style.overflow = '';
+	}
+
+	// Clean up component completely
+	destroy() {
+		// Restore background scrolling
+		document.body.style.overflow = '';
+
+		// Remove the component from DOM
+		if (this.parentNode) {
+			this.parentNode.removeChild(this);
+		}
 	}
 
 	// Determine page icon type based on page position and whether it's beilage
@@ -1406,5 +1419,23 @@ class SinglePageViewer extends HTMLElement {
 
 // Register the web component
 customElements.define('single-page-viewer', SinglePageViewer);
+
+// Clean up single page viewer on HTMX navigation
+document.body.addEventListener('htmx:beforeRequest', function(event) {
+	// Find any active single page viewer
+	const viewer = document.querySelector('single-page-viewer');
+	if (viewer && viewer.style.display !== 'none') {
+		console.log('Cleaning up single page viewer before HTMX navigation');
+		viewer.destroy();
+	}
+});
+
+// Also clean up on page unload as fallback
+window.addEventListener('beforeunload', function() {
+	const viewer = document.querySelector('single-page-viewer');
+	if (viewer) {
+		viewer.destroy();
+	}
+});
 
 export { setup };
