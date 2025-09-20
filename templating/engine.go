@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"reflect"
 	"strings"
 	"sync"
 
@@ -90,6 +91,99 @@ func IssueContext(issueRef interface{}) string {
 	}
 }
 
+// shouldSwap determines if two pieces should be swapped for chronological ordering
+func shouldSwap(item1, item2 interface{}) bool {
+	// Use reflection to access IssueRefs field
+	v1 := reflect.ValueOf(item1)
+	v2 := reflect.ValueOf(item2)
+
+	if v1.Kind() == reflect.Ptr {
+		v1 = v1.Elem()
+	}
+	if v2.Kind() == reflect.Ptr {
+		v2 = v2.Elem()
+	}
+
+	if v1.Kind() != reflect.Struct || v2.Kind() != reflect.Struct {
+		return false
+	}
+
+	refs1 := v1.FieldByName("IssueRefs")
+	refs2 := v2.FieldByName("IssueRefs")
+
+	if !refs1.IsValid() || !refs2.IsValid() || refs1.Len() == 0 || refs2.Len() == 0 {
+		return false
+	}
+
+	// Get first IssueRef for each piece
+	ref1 := refs1.Index(0)
+	ref2 := refs2.Index(0)
+
+	// Get year
+	when1 := ref1.FieldByName("When")
+	when2 := ref2.FieldByName("When")
+	if !when1.IsValid() || !when2.IsValid() {
+		return false
+	}
+
+	year1 := when1.FieldByName("Year")
+	year2 := when2.FieldByName("Year")
+	if !year1.IsValid() || !year2.IsValid() {
+		return false
+	}
+
+	y1 := int(year1.Int())
+	y2 := int(year2.Int())
+
+	if y1 != y2 {
+		return y1 > y2 // Sort by year ascending
+	}
+
+	// If same year, sort by issue number
+	nr1 := ref1.FieldByName("Nr")
+	nr2 := ref2.FieldByName("Nr")
+	if !nr1.IsValid() || !nr2.IsValid() {
+		return false
+	}
+
+	n1 := int(nr1.Int())
+	n2 := int(nr2.Int())
+
+	if n1 != n2 {
+		return n1 > n2 // Sort by issue number ascending
+	}
+
+	// If same issue, sort by order
+	order1 := ref1.FieldByName("Order")
+	order2 := ref2.FieldByName("Order")
+	if !order1.IsValid() || !order2.IsValid() {
+		return false
+	}
+
+	o1 := int(order1.Int())
+	o2 := int(order2.Int())
+
+	return o1 > o2 // Sort by order ascending
+}
+
+// extractItem extracts the Item field from a Resolved struct
+func extractItem(piece interface{}) interface{} {
+	v := reflect.ValueOf(piece)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return nil
+	}
+
+	itemField := v.FieldByName("Item")
+	if !itemField.IsValid() {
+		return nil
+	}
+
+	return itemField.Interface()
+}
+
 func (e *Engine) funcs() error {
 	e.mu.Lock()
 	e.mu.Unlock()
@@ -136,6 +230,50 @@ func (e *Engine) funcs() error {
 	e.AddFunc("Upper", strings.ToUpper)
 	e.AddFunc("Lower", strings.ToLower)
 	e.AddFunc("Safe", functions.Safe)
+
+	// Sorting
+	e.AddFunc("SortPiecesByDate", func(pieces interface{}) interface{} {
+		// Use reflection to handle any slice type
+		v := reflect.ValueOf(pieces)
+		if v.Kind() != reflect.Slice {
+			return pieces
+		}
+
+		length := v.Len()
+		if length == 0 {
+			return pieces
+		}
+
+		// Create indices for sorting
+		indices := make([]int, length)
+		for i := range indices {
+			indices[i] = i
+		}
+
+		// Sort indices based on piece comparison
+		for i := 0; i < len(indices)-1; i++ {
+			for j := i + 1; j < len(indices); j++ {
+				piece1 := v.Index(indices[i]).Interface()
+				piece2 := v.Index(indices[j]).Interface()
+
+				// Extract the Item field from each resolved piece
+				item1 := extractItem(piece1)
+				item2 := extractItem(piece2)
+
+				if item1 != nil && item2 != nil && shouldSwap(item1, item2) {
+					indices[i], indices[j] = indices[j], indices[i]
+				}
+			}
+		}
+
+		// Create sorted slice with same type as input
+		sortedSlice := reflect.MakeSlice(v.Type(), length, length)
+		for i, idx := range indices {
+			sortedSlice.Index(i).Set(v.Index(idx))
+		}
+
+		return sortedSlice.Interface()
+	})
 
 	// Embedding of file contents
 	embedder := functions.NewEmbedder(views.StaticFS)

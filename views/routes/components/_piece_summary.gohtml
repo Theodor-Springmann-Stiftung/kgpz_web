@@ -1,0 +1,182 @@
+{{- $piece := . -}}
+
+<div class="leading-snug">
+	{{- $categoryFlags := GetCategoryFlags $piece -}}
+
+	{{- $place := "" -}}
+	{{- if $piece.PlaceRefs -}}
+		{{- $placeObj := GetPlace (index $piece.PlaceRefs 0).Ref -}}
+		{{- if gt (len $placeObj.Names) 0 -}}
+			{{- $place = index $placeObj.Names 0 -}}
+		{{- end -}}
+	{{- end -}}
+
+	{{- $title := "" -}}
+	{{- if $piece.Title -}}
+		{{- $title = index $piece.Title 0 -}}
+	{{- else if $piece.Incipit -}}
+		{{- $title = index $piece.Incipit 0 -}}
+	{{- end -}}
+
+	{{- $workTitle := "" -}}
+	{{- $workAuthorName := "" -}}
+	{{- $workAuthorID := "" -}}
+	{{- if $piece.WorkRefs -}}
+		{{- $work := GetWork (index $piece.WorkRefs 0).Ref -}}
+		{{- if $work.PreferredTitle -}}
+			{{- $workTitle = $work.PreferredTitle -}}
+		{{- else if $work.Citation.Title -}}
+			{{- $workTitle = $work.Citation.Title -}}
+		{{- end -}}
+		{{- if $work.AgentRefs -}}
+			{{- range $workAgentRef := $work.AgentRefs -}}
+				{{- if (or (eq $workAgentRef.Category "") (eq $workAgentRef.Category "autor")) -}}
+					{{- $workAgent := GetAgent $workAgentRef.Ref -}}
+					{{- if and $workAgent (gt (len $workAgent.Names) 0) -}}
+						{{- $workAuthorName = index $workAgent.Names 0 -}}
+						{{- $workAuthorID = $workAgentRef.Ref -}}
+						{{- break -}}
+					{{- end -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+	{{- end -}}
+
+	{{- /* Generate piece descriptions */ -}}
+	{{- if $categoryFlags.Rezension -}}
+		{{- $authorFound := false -}}
+		{{- range $agentref := $piece.AgentRefs -}}
+			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+				{{- $agent := GetAgent $agentref.Ref -}}
+				{{- if and $agent (gt (len $agent.Names) 0) -}}
+					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Rezension von:
+					{{ if $workAuthorName }}
+						<a href="/akteure/{{ $workAuthorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>,
+					{{ end }}
+					{{ if $workTitle }}
+						<em>{{ $workTitle }}</em>
+					{{ else if $title }}
+						<em>{{ $title }}</em>
+					{{ else }}
+						[Werk unbekannt]
+					{{ end }}
+					{{- $authorFound = true -}}
+					{{- break -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+		{{- if not $authorFound -}}
+			Rezension von:
+			{{ if $workAuthorName }}
+				<a href="/akteure/{{ $workAuthorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>,
+			{{ end }}
+			{{ if $workTitle }}
+				<em>{{ $workTitle }}</em>
+			{{ else if $title }}
+				<em>{{ $title }}</em>
+			{{ else }}
+				[Werk unbekannt]
+			{{ end }}
+		{{- end -}}
+
+	{{- else if $categoryFlags.Gedicht -}}
+		{{- $authorFound := false -}}
+		{{- range $agentref := $piece.AgentRefs -}}
+			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+				{{- $agent := GetAgent $agentref.Ref -}}
+				{{- if and $agent (gt (len $agent.Names) 0) -}}
+					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Gedicht{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
+					{{- $authorFound = true -}}
+					{{- break -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+		{{- if not $authorFound -}}
+			Gedicht{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
+		{{- end -}}
+
+	{{- else if $categoryFlags.Aufsatz -}}
+		{{- $authorFound := false -}}
+		{{- range $agentref := $piece.AgentRefs -}}
+			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+				{{- $agent := GetAgent $agentref.Ref -}}
+				{{- if and $agent (gt (len $agent.Names) 0) -}}
+					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Aufsatz{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
+					{{- $authorFound = true -}}
+					{{- break -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+		{{- if not $authorFound -}}
+			Aufsatz{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
+		{{- end -}}
+
+	{{- else if $categoryFlags.Theaterkritik -}}
+		{{- $authorFound := false -}}
+		{{- range $agentref := $piece.AgentRefs -}}
+			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+				{{- $agent := GetAgent $agentref.Ref -}}
+				{{- if and $agent (gt (len $agent.Names) 0) -}}
+					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Theaterkritik{{ if $workTitle }} zu <em>{{ $workTitle }}</em>{{ else if $title }} zu <em>{{ $title }}</em>{{ end }}
+					{{- $authorFound = true -}}
+					{{- break -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+		{{- if not $authorFound -}}
+			Theaterkritik{{ if $workTitle }} zu <em>{{ $workTitle }}</em>{{ else if $title }} zu <em>{{ $title }}</em>{{ end }}
+		{{- end -}}
+
+	{{- else if $categoryFlags.Brief -}}
+		{{ if $categoryFlags.Nachruf }}Kondolenzbrief{{ else }}Leserbrief{{ end }}
+		{{- range $agentref := $piece.AgentRefs -}}
+			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+				{{- $agent := GetAgent $agentref.Ref -}}
+				{{- if and $agent (gt (len $agent.Names) 0) -}}
+					von <a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>
+					{{- break -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+
+	{{- else if $categoryFlags.Erzaehlung -}}
+		{{- $authorFound := false -}}
+		{{- range $agentref := $piece.AgentRefs -}}
+			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+				{{- $agent := GetAgent $agentref.Ref -}}
+				{{- if and $agent (gt (len $agent.Names) 0) -}}
+					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Erzählung{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
+					{{- $authorFound = true -}}
+					{{- break -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+		{{- if not $authorFound -}}
+			Erzählung{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
+		{{- end -}}
+
+	{{- else if $categoryFlags.Lokalnachrichten -}}
+		{{ if $categoryFlags.Lotterie }}Lotterienachrichten{{ else if $categoryFlags.Nachruf }}Nachrufe{{ else if $categoryFlags.Theaterkritik }}Theaternachrichten{{ else }}Lokalnachrichten{{ end }}
+
+	{{- else if $categoryFlags.Weltnachrichten -}}
+		Politische Nachrichten aus aller Welt
+
+	{{- else -}}
+		{{- $authorFound := false -}}
+		{{- range $agentref := $piece.AgentRefs -}}
+			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+				{{- $agent := GetAgent $agentref.Ref -}}
+				{{- if and $agent (gt (len $agent.Names) 0) -}}
+					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{ if $title }}: <em>{{ $title }}</em>{{ end }}
+					{{- $authorFound = true -}}
+					{{- break -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+		{{- if not $authorFound -}}
+			{{ if $title }}<em>{{ $title }}</em>{{ else }}Beitrag ohne Titel{{ end }}
+		{{- end -}}
+	{{- end -}}
+
+	{{- if $place }} <span class="inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md ml-1 whitespace-nowrap">{{ $place }}</span>{{ end }}
+</div>
