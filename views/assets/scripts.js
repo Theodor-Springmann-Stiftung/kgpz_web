@@ -1,18 +1,18 @@
-const A = "script[xslt-onload]", m = "xslt-template", E = "xslt-transformed", y = /* @__PURE__ */ new Map();
+const A = "script[xslt-onload]", w = "xslt-template", E = "xslt-transformed", y = /* @__PURE__ */ new Map();
 function v() {
   let i = htmx.findAll(A);
   for (let t of i)
     L(t);
 }
 function L(i) {
-  if (i.getAttribute(E) === "true" || !i.hasAttribute(m))
+  if (i.getAttribute(E) === "true" || !i.hasAttribute(w))
     return;
-  let t = "#" + i.getAttribute(m), e = y.get(t);
+  let t = "#" + i.getAttribute(w), e = y.get(t);
   if (!e) {
-    let a = htmx.find(t);
-    if (a) {
-      let s = a.innerHTML ? new DOMParser().parseFromString(a.innerHTML, "application/xml") : a.contentDocument;
-      e = new XSLTProcessor(), e.importStylesheet(s), y.set(t, e);
+    let s = htmx.find(t);
+    if (s) {
+      let a = s.innerHTML ? new DOMParser().parseFromString(s.innerHTML, "application/xml") : s.contentDocument;
+      e = new XSLTProcessor(), e.importStylesheet(a), y.set(t, e);
     } else
       throw new Error("Unknown XSLT template: " + t);
   }
@@ -31,8 +31,8 @@ function q() {
         connectedCallback() {
           let o = [];
           this.slots.forEach((r) => {
-            let a = r.getAttribute("name"), s = this.querySelector(`[slot="${a}"]`);
-            s && (r.replaceWith(s.cloneNode(!0)), o.push(s));
+            let s = r.getAttribute("name"), a = this.querySelector(`[slot="${s}"]`);
+            a && (r.replaceWith(a.cloneNode(!0)), o.push(a));
           }), o.forEach((r) => {
             r.remove();
           });
@@ -46,12 +46,12 @@ window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
 window.scrollTimeout = window.scrollTimeout || null;
-function k() {
+function $() {
   window.highlightObserver && (window.highlightObserver.disconnect(), window.highlightObserver = null);
   const i = document.querySelectorAll(".newspaper-page-container");
   window.highlightObserver = new IntersectionObserver(
     (t) => {
-      S();
+      P();
     },
     {
       rootMargin: "-20% 0px -70% 0px"
@@ -60,14 +60,14 @@ function k() {
     window.highlightObserver.observe(t);
   });
 }
-function S() {
+function P() {
   const i = [];
   document.querySelectorAll(".newspaper-page-container").forEach((e) => {
-    const n = e.getBoundingClientRect(), o = window.innerHeight, r = Math.max(n.top, 0), a = Math.min(n.bottom, o), s = Math.max(0, a - r), l = n.height, u = s / l >= 0.5, g = e.querySelector("img[data-page]"), p = g ? g.getAttribute("data-page") : "unknown";
-    u && g && p && !i.includes(p) && i.push(p);
-  }), $(i), i.length > 0 && C(i);
+    const n = e.getBoundingClientRect(), o = window.innerHeight, r = Math.max(n.top, 0), s = Math.min(n.bottom, o), a = Math.max(0, s - r), l = n.height, g = a / l >= 0.5, u = e.querySelector("img[data-page]"), p = u ? u.getAttribute("data-page") : "unknown";
+    g && u && p && !i.includes(p) && i.push(p);
+  }), k(i), i.length > 0 && C(i);
 }
-function $(i) {
+function k(i) {
   document.querySelectorAll(".continuation-entry").forEach((t) => {
     t.style.display = "none";
   }), i.forEach((t) => {
@@ -98,7 +98,7 @@ function M() {
     }), e ? i.style.display = "" : i.style.display = "none";
   });
 }
-function P(i) {
+function S(i) {
   C([i]);
 }
 function C(i) {
@@ -117,28 +117,24 @@ function C(i) {
       `.page-number-inhalts[data-page-number="${e}"]`
     );
     if (n) {
-      n.classList.remove(
-        "text-slate-700",
-        "hover:bg-blue-100",
-        "hover:bg-amber-100"
-      ), n.classList.add("text-red-600", "font-bold"), n.style.textDecoration = "none", n.style.pointerEvents = "none", t.push(n);
+      n.classList.remove("text-slate-700", "hover:bg-blue-100", "hover:bg-amber-100"), n.classList.add("text-red-600", "font-bold"), n.style.textDecoration = "none", n.style.pointerEvents = "none", t.push(n);
       const o = document.querySelector(`[data-page-container="${e}"]`);
       o && (o.classList.remove("border-slate-300", "border-amber-400"), o.classList.add("border-red-500"));
       const r = n.closest(".page-entry");
-      r && (r.querySelectorAll(".inhalts-entry").forEach((s) => {
-        s.classList.remove("hover:bg-slate-100"), s.style.cursor = "default";
-      }), r.querySelectorAll('a[href*="/"]').forEach((s) => {
-        s.getAttribute("aria-current") === "page" && (s.style.textDecoration = "none", s.style.pointerEvents = "none", s.classList.add("no-underline"), s.classList.remove("hover:bg-blue-100"));
+      r && (r.querySelectorAll(".inhalts-entry").forEach((a) => {
+        a.classList.remove("hover:bg-slate-100"), a.style.cursor = "default";
+      }), r.querySelectorAll('a[href*="/"]').forEach((a) => {
+        a.getAttribute("aria-current") === "page" && (a.style.textDecoration = "none", a.style.pointerEvents = "none", a.classList.add("no-underline"), a.classList.remove("hover:bg-blue-100"));
       }));
     }
-  }), t.length > 0 && H(t[0]), document.querySelectorAll(".page-indicator").forEach((e) => {
+  }), t.length > 0 && N(t[0]), document.querySelectorAll(".page-indicator").forEach((e) => {
     e.classList.remove("text-red-600", "font-bold"), e.classList.add("text-slate-600", "font-semibold"), e.classList.contains("bg-amber-50") || e.classList.add("bg-blue-50");
   }), i.forEach((e) => {
     const n = document.querySelector(`.page-indicator[data-page="${e}"]`);
     n && (n.classList.remove("text-slate-600"), n.classList.add("text-red-600", "font-bold"));
   });
 }
-function H(i) {
+function N(i) {
   const t = i.closest(".lg\\:overflow-y-auto");
   if (t) {
     const e = t.getBoundingClientRect(), n = i.getBoundingClientRect(), o = n.top < e.top, r = n.bottom > e.bottom;
@@ -148,19 +144,17 @@ function H(i) {
     });
   }
 }
-function N(i, t, e) {
-  let n = document.querySelector("single-page-viewer");
-  n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
-  const o = i.closest('[data-beilage="true"]') !== null, r = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
-  n.show(i.src, i.alt, t, o, r);
+function H(i, t, e, n = null) {
+  let o = document.querySelector("single-page-viewer");
+  o || (o = document.createElement("single-page-viewer"), document.body.appendChild(o));
+  const r = i.closest('[data-beilage="true"]') !== null, s = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
+  o.show(i.src, i.alt, t, r, s, n);
 }
 function I() {
   document.getElementById("pageModal").classList.add("hidden");
 }
 function O() {
-  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(
-    document.querySelectorAll(".newspaper-page-container")
-  ), window.currentActiveIndex = 0, h(), document.querySelector(".newspaper-page-container")) {
+  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, h(), document.querySelector(".newspaper-page-container")) {
     let t = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
       (e) => {
@@ -168,7 +162,7 @@ function O() {
           const o = window.currentPageContainers.indexOf(n.target);
           o !== -1 && (n.isIntersecting ? t.add(o) : t.delete(o));
         }), t.size > 0) {
-          const o = Array.from(t).sort((r, a) => r - a)[0];
+          const o = Array.from(t).sort((r, s) => r - s)[0];
           o !== window.currentActiveIndex && (window.currentActiveIndex = o, h());
         }
       },
@@ -185,8 +179,8 @@ function R() {
     let i = -1;
     const t = [];
     window.currentPageContainers.forEach((n, o) => {
-      const r = n.getBoundingClientRect(), a = window.innerHeight, s = Math.max(r.top, 0), l = Math.min(r.bottom, a), c = Math.max(0, l - s), u = r.height;
-      c / u >= 0.3 && t.push(o);
+      const r = n.getBoundingClientRect(), s = window.innerHeight, a = Math.max(r.top, 0), l = Math.min(r.bottom, s), c = Math.max(0, l - a), g = r.height;
+      c / g >= 0.3 && t.push(o);
     });
     const e = Math.min(...t);
     for (let n = e - 1; n >= 0; n--)
@@ -207,8 +201,8 @@ function z() {
     let i = -1;
     const t = [];
     window.currentPageContainers.forEach((n, o) => {
-      const r = n.getBoundingClientRect(), a = window.innerHeight, s = Math.max(r.top, 0), l = Math.min(r.bottom, a), c = Math.max(0, l - s), u = r.height;
-      c / u >= 0.3 && t.push(o);
+      const r = n.getBoundingClientRect(), s = window.innerHeight, a = Math.max(r.top, 0), l = Math.min(r.bottom, s), c = Math.max(0, l - a), g = r.height;
+      c / g >= 0.3 && t.push(o);
     });
     const e = Math.max(...t);
     for (let n = e + 1; n < window.currentPageContainers.length; n++)
@@ -242,8 +236,8 @@ function D() {
 function T() {
   const i = [];
   window.currentPageContainers.forEach((t, e) => {
-    const n = t.getBoundingClientRect(), o = window.innerHeight, r = Math.max(n.top, 0), a = Math.min(n.bottom, o), s = Math.max(0, a - r), l = n.height;
-    s / l >= 0.3 && i.push(e);
+    const n = t.getBoundingClientRect(), o = window.innerHeight, r = Math.max(n.top, 0), s = Math.min(n.bottom, o), a = Math.max(0, s - r), l = n.height;
+    a / l >= 0.3 && i.push(e);
   });
   for (const t of i) {
     const e = window.currentPageContainers[t];
@@ -309,8 +303,8 @@ function V() {
     const r = document.createElement("textarea");
     r.value = o, document.body.appendChild(r), r.select();
     try {
-      const a = document.execCommand("copy");
-      d(i, a ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      const s = document.execCommand("copy");
+      d(i, s ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
       d(i, "Kopieren fehlgeschlagen");
     } finally {
@@ -336,10 +330,10 @@ function d(i, t) {
 		transition: opacity 0.2s ease;
 		white-space: nowrap;
 	`;
-  const o = i.getBoundingClientRect(), r = window.innerHeight, a = window.innerWidth;
-  let s = o.left - 10, l = o.bottom + 8;
-  const c = 120, u = 32;
-  s + c > a && (s = o.right - c + 10), l + u > r && (l = o.top - u - 8), n.style.left = Math.max(5, s) + "px", n.style.top = Math.max(5, l) + "px", document.body.appendChild(n), setTimeout(() => {
+  const o = i.getBoundingClientRect(), r = window.innerHeight, s = window.innerWidth;
+  let a = o.left - 10, l = o.bottom + 8;
+  const c = 120, g = 32;
+  a + c > s && (a = o.right - c + 10), l + g > r && (l = o.top - g - 8), n.style.left = Math.max(5, a) + "px", n.style.top = Math.max(5, l) + "px", document.body.appendChild(n), setTimeout(() => {
     n.style.opacity = "1";
   }, 10), setTimeout(() => {
     n.style.opacity = "0", setTimeout(() => {
@@ -347,7 +341,7 @@ function d(i, t) {
     }, 200);
   }, 2e3);
 }
-function W() {
+function j() {
   let i = "", t = null;
   const e = window.location.pathname.split("/");
   if (e.length >= 4 && !isNaN(e[e.length - 1])) {
@@ -367,18 +361,18 @@ function W() {
     t.scrollIntoView({
       behavior: "smooth",
       block: "start"
-    }), P(i);
+    }), S(i);
   }, 300);
 }
-function f(i, t, e = !1) {
+function b(i, t, e = !1) {
   let n = "";
   if (e)
     n = window.location.origin + window.location.pathname + `#beilage-1-page-${i}`;
   else {
     const r = window.location.pathname.split("/");
     if (r.length >= 3) {
-      const a = r[1], s = r[2];
-      n = `${window.location.origin}/${a}/${s}/${i}`;
+      const s = r[1], a = r[2];
+      n = `${window.location.origin}/${s}/${a}/${i}`;
     } else
       n = window.location.origin + window.location.pathname + `/${i}`;
   }
@@ -393,8 +387,8 @@ function f(i, t, e = !1) {
     const r = document.createElement("textarea");
     r.value = o, document.body.appendChild(r), r.select();
     try {
-      const a = document.execCommand("copy");
-      d(t, a ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      const s = document.execCommand("copy");
+      d(t, s ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
       d(t, "Kopieren fehlgeschlagen");
     } finally {
@@ -402,7 +396,7 @@ function f(i, t, e = !1) {
     }
   }
 }
-function w(i, t) {
+function m(i, t) {
   const e = document.title || "KGPZ", n = window.location.pathname.split("/");
   let o;
   if (n.length >= 3) {
@@ -410,16 +404,16 @@ function w(i, t) {
     o = `${window.location.origin}/${l}/${c}/${i}`;
   } else
     o = `${window.location.origin}${window.location.pathname}/${i}`;
-  const r = o, a = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), s = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}, Seite ${i}. Digital verfügbar unter: ${r} (Zugriff: ${a}).`;
+  const r = o, s = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), a = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}, Seite ${i}. Digital verfügbar unter: ${r} (Zugriff: ${s}).`;
   if (navigator.clipboard)
-    navigator.clipboard.writeText(s).then(() => {
+    navigator.clipboard.writeText(a).then(() => {
       d(t, "Zitation kopiert!");
     }).catch((l) => {
       d(t, "Kopieren fehlgeschlagen");
     });
   else {
     const l = document.createElement("textarea");
-    l.value = s, document.body.appendChild(l), l.select();
+    l.value = a, document.body.appendChild(l), l.select();
     try {
       const c = document.execCommand("copy");
       d(t, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
@@ -430,42 +424,42 @@ function w(i, t) {
     }
   }
 }
-function b() {
-  k(), O(), window.addEventListener("scroll", function() {
+function f() {
+  $(), O(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
-      S(), h();
+      P(), h();
     }, 50);
-  }), W(), document.addEventListener("keydown", function(i) {
+  }), j(), document.addEventListener("keydown", function(i) {
     i.key === "Escape" && I();
   });
 }
-window.enlargePage = N;
+window.enlargePage = H;
 window.closeModal = I;
 window.scrollToPreviousPage = R;
 window.scrollToNextPage = z;
 window.scrollToBeilage = D;
 window.shareCurrentPage = K;
 window.generateCitation = V;
-window.copyPagePermalink = f;
-window.generatePageCitation = w;
+window.copyPagePermalink = b;
+window.generatePageCitation = m;
 function Z() {
-  v(), q(), document.querySelector(".newspaper-page-container") && b(), htmx.on("htmx:load", function(i) {
+  v(), q(), document.querySelector(".newspaper-page-container") && f(), htmx.on("htmx:load", function(i) {
     v();
   }), document.body.addEventListener("htmx:afterSwap", function(i) {
     setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && b();
+      document.querySelector(".newspaper-page-container") && f();
     }, 100);
   }), document.body.addEventListener("htmx:afterSettle", function(i) {
     setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && b();
+      document.querySelector(".newspaper-page-container") && f();
     }, 200);
   }), document.body.addEventListener("htmx:load", function(i) {
     setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && b();
+      document.querySelector(".newspaper-page-container") && f();
     }, 100);
   });
 }
-class j extends HTMLElement {
+class W extends HTMLElement {
   constructor() {
     super(), this.resizeObserver = null;
   }
@@ -499,7 +493,7 @@ class j extends HTMLElement {
 									onclick="this.closest('single-page-viewer').toggleSidebar()"
 									class="w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
 									title="Inhaltsverzeichnis ein-/ausblenden">
-									<i class="ri-sidebar-unfold-line text-lg font-bold"></i>
+									<i class="ri-sidebar-fold-line text-lg font-bold"></i>
 								</button>
 
 								<!-- Page indicator with icon -->
@@ -590,19 +584,24 @@ class j extends HTMLElement {
       t.style.width = e, console.log("Updated sidebar width to:", e);
     }
   }
-  show(t, e, n, o = !1, r = 0) {
-    const a = this.querySelector("#single-page-image"), s = this.querySelector("#page-number"), l = this.querySelector("#page-icon");
-    this.querySelector("#page-indicator"), a.src = t, a.alt = e, this.currentPageNumber = n, this.currentIsBeilage = o;
-    const c = this.getIssueContext(n);
-    if (s.innerHTML = c ? `${c}, ${n}` : `${n}`, r && n === r) {
-      s.style.position = "relative";
-      const g = s.querySelector(".target-page-dot");
-      g && g.remove();
+  show(t, e, n, o = !1, r = 0, s = null) {
+    const a = this.querySelector("#single-page-image"), l = this.querySelector("#page-number"), c = this.querySelector("#page-icon");
+    this.querySelector("#page-indicator"), a.src = t, a.alt = e, this.currentPageNumber = n, this.currentIsBeilage = o, this.currentPartNumber = s;
+    const g = this.getIssueContext(n);
+    if (l.innerHTML = g ? `${g}, ${n}` : `${n}`, r && n === r) {
+      l.style.position = "relative";
+      const u = l.querySelector(".target-page-dot");
+      u && u.remove();
       const p = document.createElement("span");
-      p.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", p.title = "verlinkte Seite", s.appendChild(p);
+      p.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", p.title = "verlinkte Seite", l.appendChild(p);
     }
-    const u = this.determinePageIconType(n, o);
-    l.innerHTML = this.getPageIconHTML(u), this.updateNavigationButtons(), this.style.display = "block", document.body.style.overflow = "hidden", P(n);
+    if (s !== null)
+      c.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${s}. Teil</span>`;
+    else {
+      const u = this.determinePageIconType(n, o);
+      c.innerHTML = this.getPageIconHTML(u);
+    }
+    this.updateNavigationButtons(), this.style.display = "block", document.body.style.overflow = "hidden", S(n);
   }
   close() {
     this.style.display = "none", document.body.style.overflow = "";
@@ -619,8 +618,8 @@ class j extends HTMLElement {
     }).filter((l) => l !== null).sort((l, c) => l - c);
     if (r.length === 0)
       return "first";
-    const a = r[0], s = r[r.length - 1];
-    return t === a ? "first" : t === s ? "last" : t === a + 1 ? "even" : t === s - 1 ? "odd" : t % 2 === 0 ? "even" : "odd";
+    const s = r[0], a = r[r.length - 1];
+    return t === s ? "first" : t === a ? "last" : t === s + 1 ? "even" : t === a - 1 ? "odd" : t % 2 === 0 ? "even" : "odd";
   }
   // Generate page icon HTML based on type (same as Go PageIcon function)
   getPageIconHTML(t) {
@@ -640,38 +639,55 @@ class j extends HTMLElement {
   }
   // Share current page
   shareCurrentPage() {
-    if (typeof f == "function") {
+    if (typeof b == "function") {
       const t = this.querySelector("#share-btn");
-      f(this.currentPageNumber, t, this.currentIsBeilage);
+      b(this.currentPageNumber, t, this.currentIsBeilage);
     }
   }
   // Generate citation for current page
   generatePageCitation() {
-    if (typeof w == "function") {
+    if (typeof m == "function") {
       const t = this.querySelector("#cite-btn");
-      w(this.currentPageNumber, t);
+      m(this.currentPageNumber, t);
     }
   }
   // Update navigation button visibility based on available pages
   updateNavigationButtons() {
     const t = this.querySelector("#prev-page-btn"), e = this.querySelector("#next-page-btn"), { prevPage: n, nextPage: o } = this.getAdjacentPages();
-    n !== null ? (t.disabled = !1, t.className = t.className.replace("opacity-50 cursor-not-allowed", ""), t.className = t.className.replace("bg-gray-50 text-gray-400", "bg-gray-100 text-gray-700")) : (t.disabled = !0, t.className.includes("opacity-50") || (t.className += " opacity-50 cursor-not-allowed"), t.className = t.className.replace("bg-gray-100 text-gray-700", "bg-gray-50 text-gray-400")), o !== null ? (e.disabled = !1, e.className = e.className.replace("opacity-50 cursor-not-allowed", ""), e.className = e.className.replace("bg-gray-50 text-gray-400", "bg-gray-100 text-gray-700")) : (e.disabled = !0, e.className.includes("opacity-50") || (e.className += " opacity-50 cursor-not-allowed"), e.className = e.className.replace("bg-gray-100 text-gray-700", "bg-gray-50 text-gray-400"));
+    n !== null ? (t.disabled = !1, t.className = t.className.replace("opacity-50 cursor-not-allowed", ""), t.className = t.className.replace(
+      "bg-gray-50 text-gray-400",
+      "bg-gray-100 text-gray-700"
+    )) : (t.disabled = !0, t.className.includes("opacity-50") || (t.className += " opacity-50 cursor-not-allowed"), t.className = t.className.replace(
+      "bg-gray-100 text-gray-700",
+      "bg-gray-50 text-gray-400"
+    )), o !== null ? (e.disabled = !1, e.className = e.className.replace("opacity-50 cursor-not-allowed", ""), e.className = e.className.replace(
+      "bg-gray-50 text-gray-400",
+      "bg-gray-100 text-gray-700"
+    )) : (e.disabled = !0, e.className.includes("opacity-50") || (e.className += " opacity-50 cursor-not-allowed"), e.className = e.className.replace(
+      "bg-gray-100 text-gray-700",
+      "bg-gray-50 text-gray-400"
+    ));
   }
   // Get previous and next page numbers
   getAdjacentPages() {
     let t;
     this.currentIsBeilage ? t = '.newspaper-page-container[data-beilage="true"]' : t = ".newspaper-page-container:not([data-beilage])";
     const e = Array.from(document.querySelectorAll(t));
-    console.log("Found containers:", e.length, "for", this.currentIsBeilage ? "beilage" : "main");
-    const n = e.map((s) => {
-      const l = s.getAttribute("data-page-container"), c = l ? parseInt(l) : null;
+    console.log(
+      "Found containers:",
+      e.length,
+      "for",
+      this.currentIsBeilage ? "beilage" : "main"
+    );
+    const n = e.map((a) => {
+      const l = a.getAttribute("data-page-container"), c = l ? parseInt(l) : null;
       return console.log("Container page:", l, "parsed:", c), c;
-    }).filter((s) => s !== null).sort((s, l) => s - l);
+    }).filter((a) => a !== null).sort((a, l) => a - l);
     console.log("All pages found:", n), console.log("Current page:", this.currentPageNumber);
     const o = n.indexOf(this.currentPageNumber);
     console.log("Current index:", o);
-    let r = null, a = null;
-    return o > 0 && (r = n[o - 1]), o < n.length - 1 && (a = n[o + 1]), console.log("Adjacent pages - prev:", r, "next:", a), { prevPage: r, nextPage: a };
+    let r = null, s = null;
+    return o > 0 && (r = n[o - 1]), o < n.length - 1 && (s = n[o + 1]), console.log("Adjacent pages - prev:", r, "next:", s), { prevPage: r, nextPage: s };
   }
   // Navigate to previous page
   goToPreviousPage() {
@@ -685,33 +701,61 @@ class j extends HTMLElement {
   }
   // Navigate to a specific page
   navigateToPage(t) {
-    const e = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", n = document.querySelector(`${e}[data-page-container="${t}"]`);
+    const e = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", n = document.querySelector(
+      `${e}[data-page-container="${t}"]`
+    );
     if (n) {
       const o = n.querySelector(".newspaper-page-image");
-      o && this.show(o.src, o.alt, t, this.currentIsBeilage);
+      if (o) {
+        let r = null;
+        this.currentPartNumber !== null && (r = this.getPartNumberForPage(t)), this.show(
+          o.src,
+          o.alt,
+          t,
+          this.currentIsBeilage,
+          0,
+          r
+        );
+      }
     }
+  }
+  // Get part number for a specific page in piece view
+  getPartNumberForPage(t) {
+    const e = document.querySelector(`[data-page-container="${t}"]`);
+    if (e) {
+      const n = e.querySelector(".part-number");
+      if (n) {
+        const o = n.textContent.match(/(\d+)\./);
+        if (o)
+          return parseInt(o[1]);
+      }
+    }
+    return null;
   }
   // Toggle sidebar visibility
   toggleSidebar() {
     const t = this.querySelector("#sidebar-spacer"), e = this.querySelector("#sidebar-toggle-btn"), n = e.querySelector("i"), o = t.style.width, r = o === "0px" || o === "0";
     if (console.log("Current state - isCollapsed:", r), console.log("Current width:", o), r) {
-      const a = this.detectSidebarWidth();
-      t.style.width = a, e.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-unfold-line text-lg font-bold", e.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", a);
+      const s = this.detectSidebarWidth();
+      t.style.width = s, e.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-fold-line text-lg font-bold", e.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", s);
     } else
-      t.style.width = "0px", e.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-fold-line text-lg font-bold", e.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
+      t.style.width = "0px", e.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-unfold-line text-lg font-bold", e.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
     console.log("New width:", t.style.width);
   }
   // Extract issue context from document title, URL, or page container
   getIssueContext(t) {
     const e = window.location.pathname, n = e.includes("/beitrag/");
     if (n) {
-      const a = document.querySelector(`[data-page-container="${t}"]`);
-      if (a) {
-        const c = a.querySelector(".page-indicator");
+      const s = document.querySelector(`[data-page-container="${t}"]`);
+      if (s) {
+        const c = s.querySelector(".page-indicator");
         if (c) {
-          const g = c.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
-          if (g)
-            return `${g[1]} Nr. ${g[2]}`;
+          const g = c.textContent.trim(), u = g.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
+          if (u)
+            return u[1];
+          const p = g.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+          if (p)
+            return `${p[1]} Nr. ${p[2]}`;
         }
       }
       const l = document.title.match(/(\d{4}).*Nr\.\s*(\d+)/);
@@ -724,14 +768,14 @@ class j extends HTMLElement {
       return n ? `${o[1]} Nr. ${o[2]}` : "";
     const r = document.querySelector(".page-indicator");
     if (r) {
-      const s = r.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
-      if (s)
-        return `${s[1]} Nr. ${s[2]}`;
+      const a = r.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
+      if (a)
+        return `${a[1]} Nr. ${a[2]}`;
     }
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", j);
+customElements.define("single-page-viewer", W);
 document.body.addEventListener("htmx:beforeRequest", function(i) {
   const t = document.querySelector("single-page-viewer");
   t && t.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), t.destroy());

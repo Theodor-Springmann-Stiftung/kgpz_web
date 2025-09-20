@@ -280,11 +280,7 @@ function markCurrentPagesInInhaltsverzeichnis(pageNumbers) {
 
 		if (pageNumElement) {
 			// Highlight the page number
-			pageNumElement.classList.remove(
-				"text-slate-700",
-				"hover:bg-blue-100",
-				"hover:bg-amber-100",
-			);
+			pageNumElement.classList.remove("text-slate-700", "hover:bg-blue-100", "hover:bg-amber-100");
 			pageNumElement.classList.add("text-red-600", "font-bold");
 			pageNumElement.style.textDecoration = "none";
 			pageNumElement.style.pointerEvents = "none";
@@ -368,11 +364,11 @@ function scrollToHighlightedPage(element) {
 }
 
 // Modal functions
-function enlargePage(imgElement, pageNumber, isFromSpread) {
+function enlargePage(imgElement, pageNumber, isFromSpread, partNumber = null) {
 	// Get or create the single page viewer component
-	let viewer = document.querySelector('single-page-viewer');
+	let viewer = document.querySelector("single-page-viewer");
 	if (!viewer) {
-		viewer = document.createElement('single-page-viewer');
+		viewer = document.createElement("single-page-viewer");
 		document.body.appendChild(viewer);
 	}
 
@@ -380,10 +376,11 @@ function enlargePage(imgElement, pageNumber, isFromSpread) {
 	const isBeilage = imgElement.closest('[data-beilage="true"]') !== null;
 
 	// Get target page from template data if available
-	const targetPage = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
+	const targetPage =
+		window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
 
 	// Show the page in the viewer
-	viewer.show(imgElement.src, imgElement.alt, pageNumber, isBeilage, targetPage);
+	viewer.show(imgElement.src, imgElement.alt, pageNumber, isBeilage, targetPage, partNumber);
 }
 
 function closeModal() {
@@ -400,9 +397,7 @@ function initializePageTracking() {
 	}
 
 	// Reset state
-	window.currentPageContainers = Array.from(
-		document.querySelectorAll(".newspaper-page-container"),
-	);
+	window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container"));
 	window.currentActiveIndex = 0;
 	updateButtonStates();
 
@@ -462,7 +457,8 @@ function scrollToPreviousPage() {
 			const containerHeight = containerRect.height;
 
 			const visibilityRatio = visibleHeight / containerHeight;
-			if (visibilityRatio >= 0.3) { // Consider visible if 30% or more is showing
+			if (visibilityRatio >= 0.3) {
+				// Consider visible if 30% or more is showing
 				visibleIndexes.push(index);
 			}
 		});
@@ -513,7 +509,8 @@ function scrollToNextPage() {
 			const containerHeight = containerRect.height;
 
 			const visibilityRatio = visibleHeight / containerHeight;
-			if (visibilityRatio >= 0.3) { // Consider visible if 30% or more is showing
+			if (visibilityRatio >= 0.3) {
+				// Consider visible if 30% or more is showing
 				visibleIndexes.push(index);
 			}
 		});
@@ -553,7 +550,7 @@ function scrollToBeilage() {
 
 	if (isViewingBeilage) {
 		// Go back to main issue (first main page)
-		const firstMainPage = document.querySelector('#newspaper-content .newspaper-page-container');
+		const firstMainPage = document.querySelector("#newspaper-content .newspaper-page-container");
 		if (firstMainPage) {
 			firstMainPage.scrollIntoView({
 				behavior: "smooth",
@@ -585,7 +582,8 @@ function isCurrentlyInBeilageSection() {
 		const containerHeight = containerRect.height;
 
 		const visibilityRatio = visibleHeight / containerHeight;
-		if (visibilityRatio >= 0.3) { // Consider visible if 30% or more is showing
+		if (visibilityRatio >= 0.3) {
+			// Consider visible if 30% or more is showing
 			visibleIndexes.push(index);
 		}
 	});
@@ -593,7 +591,7 @@ function isCurrentlyInBeilageSection() {
 	// Check if any visible page is a Beilage page
 	for (const index of visibleIndexes) {
 		const container = window.currentPageContainers[index];
-		if (container && container.id && container.id.includes('beilage-')) {
+		if (container && container.id && container.id.includes("beilage-")) {
 			return true;
 		}
 	}
@@ -625,19 +623,21 @@ function updateButtonStates() {
 	// Update Beilage button based on current location
 	if (beilageBtn) {
 		const isViewingBeilage = isCurrentlyInBeilageSection();
-		const icon = beilageBtn.querySelector('i');
+		const icon = beilageBtn.querySelector("i");
 
 		if (isViewingBeilage) {
 			// Show "Go to Main Issue" state - use gray styling
 			beilageBtn.title = "Zur Hauptausgabe";
-			beilageBtn.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer";
+			beilageBtn.className =
+				"w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer";
 			if (icon) {
 				icon.className = "ri-file-text-line text-lg lg:text-xl";
 			}
 		} else {
 			// Show "Go to Beilage" state - use amber styling
 			beilageBtn.title = "Zu Beilage";
-			beilageBtn.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer";
+			beilageBtn.className =
+				"w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer";
 			if (icon) {
 				icon.className = "ri-attachment-line text-lg lg:text-xl";
 			}
@@ -723,8 +723,8 @@ function generateCitation() {
 	let cleanUrl = window.location.origin + window.location.pathname;
 
 	// Remove any hash fragments that might still exist
-	if (cleanUrl.includes('#')) {
-		cleanUrl = cleanUrl.split('#')[0];
+	if (cleanUrl.includes("#")) {
+		cleanUrl = cleanUrl.split("#")[0];
 	}
 
 	// Basic citation format (can be expanded later)
@@ -837,7 +837,7 @@ function scrollToPageFromURL() {
 	let targetContainer = null;
 
 	// Check if URL ends with a page number (e.g., /1768/42/166)
-	const pathParts = window.location.pathname.split('/');
+	const pathParts = window.location.pathname.split("/");
 	if (pathParts.length >= 4 && !isNaN(pathParts[pathParts.length - 1])) {
 		pageNumber = pathParts[pathParts.length - 1];
 
@@ -887,7 +887,7 @@ function copyPagePermalink(pageNumber, button, isBeilage = false) {
 		pageUrl = window.location.origin + window.location.pathname + `#beilage-1-page-${pageNumber}`;
 	} else {
 		// For regular pages, use the new URL format
-		const pathParts = window.location.pathname.split('/');
+		const pathParts = window.location.pathname.split("/");
 		if (pathParts.length >= 3) {
 			// Current URL format: /year/issue or /year/issue/page
 			// New format: /year/issue/page
@@ -934,7 +934,7 @@ function generatePageCitation(pageNumber, button) {
 	const issueInfo = document.title || "KGPZ";
 
 	// Generate page URL in new format
-	const pathParts = window.location.pathname.split('/');
+	const pathParts = window.location.pathname.split("/");
 	let pageUrl;
 	if (pathParts.length >= 3) {
 		const year = pathParts[1];
@@ -1075,7 +1075,7 @@ class SinglePageViewer extends HTMLElement {
 		if (sidebar) {
 			const sidebarRect = sidebar.getBoundingClientRect();
 			const sidebarWidth = sidebarRect.width;
-			console.log('Detected sidebar width:', sidebarWidth, 'px');
+			console.log("Detected sidebar width:", sidebarWidth, "px");
 			return `${sidebarWidth}px`;
 		}
 
@@ -1084,7 +1084,7 @@ class SinglePageViewer extends HTMLElement {
 
 		if (viewportWidth < 1024) {
 			// Below lg breakpoint - no sidebar space needed
-			return '0px';
+			return "0px";
 		} else if (viewportWidth < 1280) {
 			// lg breakpoint: assume 1/4 of viewport (similar to both layouts)
 			return `${Math.floor(viewportWidth * 0.25)}px`;
@@ -1116,7 +1116,7 @@ class SinglePageViewer extends HTMLElement {
 									onclick="this.closest('single-page-viewer').toggleSidebar()"
 									class="w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
 									title="Inhaltsverzeichnis ein-/ausblenden">
-									<i class="ri-sidebar-unfold-line text-lg font-bold"></i>
+									<i class="ri-sidebar-fold-line text-lg font-bold"></i>
 								</button>
 
 								<!-- Page indicator with icon -->
@@ -1215,20 +1215,20 @@ class SinglePageViewer extends HTMLElement {
 
 	// Update sidebar width when window is resized
 	updateSidebarWidth() {
-		const sidebarSpacer = this.querySelector('#sidebar-spacer');
-		if (sidebarSpacer && !sidebarSpacer.style.width.includes('0px')) {
+		const sidebarSpacer = this.querySelector("#sidebar-spacer");
+		if (sidebarSpacer && !sidebarSpacer.style.width.includes("0px")) {
 			// Only update if sidebar is not collapsed (not 0px width)
 			const newWidth = this.detectSidebarWidth();
 			sidebarSpacer.style.width = newWidth;
-			console.log('Updated sidebar width to:', newWidth);
+			console.log("Updated sidebar width to:", newWidth);
 		}
 	}
 
-	show(imgSrc, imgAlt, pageNumber, isBeilage = false, targetPage = 0) {
-		const img = this.querySelector('#single-page-image');
-		const pageNumberSpan = this.querySelector('#page-number');
-		const pageIconSpan = this.querySelector('#page-icon');
-		const pageIndicator = this.querySelector('#page-indicator');
+	show(imgSrc, imgAlt, pageNumber, isBeilage = false, targetPage = 0, partNumber = null) {
+		const img = this.querySelector("#single-page-image");
+		const pageNumberSpan = this.querySelector("#page-number");
+		const pageIconSpan = this.querySelector("#page-icon");
+		const pageIndicator = this.querySelector("#page-indicator");
 
 		img.src = imgSrc;
 		img.alt = imgAlt;
@@ -1236,6 +1236,7 @@ class SinglePageViewer extends HTMLElement {
 		// Store current page info for button actions
 		this.currentPageNumber = pageNumber;
 		this.currentIsBeilage = isBeilage;
+		this.currentPartNumber = partNumber;
 
 		// Get issue context from document title or URL
 		const issueContext = this.getIssueContext(pageNumber);
@@ -1245,42 +1246,49 @@ class SinglePageViewer extends HTMLElement {
 
 		// Add red dot if this is the target page
 		if (targetPage && pageNumber === targetPage) {
-			pageNumberSpan.style.position = 'relative';
+			pageNumberSpan.style.position = "relative";
 			// Remove any existing red dot
-			const existingDot = pageNumberSpan.querySelector('.target-page-dot');
+			const existingDot = pageNumberSpan.querySelector(".target-page-dot");
 			if (existingDot) {
 				existingDot.remove();
 			}
 			// Add new red dot
-			const redDot = document.createElement('span');
-			redDot.className = 'target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10';
-			redDot.title = 'verlinkte Seite';
+			const redDot = document.createElement("span");
+			redDot.className =
+				"target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10";
+			redDot.title = "verlinkte Seite";
 			pageNumberSpan.appendChild(redDot);
 		}
 
-		// Set page icon based on position and type
-		const iconType = this.determinePageIconType(pageNumber, isBeilage);
-		pageIconSpan.innerHTML = this.getPageIconHTML(iconType);
+		// Set page icon or part number based on view type
+		if (partNumber !== null) {
+			// Piece view: Show part number instead of icon
+			pageIconSpan.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${partNumber}. Teil</span>`;
+		} else {
+			// Issue view: Show icon based on position and type
+			const iconType = this.determinePageIconType(pageNumber, isBeilage);
+			pageIconSpan.innerHTML = this.getPageIconHTML(iconType);
+		}
 
 		// Page indicator styling is now consistent (white background)
 
 		// Update navigation button visibility
 		this.updateNavigationButtons();
 
-		this.style.display = 'block';
+		this.style.display = "block";
 
 		// Prevent background scrolling but allow scrolling within the viewer
-		document.body.style.overflow = 'hidden';
+		document.body.style.overflow = "hidden";
 
 		// Mark current page in Inhaltsverzeichnis
 		markCurrentPageInInhaltsverzeichnis(pageNumber);
 	}
 
 	close() {
-		this.style.display = 'none';
+		this.style.display = "none";
 
 		// Restore background scrolling
-		document.body.style.overflow = '';
+		document.body.style.overflow = "";
 	}
 
 	// Clean up component completely
@@ -1292,7 +1300,7 @@ class SinglePageViewer extends HTMLElement {
 		}
 
 		// Restore background scrolling
-		document.body.style.overflow = '';
+		document.body.style.overflow = "";
 
 		// Remove the component from DOM
 		if (this.parentNode) {
@@ -1303,16 +1311,18 @@ class SinglePageViewer extends HTMLElement {
 	// Determine page icon type based on page position and whether it's beilage
 	determinePageIconType(pageNumber, isBeilage) {
 		// Get all page containers to determine position
-		const containerSelector = isBeilage ? '.newspaper-page-container[data-beilage="true"]' : '.newspaper-page-container:not([data-beilage])';
+		const containerSelector = isBeilage
+			? '.newspaper-page-container[data-beilage="true"]'
+			: ".newspaper-page-container:not([data-beilage])";
 		const pageContainers = Array.from(document.querySelectorAll(containerSelector));
 
 		// Extract page numbers and sort them
 		const allPages = pageContainers
-			.map(container => {
-				const pageAttr = container.getAttribute('data-page-container');
+			.map((container) => {
+				const pageAttr = container.getAttribute("data-page-container");
 				return pageAttr ? parseInt(pageAttr) : null;
 			})
-			.filter(p => p !== null)
+			.filter((p) => p !== null)
 			.sort((a, b) => a - b);
 
 		if (allPages.length === 0) {
@@ -1324,15 +1334,15 @@ class SinglePageViewer extends HTMLElement {
 
 		// Same logic as Go determinePageIcon function
 		if (pageNumber === firstPage) {
-			return "first";  // Front page - normal icon
+			return "first"; // Front page - normal icon
 		} else if (pageNumber === lastPage) {
-			return "last";   // Back page - mirrored icon
+			return "last"; // Back page - mirrored icon
 		} else {
 			// For middle pages in newspaper layout
 			if (pageNumber === firstPage + 1) {
-				return "even";  // Page 2 - black + mirrored grey
+				return "even"; // Page 2 - black + mirrored grey
 			} else if (pageNumber === lastPage - 1) {
-				return "odd";   // Page 3 - grey + black
+				return "odd"; // Page 3 - grey + black
 			} else {
 				// For newspapers with more than 4 pages, use alternating pattern
 				if (pageNumber % 2 === 0) {
@@ -1364,53 +1374,65 @@ class SinglePageViewer extends HTMLElement {
 
 	// Share current page
 	shareCurrentPage() {
-		if (typeof copyPagePermalink === 'function') {
+		if (typeof copyPagePermalink === "function") {
 			// Use the actual button element
-			const shareBtn = this.querySelector('#share-btn');
+			const shareBtn = this.querySelector("#share-btn");
 			copyPagePermalink(this.currentPageNumber, shareBtn, this.currentIsBeilage);
 		}
 	}
 
 	// Generate citation for current page
 	generatePageCitation() {
-		if (typeof generatePageCitation === 'function') {
+		if (typeof generatePageCitation === "function") {
 			// Use the actual button element
-			const citeBtn = this.querySelector('#cite-btn');
+			const citeBtn = this.querySelector("#cite-btn");
 			generatePageCitation(this.currentPageNumber, citeBtn);
 		}
 	}
 
 	// Update navigation button visibility based on available pages
 	updateNavigationButtons() {
-		const prevBtn = this.querySelector('#prev-page-btn');
-		const nextBtn = this.querySelector('#next-page-btn');
+		const prevBtn = this.querySelector("#prev-page-btn");
+		const nextBtn = this.querySelector("#next-page-btn");
 
 		const { prevPage, nextPage } = this.getAdjacentPages();
 
 		// Enable/disable previous page button
 		if (prevPage !== null) {
 			prevBtn.disabled = false;
-			prevBtn.className = prevBtn.className.replace('opacity-50 cursor-not-allowed', '');
-			prevBtn.className = prevBtn.className.replace('bg-gray-50 text-gray-400', 'bg-gray-100 text-gray-700');
+			prevBtn.className = prevBtn.className.replace("opacity-50 cursor-not-allowed", "");
+			prevBtn.className = prevBtn.className.replace(
+				"bg-gray-50 text-gray-400",
+				"bg-gray-100 text-gray-700",
+			);
 		} else {
 			prevBtn.disabled = true;
-			if (!prevBtn.className.includes('opacity-50')) {
-				prevBtn.className += ' opacity-50 cursor-not-allowed';
+			if (!prevBtn.className.includes("opacity-50")) {
+				prevBtn.className += " opacity-50 cursor-not-allowed";
 			}
-			prevBtn.className = prevBtn.className.replace('bg-gray-100 text-gray-700', 'bg-gray-50 text-gray-400');
+			prevBtn.className = prevBtn.className.replace(
+				"bg-gray-100 text-gray-700",
+				"bg-gray-50 text-gray-400",
+			);
 		}
 
 		// Enable/disable next page button
 		if (nextPage !== null) {
 			nextBtn.disabled = false;
-			nextBtn.className = nextBtn.className.replace('opacity-50 cursor-not-allowed', '');
-			nextBtn.className = nextBtn.className.replace('bg-gray-50 text-gray-400', 'bg-gray-100 text-gray-700');
+			nextBtn.className = nextBtn.className.replace("opacity-50 cursor-not-allowed", "");
+			nextBtn.className = nextBtn.className.replace(
+				"bg-gray-50 text-gray-400",
+				"bg-gray-100 text-gray-700",
+			);
 		} else {
 			nextBtn.disabled = true;
-			if (!nextBtn.className.includes('opacity-50')) {
-				nextBtn.className += ' opacity-50 cursor-not-allowed';
+			if (!nextBtn.className.includes("opacity-50")) {
+				nextBtn.className += " opacity-50 cursor-not-allowed";
 			}
-			nextBtn.className = nextBtn.className.replace('bg-gray-100 text-gray-700', 'bg-gray-50 text-gray-400');
+			nextBtn.className = nextBtn.className.replace(
+				"bg-gray-100 text-gray-700",
+				"bg-gray-50 text-gray-400",
+			);
 		}
 	}
 
@@ -1421,28 +1443,33 @@ class SinglePageViewer extends HTMLElement {
 		if (this.currentIsBeilage) {
 			containerSelector = '.newspaper-page-container[data-beilage="true"]';
 		} else {
-			containerSelector = '.newspaper-page-container:not([data-beilage])';
+			containerSelector = ".newspaper-page-container:not([data-beilage])";
 		}
 
 		const pageContainers = Array.from(document.querySelectorAll(containerSelector));
-		console.log('Found containers:', pageContainers.length, 'for', this.currentIsBeilage ? 'beilage' : 'main');
+		console.log(
+			"Found containers:",
+			pageContainers.length,
+			"for",
+			this.currentIsBeilage ? "beilage" : "main",
+		);
 
 		// Extract page numbers and sort them
 		const allPages = pageContainers
-			.map(container => {
-				const pageAttr = container.getAttribute('data-page-container');
+			.map((container) => {
+				const pageAttr = container.getAttribute("data-page-container");
 				const pageNum = pageAttr ? parseInt(pageAttr) : null;
-				console.log('Container page:', pageAttr, 'parsed:', pageNum);
+				console.log("Container page:", pageAttr, "parsed:", pageNum);
 				return pageNum;
 			})
-			.filter(p => p !== null)
+			.filter((p) => p !== null)
 			.sort((a, b) => a - b);
 
-		console.log('All pages found:', allPages);
-		console.log('Current page:', this.currentPageNumber);
+		console.log("All pages found:", allPages);
+		console.log("Current page:", this.currentPageNumber);
 
 		const currentIndex = allPages.indexOf(this.currentPageNumber);
-		console.log('Current index:', currentIndex);
+		console.log("Current index:", currentIndex);
 
 		let prevPage = null;
 		let nextPage = null;
@@ -1455,7 +1482,7 @@ class SinglePageViewer extends HTMLElement {
 			nextPage = allPages[currentIndex + 1];
 		}
 
-		console.log('Adjacent pages - prev:', prevPage, 'next:', nextPage);
+		console.log("Adjacent pages - prev:", prevPage, "next:", nextPage);
 		return { prevPage, nextPage };
 	}
 
@@ -1478,30 +1505,67 @@ class SinglePageViewer extends HTMLElement {
 	// Navigate to a specific page
 	navigateToPage(pageNumber) {
 		// Find the image element for the target page
-		const containerSelector = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : '.newspaper-page-container:not([data-beilage])';
-		const targetContainer = document.querySelector(`${containerSelector}[data-page-container="${pageNumber}"]`);
+		const containerSelector = this.currentIsBeilage
+			? '.newspaper-page-container[data-beilage="true"]'
+			: ".newspaper-page-container:not([data-beilage])";
+		const targetContainer = document.querySelector(
+			`${containerSelector}[data-page-container="${pageNumber}"]`,
+		);
 
 		if (targetContainer) {
-			const imgElement = targetContainer.querySelector('.newspaper-page-image');
+			const imgElement = targetContainer.querySelector(".newspaper-page-image");
 			if (imgElement) {
+				// Determine part number for piece view
+				let newPartNumber = null;
+				if (this.currentPartNumber !== null) {
+					// We're in piece view, try to find the part number for the new page
+					newPartNumber = this.getPartNumberForPage(pageNumber);
+				}
+
 				// Update the current view with the new page
-				this.show(imgElement.src, imgElement.alt, pageNumber, this.currentIsBeilage);
+				this.show(
+					imgElement.src,
+					imgElement.alt,
+					pageNumber,
+					this.currentIsBeilage,
+					0,
+					newPartNumber,
+				);
 			}
 		}
 	}
 
+	// Get part number for a specific page in piece view
+	getPartNumberForPage(pageNumber) {
+		// Try to find the part number from the page container in piece view
+		const pageContainer = document.querySelector(`[data-page-container="${pageNumber}"]`);
+		if (pageContainer) {
+			const partNumberElement = pageContainer.querySelector(".part-number");
+			if (partNumberElement) {
+				// Extract just the number from "X. Teil" format
+				const match = partNumberElement.textContent.match(/(\d+)\./);
+				if (match) {
+					return parseInt(match[1]);
+				}
+			}
+		}
+
+		// Fallback: if we can't find it, return null to show icon instead
+		return null;
+	}
+
 	// Toggle sidebar visibility
 	toggleSidebar() {
-		const sidebarSpacer = this.querySelector('#sidebar-spacer');
-		const toggleBtn = this.querySelector('#sidebar-toggle-btn');
-		const toggleIcon = toggleBtn.querySelector('i');
+		const sidebarSpacer = this.querySelector("#sidebar-spacer");
+		const toggleBtn = this.querySelector("#sidebar-toggle-btn");
+		const toggleIcon = toggleBtn.querySelector("i");
 
 		// Check if sidebar is currently collapsed by looking at width
 		const currentWidth = sidebarSpacer.style.width;
-		const isCollapsed = currentWidth === '0px' || currentWidth === '0';
+		const isCollapsed = currentWidth === "0px" || currentWidth === "0";
 
-		console.log('Current state - isCollapsed:', isCollapsed);
-		console.log('Current width:', currentWidth);
+		console.log("Current state - isCollapsed:", isCollapsed);
+		console.log("Current width:", currentWidth);
 
 		if (isCollapsed) {
 			// Sidebar is collapsed, expand it
@@ -1509,29 +1573,31 @@ class SinglePageViewer extends HTMLElement {
 			sidebarSpacer.style.width = fullWidth;
 
 			// Update button to normal state (sidebar visible)
-			toggleBtn.className = 'w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer';
-			toggleIcon.className = 'ri-sidebar-unfold-line text-lg font-bold';
-			toggleBtn.title = 'Inhaltsverzeichnis ausblenden';
-			console.log('Expanding sidebar to:', fullWidth);
+			toggleBtn.className =
+				"w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer";
+			toggleIcon.className = "ri-sidebar-fold-line text-lg font-bold";
+			toggleBtn.title = "Inhaltsverzeichnis ausblenden";
+			console.log("Expanding sidebar to:", fullWidth);
 		} else {
 			// Sidebar is expanded, collapse it
-			sidebarSpacer.style.width = '0px';
+			sidebarSpacer.style.width = "0px";
 
 			// Update button to active state (sidebar hidden - orange highlight)
-			toggleBtn.className = 'w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer';
-			toggleIcon.className = 'ri-sidebar-fold-line text-lg font-bold';
-			toggleBtn.title = 'Inhaltsverzeichnis einblenden';
-			console.log('Collapsing sidebar');
+			toggleBtn.className =
+				"w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer";
+			toggleIcon.className = "ri-sidebar-unfold-line text-lg font-bold";
+			toggleBtn.title = "Inhaltsverzeichnis einblenden";
+			console.log("Collapsing sidebar");
 		}
 
-		console.log('New width:', sidebarSpacer.style.width);
+		console.log("New width:", sidebarSpacer.style.width);
 	}
 
 	// Extract issue context from document title, URL, or page container
 	getIssueContext(pageNumber) {
 		// Determine if we're in a piece view (beitrag) or issue view (ausgabe)
 		const path = window.location.pathname;
-		const isPieceView = path.includes('/beitrag/');
+		const isPieceView = path.includes("/beitrag/");
 
 		if (isPieceView) {
 			// For piece view: Return full format "1765 Nr. 2"
@@ -1539,13 +1605,18 @@ class SinglePageViewer extends HTMLElement {
 			const pageContainer = document.querySelector(`[data-page-container="${pageNumber}"]`);
 			if (pageContainer) {
 				// Look for existing page indicator with context
-				const pageIndicator = pageContainer.querySelector('.page-indicator');
+				const pageIndicator = pageContainer.querySelector(".page-indicator");
 				if (pageIndicator) {
 					const text = pageIndicator.textContent.trim();
-					// Extract year and issue from text like "1768 Nr. 20, 79"
-					const match = text.match(/(\d{4})\s+Nr\.\s+(\d+)/);
-					if (match) {
-						return `${match[1]} Nr. ${match[2]}`;
+					// Extract full date and issue from text like "3.7.1767 Nr. 53, 213"
+					const fullDateMatch = text.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
+					if (fullDateMatch) {
+						return fullDateMatch[1];
+					}
+					// Fallback: Extract year and issue from text like "1768 Nr. 20, 79"
+					const yearMatch = text.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+					if (yearMatch) {
+						return `${yearMatch[1]} Nr. ${yearMatch[2]}`;
 					}
 				}
 			}
@@ -1558,17 +1629,17 @@ class SinglePageViewer extends HTMLElement {
 			}
 		} else {
 			// For issue view: Return just empty string (page number only)
-			return '';
+			return "";
 		}
 
 		// Final fallback: Try to extract from URL path
 		const urlMatch = path.match(/\/(\d{4})\/(\d+)/);
 		if (urlMatch) {
-			return isPieceView ? `${urlMatch[1]} Nr. ${urlMatch[2]}` : '';
+			return isPieceView ? `${urlMatch[1]} Nr. ${urlMatch[2]}` : "";
 		}
 
 		// Fallback - try to get from any visible page context
-		const anyPageIndicator = document.querySelector('.page-indicator');
+		const anyPageIndicator = document.querySelector(".page-indicator");
 		if (anyPageIndicator) {
 			const text = anyPageIndicator.textContent.trim();
 			const match = text.match(/(\d{4})\s+Nr\.\s+(\d+)/);
@@ -1583,21 +1654,21 @@ class SinglePageViewer extends HTMLElement {
 }
 
 // Register the web component
-customElements.define('single-page-viewer', SinglePageViewer);
+customElements.define("single-page-viewer", SinglePageViewer);
 
 // Clean up single page viewer on HTMX navigation
-document.body.addEventListener('htmx:beforeRequest', function(event) {
+document.body.addEventListener("htmx:beforeRequest", function (event) {
 	// Find any active single page viewer
-	const viewer = document.querySelector('single-page-viewer');
-	if (viewer && viewer.style.display !== 'none') {
-		console.log('Cleaning up single page viewer before HTMX navigation');
+	const viewer = document.querySelector("single-page-viewer");
+	if (viewer && viewer.style.display !== "none") {
+		console.log("Cleaning up single page viewer before HTMX navigation");
 		viewer.destroy();
 	}
 });
 
 // Also clean up on page unload as fallback
-window.addEventListener('beforeunload', function() {
-	const viewer = document.querySelector('single-page-viewer');
+window.addEventListener("beforeunload", function () {
+	const viewer = document.querySelector("single-page-viewer");
 	if (viewer) {
 		viewer.destroy();
 	}

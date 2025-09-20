@@ -22,7 +22,7 @@
 						<!-- Page indicator row -->
 						<div class="flex justify-start items-center gap-2 mb-3">
 							<span class="part-number bg-slate-100 text-slate-800 text-sm font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">
-								{{ $pageEntry.PartNumber }}
+								{{ $pageEntry.PartNumber }}. Teil
 							</span>
 							<span class="page-indicator text-sm font-bold text-slate-600 bg-blue-50 px-2 py-1 rounded transition-all duration-300 flex items-center gap-1 relative" data-page="{{ $page.PageNumber }}">
 								{{ $issueContext }}, {{ $page.PageNumber }}
@@ -42,7 +42,7 @@
 								<i class="ri-file-text-line text-xs"></i>
 							</button>
 
-							<button onclick="enlargePage(document.querySelector('#piece-page-{{ $page.PageNumber }} .piece-page-image'), {{ $page.PageNumber }}, false)"
+							<button onclick="enlargePage(document.querySelector('#piece-page-{{ $page.PageNumber }} .piece-page-image'), {{ $page.PageNumber }}, false, {{ $pageEntry.PartNumber }})"
 									class="w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
 									title="Seite {{ $page.PageNumber }} vergrößern">
 								<i class="ri-zoom-in-line text-xs"></i>
@@ -55,7 +55,7 @@
 								<img src="{{ $page.ImagePath }}"
 									 alt="Seite {{ $page.PageNumber }} ({{ $issueContext }})"
 									 class="piece-page-image newspaper-page-image cursor-zoom-in rounded-sm hover:scale-[1.02] transition-transform duration-200 w-full"
-									 onclick="enlargePage(this, {{ $page.PageNumber }}, false)"
+									 onclick="enlargePage(this, {{ $page.PageNumber }}, false, {{ $pageEntry.PartNumber }})"
 									 data-page="{{ $page.PageNumber }}"
 									 loading="lazy" />
 							{{ else }}
