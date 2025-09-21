@@ -1094,6 +1094,35 @@ function initializeScrollspy() {
 		}
 	}
 
+	function updateActiveLinkImmediate(targetId) {
+		// Immediately highlight the clicked link
+		const navLinks = document.querySelectorAll(".scrollspy-link");
+		const slider = document.getElementById("scrollspy-slider");
+
+		// Reset all links
+		navLinks.forEach((link) => {
+			link.classList.remove("font-medium");
+		});
+
+		// Highlight the clicked link
+		const clickedLink = document.querySelector(`[data-target="${targetId}"]`);
+		if (clickedLink) {
+			clickedLink.classList.add("font-medium");
+
+			// Update slider position for the single clicked link
+			if (slider) {
+				const nav = document.getElementById("scrollspy-nav");
+				const navRect = nav.getBoundingClientRect();
+				const linkRect = clickedLink.getBoundingClientRect();
+
+				const relativeTop = linkRect.top - navRect.top + nav.scrollTop;
+				slider.style.top = `${relativeTop}px`;
+				slider.style.height = `${linkRect.height}px`;
+				slider.style.opacity = '1';
+			}
+		}
+	}
+
 	function updateSidebarScroll(activeLinks) {
 		// Skip automatic scrolling during manual navigation
 		if (window.scrollspyManualNavigation) return;
@@ -1172,8 +1201,12 @@ function initializeScrollspy() {
 	navLinks.forEach((link) => {
 		const clickHandler = function (e) {
 			e.preventDefault();
-			const target = document.getElementById(this.getAttribute("data-target"));
+			const targetId = this.getAttribute("data-target");
+			const target = document.getElementById(targetId);
 			if (target) {
+				// Immediately update the active link highlighting on click
+				updateActiveLinkImmediate(targetId);
+
 				// Temporarily disable automatic sidebar scrolling during manual navigation
 				window.scrollspyManualNavigation = true;
 
