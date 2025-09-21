@@ -33,35 +33,103 @@ body::before {
 	/* Apply transformations here */
 	transform: rotate(15deg) skew(25deg) scale(4);
 	opacity: 0.4;
+	animation: backdrop-drift 60s linear infinite;
+	transition: transform 1.5s ease-in-out;
 }
 
-/* Page-specific backdrop variations */
+/* Backdrop animation */
+@keyframes backdrop-drift {
+	0% { transform: rotate(15deg) skew(25deg) scale(4); }
+	25% { transform: rotate(20deg) skew(30deg) scale(4.1); }
+	50% { transform: rotate(10deg) skew(20deg) scale(3.9); }
+	75% { transform: rotate(18deg) skew(28deg) scale(4.05); }
+	100% { transform: rotate(15deg) skew(25deg) scale(4); }
+}
+
+/* Page-specific backdrop variations with animations */
 body.page-akteure::before {
-	transform: rotate(-35deg) skew(-40deg) scale(4.2);
+	animation: backdrop-drift-akteure 45s ease-in-out infinite;
 }
 
 body.page-ausgabe::before {
-	transform: rotate(40deg) skew(15deg) scale(4.5);
+	animation: backdrop-drift-ausgabe 55s ease-in-out infinite;
 }
 
 body.page-search::before {
-	transform: rotate(0deg) skew(45deg) scale(3.8);
+	animation: backdrop-drift-search 40s ease-in-out infinite;
 }
 
 body.page-ort::before {
-	transform: rotate(60deg) skew(-30deg) scale(4.8);
+	animation: backdrop-drift-ort 65s ease-in-out infinite;
 }
 
 body.page-kategorie::before {
-	transform: rotate(-25deg) skew(50deg) scale(4.1);
+	animation: backdrop-drift-kategorie 50s ease-in-out infinite;
 }
 
 body.page-piece::before {
-	transform: rotate(45deg) skew(-25deg) scale(4.3);
+	animation: backdrop-drift-piece 58s ease-in-out infinite;
 }
 
 body.page-edition::before {
-	transform: rotate(-50deg) skew(35deg) scale(3.9);
+	animation: backdrop-drift-edition 42s ease-in-out infinite;
+}
+
+/* Page-specific keyframes */
+@keyframes backdrop-drift-akteure {
+	0% { transform: rotate(-35deg) skew(-40deg) scale(4.2); }
+	25% { transform: rotate(-30deg) skew(-35deg) scale(4.0); }
+	50% { transform: rotate(-40deg) skew(-45deg) scale(4.4); }
+	75% { transform: rotate(-32deg) skew(-38deg) scale(4.1); }
+	100% { transform: rotate(-35deg) skew(-40deg) scale(4.2); }
+}
+
+@keyframes backdrop-drift-ausgabe {
+	0% { transform: rotate(40deg) skew(15deg) scale(4.5); }
+	25% { transform: rotate(45deg) skew(20deg) scale(4.3); }
+	50% { transform: rotate(35deg) skew(10deg) scale(4.7); }
+	75% { transform: rotate(42deg) skew(18deg) scale(4.4); }
+	100% { transform: rotate(40deg) skew(15deg) scale(4.5); }
+}
+
+@keyframes backdrop-drift-search {
+	0% { transform: rotate(0deg) skew(45deg) scale(3.8); }
+	25% { transform: rotate(5deg) skew(50deg) scale(3.6); }
+	50% { transform: rotate(-5deg) skew(40deg) scale(4.0); }
+	75% { transform: rotate(2deg) skew(48deg) scale(3.7); }
+	100% { transform: rotate(0deg) skew(45deg) scale(3.8); }
+}
+
+@keyframes backdrop-drift-ort {
+	0% { transform: rotate(60deg) skew(-30deg) scale(4.8); }
+	25% { transform: rotate(65deg) skew(-25deg) scale(4.6); }
+	50% { transform: rotate(55deg) skew(-35deg) scale(5.0); }
+	75% { transform: rotate(62deg) skew(-28deg) scale(4.7); }
+	100% { transform: rotate(60deg) skew(-30deg) scale(4.8); }
+}
+
+@keyframes backdrop-drift-kategorie {
+	0% { transform: rotate(-25deg) skew(50deg) scale(4.1); }
+	25% { transform: rotate(-20deg) skew(55deg) scale(3.9); }
+	50% { transform: rotate(-30deg) skew(45deg) scale(4.3); }
+	75% { transform: rotate(-22deg) skew(52deg) scale(4.0); }
+	100% { transform: rotate(-25deg) skew(50deg) scale(4.1); }
+}
+
+@keyframes backdrop-drift-piece {
+	0% { transform: rotate(45deg) skew(-25deg) scale(4.3); }
+	25% { transform: rotate(50deg) skew(-20deg) scale(4.1); }
+	50% { transform: rotate(40deg) skew(-30deg) scale(4.5); }
+	75% { transform: rotate(47deg) skew(-22deg) scale(4.2); }
+	100% { transform: rotate(45deg) skew(-25deg) scale(4.3); }
+}
+
+@keyframes backdrop-drift-edition {
+	0% { transform: rotate(-50deg) skew(35deg) scale(3.9); }
+	25% { transform: rotate(-45deg) skew(40deg) scale(3.7); }
+	50% { transform: rotate(-55deg) skew(30deg) scale(4.1); }
+	75% { transform: rotate(-48deg) skew(38deg) scale(3.8); }
+	100% { transform: rotate(-50deg) skew(35deg) scale(3.9); }
 }
 
 /*
