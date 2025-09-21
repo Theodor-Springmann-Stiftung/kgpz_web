@@ -1330,10 +1330,39 @@ window.generateCitation = generateCitation;
 window.copyPagePermalink = copyPagePermalink;
 window.generatePageCitation = generatePageCitation;
 
+// Apply page-specific backdrop styling based on URL
+function applyPageBackdrop() {
+	const path = window.location.pathname;
+	const body = document.body;
+
+	// Remove any existing page-specific classes
+	body.classList.remove('page-akteure', 'page-ausgabe', 'page-search', 'page-ort', 'page-kategorie', 'page-piece', 'page-edition');
+
+	// Determine page type from URL path and apply appropriate class
+	if (path.includes('/akteure/') || path.includes('/autoren')) {
+		body.classList.add('page-akteure');
+	} else if (path.match(/\/\d{4}\/\d+/)) { // Issue URLs like /1771/42 or /1771/42/166
+		body.classList.add('page-ausgabe');
+	} else if (path.includes('/search') || path.includes('/suche')) {
+		body.classList.add('page-search');
+	} else if (path.includes('/ort/')) {
+		body.classList.add('page-ort');
+	} else if (path.includes('/kategorie/')) {
+		body.classList.add('page-kategorie');
+	} else if (path.includes('/beitrag/')) {
+		body.classList.add('page-piece');
+	} else if (path.includes('/edition')) {
+		body.classList.add('page-edition');
+	}
+}
+
 // INFO: This is intended to be called once on website load
 function setup() {
 	setup_xslt();
 	setup_templates();
+
+	// Apply page-specific backdrop styling
+	applyPageBackdrop();
 
 	// Initialize newspaper layout if present
 	if (document.querySelector(".newspaper-page-container")) {
@@ -1354,6 +1383,9 @@ function setup() {
 
 	// HTMX event handling for newspaper layout, scrollspy, and scroll-to-top button
 	document.body.addEventListener("htmx:afterSwap", function (event) {
+		// Apply page-specific backdrop styling after navigation
+		applyPageBackdrop();
+
 		// Prevent auto-scrolling during HTMX navigation
 		window.htmxNavigating = true;
 
