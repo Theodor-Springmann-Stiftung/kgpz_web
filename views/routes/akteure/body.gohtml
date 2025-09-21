@@ -1,21 +1,22 @@
 {{ if ne (len .model.Search) 1 }}
 	{{ $agent := index $.model.Agents .model.Search }}
 	{{ if not $agent }}
-		<div class="max-w-4xl mx-auto px-4 py-8">
-			<div class="bg-red-50 border border-red-200 rounded-lg p-4">
+		<div class="max-w-6xl mx-auto px-8 py-8">
+			<div class="bg-red-50 border border-red-200 rounded-lg p-6">
 				<div class="flex items-center">
-					<i class="ri-error-warning-line text-red-600 text-xl mr-2"></i>
-					<span class="text-red-800">Person nicht gefunden: <strong>{{ .model.Search }}</strong></span>
+					<i class="ri-error-warning-line text-red-600 text-2xl mr-3"></i>
+					<span class="text-red-800 text-lg">Person nicht gefunden: <strong>{{ .model.Search }}</strong></span>
 				</div>
 			</div>
 		</div>
 	{{ else }}
-		<div class="max-w-4xl mx-auto px-4 py-8">
-			<div class="mb-6">
+		<div class="max-w-full mx-auto px-8 py-8">
+			<div class="mb-8">
 				{{ $letter := Upper (FirstLetter $agent.ID) }}
-				<a href="/akteure/{{ $letter }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-					<i class="ri-arrow-left-line mr-2"></i>
-					Zurück zu Buchstabe {{ $letter }}
+				<a href="/akteure/{{ $letter }}" class="inline-flex items-center text-blue-600
+				hover:text-blue-800 transition-colors text-xl">
+					<i class="ri-arrow-left-line mr-3 text-xl"></i>
+					{{ $letter }}
 				</a>
 			</div>
 			<div>{{ template "_akteur" $agent }}</div>
@@ -23,31 +24,71 @@
 	{{ end }}
 
 {{ else }}
-	<div class="max-w-7xl mx-auto px-4 py-8">
-		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-gray-900 mb-4">Personen & Körperschaften</h1>
-			<p class="text-gray-600">Verzeichnis aller in der Zeitung erwähnten Personen und Institutionen</p>
+	<div class="max-w-full mx-auto px-8 py-8">
+		<div class="mb-10">
+			<div class="bg-slate-100 px-6 py-4 rounded-lg mb-6">
+				{{ if eq .model.Search "autoren" }}
+					<h1 class="text-4xl font-bold text-gray-900 mb-2">Autoren</h1>
+					<p class="text-gray-700 text-lg">Personen, die Beiträge in der Zeitung verfasst haben</p>
+				{{ else }}
+					<h1 class="text-4xl font-bold text-gray-900 mb-2">Personen & Körperschaften</h1>
+					<p class="text-gray-700 text-lg">Verzeichnis aller in der Zeitung erwähnten Personen und Institutionen</p>
+				{{ end }}
+			</div>
+			<div class="flex items-center gap-4 mb-6">
+				<label class="inline-flex items-center">
+					<input type="checkbox"
+					       class="form-checkbox h-5 w-5 text-blue-600 rounded"
+					       {{ if eq .model.Search "autoren" }}checked{{ end }}
+					       hx-get="{{ if eq .model.Search "autoren" }}/akteure/a{{ else }}/akteure/autoren{{ end }}"
+					       hx-target="body"
+					       hx-push-url="true">
+					<span class="ml-2 text-lg text-gray-700">Nur Autoren anzeigen</span>
+				</label>
+			</div>
 		</div>
 
 		<!-- Alphabet Navigation -->
-		<div class="mb-8 p-4 bg-gray-50 rounded-lg">
-			<div class="flex flex-wrap gap-2">
+		<div class="mb-10 p-6 bg-gray-50 rounded-lg">
+			<div class="flex flex-wrap gap-3">
 				{{ range $_, $l := .model.AvailableLetters }}
-					<a href="/akteure/{{ $l }}" class="inline-flex items-center justify-center w-8 h-8 bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 font-medium text-gray-700 hover:text-blue-700 transition-colors">
+					<a href="/akteure/{{ $l }}" class="inline-flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 font-medium text-gray-700 hover:text-blue-700 transition-colors text-lg">
 						{{ $l }}
 					</a>
 				{{ end }}
 			</div>
 		</div>
 
-		<!-- People List - Dictionary Column Layout -->
-		<div class="columns-1 lg:columns-2 gap-8 space-y-0">
-			{{ range $_, $id := .model.Sorted }}
-				{{ $a := index $.model.Agents $id }}
-				<div class="break-inside-avoid mb-4 bg-stone-100 rounded-lg p-4 border border-stone-200">
-					{{ template "_akteur" $a }}
+		<!-- Two Column Layout: Scrollspy + Content -->
+		<div class="flex gap-8">
+			<!-- Scrollspy Navigation - Hidden on smaller screens, shown on 2xl+ -->
+			<div class="hidden 2xl:block w-80 flex-shrink-0">
+				<div class="sticky top-8 h-screen">
+					<div class="bg-white border border-gray-200 rounded-lg p-4 h-full flex flex-col">
+						<h3 class="text-lg font-bold text-gray-900 mb-4">Auf dieser Seite</h3>
+						<nav class="flex-1 overflow-y-auto" id="scrollspy-nav">
+							{{ range $_, $id := .model.Sorted }}
+								{{ $a := index $.model.Agents $id }}
+								<a href="#author-{{ $id }}"
+								   class="block px-3 py-1 text-base text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded scrollspy-link transition-colors border-l-4 border-transparent"
+								   data-target="author-{{ $id }}">
+									{{ index $a.Names 0 }}
+								</a>
+							{{ end }}
+						</nav>
+					</div>
 				</div>
-			{{ end }}
+			</div>
+
+			<!-- People List - Main Content -->
+			<div class="flex-1 space-y-6">
+				{{ range $_, $id := .model.Sorted }}
+					{{ $a := index $.model.Agents $id }}
+					<div id="author-{{ $id }}" class="bg-stone-100 rounded-lg p-6 border border-stone-200 scroll-mt-8 author-section">
+						{{ template "_akteur" $a }}
+					</div>
+				{{ end }}
+			</div>
 		</div>
 	</div>
 {{ end }}

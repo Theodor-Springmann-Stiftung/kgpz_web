@@ -1,4 +1,5 @@
-{{- $piece := . -}}
+{{- $piece := .Piece -}}
+{{- $currentActorID := .CurrentActorID -}}
 
 <div class="leading-snug">
 	{{- $categoryFlags := GetCategoryFlags $piece -}}
@@ -42,14 +43,113 @@
 		{{- end -}}
 	{{- end -}}
 
-	{{- /* Generate piece descriptions */ -}}
+	{{- /* Build category list */ -}}
+	{{- $categories := slice -}}
 	{{- if $categoryFlags.Rezension -}}
+		{{- $categories = append $categories "Rezension" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Gedicht -}}
+		{{- $categories = append $categories "Gedicht" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Aufsatz -}}
+		{{- $categories = append $categories "Aufsatz" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Theaterkritik -}}
+		{{- $categories = append $categories "Theaterkritik" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Brief -}}
+		{{- $categories = append $categories "Brief" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Erzaehlung -}}
+		{{- $categories = append $categories "Erzählung" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Kommentar -}}
+		{{- $categories = append $categories "Kommentar" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Uebersetzung -}}
+		{{- $categories = append $categories "Übersetzung" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Auszug -}}
+		{{- $categories = append $categories "Auszug" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Replik -}}
+		{{- $categories = append $categories "Replik" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Lokalnachrichten -}}
+		{{- $categories = append $categories "Lokalnachrichten" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Lotterie -}}
+		{{- $categories = append $categories "Lotterie" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Nachruf -}}
+		{{- $categories = append $categories "Nachruf" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Weltnachrichten -}}
+		{{- $categories = append $categories "Weltnachrichten" -}}
+	{{- end -}}
+	{{- if $categoryFlags.EinkommendeFremde -}}
+		{{- $categories = append $categories "Einkommende Fremde" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Wechselkurse -}}
+		{{- $categories = append $categories "Wechselkurse" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Buecher -}}
+		{{- $categories = append $categories "Bücher" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Lokalanzeigen -}}
+		{{- $categories = append $categories "Lokalanzeigen" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Vorladung -}}
+		{{- $categories = append $categories "Vorladung" -}}
+	{{- end -}}
+	{{- if $categoryFlags.GelehrteNachrichten -}}
+		{{- $categories = append $categories "Gelehrte Nachrichten" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Anzeige -}}
+		{{- $categories = append $categories "Anzeige" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Proklamation -}}
+		{{- $categories = append $categories "Proklamation" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Desertionsliste -}}
+		{{- $categories = append $categories "Desertionsliste" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Notenblatt -}}
+		{{- $categories = append $categories "Notenblatt" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Vorlesungsverzeichnis -}}
+		{{- $categories = append $categories "Vorlesungsverzeichnis" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Abbildung -}}
+		{{- $categories = append $categories "Abbildung" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Ineigenersache -}}
+		{{- $categories = append $categories "In eigener Sache" -}}
+	{{- end -}}
+	{{- if $categoryFlags.Provinienz -}}
+		{{- $categories = append $categories "Provinienz" -}}
+	{{- end -}}
+
+	{{- /* Display category combination */ -}}
+	{{- $categoryName := "" -}}
+	{{- if eq (len $categories) 0 -}}
+		{{- $categoryName = "Beitrag" -}}
+	{{- else -}}
+		{{- $sortedCategories := sortStrings $categories -}}
+		{{- $categoryName = joinWithUnd $sortedCategories -}}
+	{{- end -}}
+
+	{{- /* Generate piece descriptions */ -}}
+	{{- if has $categories "Rezension" -}}
 		{{- $authorFound := false -}}
 		{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Rezension von:
+					{{- if ne $agentref.Ref $currentActorID -}}
+						<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
+					{{- end -}}
+					{{ $categoryName }} von:
 					{{ if $workAuthorName }}
 						<a href="/akteure/{{ $workAuthorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>,
 					{{ end }}
@@ -66,7 +166,7 @@
 			{{- end -}}
 		{{- end -}}
 		{{- if not $authorFound -}}
-			Rezension von:
+			{{ $categoryName }} von:
 			{{ if $workAuthorName }}
 				<a href="/akteure/{{ $workAuthorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>,
 			{{ end }}
@@ -79,104 +179,24 @@
 			{{ end }}
 		{{- end -}}
 
-	{{- else if $categoryFlags.Gedicht -}}
-		{{- $authorFound := false -}}
-		{{- range $agentref := $piece.AgentRefs -}}
-			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
-				{{- $agent := GetAgent $agentref.Ref -}}
-				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Gedicht{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
-					{{- $authorFound = true -}}
-					{{- break -}}
-				{{- end -}}
-			{{- end -}}
-		{{- end -}}
-		{{- if not $authorFound -}}
-			Gedicht{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
-		{{- end -}}
-
-	{{- else if $categoryFlags.Aufsatz -}}
-		{{- $authorFound := false -}}
-		{{- range $agentref := $piece.AgentRefs -}}
-			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
-				{{- $agent := GetAgent $agentref.Ref -}}
-				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Aufsatz{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
-					{{- $authorFound = true -}}
-					{{- break -}}
-				{{- end -}}
-			{{- end -}}
-		{{- end -}}
-		{{- if not $authorFound -}}
-			Aufsatz{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
-		{{- end -}}
-
-	{{- else if $categoryFlags.Theaterkritik -}}
-		{{- $authorFound := false -}}
-		{{- range $agentref := $piece.AgentRefs -}}
-			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
-				{{- $agent := GetAgent $agentref.Ref -}}
-				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Theaterkritik{{ if $workTitle }} zu <em>{{ $workTitle }}</em>{{ else if $title }} zu <em>{{ $title }}</em>{{ end }}
-					{{- $authorFound = true -}}
-					{{- break -}}
-				{{- end -}}
-			{{- end -}}
-		{{- end -}}
-		{{- if not $authorFound -}}
-			Theaterkritik{{ if $workTitle }} zu <em>{{ $workTitle }}</em>{{ else if $title }} zu <em>{{ $title }}</em>{{ end }}
-		{{- end -}}
-
-	{{- else if $categoryFlags.Brief -}}
-		{{ if $categoryFlags.Nachruf }}Kondolenzbrief{{ else }}Leserbrief{{ end }}
-		{{- range $agentref := $piece.AgentRefs -}}
-			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
-				{{- $agent := GetAgent $agentref.Ref -}}
-				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					von <a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>
-					{{- break -}}
-				{{- end -}}
-			{{- end -}}
-		{{- end -}}
-
-	{{- else if $categoryFlags.Erzaehlung -}}
-		{{- $authorFound := false -}}
-		{{- range $agentref := $piece.AgentRefs -}}
-			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
-				{{- $agent := GetAgent $agentref.Ref -}}
-				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>, Erzählung{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
-					{{- $authorFound = true -}}
-					{{- break -}}
-				{{- end -}}
-			{{- end -}}
-		{{- end -}}
-		{{- if not $authorFound -}}
-			Erzählung{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
-		{{- end -}}
-
-	{{- else if $categoryFlags.Lokalnachrichten -}}
-		{{ if $categoryFlags.Lotterie }}Lotterienachrichten{{ else if $categoryFlags.Nachruf }}Nachrufe{{ else if $categoryFlags.Theaterkritik }}Theaternachrichten{{ else }}Lokalnachrichten{{ end }}
-
-	{{- else if $categoryFlags.Weltnachrichten -}}
-		Politische Nachrichten aus aller Welt
-
 	{{- else -}}
 		{{- $authorFound := false -}}
 		{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{ if $title }}: <em>{{ $title }}</em>{{ end }}
+					{{- if ne $agentref.Ref $currentActorID -}}
+						<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
+					{{- end -}}
+					{{ $categoryName }}{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
 					{{- $authorFound = true -}}
 					{{- break -}}
 				{{- end -}}
 			{{- end -}}
 		{{- end -}}
 		{{- if not $authorFound -}}
-			{{ if $title }}<em>{{ $title }}</em>{{ else }}Beitrag ohne Titel{{ end }}
+			{{ $categoryName }}{{ if $title }}: <em>„{{ $title }}"</em>{{ else if eq $categoryName "Beitrag" }} ohne Titel{{ end }}
 		{{- end -}}
 	{{- end -}}
 
-	{{- if $place }} <span class="inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md ml-1 whitespace-nowrap">{{ $place }}</span>{{ end }}
 </div>

@@ -46,3 +46,34 @@ func AgentsView(letterorid string, lib *xmlmodels.Library) *AgentsListView {
 
 	return &res
 }
+
+// AuthorsView returns only agents who have authored pieces (have written Beiträge)
+func AuthorsView(lib *xmlmodels.Library) *AgentsListView {
+	res := AgentsListView{Search: "autoren", Agents: make(map[string]xmlmodels.Agent)}
+	av := make(map[string]bool)
+
+	// Find all agents who have pieces
+	authorIDs := make(map[string]bool)
+	for _, piece := range lib.Pieces.Array {
+		for _, agentRef := range piece.AgentRefs {
+			if agentRef.Category == "" || agentRef.Category == "autor" {
+				authorIDs[agentRef.Ref] = true
+			}
+		}
+	}
+
+	// Add all agents who are authors
+	for _, a := range lib.Agents.Array {
+		av[strings.ToUpper(a.ID[:1])] = true
+		if authorIDs[a.ID] {
+			res.Sorted = append(res.Sorted, a.ID)
+			res.Agents[a.ID] = a
+		}
+	}
+
+	res.AvailableLetters = slices.Collect(maps.Keys(av))
+	slices.Sort(res.AvailableLetters)
+	slices.Sort(res.Sorted)
+
+	return &res
+}

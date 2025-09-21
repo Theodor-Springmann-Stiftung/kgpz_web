@@ -1,0 +1,54 @@
+<div class="max-w-full mx-auto px-8 py-8">
+	<div class="mb-10">
+		<div class="bg-slate-100 px-6 py-4 rounded-lg mb-6">
+			<h1 class="text-4xl font-bold text-gray-900 mb-2">Autoren</h1>
+			<p class="text-gray-700 text-lg">Personen, die Beiträge in der Zeitung verfasst haben</p>
+		</div>
+		<div class="flex items-center gap-4 mb-6">
+			<label class="inline-flex items-center">
+				<input type="checkbox"
+				       class="form-checkbox h-5 w-5 text-blue-600 rounded"
+				       checked
+				       hx-get="/akteure/a"
+				       hx-target="body"
+				       hx-push-url="true">
+				<span class="ml-2 text-lg text-gray-700">Nur Autoren anzeigen</span>
+			</label>
+		</div>
+	</div>
+
+
+	<!-- Two Column Layout: Scrollspy + Content -->
+	<div class="flex gap-8">
+		<!-- Scrollspy Navigation - Hidden on smaller screens, shown on 2xl+ -->
+		<div class="hidden 2xl:block w-80 flex-shrink-0">
+			<div class="sticky top-8 h-screen">
+				<div class="bg-white border border-gray-200 rounded-lg p-4 h-full flex flex-col">
+					<h3 class="text-lg font-bold text-gray-900 mb-4">Auf dieser Seite</h3>
+					<nav class="flex-1 overflow-y-auto" id="scrollspy-nav">
+						{{ range $_, $id := .model.Sorted }}
+							{{ $a := index $.model.Agents $id }}
+							<a href="#author-{{ $id }}"
+							   class="block px-3 py-1 text-base text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded scrollspy-link transition-colors border-l-4 border-transparent"
+							   data-target="author-{{ $id }}">
+								{{ index $a.Names 0 }}
+							</a>
+						{{ end }}
+					</nav>
+				</div>
+			</div>
+		</div>
+
+		<!-- Authors List - Main Content -->
+		<div class="flex-1 space-y-6">
+			{{ range $_, $id := .model.Sorted }}
+				{{ $a := index $.model.Agents $id }}
+				<div id="author-{{ $id }}" class="bg-stone-100 rounded-lg p-6 border border-stone-200 scroll-mt-8 author-section">
+					{{ template "_akteur_header" $a }}
+					{{ template "_akteur_beitraege" $a }}
+				</div>
+			{{ end }}
+		</div>
+	</div>
+</div>
+

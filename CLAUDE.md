@@ -118,9 +118,15 @@ views/
 │   └── default/            # Default layout (root.gohtml)
 ├── routes/                 # Page-specific templates
 │   ├── akteure/           # Agents/People pages (body.gohtml, head.gohtml)
+│   ├── autoren/           # Authors-only pages (body.gohtml, head.gohtml)
 │   ├── ausgabe/           # Issue pages with components
 │   │   └── components/    # Issue-specific components (_inhaltsverzeichnis, _bilder, etc.)
-│   ├── components/        # Shared route components (_akteur.gohtml)
+│   ├── components/        # Shared route components
+│   │   ├── _akteur.gohtml          # Main agent component (uses sub-components)
+│   │   ├── _akteur_header.gohtml   # Agent name, dates, professions, links
+│   │   ├── _akteur_werke.gohtml    # Works section with categorized pieces
+│   │   ├── _akteur_beitraege.gohtml # Contributions/pieces with grouping
+│   │   └── _piece_summary.gohtml   # Individual piece display logic
 │   ├── datenschutz/       # Privacy policy
 │   ├── edition/           # Edition pages
 │   ├── kategorie/         # Category pages
@@ -171,6 +177,7 @@ Each route has dedicated `head.gohtml` and `body.gohtml` files following Go temp
 - **HTMX**: Core interactivity and AJAX requests
 - **Alpine.js**: Lightweight reactivity for UI components
 - **Custom Extensions**: HTMX plugins for response targets, client-side templates, loading states
+- **Scrollspy System**: Advanced navigation for agents/authors pages with multi-item highlighting
 - **Build Tool**: Vite for module bundling and development server
 
 **CSS Stack**:
@@ -217,8 +224,10 @@ The application follows a **logic-in-Go, presentation-in-templates** approach:
 
 ### JavaScript Integration
 - **Progressive Enhancement**: HTMX + Alpine.js for interactivity
-- **Real-time Highlighting**: Intersection Observer API with scroll fallback
+- **Real-time Highlighting**: Intersection Observer API with scroll fallback (issue view)
+- **Scrollspy Navigation**: Multi-item highlighting system for agents/authors pages
 - **Page Navigation**: Smooth scrolling with visibility detection
+- **HTMX Integration**: Automatic cleanup and re-initialization on page swaps
 - **Responsive Design**: Mobile-optimized with proper touch interactions
 
 ## Development Workflow
@@ -439,3 +448,179 @@ const pageUrl = `/${year}/${issue}/${pageNumber}`;
 // Old format still used for beilage pages
 const beilageUrl = `${window.location.pathname}#beilage-1-page-${pageNumber}`;
 ```
+
+## Agents/Authors View System (/akteure/ and /autoren/)
+
+The application provides sophisticated person and organization browsing through dual view systems with advanced navigation and filtering capabilities.
+
+### Dual View Architecture
+
+**General Agents View** (`/akteure/`):
+- Displays all persons and organizations mentioned in the newspaper
+- Supports letter-based navigation (A-Z)
+- Individual person pages with detailed information
+- Two-column layout with scrollspy navigation on large screens
+
+**Authors-Only View** (`/autoren/`):
+- Filtered view showing only people who authored pieces (Beiträge)
+- Single-page display of all authors regardless of starting letter
+- No alphabet navigation (all authors shown together)
+- Same advanced layout and scrollspy functionality
+
+### URL Structure & Navigation
+
+**URL Patterns**:
+- `/akteure/` - All persons overview
+- `/akteure/a` - Persons starting with letter "A"
+- `/akteure/{id}` - Individual person page
+- `/akteure/autoren` - Authors-only filtered view
+
+**Toggle Navigation**:
+- Checkbox interface: "Nur Autoren anzeigen" switches between views
+- HTMX-powered transitions with URL history management
+- Unchecking returns to `/akteure/a` (letter A starting point)
+
+### Template Architecture & Components
+
+**Modular Template System** (`views/routes/components/`):
+- `_akteur.gohtml` - Main component using sub-components
+- `_akteur_header.gohtml` - Name, life dates, professions, external links
+- `_akteur_werke.gohtml` - Works section with categorized pieces
+- `_akteur_beitraege.gohtml` - Contributions/pieces with grouping
+
+**Component Benefits**:
+- Reusable across different view contexts
+- Maintainable separation of concerns
+- Consistent styling and behavior
+- Easy customization for specific views (authors vs. full agents)
+
+### Advanced Scrollspy Navigation
+
+**Full-Height Sidebar** (2XL+ screens only):
+- Fixed 320px width with full viewport height
+- Sticky positioning that follows scroll
+- Complete name list with smooth scrolling navigation
+- Automatic cleanup on HTMX page transitions
+
+**Multi-Item Highlighting**:
+- Highlights ALL currently visible authors simultaneously
+- Red left border indicating visible items (matches issue view pattern)
+- Header visibility detection (name, life data, professions must be fully visible)
+- Real-time updates during scroll with 50ms debouncing
+
+**Visual Features**:
+- Larger text (`text-base`) for better readability
+- Closer spacing (`py-1`) for more names visible
+- Smooth transitions and hover effects
+- Blue background highlighting for active items
+
+### Controller Architecture
+
+**Unified Controller** (`controllers/akteur_controller.go`):
+- Handles both general agents and authors-only views
+- Special routing for "autoren" parameter
+- Template path switching based on view type
+- Letter-based filtering and ID lookup
+
+**View Models** (`viewmodels/agent_view.go`):
+- `AgentsView()` - General person lookup by letter/ID
+- `AuthorsView()` - Filtered view of piece authors only
+- `AuthorsListView` struct with sorting and letter availability
+- Pre-processed agent data for efficient template rendering
+
+### Template Features & Data Processing
+
+**Enhanced Data Presentation**:
+- Grouped pieces by title and work reference
+- Category combination with proper German grammar ("und" vs. "mit")
+- Inline citation format: DD.MM.YYYY/ISSUENO, PPP[-PPP]
+- Works section showing review/commentary pieces
+- External link integration (Wikipedia, GND, VIAF)
+
+**Text Sizing & Hierarchy**:
+- Large serif names (`text-2xl font-serif font-bold`)
+- Readable life dates and professions (`text-xl`)
+- Appropriately sized content text (`text-lg`)
+- Larger pill text (`text-sm`) matching issue view standards
+
+### JavaScript Integration
+
+**HTMX-Safe Scrollspy** (`views/transform/main.js`):
+- Proper event listener cleanup on page navigation
+- Memory leak prevention with timeout management
+- Auto-initialization detection for `.author-section` elements
+- Smooth scroll behavior for sidebar navigation
+
+**Performance Optimizations**:
+- Debounced scroll handling (50ms)
+- Efficient viewport calculations using `getBoundingClientRect()`
+- Minimal DOM queries with cached element references
+- Responsive behavior with automatic sidebar hiding
+
+### Responsive Design
+
+**Desktop Experience** (2XL+ screens):
+- Two-column layout: 320px sidebar + flexible content area
+- Fixed scrollspy navigation with full name list
+- Multi-author highlighting system
+- Smooth scrolling between authors
+
+**Mobile Experience** (< 2XL screens):
+- Single-column layout with full-width content
+- Hidden scrollspy navigation (saves space)
+- Touch-optimized interactions
+- Same content organization and functionality
+
+### Data Categories & Processing
+
+**Comprehensive Category Support**:
+- All 29 XML-defined categories supported
+- Dynamic category detection and grouping
+- Proper German grammar rules for combinations
+- Author filtering for non-current-user pieces
+
+**Helper Functions** (`templating/engine.go`):
+- `merge`, `append`, `slice` - Data manipulation
+- `sortStrings`, `unique` - Array processing
+- `joinWithUnd` - German grammar formatting
+- Enhanced data processing for complex template logic
+
+### Usage Examples
+
+**Template Integration**:
+```gohtml
+{{ template "_akteur_header" $agent }}
+{{ template "_akteur_werke" $agent }}
+{{ template "_akteur_beitraege" $agent }}
+```
+
+**Scrollspy Navigation**:
+```gohtml
+<a href="#author-{{ $id }}"
+   class="scrollspy-link border-l-4 border-transparent"
+   data-target="author-{{ $id }}">
+   {{ index $agent.Names 0 }}
+</a>
+```
+
+**HTMX Toggle**:
+```gohtml
+<input type="checkbox"
+       hx-get="/akteure/autoren"
+       hx-target="body"
+       hx-push-url="true">
+```
+
+### Error Handling & Edge Cases
+
+**Template Safety**:
+- Null checks for GND data and agent information
+- Graceful fallback for missing names or professions
+- Safe handling of empty work/piece lists
+- Error boundaries for external link data
+
+**Navigation Robustness**:
+- 404 handling for invalid agent IDs
+- Automatic fallback for missing letters
+- Smooth transitions between view modes
+- Proper state management across HTMX swaps

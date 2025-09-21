@@ -1,0 +1,73 @@
+{{ $a := . }}
+{{ if and $a (ne (len $a.Names) 0) }}
+	{{ $gnd := GetGND $a.GND }}
+
+	<!-- Name and external links -->
+	<div class="flex items-start justify-between gap-4">
+		<div class="flex-1">
+			<!-- Large serif name - bold -->
+			<div class="text-2xl font-serif font-bold text-gray-900 leading-tight">
+				<a href="/akteure/{{ $a.ID }}" class="hover:text-blue-600 transition-colors">
+					{{ index $a.Names 0 }}
+				</a>
+			</div>
+
+			<!-- Years only below name -->
+			{{ if ne $gnd nil }}
+				{{- if or (ne (len $gnd.DateOfBirth) 0) (ne (len $gnd.DateOfDeath) 0) -}}
+					<div class="text-gray-600 text-xl mt-2">
+						{{- if ne (len $gnd.DateOfBirth) 0 -}}
+							{{ HRDateYear (index $gnd.DateOfBirth 0) }}
+						{{- end -}}
+						{{- if ne (len $gnd.DateOfDeath) 0 -}}
+							–{{ HRDateYear (index $gnd.DateOfDeath 0) }}
+						{{- end -}}
+					</div>
+				{{- end -}}
+			{{ end }}
+
+			<!-- First three professions -->
+			{{ if ne $gnd nil }}
+				{{- if ne (len $gnd.ProfessionOrOccupation) 0 -}}
+					<div class="text-gray-600 text-xl mt-2">
+						{{ range $i, $prof := $gnd.ProfessionOrOccupation }}
+							{{ if lt $i 3 }}
+								{{ if gt $i 0 }} · {{ end }}{{ $prof.Label }}
+							{{ end }}
+						{{ end }}
+					</div>
+				{{- end -}}
+			{{ end }}
+		</div>
+
+		<!-- External link symbols on the right -->
+		<div class="flex gap-2 flex-shrink-0">
+			{{- if ne $gnd nil -}}
+				{{- /* Wikipedia link if available */ -}}
+				{{- if ne (len $gnd.Wikipedia) 0 -}}
+					<a href="{{ (index $gnd.Wikipedia 0).ID }}" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors text-lg" title="Wikipedia">
+						<i class="ri-wikipedia-line"></i>
+					</a>
+				{{- end -}}
+
+				{{- /* GND link if available */ -}}
+				{{- if ne $a.GND "" -}}
+					<a href="{{ $a.GND }}" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors text-lg" title="Gemeinsame Normdatei">
+						<i class="ri-links-line"></i>
+					</a>
+				{{- else -}}
+					{{- /* VIAF link if no GND available */ -}}
+					{{- if ne (len $gnd.SameAs) 0 -}}
+						{{ range $_, $ref := $gnd.SameAs }}
+							{{- if ne $ref.ID "" -}}
+								<a href="{{ $ref.ID }}" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors text-lg" title="External Link">
+									<i class="ri-global-line"></i>
+								</a>
+							{{- end -}}
+						{{ end }}
+					{{- end -}}
+				{{- end -}}
+			{{- end -}}
+		</div>
+	</div>
+{{ end }}

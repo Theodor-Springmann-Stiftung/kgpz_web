@@ -977,6 +977,192 @@ function generatePageCitation(pageNumber, button) {
 	}
 }
 
+// Initialize scrollspy functionality for author/agent pages
+function initializeScrollspy() {
+	// Clean up any existing scrollspy
+	cleanupScrollspy();
+
+	const sections = document.querySelectorAll('.author-section');
+	const navLinks = document.querySelectorAll('.scrollspy-link');
+
+	if (sections.length === 0 || navLinks.length === 0) {
+		return;
+	}
+
+	function updateActiveLink() {
+		const visibleSections = [];
+		const viewportTop = window.scrollY;
+		const viewportBottom = viewportTop + window.innerHeight;
+
+		// Check which sections are fully visible (header must be completely visible)
+		sections.forEach(section => {
+			const sectionRect = section.getBoundingClientRect();
+			const sectionTop = sectionRect.top + window.scrollY;
+
+			// Find the header element (name, life data, professions)
+			const headerElement = section.querySelector('div:first-child');
+			if (headerElement) {
+				const headerRect = headerElement.getBoundingClientRect();
+				const headerTop = headerRect.top + window.scrollY;
+				const headerBottom = headerTop + headerRect.height;
+
+				// Check if the entire header is visible in the viewport
+				const headerTopVisible = headerRect.top >= 0;
+				const headerBottomVisible = headerRect.bottom <= window.innerHeight;
+
+				if (headerTopVisible && headerBottomVisible) {
+					visibleSections.push(section.getAttribute('id'));
+				}
+			}
+		});
+
+		// Update highlighting for all visible sections
+		const activeLinks = [];
+		navLinks.forEach(link => {
+			link.classList.remove('bg-blue-100', 'text-blue-700', 'font-medium', 'border-red-500');
+			link.classList.add('text-gray-600', 'border-transparent');
+
+			const targetId = link.getAttribute('data-target');
+			if (visibleSections.includes(targetId)) {
+				link.classList.remove('text-gray-600', 'border-transparent');
+				link.classList.add('bg-blue-100', 'text-blue-700', 'font-medium', 'border-red-500');
+				activeLinks.push(link);
+			}
+		});
+
+		// Implement proportional scrolling to keep active links visible
+		if (activeLinks.length > 0) {
+			updateSidebarScroll(activeLinks);
+		}
+	}
+
+	function updateSidebarScroll(activeLinks) {
+		// Skip automatic scrolling during manual navigation
+		if (window.scrollspyManualNavigation) return;
+
+		const sidebar = document.getElementById('scrollspy-nav');
+		if (!sidebar) return;
+
+		// Get the first active link as reference
+		const firstActiveLink = activeLinks[0];
+
+		// Calculate the main content scroll progress
+		const documentHeight = Math.max(
+			document.body.scrollHeight,
+			document.body.offsetHeight,
+			document.documentElement.clientHeight,
+			document.documentElement.scrollHeight,
+			document.documentElement.offsetHeight
+		);
+		const viewportHeight = window.innerHeight;
+		const maxScroll = documentHeight - viewportHeight;
+		const scrollProgress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+
+		// Calculate sidebar scroll dimensions
+		const sidebarHeight = sidebar.clientHeight;
+		const sidebarScrollHeight = sidebar.scrollHeight;
+		const maxSidebarScroll = sidebarScrollHeight - sidebarHeight;
+
+		if (maxSidebarScroll > 0) {
+			// Calculate proportional scroll position
+			const targetSidebarScroll = scrollProgress * maxSidebarScroll;
+
+			// Get the position of the first active link within the sidebar
+			const linkRect = firstActiveLink.getBoundingClientRect();
+			const sidebarRect = sidebar.getBoundingClientRect();
+			const linkOffsetInSidebar = linkRect.top - sidebarRect.top + sidebar.scrollTop;
+
+			// Calculate the desired position (center the active link in the sidebar viewport)
+			const sidebarCenter = sidebarHeight / 2;
+			const centeredPosition = linkOffsetInSidebar - sidebarCenter;
+
+			// Use a blend of proportional scrolling and centering for smooth behavior
+			const blendFactor = 0.7; // 70% proportional, 30% centering
+			const finalScrollPosition = (blendFactor * targetSidebarScroll) + ((1 - blendFactor) * centeredPosition);
+
+			// Clamp to valid scroll range
+			const clampedPosition = Math.max(0, Math.min(maxSidebarScroll, finalScrollPosition));
+
+			// Apply smooth scrolling, but only if the difference is significant
+			const currentScrollTop = sidebar.scrollTop;
+			const scrollDifference = Math.abs(clampedPosition - currentScrollTop);
+
+			if (scrollDifference > 10) { // Only scroll if more than 10px difference
+				sidebar.scrollTo({
+					top: clampedPosition,
+					behavior: 'smooth'
+				});
+			}
+		}
+	}
+
+	// Store scroll handler reference for cleanup
+	window.scrollspyScrollHandler = function() {
+		clearTimeout(window.scrollspyTimeout);
+		window.scrollspyTimeout = setTimeout(updateActiveLink, 50);
+	};
+
+	// Add scroll listener
+	window.addEventListener('scroll', window.scrollspyScrollHandler);
+
+	// Store click handlers for cleanup
+	window.scrollspyClickHandlers = [];
+
+	// Add smooth scroll on link click
+	navLinks.forEach(link => {
+		const clickHandler = function(e) {
+			e.preventDefault();
+			const target = document.getElementById(this.getAttribute('data-target'));
+			if (target) {
+				// Temporarily disable automatic sidebar scrolling during manual navigation
+				window.scrollspyManualNavigation = true;
+
+				target.scrollIntoView({
+					behavior: 'smooth',
+					block: 'start'
+				});
+
+				// Re-enable automatic scrolling after navigation completes
+				setTimeout(() => {
+					window.scrollspyManualNavigation = false;
+				}, 1000);
+			}
+		};
+
+		window.scrollspyClickHandlers.push({ link, handler: clickHandler });
+		link.addEventListener('click', clickHandler);
+	});
+
+	// Initial active link update
+	updateActiveLink();
+}
+
+// Cleanup scrollspy functionality
+function cleanupScrollspy() {
+	// Remove scroll listener
+	if (window.scrollspyScrollHandler) {
+		window.removeEventListener('scroll', window.scrollspyScrollHandler);
+		window.scrollspyScrollHandler = null;
+	}
+
+	// Clear timeout
+	if (window.scrollspyTimeout) {
+		clearTimeout(window.scrollspyTimeout);
+		window.scrollspyTimeout = null;
+	}
+
+	// Remove click handlers
+	if (window.scrollspyClickHandlers) {
+		window.scrollspyClickHandlers.forEach(({ link, handler }) => {
+			link.removeEventListener('click', handler);
+		});
+		window.scrollspyClickHandlers = null;
+	}
+
+	// Reset manual navigation flag
+	window.scrollspyManualNavigation = false;
+}
+
 // Initialize newspaper layout functionality
 function initializeNewspaperLayout() {
 	// Initialize page highlighting
@@ -1026,6 +1212,11 @@ function setup() {
 		initializeNewspaperLayout();
 	}
 
+	// Initialize scrollspy if author/agent sections are present
+	if (document.querySelector(".author-section")) {
+		initializeScrollspy();
+	}
+
 	// Set up HTMX event handlers
 	htmx.on("htmx:load", function (_) {
 		// INFO: We can instead use afterSettle; and also clear the map with
@@ -1033,11 +1224,15 @@ function setup() {
 		setup_xslt();
 	});
 
-	// HTMX event handling for newspaper layout
+
+	// HTMX event handling for newspaper layout and scrollspy
 	document.body.addEventListener("htmx:afterSwap", function (event) {
 		setTimeout(() => {
 			if (document.querySelector(".newspaper-page-container")) {
 				initializeNewspaperLayout();
+			}
+			if (document.querySelector(".author-section")) {
+				initializeScrollspy();
 			}
 		}, 100);
 	});
@@ -1047,6 +1242,9 @@ function setup() {
 			if (document.querySelector(".newspaper-page-container")) {
 				initializeNewspaperLayout();
 			}
+			if (document.querySelector(".author-section")) {
+				initializeScrollspy();
+			}
 		}, 200);
 	});
 
@@ -1054,6 +1252,9 @@ function setup() {
 		setTimeout(() => {
 			if (document.querySelector(".newspaper-page-container")) {
 				initializeNewspaperLayout();
+			}
+			if (document.querySelector(".author-section")) {
+				initializeScrollspy();
 			}
 		}, 100);
 	});
@@ -1664,6 +1865,9 @@ document.body.addEventListener("htmx:beforeRequest", function (event) {
 		console.log("Cleaning up single page viewer before HTMX navigation");
 		viewer.destroy();
 	}
+
+	// Clean up scrollspy before navigating
+	cleanupScrollspy();
 });
 
 // Also clean up on page unload as fallback

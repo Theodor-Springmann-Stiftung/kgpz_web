@@ -4,6 +4,7 @@ import "github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 
 // CategoryFlags represents all possible category flags for a piece
 type CategoryFlags struct {
+	// Categories from kategorien.xml
 	Rezension               bool
 	Weltnachrichten         bool
 	EinkommendeFremde       bool
@@ -15,6 +16,7 @@ type CategoryFlags struct {
 	Gedicht                 bool
 	Vorladung               bool
 	Auszug                  bool
+	Provinienz              bool // Added missing category
 	Aufsatz                 bool
 	GelehrteNachrichten     bool
 	Theaterkritik           bool
@@ -23,17 +25,18 @@ type CategoryFlags struct {
 	Nachruf                 bool
 	Replik                  bool
 	Proklamation            bool
-	Ineigenersache          bool
 	Brief                   bool
 	Anzeige                 bool
+	Ineigenersache          bool
 	Desertionsliste         bool
 	Notenblatt              bool
 	Vorlesungsverzeichnis   bool
 	Erzaehlung              bool
+	Abbildung               bool
+	// Additional categories that appear in combinations
 	Nachtrag                bool
 	Panegyrik               bool
 	Kriminalanzeige         bool
-	Abbildung               bool
 	Rezepte                 bool
 	Korrektur               bool
 }
@@ -67,6 +70,8 @@ func GetCategoryFlags(piece xmlmodels.Piece) CategoryFlags {
 			flags.Vorladung = true
 		case "auszug":
 			flags.Auszug = true
+		case "provinienz":
+			flags.Provinienz = true
 		case "aufsatz":
 			flags.Aufsatz = true
 		case "gelehrte-nachrichten":

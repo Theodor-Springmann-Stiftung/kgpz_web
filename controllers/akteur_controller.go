@@ -17,6 +17,21 @@ func GetAgents(kgpz *xmlmodels.Library) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		a := c.Params("letterorid", DEFAULT_AGENT)
 		a = strings.ToLower(a)
+
+		// Handle special "autoren" route
+		if a == "autoren" {
+			agents := viewmodels.AuthorsView(kgpz)
+			if len(agents.Agents) == 0 {
+				logging.Error(nil, "No authors found")
+				return c.SendStatus(fiber.StatusNotFound)
+			}
+			return c.Render(
+				"/autoren/",
+				fiber.Map{"model": agents},
+			)
+		}
+
+		// Handle normal letter/id lookup
 		agents := viewmodels.AgentsView(a, kgpz)
 		if len(agents.Agents) == 0 {
 			logging.Error(nil, "No agents found for letter or id: "+a)

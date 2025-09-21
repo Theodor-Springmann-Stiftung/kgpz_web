@@ -225,6 +225,121 @@ func (e *Engine) funcs() error {
 		return dict, nil
 	})
 
+	e.AddFunc("merge", func(dest map[string]interface{}, src map[string]interface{}) map[string]interface{} {
+		result := make(map[string]interface{})
+		// Copy from dest first
+		for k, v := range dest {
+			result[k] = v
+		}
+		// Override with src values
+		for k, v := range src {
+			result[k] = v
+		}
+		return result
+	})
+
+	e.AddFunc("append", func(slice interface{}, item interface{}) interface{} {
+		v := reflect.ValueOf(slice)
+		if v.Kind() != reflect.Slice {
+			return slice
+		}
+		newSlice := reflect.Append(v, reflect.ValueOf(item))
+		return newSlice.Interface()
+	})
+
+	e.AddFunc("slice", func(items ...interface{}) []interface{} {
+		return items
+	})
+
+	e.AddFunc("keys", func(m map[string]interface{}) []string {
+		keys := make([]string, 0, len(m))
+		for k := range m {
+			keys = append(keys, k)
+		}
+		return keys
+	})
+
+	e.AddFunc("has", func(slice interface{}, item interface{}) bool {
+		v := reflect.ValueOf(slice)
+		if v.Kind() != reflect.Slice {
+			return false
+		}
+		for i := 0; i < v.Len(); i++ {
+			if reflect.DeepEqual(v.Index(i).Interface(), item) {
+				return true
+			}
+		}
+		return false
+	})
+
+	e.AddFunc("joinWithUnd", func(items []string) string {
+		if len(items) == 0 {
+			return ""
+		}
+		if len(items) == 1 {
+			return items[0]
+		}
+		if len(items) == 2 {
+			return items[0] + " und " + items[1]
+		}
+		// For 3+ items: "A, B und C"
+		result := ""
+		for i, item := range items {
+			if i == 0 {
+				result = item
+			} else if i == len(items)-1 {
+				result += " und " + item
+			} else {
+				result += ", " + item
+			}
+		}
+		return result
+	})
+
+	e.AddFunc("sortStrings", func(items interface{}) []string {
+		v := reflect.ValueOf(items)
+		if v.Kind() != reflect.Slice {
+			return []string{}
+		}
+
+		// Convert to string slice
+		result := make([]string, v.Len())
+		for i := 0; i < v.Len(); i++ {
+			if str, ok := v.Index(i).Interface().(string); ok {
+				result[i] = str
+			}
+		}
+
+		// Simple bubble sort
+		for i := 0; i < len(result)-1; i++ {
+			for j := i + 1; j < len(result); j++ {
+				if result[i] > result[j] {
+					result[i], result[j] = result[j], result[i]
+				}
+			}
+		}
+		return result
+	})
+
+	e.AddFunc("unique", func(items interface{}) []string {
+		v := reflect.ValueOf(items)
+		if v.Kind() != reflect.Slice {
+			return []string{}
+		}
+
+		seen := make(map[string]bool)
+		result := []string{}
+		for i := 0; i < v.Len(); i++ {
+			if str, ok := v.Index(i).Interface().(string); ok {
+				if !seen[str] {
+					seen[str] = true
+					result = append(result, str)
+				}
+			}
+		}
+		return result
+	})
+
 	// Strings
 	e.AddFunc("FirstLetter", functions.FirstLetter)
 	e.AddFunc("Upper", strings.ToUpper)

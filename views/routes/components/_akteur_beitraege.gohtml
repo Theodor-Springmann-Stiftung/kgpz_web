@@ -1,0 +1,74 @@
+{{ $a := . }}
+{{ $pieces := LookupPieces $a }}
+{{ if ne (len $pieces) 0 }}
+	<div class="mt-8">
+		<div class="px-4 py-3 rounded-lg mb-4">
+			<h2 class="text-lg font-bold text-gray-900">
+				<i class="ri-newspaper-line mr-2"></i>Beiträge
+			</h2>
+		</div>
+		<div class="space-y-2">
+			{{- /* Group pieces by title and work reference */ -}}
+			{{- $groupedPieces := dict -}}
+			{{- range $_, $p := SortPiecesByDate $pieces -}}
+				{{- $groupKey := "" -}}
+				{{- if $p.Item.Title -}}
+					{{- $groupKey = index $p.Item.Title 0 -}}
+				{{- else if $p.Item.WorkRefs -}}
+					{{- $work := GetWork (index $p.Item.WorkRefs 0).Ref -}}
+					{{- if $work.PreferredTitle -}}
+						{{- $groupKey = $work.PreferredTitle -}}
+					{{- else if $work.Citation.Title -}}
+						{{- $groupKey = $work.Citation.Title -}}
+					{{- end -}}
+				{{- else if $p.Item.Incipit -}}
+					{{- $groupKey = index $p.Item.Incipit 0 -}}
+				{{- else -}}
+					{{- $groupKey = printf "untitled-%s" $p.Item.ID -}}
+				{{- end -}}
+
+				{{- $existing := index $groupedPieces $groupKey -}}
+				{{- if $existing -}}
+					{{- $groupedPieces = merge $groupedPieces (dict $groupKey (append $existing $p)) -}}
+				{{- else -}}
+					{{- $groupedPieces = merge $groupedPieces (dict $groupKey (slice $p)) -}}
+				{{- end -}}
+			{{- end -}}
+
+
+		<div class="columns-2 gap-6">
+			{{- /* Display grouped pieces */ -}}
+			{{- range $groupKey, $groupedItems := $groupedPieces -}}
+				<div class="border-l-2 border-gray-200 pl-4 break-inside-avoid">
+					<div class="text-lg">
+						{{- /* Use first piece for display text */ -}}
+						{{ template "_piece_summary" (dict "Piece" (index $groupedItems 0).Item "CurrentActorID" $a.ID) }}
+
+						{{- /* Show all citations from all pieces in this group */ -}}
+						{{- range $_, $groupItem := $groupedItems -}}
+							{{- range $i, $issue := $groupItem.Item.IssueRefs -}}
+								{{ $issueData := GetIssue (printf "%d-%d" $issue.When.Year $issue.Nr) }}
+								{{- $url := printf "/%s/%d" $issue.When $issue.Nr -}}
+								{{- if $issue.Von -}}
+									{{- if $issue.Beilage -}}
+										{{- $url = printf "%s#beilage-%d-page-%d" $url $issue.Beilage $issue.Von -}}
+									{{- else -}}
+										{{- $url = printf "%s/%d" $url $issue.Von -}}
+									{{- end -}}
+								{{- end -}}
+								<a href="{{ $url }}" class="inline-block text-sm bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-3 py-2 rounded ml-2 no-underline">
+									{{- if $issueData -}}
+										{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
+									{{- else -}}
+										{{ $issue.When.Day }}.{{ $issue.When.Month }}.{{ $issue.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
+									{{- end -}}
+								</a>
+							{{- end -}}
+						{{- end -}}
+					</div>
+				</div>
+			{{- end -}}
+			</div>
+		</div>
+	</div>
+{{ end }}

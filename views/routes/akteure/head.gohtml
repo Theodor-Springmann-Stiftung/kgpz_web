@@ -1,7 +1,14 @@
 <title>
 	KGPZ &ndash;
-	{{ if ne (len .model.Search) 1 }}
-		{{ index (index .model.Agents .model.Search).Names 0 }}
+	{{ if eq .model.Search "autoren" }}
+		Autoren
+	{{ else if ne (len .model.Search) 1 }}
+		{{ $agent := index .model.Agents .model.Search }}
+		{{ if $agent }}
+			{{ index $agent.Names 0 }}
+		{{ else }}
+			Person nicht gefunden
+		{{ end }}
 	{{ else }}
 		Personen &amp; Körperschaften:
 		{{ Upper .model.Search }}
