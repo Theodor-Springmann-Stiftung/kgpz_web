@@ -1,7 +1,7 @@
 {{ if ne (len .model.Search) 1 }}
 	{{ $agent := index $.model.Agents .model.Search }}
 	{{ if not $agent }}
-		<div class="max-w-6xl mx-auto px-8 py-8">
+		<div class="max-w-7xl mx-auto px-8 py-8">
 			<div class="bg-red-50 border border-red-200 rounded-lg p-6">
 				<div class="flex items-center">
 					<i class="ri-error-warning-line text-red-600 text-2xl mr-3"></i>
@@ -10,7 +10,7 @@
 			</div>
 		</div>
 	{{ else }}
-		<div class="max-w-6xl mx-auto px-8 py-8">
+		<div class="max-w-7xl mx-auto px-8 py-8">
 			<div class="bg-white px-6 py-6 rounded">
 				<div class="mb-6">
 					{{ $letter := Upper (FirstLetter $agent.ID) }}
@@ -25,16 +25,16 @@
 	{{ end }}
 
 {{ else }}
-	<div class="max-w-full mx-auto px-8 py-8">
+	<div class="max-w-7xl mx-auto px-8 py-8">
 		<div class="mb-10 2xl:mb-0">
 			<!-- Main header - hidden on 2xl+ screens when scrollspy is visible -->
 			<div class="bg-white px-6 py-4 rounded mb-6 2xl:hidden">
 				{{ if eq .model.Search "autoren" }}
 					<h1 class="text-4xl font-bold text-gray-900 mb-2">Autor:innen</h1>
-					<p class="text-gray-700 text-lg">Personen, die Beiträge in der Zeitung verfasst haben</p>
+					<p class="text-gray-700">Personen, die Beiträge in der Zeitung verfasst haben</p>
 				{{ else }}
 					<h1 class="text-4xl font-bold text-gray-900 mb-2">Personen & Körperschaften</h1>
-					<p class="text-gray-700 text-lg">Verzeichnis aller in der Zeitung erwähnten Personen und Institutionen</p>
+					<p class="text-gray-700">Verzeichnis aller in der Zeitung erwähnten Personen und Institutionen</p>
 				{{ end }}
 
 				<!-- Integrated checkbox into header -->
@@ -47,7 +47,7 @@
 						       hx-get="{{ if eq .model.Search "autoren" }}/akteure/a{{ else }}/akteure/autoren{{ end }}"
 						       hx-target="body"
 						       hx-push-url="true">
-						<span class="ml-2 text-lg text-gray-700">Nur Autor:innen anzeigen</span>
+						<span class="ml-2 text-gray-700">Nur Autor:innen anzeigen</span>
 					</label>
 				</div>
 			</div>

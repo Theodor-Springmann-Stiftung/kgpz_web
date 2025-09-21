@@ -6,7 +6,7 @@
 		<!-- Three-column layout -->
 		<div class="flex flex-col lg:flex-row gap-6 w-full min-h-screen">
 			<!-- Column 1: Sticky Inhaltsverzeichnis -->
-			<div class="lg:w-1/4 xl:w-1/5 flex-shrink-0 bg-slate-50 px-8 py-4">
+			<div class="lg:w-1/4 xl:w-1/4 flex-shrink-0 bg-slate-50 px-8 py-4">
 				<div class="lg:sticky lg:top-8 lg:overflow-y-auto">
 					<div class="bg-slate-50">
 						{{ template "_title_nav" . }}
@@ -18,7 +18,7 @@
 			</div>
 
 			<!-- Column 2: Newspaper pages -->
-			<div class="lg:w-3/5 xl:w-3/5 flex-1 py-4">
+			<div class="flex-1 py-4">
 				{{ template "_newspaper_layout" . }}
 			</div>
 

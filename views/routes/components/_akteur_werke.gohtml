@@ -14,7 +14,7 @@
 {{- if or (ne (len $works) 0) (ne (len $workPieces) 0) -}}
 	<div class="mt-4 akteur-werke-section">
 		<div class="py-1 rounded-lg mb-1">
-			<h2 class="text-lg font-bold">
+			<h2 class="font-bold">
 				<i class="ri-book-line mr-2"></i><u class="decoration underline-offset-3">Werke</u>
 			</h2>
 		</div>
@@ -22,7 +22,7 @@
 		{{ range $_, $w := $works }}
 			<div class="mb-1.5 break-inside-avoid max-w-[95ch]">
 				{{- if ne (len $w.Item.Citation.InnerXML ) 0 -}}
-					<div class="text-lg indent-6">
+					<div class="indent-6">
 						{{- Safe $w.Item.Citation.HTML -}}
 						{{- range $_, $url := $w.Item.URLs -}}
 							<span class="ml-1 whitespace-nowrap">
@@ -35,7 +35,7 @@
 				{{- end -}}
 				{{ $workPieces := LookupPieces $w.Item }}
 				{{ if len $workPieces }}
-					<div class="mt-1 text-lg">
+					<div class="mt-1">
 						{{- /* Group pieces by piece ID first to combine all categories per piece, then by additional authors */ -}}
 						{{- $pieceData := dict -}}
 						{{- range $_, $p := $workPieces -}}
@@ -296,7 +296,7 @@
 			{{- /* Display standalone work pieces */ -}}
 			{{- range $groupKey, $categoryPieces := $standaloneGrouped -}}
 				<div class="mb-1.5 break-inside-avoid max-w-[95ch]">
-					<div class="text-lg">
+					<div class="">
 						<span class="inline-block">
 							{{- /* Extract category and additional authors from group key */ -}}
 							{{- $keyParts := split $groupKey "|" -}}

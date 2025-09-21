@@ -8,7 +8,7 @@
 			<!-- Large serif name - bold with inline permalink icon -->
 			<div class="text-xl font-serif font-bold mb-1 flex items-center gap-2">
 				<span>{{ index $a.Names 0 }}</span>
-				<a href="/akteure/{{ $a.ID }}" class="text-gray-500 hover:text-blue-600 transition-colors text-lg no-underline" title="Permalink zu {{ index $a.Names 0 }}">
+				<a href="/akteure/{{ $a.ID }}" class="text-gray-500 hover:text-blue-600 transition-colors no-underline" title="Permalink zu {{ index $a.Names 0 }}">
 					<i class="ri-link text-base"></i>
 				</a>
 			</div>
@@ -16,7 +16,7 @@
 			<!-- Years ONLY below name -->
 			{{ if ne $gnd nil }}
 				{{- if or (ne (len $gnd.DateOfBirth) 0) (ne (len $gnd.DateOfDeath) 0) -}}
-					<div class="text-gray-800 text-lg">
+					<div class="text-gray-800">
 						{{- if ne (len $gnd.DateOfBirth) 0 -}}
 							{{ HRDateYear (index $gnd.DateOfBirth 0) }}
 						{{- end -}}
@@ -30,7 +30,7 @@
 			<!-- First three professions -->
 			{{ if ne $gnd nil }}
 				{{- if ne (len $gnd.ProfessionOrOccupation) 0 -}}
-					<div class="text-gray-800 text-lg">
+					<div class="text-gray-800">
 						{{ range $i, $prof := $gnd.ProfessionOrOccupation }}
 							{{ if lt $i 3 }}
 								{{ if gt $i 0 }} · {{ end }}{{ $prof.Label }}
@@ -61,7 +61,7 @@
 					{{- if ne (len $gnd.SameAs) 0 -}}
 						{{ range $_, $ref := $gnd.SameAs }}
 							{{- if ne $ref.ID "" -}}
-								<a href="{{ $ref.ID }}" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors text-lg" title="External Link">
+								<a href="{{ $ref.ID }}" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors" title="External Link">
 									<i class="ri-global-line"></i>
 								</a>
 							{{- end -}}
