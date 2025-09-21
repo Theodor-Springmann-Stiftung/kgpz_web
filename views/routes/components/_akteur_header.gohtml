@@ -6,16 +6,16 @@
 	<div class="flex items-start justify-between gap-4">
 		<div class="flex-1">
 			<!-- Large serif name - bold -->
-			<div class="text-2xl font-serif font-bold text-gray-900 leading-tight">
-				<a href="/akteure/{{ $a.ID }}" class="hover:text-blue-600 transition-colors">
+			<div class="text-xl font-serif font-bold mb-1">
+				<a href="/akteure/{{ $a.ID }}" class="hover:text-slate-900 transition-colors no-underline">
 					{{ index $a.Names 0 }}
 				</a>
 			</div>
 
-			<!-- Years only below name -->
+			<!-- Years ONLY below name -->
 			{{ if ne $gnd nil }}
 				{{- if or (ne (len $gnd.DateOfBirth) 0) (ne (len $gnd.DateOfDeath) 0) -}}
-					<div class="text-gray-600 text-xl mt-2">
+					<div class="text-gray-800 text-lg">
 						{{- if ne (len $gnd.DateOfBirth) 0 -}}
 							{{ HRDateYear (index $gnd.DateOfBirth 0) }}
 						{{- end -}}
@@ -29,7 +29,7 @@
 			<!-- First three professions -->
 			{{ if ne $gnd nil }}
 				{{- if ne (len $gnd.ProfessionOrOccupation) 0 -}}
-					<div class="text-gray-600 text-xl mt-2">
+					<div class="text-gray-800 text-lg">
 						{{ range $i, $prof := $gnd.ProfessionOrOccupation }}
 							{{ if lt $i 3 }}
 								{{ if gt $i 0 }} · {{ end }}{{ $prof.Label }}

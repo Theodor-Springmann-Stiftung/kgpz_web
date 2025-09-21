@@ -982,8 +982,8 @@ function initializeScrollspy() {
 	// Clean up any existing scrollspy
 	cleanupScrollspy();
 
-	const sections = document.querySelectorAll('.author-section');
-	const navLinks = document.querySelectorAll('.scrollspy-link');
+	const sections = document.querySelectorAll(".author-section");
+	const navLinks = document.querySelectorAll(".scrollspy-link");
 
 	if (sections.length === 0 || navLinks.length === 0) {
 		return;
@@ -995,12 +995,12 @@ function initializeScrollspy() {
 		const viewportBottom = viewportTop + window.innerHeight;
 
 		// Check which sections are fully visible (header must be completely visible)
-		sections.forEach(section => {
+		sections.forEach((section) => {
 			const sectionRect = section.getBoundingClientRect();
 			const sectionTop = sectionRect.top + window.scrollY;
 
 			// Find the header element (name, life data, professions)
-			const headerElement = section.querySelector('div:first-child');
+			const headerElement = section.querySelector("div:first-child");
 			if (headerElement) {
 				const headerRect = headerElement.getBoundingClientRect();
 				const headerTop = headerRect.top + window.scrollY;
@@ -1011,21 +1011,21 @@ function initializeScrollspy() {
 				const headerBottomVisible = headerRect.bottom <= window.innerHeight;
 
 				if (headerTopVisible && headerBottomVisible) {
-					visibleSections.push(section.getAttribute('id'));
+					visibleSections.push(section.getAttribute("id"));
 				}
 			}
 		});
 
 		// Update highlighting for all visible sections
 		const activeLinks = [];
-		navLinks.forEach(link => {
-			link.classList.remove('bg-blue-100', 'text-blue-700', 'font-medium', 'border-red-500');
-			link.classList.add('text-gray-600', 'border-transparent');
+		navLinks.forEach((link) => {
+			link.classList.remove("font-medium", "bg-red-100");
+			link.classList.add("text-gray-700", "bg-white");
 
-			const targetId = link.getAttribute('data-target');
+			const targetId = link.getAttribute("data-target");
 			if (visibleSections.includes(targetId)) {
-				link.classList.remove('text-gray-600', 'border-transparent');
-				link.classList.add('bg-blue-100', 'text-blue-700', 'font-medium', 'border-red-500');
+				link.classList.remove("text-gray-700", "bg-white");
+				link.classList.add("font-medium", "bg-red-100");
 				activeLinks.push(link);
 			}
 		});
@@ -1040,7 +1040,7 @@ function initializeScrollspy() {
 		// Skip automatic scrolling during manual navigation
 		if (window.scrollspyManualNavigation) return;
 
-		const sidebar = document.getElementById('scrollspy-nav');
+		const sidebar = document.getElementById("scrollspy-nav");
 		if (!sidebar) return;
 
 		// Get the first active link as reference
@@ -1052,7 +1052,7 @@ function initializeScrollspy() {
 			document.body.offsetHeight,
 			document.documentElement.clientHeight,
 			document.documentElement.scrollHeight,
-			document.documentElement.offsetHeight
+			document.documentElement.offsetHeight,
 		);
 		const viewportHeight = window.innerHeight;
 		const maxScroll = documentHeight - viewportHeight;
@@ -1078,7 +1078,8 @@ function initializeScrollspy() {
 
 			// Use a blend of proportional scrolling and centering for smooth behavior
 			const blendFactor = 0.7; // 70% proportional, 30% centering
-			const finalScrollPosition = (blendFactor * targetSidebarScroll) + ((1 - blendFactor) * centeredPosition);
+			const finalScrollPosition =
+				blendFactor * targetSidebarScroll + (1 - blendFactor) * centeredPosition;
 
 			// Clamp to valid scroll range
 			const clampedPosition = Math.max(0, Math.min(maxSidebarScroll, finalScrollPosition));
@@ -1087,39 +1088,40 @@ function initializeScrollspy() {
 			const currentScrollTop = sidebar.scrollTop;
 			const scrollDifference = Math.abs(clampedPosition - currentScrollTop);
 
-			if (scrollDifference > 10) { // Only scroll if more than 10px difference
+			if (scrollDifference > 10) {
+				// Only scroll if more than 10px difference
 				sidebar.scrollTo({
 					top: clampedPosition,
-					behavior: 'smooth'
+					behavior: "smooth",
 				});
 			}
 		}
 	}
 
 	// Store scroll handler reference for cleanup
-	window.scrollspyScrollHandler = function() {
+	window.scrollspyScrollHandler = function () {
 		clearTimeout(window.scrollspyTimeout);
 		window.scrollspyTimeout = setTimeout(updateActiveLink, 50);
 	};
 
 	// Add scroll listener
-	window.addEventListener('scroll', window.scrollspyScrollHandler);
+	window.addEventListener("scroll", window.scrollspyScrollHandler);
 
 	// Store click handlers for cleanup
 	window.scrollspyClickHandlers = [];
 
 	// Add smooth scroll on link click
-	navLinks.forEach(link => {
-		const clickHandler = function(e) {
+	navLinks.forEach((link) => {
+		const clickHandler = function (e) {
 			e.preventDefault();
-			const target = document.getElementById(this.getAttribute('data-target'));
+			const target = document.getElementById(this.getAttribute("data-target"));
 			if (target) {
 				// Temporarily disable automatic sidebar scrolling during manual navigation
 				window.scrollspyManualNavigation = true;
 
 				target.scrollIntoView({
-					behavior: 'smooth',
-					block: 'start'
+					behavior: "smooth",
+					block: "start",
 				});
 
 				// Re-enable automatic scrolling after navigation completes
@@ -1130,7 +1132,7 @@ function initializeScrollspy() {
 		};
 
 		window.scrollspyClickHandlers.push({ link, handler: clickHandler });
-		link.addEventListener('click', clickHandler);
+		link.addEventListener("click", clickHandler);
 	});
 
 	// Initial active link update
@@ -1141,7 +1143,7 @@ function initializeScrollspy() {
 function cleanupScrollspy() {
 	// Remove scroll listener
 	if (window.scrollspyScrollHandler) {
-		window.removeEventListener('scroll', window.scrollspyScrollHandler);
+		window.removeEventListener("scroll", window.scrollspyScrollHandler);
 		window.scrollspyScrollHandler = null;
 	}
 
@@ -1154,7 +1156,7 @@ function cleanupScrollspy() {
 	// Remove click handlers
 	if (window.scrollspyClickHandlers) {
 		window.scrollspyClickHandlers.forEach(({ link, handler }) => {
-			link.removeEventListener('click', handler);
+			link.removeEventListener("click", handler);
 		});
 		window.scrollspyClickHandlers = null;
 	}
@@ -1223,7 +1225,6 @@ function setup() {
 		// xslt_processors.clear();
 		setup_xslt();
 	});
-
 
 	// HTMX event handling for newspaper layout and scrollspy
 	document.body.addEventListener("htmx:afterSwap", function (event) {

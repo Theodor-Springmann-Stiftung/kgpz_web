@@ -63,8 +63,8 @@ function W() {
 function I() {
   const o = [];
   document.querySelectorAll(".newspaper-page-container").forEach((e) => {
-    const n = e.getBoundingClientRect(), i = window.innerHeight, r = Math.max(n.top, 0), s = Math.min(n.bottom, i), a = Math.max(0, s - r), l = n.height, g = a / l >= 0.5, d = e.querySelector("img[data-page]"), p = d ? d.getAttribute("data-page") : "unknown";
-    g && d && p && !o.includes(p) && o.push(p);
+    const n = e.getBoundingClientRect(), i = window.innerHeight, r = Math.max(n.top, 0), s = Math.min(n.bottom, i), a = Math.max(0, s - r), l = n.height, g = a / l >= 0.5, d = e.querySelector("img[data-page]"), h = d ? d.getAttribute("data-page") : "unknown";
+    g && d && h && !o.includes(h) && o.push(h);
   }), Z(o), o.length > 0 && A(o);
 }
 function Z(o) {
@@ -154,7 +154,7 @@ function L() {
   document.getElementById("pageModal").classList.add("hidden");
 }
 function G() {
-  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, h(), document.querySelector(".newspaper-page-container")) {
+  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, p(), document.querySelector(".newspaper-page-container")) {
     let t = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
       (e) => {
@@ -163,7 +163,7 @@ function G() {
           i !== -1 && (n.isIntersecting ? t.add(i) : t.delete(i));
         }), t.size > 0) {
           const i = Array.from(t).sort((r, s) => r - s)[0];
-          i !== window.currentActiveIndex && (window.currentActiveIndex = i, h());
+          i !== window.currentActiveIndex && (window.currentActiveIndex = i, p());
         }
       },
       {
@@ -192,7 +192,7 @@ function Y() {
       behavior: "smooth",
       block: "start"
     }), setTimeout(() => {
-      h();
+      p();
     }, 100));
   }
 }
@@ -214,7 +214,7 @@ function J() {
       behavior: "smooth",
       block: "start"
     }), setTimeout(() => {
-      h();
+      p();
     }, 100));
   }
 }
@@ -246,7 +246,7 @@ function q() {
   }
   return !1;
 }
-function h() {
+function p() {
   const o = document.getElementById("prevPageBtn"), t = document.getElementById("nextPageBtn"), e = document.getElementById("beilageBtn");
   if (o && (window.currentActiveIndex <= 0 ? o.style.display = "none" : o.style.display = "flex"), t && (window.currentActiveIndex >= window.currentPageContainers.length - 1 ? t.style.display = "none" : t.style.display = "flex"), e) {
     const n = q(), i = e.querySelector("i");
@@ -437,15 +437,15 @@ function f() {
       if (l) {
         const c = l.getBoundingClientRect();
         c.top + window.scrollY + c.height;
-        const d = c.top >= 0, p = c.bottom <= window.innerHeight;
-        d && p && i.push(s.getAttribute("id"));
+        const d = c.top >= 0, h = c.bottom <= window.innerHeight;
+        d && h && i.push(s.getAttribute("id"));
       }
     });
     const r = [];
     t.forEach((s) => {
-      s.classList.remove("bg-blue-100", "text-blue-700", "font-medium", "border-red-500"), s.classList.add("text-gray-600", "border-transparent");
+      s.classList.remove("font-medium", "bg-red-100"), s.classList.add("text-gray-700", "bg-white");
       const a = s.getAttribute("data-target");
-      i.includes(a) && (s.classList.remove("text-gray-600", "border-transparent"), s.classList.add("bg-blue-100", "text-blue-700", "font-medium", "border-red-500"), r.push(s));
+      i.includes(a) && (s.classList.remove("text-gray-700", "bg-white"), s.classList.add("font-medium", "bg-red-100"), r.push(s));
     }), r.length > 0 && n(r);
   }
   function n(i) {
@@ -491,7 +491,7 @@ function k() {
 function b() {
   W(), G(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
-      I(), h();
+      I(), p();
     }, 50);
   }), ne(), document.addEventListener("keydown", function(o) {
     o.key === "Escape" && L();
@@ -656,8 +656,8 @@ class oe extends HTMLElement {
       l.style.position = "relative";
       const d = l.querySelector(".target-page-dot");
       d && d.remove();
-      const p = document.createElement("span");
-      p.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", p.title = "verlinkte Seite", l.appendChild(p);
+      const h = document.createElement("span");
+      h.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", h.title = "verlinkte Seite", l.appendChild(h);
     }
     if (s !== null)
       c.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${s}. Teil</span>`;
@@ -817,9 +817,9 @@ class oe extends HTMLElement {
           const g = c.textContent.trim(), d = g.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
           if (d)
             return d[1];
-          const p = g.match(/(\d{4})\s+Nr\.\s+(\d+)/);
-          if (p)
-            return `${p[1]} Nr. ${p[2]}`;
+          const h = g.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+          if (h)
+            return `${h[1]} Nr. ${h[2]}`;
         }
       }
       const l = document.title.match(/(\d{4}).*Nr\.\s*(\d+)/);

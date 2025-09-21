@@ -1,10 +1,10 @@
 {{ $a := . }}
 {{ $pieces := LookupPieces $a }}
 {{ if ne (len $pieces) 0 }}
-	<div class="mt-8">
-		<div class="px-4 py-3 rounded-lg mb-4">
-			<h2 class="text-lg font-bold text-gray-900">
-				<i class="ri-newspaper-line mr-2"></i>Beiträge
+	<div class="mt-4">
+		<div class="py-1 rounded-lg mb-1">
+			<h2 class="text-lg font-bold">
+				<i class="ri-newspaper-line mr-2"></i><u class="decoration underline-offset-3">Beiträge</u>
 			</h2>
 		</div>
 		<div class="space-y-2">
@@ -39,10 +39,12 @@
 		<div class="columns-2 gap-6">
 			{{- /* Display grouped pieces */ -}}
 			{{- range $groupKey, $groupedItems := $groupedPieces -}}
-				<div class="border-l-2 border-gray-200 pl-4 break-inside-avoid">
-					<div class="text-lg">
+				<div class="break-inside-avoid">
+					<div class="text-lg pb-1">
 						{{- /* Use first piece for display text */ -}}
+						<span class="inline-block indent-6">
 						{{ template "_piece_summary" (dict "Piece" (index $groupedItems 0).Item "CurrentActorID" $a.ID) }}
+						</span>
 
 						{{- /* Show all citations from all pieces in this group */ -}}
 						{{- range $_, $groupItem := $groupedItems -}}
@@ -56,7 +58,7 @@
 										{{- $url = printf "%s/%d" $url $issue.Von -}}
 									{{- end -}}
 								{{- end -}}
-								<a href="{{ $url }}" class="inline-block text-sm bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-3 py-2 rounded ml-2 no-underline">
+								<a href="{{ $url }}" class="ml-1.5 inline-block text-blue-700 hover:text-blue-800">
 									{{- if $issueData -}}
 										{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
 									{{- else -}}

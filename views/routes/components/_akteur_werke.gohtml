@@ -1,26 +1,20 @@
 {{ $a := . }}
 {{ $works := LookupWorks $a }}
 {{- if ne (len $works) 0 -}}
-	<div class="mt-8">
-		<div class="px-4 py-3 rounded-lg mb-4">
-			<h2 class="text-lg font-bold text-gray-900">
-				<i class="ri-book-line mr-2"></i>Werke
+	<div class="mt-4">
+		<div class="py-1 rounded-lg mb-1">
+			<h2 class="text-lg font-bold">
+				<i class="ri-book-line mr-2"></i><u class="decoration underline-offset-3">Werke</u>
 			</h2>
 		</div>
-		<div class="columns-2 gap-6">
+		<div class="">
 		{{ range $_, $w := $works }}
-			<div class="mb-2 break-inside-avoid pl-4">
+			<div class="mb-1.5 break-inside-avoid max-w-[95ch]">
 				{{- if ne (len $w.Item.Citation.InnerXML ) 0 -}}
-					<div class="text-lg">
-						<span class="italic">
-							<script type="application/xml" xslt-template="transform-citation" xslt-onload>
-								<xml>
-									{{- Safe $w.Item.Citation.InnerXML -}}
-								</xml>
-							</script>
-						</span>
+					<div class="text-lg indent-6">
+						{{- Safe $w.Item.Citation.HTML -}}
 						{{- range $_, $url := $w.Item.URLs -}}
-							<span class="ml-1">
+							<span class="ml-1 whitespace-nowrap">
 								<a href="{{ $url.Address }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
 									{{ $url.Chardata }} <i class="ri-external-link-line text-xs"></i>
 								</a>
@@ -141,7 +135,8 @@
 
 						{{- /* Display each category group */ -}}
 						{{- range $categoryName, $categoryPieces := $groupedByCategory -}}
-							<span class="inline-block text-sm bg-green-50 text-green-700 px-3 py-2 rounded ml-2">
+						<div>
+							<span class="inline-block">
 								{{ $categoryName }}
 								{{- /* Check for additional authors (non-current actor) */ -}}
 								{{- $additionalAuthorIDs := slice -}}
@@ -154,7 +149,7 @@
 								{{- end -}}
 								{{- $uniqueAuthorIDs := unique $additionalAuthorIDs -}}
 								{{- if $uniqueAuthorIDs -}}
-									{{ " " }}von {{ range $i, $authorID := $uniqueAuthorIDs }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="text-green-700 hover:text-green-900 underline text-sm font-bold">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}
+									{{ " " }}von {{ range $i, $authorID := $uniqueAuthorIDs }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}
 								{{- end -}}{{ ":" }}
 							</span>
 							{{- /* Show all citations for this category */ -}}
@@ -169,7 +164,7 @@
 											{{- $url = printf "%s/%d" $url $issue.Von -}}
 										{{- end -}}
 									{{- end -}}
-									<a href="{{ $url }}" class="inline-block text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-3 py-2 rounded ml-2 no-underline">
+									<a href="{{ $url }}" class="inline-block text-blue-700 hover:text-blue-800 rounded ml-2 ">
 										{{- if $issueData -}}
 											{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
 										{{- else -}}
@@ -178,6 +173,7 @@
 									</a>
 								{{- end -}}
 							{{- end -}}
+							</div>
 						{{- end -}}
 					</div>
 				{{ end }}
