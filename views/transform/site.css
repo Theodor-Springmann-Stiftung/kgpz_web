@@ -160,4 +160,9 @@ body::before {
 		background-color: rgb(254 215 170) !important; /* amber-200 */
 		color: rgb(146 64 14) !important; /* amber-800 */
 	}
+
+	/* Scrollspy hover effect - only when not active */
+	.scrollspy-hover:hover:not(.font-medium) {
+		background-color: rgb(254 242 242); /* red-50 */
+	}
 }

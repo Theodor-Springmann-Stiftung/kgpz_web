@@ -152,9 +152,10 @@
 									{{ " " }}von {{ range $i, $authorID := $uniqueAuthorIDs }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}
 								{{- end -}}{{ ":" }}
 							</span>
-							{{- /* Show all citations for this category */ -}}
-							{{- range $_, $p := $categoryPieces -}}
-								{{- range $_, $issue := $p.Item.IssueRefs -}}
+							{{- /* Show all citations for this category inline with commas */ -}}
+							{{ " " }}{{- range $pieceIndex, $p := $categoryPieces -}}
+								{{- range $issueIndex, $issue := $p.Item.IssueRefs -}}
+									{{- if or (gt $pieceIndex 0) (gt $issueIndex 0) }}, {{ end -}}
 									{{ $issueData := GetIssue (printf "%d-%d" $issue.When.Year $issue.Nr) }}
 									{{- $url := printf "/%s/%d" $issue.When $issue.Nr -}}
 									{{- if $issue.Von -}}
@@ -164,7 +165,7 @@
 											{{- $url = printf "%s/%d" $url $issue.Von -}}
 										{{- end -}}
 									{{- end -}}
-									<a href="{{ $url }}" class="inline-block text-blue-700 hover:text-blue-800 rounded ml-2 ">
+									<a href="{{ $url }}" class="text-blue-700 hover:text-blue-800">
 										{{- if $issueData -}}
 											{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
 										{{- else -}}

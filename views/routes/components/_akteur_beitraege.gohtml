@@ -44,9 +44,10 @@
 						{{- /* Use first piece for display text */ -}}
 						{{ template "_piece_summary" (dict "Piece" (index $groupedItems 0).Item "CurrentActorID" $a.ID) }}
 
-						{{- /* Show all citations from all pieces in this group */ -}}
-						{{- range $_, $groupItem := $groupedItems -}}
-							{{- range $i, $issue := $groupItem.Item.IssueRefs -}}
+						{{- /* Show all citations from all pieces in this group inline with commas */ -}}
+						{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}
+							{{- range $issueIndex, $issue := $groupItem.Item.IssueRefs -}}
+								{{- if or (gt $groupIndex 0) (gt $issueIndex 0) }}, {{ end -}}
 								{{ $issueData := GetIssue (printf "%d-%d" $issue.When.Year $issue.Nr) }}
 								{{- $url := printf "/%s/%d" $issue.When $issue.Nr -}}
 								{{- if $issue.Von -}}
@@ -56,7 +57,7 @@
 										{{- $url = printf "%s/%d" $url $issue.Von -}}
 									{{- end -}}
 								{{- end -}}
-								<a href="{{ $url }}" class="ml-1.5 inline-block text-blue-700 hover:text-blue-800">
+								<a href="{{ $url }}" class="text-blue-700 hover:text-blue-800">
 									{{- if $issueData -}}
 										{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
 									{{- else -}}

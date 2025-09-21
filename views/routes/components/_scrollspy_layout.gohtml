@@ -7,11 +7,14 @@
 	<!-- Scrollspy Navigation - Hidden on smaller screens, shown on 2xl+ -->
 	<div class="hidden 2xl:block w-96 flex-shrink-0">
 		<div class="sticky top-0 max-h-screen bg-white rounded py-4 flex flex-col border-x-6 border-white">
-			<nav class="flex-1 overflow-y-auto overscroll-contain" id="scrollspy-nav">
+			<nav class="flex-1 overflow-y-auto overscroll-contain relative" id="scrollspy-nav">
+				<!-- Sliding red background element -->
+				<div id="scrollspy-slider" class="absolute left-0 bg-red-100 rounded-sm transition-all duration-300 ease-out opacity-0 z-0" style="width: 100%; height: 0; top: 0;"></div>
+
 				{{ range $_, $id := $sorted }}
 					{{ $a := index $agents $id }}
 					<a href="#author-{{ $id }}"
-						 class="block px-2 py-0.5 text-lg text-gray-900 scrollspy-link no-underline box-content"
+						 class="block px-2 py-0.5 text-lg text-gray-900 scrollspy-link no-underline box-content relative z-10 scrollspy-hover"
 					   data-target="author-{{ $id }}">
 						{{ index $a.Names 0 }}
 					</a>

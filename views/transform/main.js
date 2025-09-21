@@ -1042,19 +1042,51 @@ function initializeScrollspy() {
 			}
 		});
 
-		// Update highlighting for all visible sections (instant, no transitions)
+		// Update highlighting with sliding background animation
 		const activeLinks = [];
+		const slider = document.getElementById("scrollspy-slider");
+
+		// Reset all links to default state (no background, just font weight for active)
 		navLinks.forEach((link) => {
-			link.classList.remove("font-medium", "bg-red-100");
-			link.classList.add("text-gray-700", "bg-white");
+			link.classList.remove("font-medium");
 
 			const targetId = link.getAttribute("data-target");
 			if (visibleSections.includes(targetId)) {
-				link.classList.remove("text-gray-700", "bg-white");
-				link.classList.add("font-medium", "bg-red-100");
+				link.classList.add("font-medium");
 				activeLinks.push(link);
 			}
 		});
+
+		// Calculate and animate the sliding background
+		if (activeLinks.length > 0 && slider) {
+			// Get the nav container for relative positioning
+			const nav = document.getElementById("scrollspy-nav");
+			const navRect = nav.getBoundingClientRect();
+
+			// Calculate the combined area of all active links
+			let minTop = Infinity;
+			let maxBottom = -Infinity;
+
+			activeLinks.forEach((link) => {
+				const linkRect = link.getBoundingClientRect();
+				const relativeTop = linkRect.top - navRect.top + nav.scrollTop;
+				const relativeBottom = relativeTop + linkRect.height;
+
+				minTop = Math.min(minTop, relativeTop);
+				maxBottom = Math.max(maxBottom, relativeBottom);
+			});
+
+			// Handle gaps between non-consecutive active links
+			let totalHeight = maxBottom - minTop;
+
+			// Position and size the slider
+			slider.style.top = `${minTop}px`;
+			slider.style.height = `${totalHeight}px`;
+			slider.style.opacity = '1';
+		} else if (slider) {
+			// Hide slider when no active links
+			slider.style.opacity = '0';
+		}
 
 		// Implement proportional scrolling to keep active links visible
 		if (activeLinks.length > 0) {
@@ -1185,6 +1217,13 @@ function cleanupScrollspy() {
 			link.removeEventListener("click", handler);
 		});
 		window.scrollspyClickHandlers = null;
+	}
+
+	// Reset slider
+	const slider = document.getElementById("scrollspy-slider");
+	if (slider) {
+		slider.style.opacity = '0';
+		slider.style.height = '0';
 	}
 
 	// Reset manual navigation flag
