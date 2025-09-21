@@ -19,5 +19,19 @@
 		</div>
 	</div>
 
+<!-- Two Column Layout: Scrollspy + Content -->
+<div class="flex gap-8">
+
 	{{ template "_scrollspy_layout" .model }}
+
+	<!-- People List - Main Content -->
+	<div class="flex-1 space-y-6 bg-white">
+		{{ range $_, $id := $.model.Sorted }}
+			{{ $a := index $.model.Agents $id }}
+			<div id="author-{{ $id }}" class="p-6 scroll-mt-8 author-section">
+				{{ template "_akteur" $a }}
+			</div>
+		{{ end }}
+	</div>
+</div>
 </div>
