@@ -994,29 +994,55 @@ function initializeScrollspy() {
 		const viewportTop = window.scrollY;
 		const viewportBottom = viewportTop + window.innerHeight;
 
-		// Check which sections are fully visible (header must be completely visible)
+		// Check which sections have any part of their Werke or Beiträge visible
 		sections.forEach((section) => {
-			const sectionRect = section.getBoundingClientRect();
-			const sectionTop = sectionRect.top + window.scrollY;
+			const sectionId = section.getAttribute("id");
 
-			// Find the header element (name, life data, professions)
-			const headerElement = section.querySelector("div:first-child");
-			if (headerElement) {
-				const headerRect = headerElement.getBoundingClientRect();
-				const headerTop = headerRect.top + window.scrollY;
-				const headerBottom = headerTop + headerRect.height;
+			// Find Werke and Beiträge sections within this author section
+			const werkeSection = section.querySelector(".akteur-werke-section");
+			const beitraegeSection = section.querySelector(".akteur-beitraege-section");
 
-				// Check if the entire header is visible in the viewport
-				const headerTopVisible = headerRect.top >= 0;
-				const headerBottomVisible = headerRect.bottom <= window.innerHeight;
+			let isVisible = false;
 
-				if (headerTopVisible && headerBottomVisible) {
-					visibleSections.push(section.getAttribute("id"));
+			// Check if any part of Werke section is visible
+			if (werkeSection) {
+				const werkeRect = werkeSection.getBoundingClientRect();
+				const werkeTopVisible = werkeRect.top < window.innerHeight;
+				const werkeBottomVisible = werkeRect.bottom > 0;
+				if (werkeTopVisible && werkeBottomVisible) {
+					isVisible = true;
 				}
+			}
+
+			// Check if any part of Beiträge section is visible
+			if (beitraegeSection && !isVisible) {
+				const beitraegeRect = beitraegeSection.getBoundingClientRect();
+				const beitraegeTopVisible = beitraegeRect.top < window.innerHeight;
+				const beitraegeBottomVisible = beitraegeRect.bottom > 0;
+				if (beitraegeTopVisible && beitraegeBottomVisible) {
+					isVisible = true;
+				}
+			}
+
+			// Fallback: if no Werke/Beiträge sections, check header visibility (for authors without content)
+			if (!werkeSection && !beitraegeSection) {
+				const headerElement = section.querySelector("div:first-child");
+				if (headerElement) {
+					const headerRect = headerElement.getBoundingClientRect();
+					const headerTopVisible = headerRect.top >= 0;
+					const headerBottomVisible = headerRect.bottom <= window.innerHeight;
+					if (headerTopVisible && headerBottomVisible) {
+						isVisible = true;
+					}
+				}
+			}
+
+			if (isVisible) {
+				visibleSections.push(sectionId);
 			}
 		});
 
-		// Update highlighting for all visible sections
+		// Update highlighting for all visible sections (instant, no transitions)
 		const activeLinks = [];
 		navLinks.forEach((link) => {
 			link.classList.remove("font-medium", "bg-red-100");

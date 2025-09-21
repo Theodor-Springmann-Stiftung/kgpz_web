@@ -1,7 +1,7 @@
 {{ $a := . }}
 {{ $pieces := LookupPieces $a }}
 {{ if ne (len $pieces) 0 }}
-	<div class="mt-4">
+	<div class="mt-4 akteur-beitraege-section">
 		<div class="py-1 rounded-lg mb-1">
 			<h2 class="text-lg font-bold">
 				<i class="ri-newspaper-line mr-2"></i><u class="decoration underline-offset-3">Beiträge</u>
@@ -39,12 +39,10 @@
 		<div class="columns-2 gap-6">
 			{{- /* Display grouped pieces */ -}}
 			{{- range $groupKey, $groupedItems := $groupedPieces -}}
-				<div class="break-inside-avoid">
+				<div class="break-inside-avoid pl-4">
 					<div class="text-lg pb-1">
 						{{- /* Use first piece for display text */ -}}
-						<span class="inline-block indent-6">
 						{{ template "_piece_summary" (dict "Piece" (index $groupedItems 0).Item "CurrentActorID" $a.ID) }}
-						</span>
 
 						{{- /* Show all citations from all pieces in this group */ -}}
 						{{- range $_, $groupItem := $groupedItems -}}
@@ -70,7 +68,7 @@
 					</div>
 				</div>
 			{{- end -}}
-			</div>
+		</div>
 		</div>
 	</div>
 {{ end }}

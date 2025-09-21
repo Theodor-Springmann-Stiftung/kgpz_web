@@ -1,0 +1,32 @@
+{{- /* Shared two-column layout with scrollspy navigation for agent pages */ -}}
+{{- $agents := .Agents -}}
+{{- $sorted := .Sorted -}}
+
+<!-- Two Column Layout: Scrollspy + Content -->
+<div class="flex gap-8">
+	<!-- Scrollspy Navigation - Hidden on smaller screens, shown on 2xl+ -->
+	<div class="hidden 2xl:block w-96 flex-shrink-0">
+		<div class="sticky top-0 max-h-screen bg-white rounded py-4 flex flex-col border-x-6 border-white">
+			<nav class="flex-1 overflow-y-auto overscroll-contain" id="scrollspy-nav">
+				{{ range $_, $id := $sorted }}
+					{{ $a := index $agents $id }}
+					<a href="#author-{{ $id }}"
+						 class="block px-2 py-0.5 text-lg text-gray-900 scrollspy-link no-underline box-content"
+					   data-target="author-{{ $id }}">
+						{{ index $a.Names 0 }}
+					</a>
+				{{ end }}
+			</nav>
+		</div>
+	</div>
+
+	<!-- People List - Main Content -->
+	<div class="flex-1 space-y-6 bg-white">
+		{{ range $_, $id := $sorted }}
+			{{ $a := index $agents $id }}
+			<div id="author-{{ $id }}" class="p-6 scroll-mt-8 author-section">
+				{{ template "_akteur" $a }}
+			</div>
+		{{ end }}
+	</div>
+</div>

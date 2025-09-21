@@ -1,18 +1,18 @@
-const D = "script[xslt-onload]", S = "xslt-template", V = "xslt-transformed", P = /* @__PURE__ */ new Map();
-function C() {
-  let o = htmx.findAll(D);
+const V = "script[xslt-onload]", P = "xslt-template", D = "xslt-transformed", C = /* @__PURE__ */ new Map();
+function T() {
+  let o = htmx.findAll(V);
   for (let t of o)
     K(t);
 }
 function K(o) {
-  if (o.getAttribute(V) === "true" || !o.hasAttribute(S))
+  if (o.getAttribute(D) === "true" || !o.hasAttribute(P))
     return;
-  let t = "#" + o.getAttribute(S), e = P.get(t);
+  let t = "#" + o.getAttribute(P), e = C.get(t);
   if (!e) {
     let s = htmx.find(t);
     if (s) {
       let a = s.innerHTML ? new DOMParser().parseFromString(s.innerHTML, "application/xml") : s.contentDocument;
-      e = new XSLTProcessor(), e.importStylesheet(a), P.set(t, e);
+      e = new XSLTProcessor(), e.importStylesheet(a), C.set(t, e);
     } else
       throw new Error("Unknown XSLT template: " + t);
   }
@@ -51,7 +51,7 @@ function W() {
   const o = document.querySelectorAll(".newspaper-page-container");
   window.highlightObserver = new IntersectionObserver(
     (t) => {
-      I();
+      E();
     },
     {
       rootMargin: "-20% 0px -70% 0px"
@@ -60,12 +60,12 @@ function W() {
     window.highlightObserver.observe(t);
   });
 }
-function I() {
+function E() {
   const o = [];
   document.querySelectorAll(".newspaper-page-container").forEach((e) => {
-    const n = e.getBoundingClientRect(), i = window.innerHeight, r = Math.max(n.top, 0), s = Math.min(n.bottom, i), a = Math.max(0, s - r), l = n.height, g = a / l >= 0.5, d = e.querySelector("img[data-page]"), h = d ? d.getAttribute("data-page") : "unknown";
-    g && d && h && !o.includes(h) && o.push(h);
-  }), Z(o), o.length > 0 && A(o);
+    const n = e.getBoundingClientRect(), i = window.innerHeight, r = Math.max(n.top, 0), s = Math.min(n.bottom, i), a = Math.max(0, s - r), l = n.height, g = a / l >= 0.5, d = e.querySelector("img[data-page]"), u = d ? d.getAttribute("data-page") : "unknown";
+    g && d && u && !o.includes(u) && o.push(u);
+  }), Z(o), o.length > 0 && L(o);
 }
 function Z(o) {
   document.querySelectorAll(".continuation-entry").forEach((t) => {
@@ -98,10 +98,10 @@ function F() {
     }), e ? o.style.display = "" : o.style.display = "none";
   });
 }
-function E(o) {
-  A([o]);
-}
 function A(o) {
+  L([o]);
+}
+function L(o) {
   console.log("markCurrentPagesInInhaltsverzeichnis called with:", o), document.querySelectorAll("[data-page-container]").forEach((e) => {
     e.hasAttribute("data-beilage") ? (e.classList.remove("border-red-500"), e.classList.add("border-amber-400")) : (e.classList.remove("border-red-500"), e.classList.add("border-slate-300"));
   }), document.querySelectorAll(".page-number-inhalts").forEach((e) => {
@@ -150,11 +150,11 @@ function U(o, t, e, n = null) {
   const r = o.closest('[data-beilage="true"]') !== null, s = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
   i.show(o.src, o.alt, t, r, s, n);
 }
-function L() {
+function k() {
   document.getElementById("pageModal").classList.add("hidden");
 }
 function G() {
-  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, p(), document.querySelector(".newspaper-page-container")) {
+  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, f(), document.querySelector(".newspaper-page-container")) {
     let t = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
       (e) => {
@@ -163,7 +163,7 @@ function G() {
           i !== -1 && (n.isIntersecting ? t.add(i) : t.delete(i));
         }), t.size > 0) {
           const i = Array.from(t).sort((r, s) => r - s)[0];
-          i !== window.currentActiveIndex && (window.currentActiveIndex = i, p());
+          i !== window.currentActiveIndex && (window.currentActiveIndex = i, f());
         }
       },
       {
@@ -192,7 +192,7 @@ function Y() {
       behavior: "smooth",
       block: "start"
     }), setTimeout(() => {
-      p();
+      f();
     }, 100));
   }
 }
@@ -214,7 +214,7 @@ function J() {
       behavior: "smooth",
       block: "start"
     }), setTimeout(() => {
-      p();
+      f();
     }, 100));
   }
 }
@@ -246,7 +246,7 @@ function q() {
   }
   return !1;
 }
-function p() {
+function f() {
   const o = document.getElementById("prevPageBtn"), t = document.getElementById("nextPageBtn"), e = document.getElementById("beilageBtn");
   if (o && (window.currentActiveIndex <= 0 ? o.style.display = "none" : o.style.display = "flex"), t && (window.currentActiveIndex >= window.currentPageContainers.length - 1 ? t.style.display = "none" : t.style.display = "flex"), e) {
     const n = q(), i = e.querySelector("i");
@@ -265,24 +265,24 @@ function ee() {
     title: document.title,
     url: e
   }).catch((n) => {
-    T(e, o);
-  }) : T(e, o);
+    I(e, o);
+  }) : I(e, o);
 }
-function T(o, t) {
+function I(o, t) {
   if (navigator.clipboard)
     navigator.clipboard.writeText(o).then(() => {
-      u(t, "Link kopiert!");
+      h(t, "Link kopiert!");
     }).catch((e) => {
-      u(t, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     });
   else {
     const e = document.createElement("textarea");
     e.value = o, document.body.appendChild(e), e.select();
     try {
       const n = document.execCommand("copy");
-      u(t, n ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      h(t, n ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      u(t, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(e);
     }
@@ -295,24 +295,24 @@ function te() {
   const n = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), i = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}. Digital verfügbar unter: ${e} (Zugriff: ${n}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(i).then(() => {
-      u(o, "Zitation kopiert!");
+      h(o, "Zitation kopiert!");
     }).catch((r) => {
-      u(o, "Kopieren fehlgeschlagen");
+      h(o, "Kopieren fehlgeschlagen");
     });
   else {
     const r = document.createElement("textarea");
     r.value = i, document.body.appendChild(r), r.select();
     try {
       const s = document.execCommand("copy");
-      u(o, s ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      h(o, s ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      u(o, "Kopieren fehlgeschlagen");
+      h(o, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(r);
     }
   }
 }
-function u(o, t) {
+function h(o, t) {
   const e = document.querySelector(".simple-popup");
   e && e.remove();
   const n = document.createElement("div");
@@ -361,10 +361,10 @@ function ne() {
     t.scrollIntoView({
       behavior: "smooth",
       block: "start"
-    }), E(o);
+    }), A(o);
   }, 300);
 }
-function m(o, t, e = !1) {
+function y(o, t, e = !1) {
   let n = "";
   if (e)
     n = window.location.origin + window.location.pathname + `#beilage-1-page-${o}`;
@@ -379,24 +379,24 @@ function m(o, t, e = !1) {
   const i = n;
   if (navigator.clipboard)
     navigator.clipboard.writeText(i).then(() => {
-      u(t, "Link kopiert!");
+      h(t, "Link kopiert!");
     }).catch((r) => {
-      u(t, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     });
   else {
     const r = document.createElement("textarea");
     r.value = i, document.body.appendChild(r), r.select();
     try {
       const s = document.execCommand("copy");
-      u(t, s ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      h(t, s ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      u(t, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(r);
     }
   }
 }
-function y(o, t) {
+function v(o, t) {
   const e = document.title || "KGPZ", n = window.location.pathname.split("/");
   let i;
   if (n.length >= 3) {
@@ -407,39 +407,49 @@ function y(o, t) {
   const r = i, s = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), a = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}, Seite ${o}. Digital verfügbar unter: ${r} (Zugriff: ${s}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(a).then(() => {
-      u(t, "Zitation kopiert!");
+      h(t, "Zitation kopiert!");
     }).catch((l) => {
-      u(t, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     });
   else {
     const l = document.createElement("textarea");
     l.value = a, document.body.appendChild(l), l.select();
     try {
       const c = document.execCommand("copy");
-      u(t, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      h(t, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      u(t, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(l);
     }
   }
 }
-function f() {
-  k();
+function b() {
+  H();
   const o = document.querySelectorAll(".author-section"), t = document.querySelectorAll(".scrollspy-link");
   if (o.length === 0 || t.length === 0)
     return;
   function e() {
     const i = [];
     o.forEach((s) => {
-      s.getBoundingClientRect().top + window.scrollY;
-      const l = s.querySelector("div:first-child");
+      const a = s.getAttribute("id"), l = s.querySelector(".akteur-werke-section"), c = s.querySelector(".akteur-beitraege-section");
+      let g = !1;
       if (l) {
-        const c = l.getBoundingClientRect();
-        c.top + window.scrollY + c.height;
-        const d = c.top >= 0, h = c.bottom <= window.innerHeight;
-        d && h && i.push(s.getAttribute("id"));
+        const d = l.getBoundingClientRect(), u = d.top < window.innerHeight, p = d.bottom > 0;
+        u && p && (g = !0);
       }
+      if (c && !g) {
+        const d = c.getBoundingClientRect(), u = d.top < window.innerHeight, p = d.bottom > 0;
+        u && p && (g = !0);
+      }
+      if (!l && !c) {
+        const d = s.querySelector("div:first-child");
+        if (d) {
+          const u = d.getBoundingClientRect(), p = u.top >= 0, m = u.bottom <= window.innerHeight;
+          p && m && (g = !0);
+        }
+      }
+      g && i.push(a);
     });
     const r = [];
     t.forEach((s) => {
@@ -458,11 +468,11 @@ function f() {
       document.documentElement.clientHeight,
       document.documentElement.scrollHeight,
       document.documentElement.offsetHeight
-    ), l = window.innerHeight, c = a - l, g = c > 0 ? window.scrollY / c : 0, d = r.clientHeight, w = r.scrollHeight - d;
-    if (w > 0) {
-      const H = g * w, B = s.getBoundingClientRect(), $ = r.getBoundingClientRect(), M = B.top - $.top + r.scrollTop, N = d / 2, R = M - N, v = 0.7, O = v * H + (1 - v) * R, x = Math.max(0, Math.min(w, O)), z = r.scrollTop;
-      Math.abs(x - z) > 10 && r.scrollTo({
-        top: x,
+    ), l = window.innerHeight, c = a - l, g = c > 0 ? window.scrollY / c : 0, d = r.clientHeight, p = r.scrollHeight - d;
+    if (p > 0) {
+      const m = g * p, B = s.getBoundingClientRect(), $ = r.getBoundingClientRect(), M = B.top - $.top + r.scrollTop, N = d / 2, R = M - N, x = 0.7, O = x * m + (1 - x) * R, S = Math.max(0, Math.min(p, O)), z = r.scrollTop;
+      Math.abs(S - z) > 10 && r.scrollTo({
+        top: S,
         behavior: "smooth"
       });
     }
@@ -483,43 +493,43 @@ function f() {
     window.scrollspyClickHandlers.push({ link: i, handler: r }), i.addEventListener("click", r);
   }), e();
 }
-function k() {
+function H() {
   window.scrollspyScrollHandler && (window.removeEventListener("scroll", window.scrollspyScrollHandler), window.scrollspyScrollHandler = null), window.scrollspyTimeout && (clearTimeout(window.scrollspyTimeout), window.scrollspyTimeout = null), window.scrollspyClickHandlers && (window.scrollspyClickHandlers.forEach(({ link: o, handler: t }) => {
     o.removeEventListener("click", t);
   }), window.scrollspyClickHandlers = null), window.scrollspyManualNavigation = !1;
 }
-function b() {
+function w() {
   W(), G(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
-      I(), p();
+      E(), f();
     }, 50);
   }), ne(), document.addEventListener("keydown", function(o) {
-    o.key === "Escape" && L();
+    o.key === "Escape" && k();
   });
 }
 window.enlargePage = U;
-window.closeModal = L;
+window.closeModal = k;
 window.scrollToPreviousPage = Y;
 window.scrollToNextPage = J;
 window.scrollToBeilage = Q;
 window.shareCurrentPage = ee;
 window.generateCitation = te;
-window.copyPagePermalink = m;
-window.generatePageCitation = y;
+window.copyPagePermalink = y;
+window.generatePageCitation = v;
 function re() {
-  C(), j(), document.querySelector(".newspaper-page-container") && b(), document.querySelector(".author-section") && f(), htmx.on("htmx:load", function(o) {
-    C();
+  T(), j(), document.querySelector(".newspaper-page-container") && w(), document.querySelector(".author-section") && b(), htmx.on("htmx:load", function(o) {
+    T();
   }), document.body.addEventListener("htmx:afterSwap", function(o) {
     setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && b(), document.querySelector(".author-section") && f();
+      document.querySelector(".newspaper-page-container") && w(), document.querySelector(".author-section") && b();
     }, 100);
   }), document.body.addEventListener("htmx:afterSettle", function(o) {
     setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && b(), document.querySelector(".author-section") && f();
+      document.querySelector(".newspaper-page-container") && w(), document.querySelector(".author-section") && b();
     }, 200);
   }), document.body.addEventListener("htmx:load", function(o) {
     setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && b(), document.querySelector(".author-section") && f();
+      document.querySelector(".newspaper-page-container") && w(), document.querySelector(".author-section") && b();
     }, 100);
   });
 }
@@ -656,8 +666,8 @@ class oe extends HTMLElement {
       l.style.position = "relative";
       const d = l.querySelector(".target-page-dot");
       d && d.remove();
-      const h = document.createElement("span");
-      h.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", h.title = "verlinkte Seite", l.appendChild(h);
+      const u = document.createElement("span");
+      u.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", u.title = "verlinkte Seite", l.appendChild(u);
     }
     if (s !== null)
       c.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${s}. Teil</span>`;
@@ -665,7 +675,7 @@ class oe extends HTMLElement {
       const d = this.determinePageIconType(n, i);
       c.innerHTML = this.getPageIconHTML(d);
     }
-    this.updateNavigationButtons(), this.style.display = "block", document.body.style.overflow = "hidden", E(n);
+    this.updateNavigationButtons(), this.style.display = "block", document.body.style.overflow = "hidden", A(n);
   }
   close() {
     this.style.display = "none", document.body.style.overflow = "";
@@ -703,16 +713,16 @@ class oe extends HTMLElement {
   }
   // Share current page
   shareCurrentPage() {
-    if (typeof m == "function") {
+    if (typeof y == "function") {
       const t = this.querySelector("#share-btn");
-      m(this.currentPageNumber, t, this.currentIsBeilage);
+      y(this.currentPageNumber, t, this.currentIsBeilage);
     }
   }
   // Generate citation for current page
   generatePageCitation() {
-    if (typeof y == "function") {
+    if (typeof v == "function") {
       const t = this.querySelector("#cite-btn");
-      y(this.currentPageNumber, t);
+      v(this.currentPageNumber, t);
     }
   }
   // Update navigation button visibility based on available pages
@@ -817,9 +827,9 @@ class oe extends HTMLElement {
           const g = c.textContent.trim(), d = g.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
           if (d)
             return d[1];
-          const h = g.match(/(\d{4})\s+Nr\.\s+(\d+)/);
-          if (h)
-            return `${h[1]} Nr. ${h[2]}`;
+          const u = g.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+          if (u)
+            return `${u[1]} Nr. ${u[2]}`;
         }
       }
       const l = document.title.match(/(\d{4}).*Nr\.\s*(\d+)/);
@@ -842,7 +852,7 @@ class oe extends HTMLElement {
 customElements.define("single-page-viewer", oe);
 document.body.addEventListener("htmx:beforeRequest", function(o) {
   const t = document.querySelector("single-page-viewer");
-  t && t.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), t.destroy()), k();
+  t && t.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), t.destroy()), H();
 });
 window.addEventListener("beforeunload", function() {
   const o = document.querySelector("single-page-viewer");
