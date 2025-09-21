@@ -994,6 +994,40 @@ function initializeScrollspy() {
 		return;
 	}
 
+	function ensureMarkerVisibility() {
+		const slider = document.getElementById("scrollspy-slider");
+		const nav = document.getElementById("scrollspy-nav");
+
+		if (!slider || !nav || slider.style.opacity === '0') {
+			return;
+		}
+
+		const navRect = nav.getBoundingClientRect();
+		const sliderTop = parseFloat(slider.style.top);
+		const sliderHeight = parseFloat(slider.style.height);
+		const sliderBottom = sliderTop + sliderHeight;
+
+		// Check if the marker extends beyond the visible area
+		const navScrollTop = nav.scrollTop;
+		const navVisibleBottom = navScrollTop + navRect.height;
+
+		if (sliderBottom > navVisibleBottom) {
+			// Marker extends below visible area - scroll down to show the bottom
+			const scrollTarget = sliderBottom - navRect.height + 20; // 20px padding
+			nav.scrollTo({
+				top: scrollTarget,
+				behavior: "smooth"
+			});
+		} else if (sliderTop < navScrollTop) {
+			// Marker extends above visible area - scroll up to show the top
+			const scrollTarget = sliderTop - 20; // 20px padding
+			nav.scrollTo({
+				top: Math.max(0, scrollTarget),
+				behavior: "smooth"
+			});
+		}
+	}
+
 	function updateActiveLink() {
 		const visibleSections = [];
 		const viewportTop = window.scrollY;
@@ -1088,6 +1122,9 @@ function initializeScrollspy() {
 			slider.style.top = `${minTop}px`;
 			slider.style.height = `${totalHeight}px`;
 			slider.style.opacity = '1';
+
+			// Ensure the full marker is visible
+			setTimeout(() => ensureMarkerVisibility(), 100);
 		} else if (slider) {
 			// Hide slider when no active links
 			slider.style.opacity = '0';
@@ -1243,6 +1280,8 @@ function initializeScrollspy() {
 				// Re-enable automatic scrolling after navigation completes
 				setTimeout(() => {
 					window.scrollspyManualNavigation = false;
+					// Ensure the full marker is visible after scroll settles
+					ensureMarkerVisibility();
 				}, 1000);
 			}
 		};

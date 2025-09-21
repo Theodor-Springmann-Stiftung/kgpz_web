@@ -1,18 +1,18 @@
-const j = "script[xslt-onload]", P = "xslt-template", W = "xslt-transformed", T = /* @__PURE__ */ new Map();
-function L() {
-  let n = htmx.findAll(j);
+const W = "script[xslt-onload]", P = "xslt-template", Z = "xslt-transformed", L = /* @__PURE__ */ new Map();
+function I() {
+  let n = htmx.findAll(W);
   for (let e of n)
-    Z(e);
+    F(e);
 }
-function Z(n) {
-  if (n.getAttribute(W) === "true" || !n.hasAttribute(P))
+function F(n) {
+  if (n.getAttribute(Z) === "true" || !n.hasAttribute(P))
     return;
-  let e = "#" + n.getAttribute(P), t = T.get(e);
+  let e = "#" + n.getAttribute(P), t = L.get(e);
   if (!t) {
     let a = htmx.find(e);
     if (a) {
       let s = a.innerHTML ? new DOMParser().parseFromString(a.innerHTML, "application/xml") : a.contentDocument;
-      t = new XSLTProcessor(), t.importStylesheet(s), T.set(e, t);
+      t = new XSLTProcessor(), t.importStylesheet(s), L.set(e, t);
     } else
       throw new Error("Unknown XSLT template: " + e);
   }
@@ -46,12 +46,12 @@ window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
 window.scrollTimeout = window.scrollTimeout || null;
-function F() {
+function U() {
   window.highlightObserver && (window.highlightObserver.disconnect(), window.highlightObserver = null);
   const n = document.querySelectorAll(".newspaper-page-container");
   window.highlightObserver = new IntersectionObserver(
     (e) => {
-      B();
+      H();
     },
     {
       rootMargin: "-20% 0px -70% 0px"
@@ -60,14 +60,14 @@ function F() {
     window.highlightObserver.observe(e);
   });
 }
-function B() {
+function H() {
   const n = [];
   document.querySelectorAll(".newspaper-page-container").forEach((t) => {
     const o = t.getBoundingClientRect(), i = window.innerHeight, r = Math.max(o.top, 0), a = Math.min(o.bottom, i), s = Math.max(0, a - r), l = o.height, d = s / l >= 0.5, g = t.querySelector("img[data-page]"), u = g ? g.getAttribute("data-page") : "unknown";
     d && g && u && !n.includes(u) && n.push(u);
-  }), U(n), n.length > 0 && q(n);
+  }), X(n), n.length > 0 && $(n);
 }
-function U(n) {
+function X(n) {
   document.querySelectorAll(".continuation-entry").forEach((e) => {
     e.style.display = "none";
   }), n.forEach((e) => {
@@ -75,9 +75,9 @@ function U(n) {
     t && t.querySelectorAll(".continuation-entry").forEach((i) => {
       i.style.display = "";
     });
-  }), X(n), G();
+  }), G(n), Y();
 }
-function X(n) {
+function G(n) {
   document.querySelectorAll(".work-title").forEach((e) => {
     const t = e.getAttribute("data-short-title");
     t && (e.textContent = t);
@@ -89,7 +89,7 @@ function X(n) {
     });
   });
 }
-function G() {
+function Y() {
   document.querySelectorAll(".page-entry").forEach((n) => {
     const e = n.querySelectorAll(".inhalts-entry");
     let t = !1;
@@ -98,10 +98,10 @@ function G() {
     }), t ? n.style.display = "" : n.style.display = "none";
   });
 }
-function H(n) {
-  q([n]);
-}
 function q(n) {
+  $([n]);
+}
+function $(n) {
   console.log("markCurrentPagesInInhaltsverzeichnis called with:", n), document.querySelectorAll("[data-page-container]").forEach((t) => {
     t.hasAttribute("data-beilage") ? (t.classList.remove("border-red-500"), t.classList.add("border-amber-400")) : (t.classList.remove("border-red-500"), t.classList.add("border-slate-300"));
   }), document.querySelectorAll(".page-number-inhalts").forEach((t) => {
@@ -127,14 +127,14 @@ function q(n) {
         s.getAttribute("aria-current") === "page" && (s.style.textDecoration = "none", s.style.pointerEvents = "none", s.classList.add("no-underline"), s.classList.remove("hover:bg-blue-100"));
       }));
     }
-  }), e.length > 0 && Y(e[0]), document.querySelectorAll(".page-indicator").forEach((t) => {
+  }), e.length > 0 && J(e[0]), document.querySelectorAll(".page-indicator").forEach((t) => {
     t.classList.remove("text-red-600", "font-bold"), t.classList.add("text-slate-600", "font-semibold"), t.classList.contains("bg-amber-50") || t.classList.add("bg-blue-50");
   }), n.forEach((t) => {
     const o = document.querySelector(`.page-indicator[data-page="${t}"]`);
     o && (o.classList.remove("text-slate-600"), o.classList.add("text-red-600", "font-bold"));
   });
 }
-function Y(n) {
+function J(n) {
   const e = n.closest(".lg\\:overflow-y-auto");
   if (e) {
     const t = e.getBoundingClientRect(), o = n.getBoundingClientRect(), i = o.top < t.top, r = o.bottom > t.bottom;
@@ -144,17 +144,17 @@ function Y(n) {
     });
   }
 }
-function J(n, e, t, o = null) {
+function Q(n, e, t, o = null) {
   let i = document.querySelector("single-page-viewer");
   i || (i = document.createElement("single-page-viewer"), document.body.appendChild(i));
   const r = n.closest('[data-beilage="true"]') !== null, a = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
   i.show(n.src, n.alt, e, r, a, o);
 }
-function $() {
+function M() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function Q() {
-  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, y(), document.querySelector(".newspaper-page-container")) {
+function ee() {
+  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, v(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
       (t) => {
@@ -163,7 +163,7 @@ function Q() {
           i !== -1 && (o.isIntersecting ? e.add(i) : e.delete(i));
         }), e.size > 0) {
           const i = Array.from(e).sort((r, a) => r - a)[0];
-          i !== window.currentActiveIndex && (window.currentActiveIndex = i, y());
+          i !== window.currentActiveIndex && (window.currentActiveIndex = i, v());
         }
       },
       {
@@ -174,7 +174,7 @@ function Q() {
     });
   }
 }
-function ee() {
+function te() {
   if (window.currentActiveIndex > 0) {
     let n = -1;
     const e = [];
@@ -192,11 +192,11 @@ function ee() {
       behavior: "smooth",
       block: "start"
     }), setTimeout(() => {
-      y();
+      v();
     }, 100));
   }
 }
-function te() {
+function ne() {
   if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
     let n = -1;
     const e = [];
@@ -214,12 +214,12 @@ function te() {
       behavior: "smooth",
       block: "start"
     }), setTimeout(() => {
-      y();
+      v();
     }, 100));
   }
 }
-function ne() {
-  if (M()) {
+function oe() {
+  if (R()) {
     const e = document.querySelector("#newspaper-content .newspaper-page-container");
     e && e.scrollIntoView({
       behavior: "smooth",
@@ -233,7 +233,7 @@ function ne() {
     });
   }
 }
-function M() {
+function R() {
   const n = [];
   window.currentPageContainers.forEach((e, t) => {
     const o = e.getBoundingClientRect(), i = window.innerHeight, r = Math.max(o.top, 0), a = Math.min(o.bottom, i), s = Math.max(0, a - r), l = o.height;
@@ -246,14 +246,14 @@ function M() {
   }
   return !1;
 }
-function y() {
+function v() {
   const n = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
   if (n && (window.currentActiveIndex <= 0 ? n.style.display = "none" : n.style.display = "flex"), e && (window.currentActiveIndex >= window.currentPageContainers.length - 1 ? e.style.display = "none" : e.style.display = "flex"), t) {
-    const o = M(), i = t.querySelector("i");
+    const o = R(), i = t.querySelector("i");
     o ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", i && (i.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", i && (i.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
-function oe() {
+function ie() {
   const n = document.getElementById("shareLinkBtn");
   let e = "";
   if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
@@ -265,10 +265,10 @@ function oe() {
     title: document.title,
     url: t
   }).catch((o) => {
-    I(t, n);
-  }) : I(t, n);
+    E(t, n);
+  }) : E(t, n);
 }
-function I(n, e) {
+function E(n, e) {
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
       p(e, "Link kopiert!");
@@ -288,7 +288,7 @@ function I(n, e) {
     }
   }
 }
-function ie() {
+function re() {
   const n = document.getElementById("citationBtn"), e = document.title || "KGPZ";
   let t = window.location.origin + window.location.pathname;
   t.includes("#") && (t = t.split("#")[0]);
@@ -341,7 +341,7 @@ function p(n, e) {
     }, 200);
   }, 2e3);
 }
-function re() {
+function se() {
   if (window.htmxNavigating)
     return;
   let n = "", e = null;
@@ -363,10 +363,10 @@ function re() {
     e.scrollIntoView({
       behavior: "smooth",
       block: "start"
-    }), H(n);
+    }), q(n);
   }, 300);
 }
-function v(n, e, t = !1) {
+function x(n, e, t = !1) {
   let o = "";
   if (t)
     o = window.location.origin + window.location.pathname + `#beilage-1-page-${n}`;
@@ -398,7 +398,7 @@ function v(n, e, t = !1) {
     }
   }
 }
-function x(n, e) {
+function S(n, e) {
   const t = document.title || "KGPZ", o = window.location.pathname.split("/");
   let i;
   if (o.length >= 3) {
@@ -426,75 +426,94 @@ function x(n, e) {
     }
   }
 }
-function E() {
-  R();
+function k() {
+  N();
   const n = document.querySelectorAll(".author-section"), e = document.querySelectorAll(".scrollspy-link");
   if (n.length === 0 || e.length === 0)
     return;
   function t() {
-    const a = [];
-    n.forEach((c) => {
-      const d = c.getAttribute("id"), g = c.querySelector(".akteur-werke-section"), u = c.querySelector(".akteur-beitraege-section");
-      let f = !1;
-      if (g) {
-        const m = g.getBoundingClientRect(), h = m.top < window.innerHeight, b = m.bottom > 0;
-        h && b && (f = !0);
-      }
-      if (u && !f) {
-        const m = u.getBoundingClientRect(), h = m.top < window.innerHeight, b = m.bottom > 0;
-        h && b && (f = !0);
-      }
-      if (!g && !u) {
-        const m = c.querySelector("div:first-child");
-        if (m) {
-          const h = m.getBoundingClientRect(), b = h.top >= 0, w = h.bottom <= window.innerHeight;
-          b && w && (f = !0);
-        }
-      }
-      f && a.push(d);
-    });
-    const s = [], l = document.getElementById("scrollspy-slider");
-    if (e.forEach((c) => {
-      c.classList.remove("font-medium");
-      const d = c.getAttribute("data-target");
-      a.includes(d) && (c.classList.add("font-medium"), s.push(c));
-    }), s.length > 0 && l) {
-      const c = document.getElementById("scrollspy-nav"), d = c.getBoundingClientRect();
-      let g = 1 / 0, u = -1 / 0;
-      s.forEach((m) => {
-        const h = m.getBoundingClientRect(), b = h.top - d.top + c.scrollTop, w = b + h.height;
-        g = Math.min(g, b), u = Math.max(u, w);
+    const s = document.getElementById("scrollspy-slider"), l = document.getElementById("scrollspy-nav");
+    if (!s || !l || s.style.opacity === "0")
+      return;
+    const c = l.getBoundingClientRect(), d = parseFloat(s.style.top), g = parseFloat(s.style.height), u = d + g, h = l.scrollTop, m = h + c.height;
+    if (u > m) {
+      const f = u - c.height + 20;
+      l.scrollTo({
+        top: f,
+        behavior: "smooth"
       });
-      let f = u - g;
-      l.style.top = `${g}px`, l.style.height = `${f}px`, l.style.opacity = "1";
-    } else l && (l.style.opacity = "0");
-    s.length > 0 && i(s);
-  }
-  function o(a) {
-    const s = document.querySelectorAll(".scrollspy-link"), l = document.getElementById("scrollspy-slider");
-    s.forEach((d) => {
-      d.classList.remove("font-medium");
-    });
-    const c = document.querySelector(`[data-target="${a}"]`);
-    if (c && (c.classList.add("font-medium"), l)) {
-      const d = document.getElementById("scrollspy-nav"), g = d.getBoundingClientRect(), u = c.getBoundingClientRect(), f = u.top - g.top + d.scrollTop;
-      l.style.top = `${f}px`, l.style.height = `${u.height}px`, l.style.opacity = "1";
+    } else if (d < h) {
+      const f = d - 20;
+      l.scrollTo({
+        top: Math.max(0, f),
+        behavior: "smooth"
+      });
     }
   }
-  function i(a) {
+  function o() {
+    const s = [];
+    n.forEach((d) => {
+      const g = d.getAttribute("id"), u = d.querySelector(".akteur-werke-section"), h = d.querySelector(".akteur-beitraege-section");
+      let m = !1;
+      if (u) {
+        const f = u.getBoundingClientRect(), b = f.top < window.innerHeight, w = f.bottom > 0;
+        b && w && (m = !0);
+      }
+      if (h && !m) {
+        const f = h.getBoundingClientRect(), b = f.top < window.innerHeight, w = f.bottom > 0;
+        b && w && (m = !0);
+      }
+      if (!u && !h) {
+        const f = d.querySelector("div:first-child");
+        if (f) {
+          const b = f.getBoundingClientRect(), w = b.top >= 0, y = b.bottom <= window.innerHeight;
+          w && y && (m = !0);
+        }
+      }
+      m && s.push(g);
+    });
+    const l = [], c = document.getElementById("scrollspy-slider");
+    if (e.forEach((d) => {
+      d.classList.remove("font-medium");
+      const g = d.getAttribute("data-target");
+      s.includes(g) && (d.classList.add("font-medium"), l.push(d));
+    }), l.length > 0 && c) {
+      const d = document.getElementById("scrollspy-nav"), g = d.getBoundingClientRect();
+      let u = 1 / 0, h = -1 / 0;
+      l.forEach((f) => {
+        const b = f.getBoundingClientRect(), w = b.top - g.top + d.scrollTop, y = w + b.height;
+        u = Math.min(u, w), h = Math.max(h, y);
+      });
+      let m = h - u;
+      c.style.top = `${u}px`, c.style.height = `${m}px`, c.style.opacity = "1", setTimeout(() => t(), 100);
+    } else c && (c.style.opacity = "0");
+    l.length > 0 && r(l);
+  }
+  function i(s) {
+    const l = document.querySelectorAll(".scrollspy-link"), c = document.getElementById("scrollspy-slider");
+    l.forEach((g) => {
+      g.classList.remove("font-medium");
+    });
+    const d = document.querySelector(`[data-target="${s}"]`);
+    if (d && (d.classList.add("font-medium"), c)) {
+      const g = document.getElementById("scrollspy-nav"), u = g.getBoundingClientRect(), h = d.getBoundingClientRect(), m = h.top - u.top + g.scrollTop;
+      c.style.top = `${m}px`, c.style.height = `${h.height}px`, c.style.opacity = "1";
+    }
+  }
+  function r(s) {
     if (window.scrollspyManualNavigation) return;
-    const s = document.getElementById("scrollspy-nav");
-    if (!s) return;
-    const l = a[0], c = Math.max(
+    const l = document.getElementById("scrollspy-nav");
+    if (!l) return;
+    const c = s[0], d = Math.max(
       document.body.scrollHeight,
       document.body.offsetHeight,
       document.documentElement.clientHeight,
       document.documentElement.scrollHeight,
       document.documentElement.offsetHeight
-    ), d = window.innerHeight, g = c - d, u = g > 0 ? window.scrollY / g : 0, f = s.clientHeight, h = s.scrollHeight - f;
-    if (h > 0) {
-      const b = u * h, w = l.getBoundingClientRect(), N = s.getBoundingClientRect(), O = w.top - N.top + s.scrollTop, V = f / 2, z = O - V, S = 0.7, D = S * b + (1 - S) * z, C = Math.max(0, Math.min(h, D)), K = s.scrollTop;
-      Math.abs(C - K) > 10 && s.scrollTo({
+    ), g = window.innerHeight, u = d - g, h = u > 0 ? window.scrollY / u : 0, m = l.clientHeight, b = l.scrollHeight - m;
+    if (b > 0) {
+      const w = h * b, y = c.getBoundingClientRect(), O = l.getBoundingClientRect(), V = y.top - O.top + l.scrollTop, z = m / 2, D = V - z, T = 0.7, K = T * w + (1 - T) * D, C = Math.max(0, Math.min(b, K)), j = l.scrollTop;
+      Math.abs(C - j) > 10 && l.scrollTo({
         top: C,
         behavior: "smooth"
       });
@@ -502,63 +521,63 @@ function E() {
   }
   window.scrollspyScrollHandler = function() {
     clearTimeout(window.scrollspyTimeout), window.scrollspyTimeout = setTimeout(() => {
-      t(), r();
+      o(), a();
     }, 50);
   };
-  function r() {
-    const a = document.getElementById("sidebar-scroll-to-top");
-    if (!a) return;
-    const s = window.pageYOffset || document.documentElement.scrollTop, l = window.innerHeight;
-    s > l * 0.5 ? (a.classList.remove("opacity-0"), a.classList.add("opacity-100")) : (a.classList.remove("opacity-100"), a.classList.add("opacity-0"));
+  function a() {
+    const s = document.getElementById("sidebar-scroll-to-top");
+    if (!s) return;
+    const l = window.pageYOffset || document.documentElement.scrollTop, c = window.innerHeight;
+    l > c * 0.5 ? (s.classList.remove("opacity-0"), s.classList.add("opacity-100")) : (s.classList.remove("opacity-100"), s.classList.add("opacity-0"));
   }
-  window.addEventListener("scroll", window.scrollspyScrollHandler), window.scrollspyClickHandlers = [], e.forEach((a) => {
-    const s = function(l) {
-      l.preventDefault();
-      const c = this.getAttribute("data-target"), d = document.getElementById(c);
-      d && (o(c), window.scrollspyManualNavigation = !0, d.scrollIntoView({
+  window.addEventListener("scroll", window.scrollspyScrollHandler), window.scrollspyClickHandlers = [], e.forEach((s) => {
+    const l = function(c) {
+      c.preventDefault();
+      const d = this.getAttribute("data-target"), g = document.getElementById(d);
+      g && (i(d), window.scrollspyManualNavigation = !0, g.scrollIntoView({
         behavior: "smooth",
         block: "start"
       }), setTimeout(() => {
-        window.scrollspyManualNavigation = !1;
+        window.scrollspyManualNavigation = !1, t();
       }, 1e3));
     };
-    window.scrollspyClickHandlers.push({ link: a, handler: s }), a.addEventListener("click", s);
-  }), t(), r();
+    window.scrollspyClickHandlers.push({ link: s, handler: l }), s.addEventListener("click", l);
+  }), o(), a();
 }
-function R() {
+function N() {
   window.scrollspyScrollHandler && (window.removeEventListener("scroll", window.scrollspyScrollHandler), window.scrollspyScrollHandler = null), window.scrollspyTimeout && (clearTimeout(window.scrollspyTimeout), window.scrollspyTimeout = null), window.scrollspyClickHandlers && (window.scrollspyClickHandlers.forEach(({ link: e, handler: t }) => {
     e.removeEventListener("click", t);
   }), window.scrollspyClickHandlers = null);
   const n = document.getElementById("scrollspy-slider");
   n && (n.style.opacity = "0", n.style.height = "0"), window.scrollspyManualNavigation = !1;
 }
-function k() {
-  F(), Q(), window.addEventListener("scroll", function() {
+function A() {
+  U(), ee(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
-      B(), y();
+      H(), v();
     }, 50);
-  }), re(), document.addEventListener("keydown", function(n) {
-    n.key === "Escape" && $();
+  }), se(), document.addEventListener("keydown", function(n) {
+    n.key === "Escape" && M();
   });
 }
-window.enlargePage = J;
-window.closeModal = $;
-window.scrollToPreviousPage = ee;
-window.scrollToNextPage = te;
-window.scrollToBeilage = ne;
-window.shareCurrentPage = oe;
-window.generateCitation = ie;
-window.copyPagePermalink = v;
-window.generatePageCitation = x;
-function A() {
+window.enlargePage = Q;
+window.closeModal = M;
+window.scrollToPreviousPage = te;
+window.scrollToNextPage = ne;
+window.scrollToBeilage = oe;
+window.shareCurrentPage = ie;
+window.generateCitation = re;
+window.copyPagePermalink = x;
+window.generatePageCitation = S;
+function B() {
   const n = window.location.pathname, e = document.body;
   e.classList.remove("page-akteure", "page-ausgabe", "page-search", "page-ort", "page-kategorie", "page-piece", "page-edition"), n.includes("/akteure/") || n.includes("/autoren") ? e.classList.add("page-akteure") : n.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : n.includes("/search") || n.includes("/suche") ? e.classList.add("page-search") : n.includes("/ort/") ? e.classList.add("page-ort") : n.includes("/kategorie/") ? e.classList.add("page-kategorie") : n.includes("/beitrag/") ? e.classList.add("page-piece") : n.includes("/edition") && e.classList.add("page-edition");
 }
-function ce() {
-  L(), _(), A(), document.querySelector(".newspaper-page-container") && k(), document.querySelector(".author-section") && E(), htmx.on("htmx:load", function(n) {
-    L();
+function de() {
+  I(), _(), B(), document.querySelector(".newspaper-page-container") && A(), document.querySelector(".author-section") && k(), htmx.on("htmx:load", function(n) {
+    I();
   }), document.body.addEventListener("htmx:afterSwap", function(n) {
-    A(), window.htmxNavigating = !0;
+    B(), window.htmxNavigating = !0;
     const e = window.location.pathname, t = e.match(/\/\d+$/), o = e.includes("/akteure/") || e.includes("/autoren");
     !t && o && setTimeout(() => {
       window.scrollTo({
@@ -567,7 +586,7 @@ function ce() {
         // Use instant instead of smooth to avoid conflicts
       });
     }, 50), setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && k(), document.querySelector(".author-section") && E();
+      document.querySelector(".newspaper-page-container") && A(), document.querySelector(".author-section") && k();
       const i = document.querySelector("scroll-to-top-button");
       i && i.reassessScrollPosition(), setTimeout(() => {
         window.htmxNavigating = !1;
@@ -577,7 +596,7 @@ function ce() {
     window.htmxNavigating = !0;
   });
 }
-class se extends HTMLElement {
+class le extends HTMLElement {
   constructor() {
     super(), this.resizeObserver = null;
   }
@@ -719,7 +738,7 @@ class se extends HTMLElement {
       const g = this.determinePageIconType(o, i);
       c.innerHTML = this.getPageIconHTML(g);
     }
-    this.updateNavigationButtons(), this.style.display = "block", document.body.style.overflow = "hidden", H(o);
+    this.updateNavigationButtons(), this.style.display = "block", document.body.style.overflow = "hidden", q(o);
   }
   close() {
     this.style.display = "none", document.body.style.overflow = "";
@@ -757,16 +776,16 @@ class se extends HTMLElement {
   }
   // Share current page
   shareCurrentPage() {
-    if (typeof v == "function") {
+    if (typeof x == "function") {
       const e = this.querySelector("#share-btn");
-      v(this.currentPageNumber, e, this.currentIsBeilage);
+      x(this.currentPageNumber, e, this.currentIsBeilage);
     }
   }
   // Generate citation for current page
   generatePageCitation() {
-    if (typeof x == "function") {
+    if (typeof S == "function") {
       const e = this.querySelector("#cite-btn");
-      x(this.currentPageNumber, e);
+      S(this.currentPageNumber, e);
     }
   }
   // Update navigation button visibility based on available pages
@@ -893,10 +912,10 @@ class se extends HTMLElement {
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", se);
+customElements.define("single-page-viewer", le);
 document.body.addEventListener("htmx:beforeRequest", function(n) {
   const e = document.querySelector("single-page-viewer");
-  e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.destroy()), R();
+  e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.destroy()), N();
 });
 window.addEventListener("beforeunload", function() {
   const n = document.querySelector("single-page-viewer");
@@ -943,5 +962,5 @@ class ae extends HTMLElement {
 }
 customElements.define("scroll-to-top-button", ae);
 export {
-  ce as setup
+  de as setup
 };
