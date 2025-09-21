@@ -1,29 +1,29 @@
-const D = "script[xslt-onload]", T = "xslt-template", K = "xslt-transformed", I = /* @__PURE__ */ new Map();
-function E() {
-  let o = htmx.findAll(D);
-  for (let e of o)
-    j(e);
+const K = "script[xslt-onload]", P = "xslt-template", j = "xslt-transformed", T = /* @__PURE__ */ new Map();
+function I() {
+  let o = htmx.findAll(K);
+  for (let t of o)
+    W(t);
 }
-function j(o) {
-  if (o.getAttribute(K) === "true" || !o.hasAttribute(T))
+function W(o) {
+  if (o.getAttribute(j) === "true" || !o.hasAttribute(P))
     return;
-  let e = "#" + o.getAttribute(T), t = I.get(e);
-  if (!t) {
-    let s = htmx.find(e);
-    if (s) {
-      let l = s.innerHTML ? new DOMParser().parseFromString(s.innerHTML, "application/xml") : s.contentDocument;
-      t = new XSLTProcessor(), t.importStylesheet(l), I.set(e, t);
+  let t = "#" + o.getAttribute(P), e = T.get(t);
+  if (!e) {
+    let l = htmx.find(t);
+    if (l) {
+      let s = l.innerHTML ? new DOMParser().parseFromString(l.innerHTML, "application/xml") : l.contentDocument;
+      e = new XSLTProcessor(), e.importStylesheet(s), T.set(t, e);
     } else
-      throw new Error("Unknown XSLT template: " + e);
+      throw new Error("Unknown XSLT template: " + t);
   }
-  let n = new DOMParser().parseFromString(o.innerHTML, "application/xml"), i = t.transformToFragment(n, document), r = new XMLSerializer().serializeToString(i);
+  let n = new DOMParser().parseFromString(o.innerHTML, "application/xml"), i = e.transformToFragment(n, document), r = new XMLSerializer().serializeToString(i);
   o.outerHTML = r;
 }
-function W() {
-  document.querySelectorAll("template[simple]").forEach((e) => {
-    let t = e.getAttribute("id"), n = e.content;
+function Z() {
+  document.querySelectorAll("template[simple]").forEach((t) => {
+    let e = t.getAttribute("id"), n = t.content;
     customElements.define(
-      t,
+      e,
       class extends HTMLElement {
         constructor() {
           super(), this.appendChild(n.cloneNode(!0)), this.slots = this.querySelectorAll("slot");
@@ -31,8 +31,8 @@ function W() {
         connectedCallback() {
           let i = [];
           this.slots.forEach((r) => {
-            let s = r.getAttribute("name"), l = this.querySelector(`[slot="${s}"]`);
-            l && (r.replaceWith(l.cloneNode(!0)), i.push(l));
+            let l = r.getAttribute("name"), s = this.querySelector(`[slot="${l}"]`);
+            s && (r.replaceWith(s.cloneNode(!0)), i.push(s));
           }), i.forEach((r) => {
             r.remove();
           });
@@ -46,44 +46,44 @@ window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
 window.scrollTimeout = window.scrollTimeout || null;
-function Z() {
+function _() {
   window.highlightObserver && (window.highlightObserver.disconnect(), window.highlightObserver = null);
   const o = document.querySelectorAll(".newspaper-page-container");
   window.highlightObserver = new IntersectionObserver(
-    (e) => {
-      k();
+    (t) => {
+      A();
     },
     {
       rootMargin: "-20% 0px -70% 0px"
     }
-  ), o.forEach((e) => {
-    window.highlightObserver.observe(e);
+  ), o.forEach((t) => {
+    window.highlightObserver.observe(t);
   });
 }
-function k() {
+function A() {
   const o = [];
-  document.querySelectorAll(".newspaper-page-container").forEach((t) => {
-    const n = t.getBoundingClientRect(), i = window.innerHeight, r = Math.max(n.top, 0), s = Math.min(n.bottom, i), l = Math.max(0, s - r), a = n.height, d = l / a >= 0.5, u = t.querySelector("img[data-page]"), g = u ? u.getAttribute("data-page") : "unknown";
-    d && u && g && !o.includes(g) && o.push(g);
-  }), _(o), o.length > 0 && q(o);
-}
-function _(o) {
-  document.querySelectorAll(".continuation-entry").forEach((e) => {
-    e.style.display = "none";
-  }), o.forEach((e) => {
-    const t = document.querySelector(`[data-page-container="${e}"]`);
-    t && t.querySelectorAll(".continuation-entry").forEach((i) => {
-      i.style.display = "";
-    });
-  }), F(o), X();
+  document.querySelectorAll(".newspaper-page-container").forEach((e) => {
+    const n = e.getBoundingClientRect(), i = window.innerHeight, r = Math.max(n.top, 0), l = Math.min(n.bottom, i), s = Math.max(0, l - r), a = n.height, d = s / a >= 0.5, g = e.querySelector("img[data-page]"), u = g ? g.getAttribute("data-page") : "unknown";
+    d && g && u && !o.includes(u) && o.push(u);
+  }), F(o), o.length > 0 && B(o);
 }
 function F(o) {
-  document.querySelectorAll(".work-title").forEach((e) => {
-    const t = e.getAttribute("data-short-title");
-    t && (e.textContent = t);
-  }), o.forEach((e) => {
-    const t = document.querySelector(`[data-page-container="${e}"]`);
-    t && t.querySelectorAll(".work-title").forEach((i) => {
+  document.querySelectorAll(".continuation-entry").forEach((t) => {
+    t.style.display = "none";
+  }), o.forEach((t) => {
+    const e = document.querySelector(`[data-page-container="${t}"]`);
+    e && e.querySelectorAll(".continuation-entry").forEach((i) => {
+      i.style.display = "";
+    });
+  }), U(o), X();
+}
+function U(o) {
+  document.querySelectorAll(".work-title").forEach((t) => {
+    const e = t.getAttribute("data-short-title");
+    e && (t.textContent = e);
+  }), o.forEach((t) => {
+    const e = document.querySelector(`[data-page-container="${t}"]`);
+    e && e.querySelectorAll(".work-title").forEach((i) => {
       const r = i.getAttribute("data-full-title");
       r && r !== i.getAttribute("data-short-title") && (i.textContent = r);
     });
@@ -91,232 +91,232 @@ function F(o) {
 }
 function X() {
   document.querySelectorAll(".page-entry").forEach((o) => {
-    const e = o.querySelectorAll(".inhalts-entry");
-    let t = !1;
-    e.forEach((n) => {
-      window.getComputedStyle(n).display !== "none" && (t = !0);
-    }), t ? o.style.display = "" : o.style.display = "none";
+    const t = o.querySelectorAll(".inhalts-entry");
+    let e = !1;
+    t.forEach((n) => {
+      window.getComputedStyle(n).display !== "none" && (e = !0);
+    }), e ? o.style.display = "" : o.style.display = "none";
   });
 }
-function A(o) {
-  q([o]);
+function H(o) {
+  B([o]);
 }
-function q(o) {
-  console.log("markCurrentPagesInInhaltsverzeichnis called with:", o), document.querySelectorAll("[data-page-container]").forEach((t) => {
-    t.hasAttribute("data-beilage") ? (t.classList.remove("border-red-500"), t.classList.add("border-amber-400")) : (t.classList.remove("border-red-500"), t.classList.add("border-slate-300"));
-  }), document.querySelectorAll(".page-number-inhalts").forEach((t) => {
-    t.classList.remove("text-red-600", "font-bold"), t.classList.add("text-slate-700", "font-semibold"), t.style.textDecoration = "", t.style.pointerEvents = "", t.classList.contains("bg-blue-50") ? t.classList.add("hover:bg-blue-100") : t.classList.contains("bg-amber-50") && t.classList.add("hover:bg-amber-100"), !t.classList.contains("bg-amber-50") && !t.classList.contains("bg-blue-50") && t.classList.add("bg-blue-50");
-  }), document.querySelectorAll(".inhalts-entry").forEach((t) => {
-    t.classList.add("hover:bg-slate-100"), t.style.cursor = "";
-  }), document.querySelectorAll('.inhalts-entry a[href*="/"]').forEach((t) => {
-    t.classList.remove("no-underline"), t.classList.contains("bg-blue-50") && t.classList.add("hover:bg-blue-100");
+function B(o) {
+  console.log("markCurrentPagesInInhaltsverzeichnis called with:", o), document.querySelectorAll("[data-page-container]").forEach((e) => {
+    e.hasAttribute("data-beilage") ? (e.classList.remove("border-red-500"), e.classList.add("border-amber-400")) : (e.classList.remove("border-red-500"), e.classList.add("border-slate-300"));
+  }), document.querySelectorAll(".page-number-inhalts").forEach((e) => {
+    e.classList.remove("text-red-600", "font-bold"), e.classList.add("text-slate-700", "font-semibold"), e.style.textDecoration = "", e.style.pointerEvents = "", e.classList.contains("bg-blue-50") ? e.classList.add("hover:bg-blue-100") : e.classList.contains("bg-amber-50") && e.classList.add("hover:bg-amber-100"), !e.classList.contains("bg-amber-50") && !e.classList.contains("bg-blue-50") && e.classList.add("bg-blue-50");
+  }), document.querySelectorAll(".inhalts-entry").forEach((e) => {
+    e.classList.add("hover:bg-slate-100"), e.style.cursor = "";
+  }), document.querySelectorAll('.inhalts-entry a[href*="/"]').forEach((e) => {
+    e.classList.remove("no-underline"), e.classList.contains("bg-blue-50") && e.classList.add("hover:bg-blue-100");
   });
-  const e = [];
-  o.forEach((t) => {
+  const t = [];
+  o.forEach((e) => {
     const n = document.querySelector(
-      `.page-number-inhalts[data-page-number="${t}"]`
+      `.page-number-inhalts[data-page-number="${e}"]`
     );
     if (n) {
-      n.classList.remove("text-slate-700", "hover:bg-blue-100", "hover:bg-amber-100"), n.classList.add("text-red-600", "font-bold"), n.style.textDecoration = "none", n.style.pointerEvents = "none", e.push(n);
-      const i = document.querySelector(`[data-page-container="${t}"]`);
+      n.classList.remove("text-slate-700", "hover:bg-blue-100", "hover:bg-amber-100"), n.classList.add("text-red-600", "font-bold"), n.style.textDecoration = "none", n.style.pointerEvents = "none", t.push(n);
+      const i = document.querySelector(`[data-page-container="${e}"]`);
       i && (i.classList.remove("border-slate-300", "border-amber-400"), i.classList.add("border-red-500"));
       const r = n.closest(".page-entry");
-      r && (r.querySelectorAll(".inhalts-entry").forEach((l) => {
-        l.classList.remove("hover:bg-slate-100"), l.style.cursor = "default";
-      }), r.querySelectorAll('a[href*="/"]').forEach((l) => {
-        l.getAttribute("aria-current") === "page" && (l.style.textDecoration = "none", l.style.pointerEvents = "none", l.classList.add("no-underline"), l.classList.remove("hover:bg-blue-100"));
+      r && (r.querySelectorAll(".inhalts-entry").forEach((s) => {
+        s.classList.remove("hover:bg-slate-100"), s.style.cursor = "default";
+      }), r.querySelectorAll('a[href*="/"]').forEach((s) => {
+        s.getAttribute("aria-current") === "page" && (s.style.textDecoration = "none", s.style.pointerEvents = "none", s.classList.add("no-underline"), s.classList.remove("hover:bg-blue-100"));
       }));
     }
-  }), e.length > 0 && U(e[0]), document.querySelectorAll(".page-indicator").forEach((t) => {
-    t.classList.remove("text-red-600", "font-bold"), t.classList.add("text-slate-600", "font-semibold"), t.classList.contains("bg-amber-50") || t.classList.add("bg-blue-50");
-  }), o.forEach((t) => {
-    const n = document.querySelector(`.page-indicator[data-page="${t}"]`);
+  }), t.length > 0 && G(t[0]), document.querySelectorAll(".page-indicator").forEach((e) => {
+    e.classList.remove("text-red-600", "font-bold"), e.classList.add("text-slate-600", "font-semibold"), e.classList.contains("bg-amber-50") || e.classList.add("bg-blue-50");
+  }), o.forEach((e) => {
+    const n = document.querySelector(`.page-indicator[data-page="${e}"]`);
     n && (n.classList.remove("text-slate-600"), n.classList.add("text-red-600", "font-bold"));
   });
 }
-function U(o) {
-  const e = o.closest(".lg\\:overflow-y-auto");
-  if (e) {
-    const t = e.getBoundingClientRect(), n = o.getBoundingClientRect(), i = n.top < t.top, r = n.bottom > t.bottom;
+function G(o) {
+  const t = o.closest(".lg\\:overflow-y-auto");
+  if (t) {
+    const e = t.getBoundingClientRect(), n = o.getBoundingClientRect(), i = n.top < e.top, r = n.bottom > e.bottom;
     (i || r) && o.scrollIntoView({
       behavior: "smooth",
       block: "center"
     });
   }
 }
-function G(o, e, t, n = null) {
+function Y(o, t, e, n = null) {
   let i = document.querySelector("single-page-viewer");
   i || (i = document.createElement("single-page-viewer"), document.body.appendChild(i));
-  const r = o.closest('[data-beilage="true"]') !== null, s = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
-  i.show(o.src, o.alt, e, r, s, n);
+  const r = o.closest('[data-beilage="true"]') !== null, l = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
+  i.show(o.src, o.alt, t, r, l, n);
 }
-function B() {
+function q() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function Y() {
-  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, w(), document.querySelector(".newspaper-page-container")) {
-    let e = /* @__PURE__ */ new Set();
+function J() {
+  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, y(), document.querySelector(".newspaper-page-container")) {
+    let t = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
-      (t) => {
-        if (t.forEach((n) => {
+      (e) => {
+        if (e.forEach((n) => {
           const i = window.currentPageContainers.indexOf(n.target);
-          i !== -1 && (n.isIntersecting ? e.add(i) : e.delete(i));
-        }), e.size > 0) {
-          const i = Array.from(e).sort((r, s) => r - s)[0];
-          i !== window.currentActiveIndex && (window.currentActiveIndex = i, w());
+          i !== -1 && (n.isIntersecting ? t.add(i) : t.delete(i));
+        }), t.size > 0) {
+          const i = Array.from(t).sort((r, l) => r - l)[0];
+          i !== window.currentActiveIndex && (window.currentActiveIndex = i, y());
         }
       },
       {
         rootMargin: "-20% 0px -70% 0px"
       }
-    ), window.currentPageContainers.forEach((t) => {
-      window.pageObserver.observe(t);
+    ), window.currentPageContainers.forEach((e) => {
+      window.pageObserver.observe(e);
     });
-  }
-}
-function J() {
-  if (window.currentActiveIndex > 0) {
-    let o = -1;
-    const e = [];
-    window.currentPageContainers.forEach((n, i) => {
-      const r = n.getBoundingClientRect(), s = window.innerHeight, l = Math.max(r.top, 0), a = Math.min(r.bottom, s), c = Math.max(0, a - l), d = r.height;
-      c / d >= 0.3 && e.push(i);
-    });
-    const t = Math.min(...e);
-    for (let n = t - 1; n >= 0; n--)
-      if (!e.includes(n)) {
-        o = n;
-        break;
-      }
-    o === -1 && t > 0 && (o = t - 1), o >= 0 && (window.currentActiveIndex = o, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    }), setTimeout(() => {
-      w();
-    }, 100));
   }
 }
 function Q() {
-  if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
+  if (window.currentActiveIndex > 0) {
     let o = -1;
-    const e = [];
+    const t = [];
     window.currentPageContainers.forEach((n, i) => {
-      const r = n.getBoundingClientRect(), s = window.innerHeight, l = Math.max(r.top, 0), a = Math.min(r.bottom, s), c = Math.max(0, a - l), d = r.height;
-      c / d >= 0.3 && e.push(i);
+      const r = n.getBoundingClientRect(), l = window.innerHeight, s = Math.max(r.top, 0), a = Math.min(r.bottom, l), c = Math.max(0, a - s), d = r.height;
+      c / d >= 0.3 && t.push(i);
     });
-    const t = Math.max(...e);
-    for (let n = t + 1; n < window.currentPageContainers.length; n++)
-      if (!e.includes(n)) {
+    const e = Math.min(...t);
+    for (let n = e - 1; n >= 0; n--)
+      if (!t.includes(n)) {
         o = n;
         break;
       }
-    o === -1 && t < window.currentPageContainers.length - 1 && (o = t + 1), o >= 0 && o < window.currentPageContainers.length && (window.currentActiveIndex = o, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+    o === -1 && e > 0 && (o = e - 1), o >= 0 && (window.currentActiveIndex = o, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       behavior: "smooth",
       block: "start"
     }), setTimeout(() => {
-      w();
+      y();
     }, 100));
   }
 }
 function ee() {
-  if (H()) {
-    const e = document.querySelector("#newspaper-content .newspaper-page-container");
-    e && e.scrollIntoView({
+  if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
+    let o = -1;
+    const t = [];
+    window.currentPageContainers.forEach((n, i) => {
+      const r = n.getBoundingClientRect(), l = window.innerHeight, s = Math.max(r.top, 0), a = Math.min(r.bottom, l), c = Math.max(0, a - s), d = r.height;
+      c / d >= 0.3 && t.push(i);
+    });
+    const e = Math.max(...t);
+    for (let n = e + 1; n < window.currentPageContainers.length; n++)
+      if (!t.includes(n)) {
+        o = n;
+        break;
+      }
+    o === -1 && e < window.currentPageContainers.length - 1 && (o = e + 1), o >= 0 && o < window.currentPageContainers.length && (window.currentActiveIndex = o, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    }), setTimeout(() => {
+      y();
+    }, 100));
+  }
+}
+function te() {
+  if ($()) {
+    const t = document.querySelector("#newspaper-content .newspaper-page-container");
+    t && t.scrollIntoView({
       behavior: "smooth",
       block: "start"
     });
   } else {
-    const e = document.querySelector('[class*="border-t-2 border-amber-200"]');
-    e && e.scrollIntoView({
+    const t = document.querySelector('[class*="border-t-2 border-amber-200"]');
+    t && t.scrollIntoView({
       behavior: "smooth",
       block: "start"
     });
   }
 }
-function H() {
+function $() {
   const o = [];
-  window.currentPageContainers.forEach((e, t) => {
-    const n = e.getBoundingClientRect(), i = window.innerHeight, r = Math.max(n.top, 0), s = Math.min(n.bottom, i), l = Math.max(0, s - r), a = n.height;
-    l / a >= 0.3 && o.push(t);
+  window.currentPageContainers.forEach((t, e) => {
+    const n = t.getBoundingClientRect(), i = window.innerHeight, r = Math.max(n.top, 0), l = Math.min(n.bottom, i), s = Math.max(0, l - r), a = n.height;
+    s / a >= 0.3 && o.push(e);
   });
-  for (const e of o) {
-    const t = window.currentPageContainers[e];
-    if (t && t.id && t.id.includes("beilage-"))
+  for (const t of o) {
+    const e = window.currentPageContainers[t];
+    if (e && e.id && e.id.includes("beilage-"))
       return !0;
   }
   return !1;
 }
-function w() {
-  const o = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
-  if (o && (window.currentActiveIndex <= 0 ? o.style.display = "none" : o.style.display = "flex"), e && (window.currentActiveIndex >= window.currentPageContainers.length - 1 ? e.style.display = "none" : e.style.display = "flex"), t) {
-    const n = H(), i = t.querySelector("i");
-    n ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", i && (i.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", i && (i.className = "ri-attachment-line text-lg lg:text-xl"));
-  }
-}
-function te() {
-  const o = document.getElementById("shareLinkBtn");
-  let e = "";
-  if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
-    const i = window.currentPageContainers[window.currentActiveIndex].querySelector("[data-page]");
-    i && (e = `/${i.getAttribute("data-page")}`);
-  }
-  const t = window.location.origin + window.location.pathname + e;
-  navigator.share ? navigator.share({
-    title: document.title,
-    url: t
-  }).catch((n) => {
-    L(t, o);
-  }) : L(t, o);
-}
-function L(o, e) {
-  if (navigator.clipboard)
-    navigator.clipboard.writeText(o).then(() => {
-      p(e, "Link kopiert!");
-    }).catch((t) => {
-      p(e, "Kopieren fehlgeschlagen");
-    });
-  else {
-    const t = document.createElement("textarea");
-    t.value = o, document.body.appendChild(t), t.select();
-    try {
-      const n = document.execCommand("copy");
-      p(e, n ? "Link kopiert!" : "Kopieren fehlgeschlagen");
-    } catch {
-      p(e, "Kopieren fehlgeschlagen");
-    } finally {
-      document.body.removeChild(t);
-    }
+function y() {
+  const o = document.getElementById("prevPageBtn"), t = document.getElementById("nextPageBtn"), e = document.getElementById("beilageBtn");
+  if (o && (window.currentActiveIndex <= 0 ? o.style.display = "none" : o.style.display = "flex"), t && (window.currentActiveIndex >= window.currentPageContainers.length - 1 ? t.style.display = "none" : t.style.display = "flex"), e) {
+    const n = $(), i = e.querySelector("i");
+    n ? (e.title = "Zur Hauptausgabe", e.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", i && (i.className = "ri-file-text-line text-lg lg:text-xl")) : (e.title = "Zu Beilage", e.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", i && (i.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
 function ne() {
-  const o = document.getElementById("citationBtn"), e = document.title || "KGPZ";
-  let t = window.location.origin + window.location.pathname;
-  t.includes("#") && (t = t.split("#")[0]);
-  const n = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), i = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}. Digital verfügbar unter: ${t} (Zugriff: ${n}).`;
+  const o = document.getElementById("shareLinkBtn");
+  let t = "";
+  if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
+    const i = window.currentPageContainers[window.currentActiveIndex].querySelector("[data-page]");
+    i && (t = `/${i.getAttribute("data-page")}`);
+  }
+  const e = window.location.origin + window.location.pathname + t;
+  navigator.share ? navigator.share({
+    title: document.title,
+    url: e
+  }).catch((n) => {
+    E(e, o);
+  }) : E(e, o);
+}
+function E(o, t) {
+  if (navigator.clipboard)
+    navigator.clipboard.writeText(o).then(() => {
+      h(t, "Link kopiert!");
+    }).catch((e) => {
+      h(t, "Kopieren fehlgeschlagen");
+    });
+  else {
+    const e = document.createElement("textarea");
+    e.value = o, document.body.appendChild(e), e.select();
+    try {
+      const n = document.execCommand("copy");
+      h(t, n ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+    } catch {
+      h(t, "Kopieren fehlgeschlagen");
+    } finally {
+      document.body.removeChild(e);
+    }
+  }
+}
+function oe() {
+  const o = document.getElementById("citationBtn"), t = document.title || "KGPZ";
+  let e = window.location.origin + window.location.pathname;
+  e.includes("#") && (e = e.split("#")[0]);
+  const n = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), i = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}. Digital verfügbar unter: ${e} (Zugriff: ${n}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(i).then(() => {
-      p(o, "Zitation kopiert!");
+      h(o, "Zitation kopiert!");
     }).catch((r) => {
-      p(o, "Kopieren fehlgeschlagen");
+      h(o, "Kopieren fehlgeschlagen");
     });
   else {
     const r = document.createElement("textarea");
     r.value = i, document.body.appendChild(r), r.select();
     try {
-      const s = document.execCommand("copy");
-      p(o, s ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      const l = document.execCommand("copy");
+      h(o, l ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      p(o, "Kopieren fehlgeschlagen");
+      h(o, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(r);
     }
   }
 }
-function p(o, e) {
-  const t = document.querySelector(".simple-popup");
-  t && t.remove();
+function h(o, t) {
+  const e = document.querySelector(".simple-popup");
+  e && e.remove();
   const n = document.createElement("div");
-  n.className = "simple-popup", n.textContent = e, n.style.cssText = `
+  n.className = "simple-popup", n.textContent = t, n.style.cssText = `
 		position: fixed;
 		background: #374151;
 		color: white;
@@ -330,10 +330,10 @@ function p(o, e) {
 		transition: opacity 0.2s ease;
 		white-space: nowrap;
 	`;
-  const i = o.getBoundingClientRect(), r = window.innerHeight, s = window.innerWidth;
-  let l = i.left - 10, a = i.bottom + 8;
+  const i = o.getBoundingClientRect(), r = window.innerHeight, l = window.innerWidth;
+  let s = i.left - 10, a = i.bottom + 8;
   const c = 120, d = 32;
-  l + c > s && (l = i.right - c + 10), a + d > r && (a = i.top - d - 8), n.style.left = Math.max(5, l) + "px", n.style.top = Math.max(5, a) + "px", document.body.appendChild(n), setTimeout(() => {
+  s + c > l && (s = i.right - c + 10), a + d > r && (a = i.top - d - 8), n.style.left = Math.max(5, s) + "px", n.style.top = Math.max(5, a) + "px", document.body.appendChild(n), setTimeout(() => {
     n.style.opacity = "1";
   }, 10), setTimeout(() => {
     n.style.opacity = "0", setTimeout(() => {
@@ -341,247 +341,258 @@ function p(o, e) {
     }, 200);
   }, 2e3);
 }
-function oe() {
-  let o = "", e = null;
-  const t = window.location.pathname.split("/");
-  if (t.length >= 4 && !isNaN(t[t.length - 1])) {
-    if (o = t[t.length - 1], e = document.getElementById(`page-${o}`), !e) {
+function ie() {
+  if (window.htmxNavigating)
+    return;
+  let o = "", t = null;
+  const e = window.location.pathname.split("/");
+  if (e.length >= 4 && !isNaN(e[e.length - 1])) {
+    if (o = e[e.length - 1], t = document.getElementById(`page-${o}`), !t) {
       const n = document.querySelectorAll(".newspaper-page-container[data-pages]");
       for (const i of n) {
         const r = i.getAttribute("data-pages");
         if (r && r.split(",").includes(o)) {
-          e = i;
+          t = i;
           break;
         }
       }
     }
-    e || (e = document.getElementById(`beilage-1-page-${o}`) || document.getElementById(`beilage-2-page-${o}`) || document.querySelector(`[id*="beilage"][id*="page-${o}"]`));
+    t || (t = document.getElementById(`beilage-1-page-${o}`) || document.getElementById(`beilage-2-page-${o}`) || document.querySelector(`[id*="beilage"][id*="page-${o}"]`));
   }
-  e && o && setTimeout(() => {
-    e.scrollIntoView({
+  t && o && setTimeout(() => {
+    t.scrollIntoView({
       behavior: "smooth",
       block: "start"
-    }), A(o);
+    }), H(o);
   }, 300);
 }
-function x(o, e, t = !1) {
+function v(o, t, e = !1) {
   let n = "";
-  if (t)
+  if (e)
     n = window.location.origin + window.location.pathname + `#beilage-1-page-${o}`;
   else {
     const r = window.location.pathname.split("/");
     if (r.length >= 3) {
-      const s = r[1], l = r[2];
-      n = `${window.location.origin}/${s}/${l}/${o}`;
+      const l = r[1], s = r[2];
+      n = `${window.location.origin}/${l}/${s}/${o}`;
     } else
       n = window.location.origin + window.location.pathname + `/${o}`;
   }
   const i = n;
   if (navigator.clipboard)
     navigator.clipboard.writeText(i).then(() => {
-      p(e, "Link kopiert!");
+      h(t, "Link kopiert!");
     }).catch((r) => {
-      p(e, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     });
   else {
     const r = document.createElement("textarea");
     r.value = i, document.body.appendChild(r), r.select();
     try {
-      const s = document.execCommand("copy");
-      p(e, s ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      const l = document.execCommand("copy");
+      h(t, l ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      p(e, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(r);
     }
   }
 }
-function S(o, e) {
-  const t = document.title || "KGPZ", n = window.location.pathname.split("/");
+function x(o, t) {
+  const e = document.title || "KGPZ", n = window.location.pathname.split("/");
   let i;
   if (n.length >= 3) {
     const a = n[1], c = n[2];
     i = `${window.location.origin}/${a}/${c}/${o}`;
   } else
     i = `${window.location.origin}${window.location.pathname}/${o}`;
-  const r = i, s = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), l = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${o}. Digital verfügbar unter: ${r} (Zugriff: ${s}).`;
+  const r = i, l = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), s = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}, Seite ${o}. Digital verfügbar unter: ${r} (Zugriff: ${l}).`;
   if (navigator.clipboard)
-    navigator.clipboard.writeText(l).then(() => {
-      p(e, "Zitation kopiert!");
+    navigator.clipboard.writeText(s).then(() => {
+      h(t, "Zitation kopiert!");
     }).catch((a) => {
-      p(e, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     });
   else {
     const a = document.createElement("textarea");
-    a.value = l, document.body.appendChild(a), a.select();
+    a.value = s, document.body.appendChild(a), a.select();
     try {
       const c = document.execCommand("copy");
-      p(e, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      h(t, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      p(e, "Kopieren fehlgeschlagen");
+      h(t, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(a);
     }
   }
 }
-function y() {
-  $();
-  const o = document.querySelectorAll(".author-section"), e = document.querySelectorAll(".scrollspy-link");
-  if (o.length === 0 || e.length === 0)
+function L() {
+  M();
+  const o = document.querySelectorAll(".author-section"), t = document.querySelectorAll(".scrollspy-link");
+  if (o.length === 0 || t.length === 0)
     return;
-  function t() {
-    const r = [];
-    o.forEach((a) => {
-      const c = a.getAttribute("id"), d = a.querySelector(".akteur-werke-section"), u = a.querySelector(".akteur-beitraege-section");
-      let g = !1;
-      if (d) {
-        const f = d.getBoundingClientRect(), h = f.top < window.innerHeight, b = f.bottom > 0;
-        h && b && (g = !0);
+  function e() {
+    const l = [];
+    o.forEach((c) => {
+      const d = c.getAttribute("id"), g = c.querySelector(".akteur-werke-section"), u = c.querySelector(".akteur-beitraege-section");
+      let f = !1;
+      if (g) {
+        const m = g.getBoundingClientRect(), p = m.top < window.innerHeight, b = m.bottom > 0;
+        p && b && (f = !0);
       }
-      if (u && !g) {
-        const f = u.getBoundingClientRect(), h = f.top < window.innerHeight, b = f.bottom > 0;
-        h && b && (g = !0);
+      if (u && !f) {
+        const m = u.getBoundingClientRect(), p = m.top < window.innerHeight, b = m.bottom > 0;
+        p && b && (f = !0);
       }
-      if (!d && !u) {
-        const f = a.querySelector("div:first-child");
-        if (f) {
-          const h = f.getBoundingClientRect(), b = h.top >= 0, m = h.bottom <= window.innerHeight;
-          b && m && (g = !0);
+      if (!g && !u) {
+        const m = c.querySelector("div:first-child");
+        if (m) {
+          const p = m.getBoundingClientRect(), b = p.top >= 0, w = p.bottom <= window.innerHeight;
+          b && w && (f = !0);
         }
       }
-      g && r.push(c);
+      f && l.push(d);
     });
-    const s = [], l = document.getElementById("scrollspy-slider");
-    if (e.forEach((a) => {
-      a.classList.remove("font-medium");
-      const c = a.getAttribute("data-target");
-      r.includes(c) && (a.classList.add("font-medium"), s.push(a));
-    }), s.length > 0 && l) {
-      const a = document.getElementById("scrollspy-nav"), c = a.getBoundingClientRect();
-      let d = 1 / 0, u = -1 / 0;
-      s.forEach((f) => {
-        const h = f.getBoundingClientRect(), b = h.top - c.top + a.scrollTop, m = b + h.height;
-        d = Math.min(d, b), u = Math.max(u, m);
+    const s = [], a = document.getElementById("scrollspy-slider");
+    if (t.forEach((c) => {
+      c.classList.remove("font-medium");
+      const d = c.getAttribute("data-target");
+      l.includes(d) && (c.classList.add("font-medium"), s.push(c));
+    }), s.length > 0 && a) {
+      const c = document.getElementById("scrollspy-nav"), d = c.getBoundingClientRect();
+      let g = 1 / 0, u = -1 / 0;
+      s.forEach((m) => {
+        const p = m.getBoundingClientRect(), b = p.top - d.top + c.scrollTop, w = b + p.height;
+        g = Math.min(g, b), u = Math.max(u, w);
       });
-      let g = u - d;
-      l.style.top = `${d}px`, l.style.height = `${g}px`, l.style.opacity = "1";
-    } else l && (l.style.opacity = "0");
+      let f = u - g;
+      a.style.top = `${g}px`, a.style.height = `${f}px`, a.style.opacity = "1";
+    } else a && (a.style.opacity = "0");
     s.length > 0 && i(s);
   }
-  function n(r) {
-    const s = document.querySelectorAll(".scrollspy-link"), l = document.getElementById("scrollspy-slider");
-    s.forEach((c) => {
-      c.classList.remove("font-medium");
+  function n(l) {
+    const s = document.querySelectorAll(".scrollspy-link"), a = document.getElementById("scrollspy-slider");
+    s.forEach((d) => {
+      d.classList.remove("font-medium");
     });
-    const a = document.querySelector(`[data-target="${r}"]`);
-    if (a && (a.classList.add("font-medium"), l)) {
-      const c = document.getElementById("scrollspy-nav"), d = c.getBoundingClientRect(), u = a.getBoundingClientRect(), g = u.top - d.top + c.scrollTop;
-      l.style.top = `${g}px`, l.style.height = `${u.height}px`, l.style.opacity = "1";
+    const c = document.querySelector(`[data-target="${l}"]`);
+    if (c && (c.classList.add("font-medium"), a)) {
+      const d = document.getElementById("scrollspy-nav"), g = d.getBoundingClientRect(), u = c.getBoundingClientRect(), f = u.top - g.top + d.scrollTop;
+      a.style.top = `${f}px`, a.style.height = `${u.height}px`, a.style.opacity = "1";
     }
   }
-  function i(r) {
+  function i(l) {
     if (window.scrollspyManualNavigation) return;
     const s = document.getElementById("scrollspy-nav");
     if (!s) return;
-    const l = r[0], a = Math.max(
+    const a = l[0], c = Math.max(
       document.body.scrollHeight,
       document.body.offsetHeight,
       document.documentElement.clientHeight,
       document.documentElement.scrollHeight,
       document.documentElement.offsetHeight
-    ), c = window.innerHeight, d = a - c, u = d > 0 ? window.scrollY / d : 0, g = s.clientHeight, h = s.scrollHeight - g;
-    if (h > 0) {
-      const b = u * h, m = l.getBoundingClientRect(), M = s.getBoundingClientRect(), R = m.top - M.top + s.scrollTop, N = g / 2, O = R - N, C = 0.7, V = C * b + (1 - C) * O, P = Math.max(0, Math.min(h, V)), z = s.scrollTop;
-      Math.abs(P - z) > 10 && s.scrollTo({
-        top: P,
+    ), d = window.innerHeight, g = c - d, u = g > 0 ? window.scrollY / g : 0, f = s.clientHeight, p = s.scrollHeight - f;
+    if (p > 0) {
+      const b = u * p, w = a.getBoundingClientRect(), R = s.getBoundingClientRect(), N = w.top - R.top + s.scrollTop, O = f / 2, V = N - O, S = 0.7, z = S * b + (1 - S) * V, C = Math.max(0, Math.min(p, z)), D = s.scrollTop;
+      Math.abs(C - D) > 10 && s.scrollTo({
+        top: C,
         behavior: "smooth"
       });
     }
   }
   window.scrollspyScrollHandler = function() {
-    clearTimeout(window.scrollspyTimeout), window.scrollspyTimeout = setTimeout(t, 50);
-  }, window.addEventListener("scroll", window.scrollspyScrollHandler), window.scrollspyClickHandlers = [], e.forEach((r) => {
-    const s = function(l) {
-      l.preventDefault();
-      const a = this.getAttribute("data-target"), c = document.getElementById(a);
-      c && (n(a), window.scrollspyManualNavigation = !0, c.scrollIntoView({
+    clearTimeout(window.scrollspyTimeout), window.scrollspyTimeout = setTimeout(() => {
+      e(), r();
+    }, 50);
+  };
+  function r() {
+    const l = document.getElementById("sidebar-scroll-to-top");
+    if (!l) return;
+    const s = window.pageYOffset || document.documentElement.scrollTop, a = window.innerHeight;
+    s > a * 0.5 ? (l.classList.remove("opacity-0"), l.classList.add("opacity-100")) : (l.classList.remove("opacity-100"), l.classList.add("opacity-0"));
+  }
+  window.addEventListener("scroll", window.scrollspyScrollHandler), window.scrollspyClickHandlers = [], t.forEach((l) => {
+    const s = function(a) {
+      a.preventDefault();
+      const c = this.getAttribute("data-target"), d = document.getElementById(c);
+      d && (n(c), window.scrollspyManualNavigation = !0, d.scrollIntoView({
         behavior: "smooth",
         block: "start"
       }), setTimeout(() => {
         window.scrollspyManualNavigation = !1;
       }, 1e3));
     };
-    window.scrollspyClickHandlers.push({ link: r, handler: s }), r.addEventListener("click", s);
-  }), t();
+    window.scrollspyClickHandlers.push({ link: l, handler: s }), l.addEventListener("click", s);
+  }), e(), r();
 }
-function $() {
-  window.scrollspyScrollHandler && (window.removeEventListener("scroll", window.scrollspyScrollHandler), window.scrollspyScrollHandler = null), window.scrollspyTimeout && (clearTimeout(window.scrollspyTimeout), window.scrollspyTimeout = null), window.scrollspyClickHandlers && (window.scrollspyClickHandlers.forEach(({ link: e, handler: t }) => {
-    e.removeEventListener("click", t);
+function M() {
+  window.scrollspyScrollHandler && (window.removeEventListener("scroll", window.scrollspyScrollHandler), window.scrollspyScrollHandler = null), window.scrollspyTimeout && (clearTimeout(window.scrollspyTimeout), window.scrollspyTimeout = null), window.scrollspyClickHandlers && (window.scrollspyClickHandlers.forEach(({ link: t, handler: e }) => {
+    t.removeEventListener("click", e);
   }), window.scrollspyClickHandlers = null);
   const o = document.getElementById("scrollspy-slider");
   o && (o.style.opacity = "0", o.style.height = "0"), window.scrollspyManualNavigation = !1;
 }
-function v() {
-  Z(), Y(), window.addEventListener("scroll", function() {
+function k() {
+  _(), J(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
-      k(), w();
+      A(), y();
     }, 50);
-  }), oe(), document.addEventListener("keydown", function(o) {
-    o.key === "Escape" && B();
+  }), ie(), document.addEventListener("keydown", function(o) {
+    o.key === "Escape" && q();
   });
 }
-window.enlargePage = G;
-window.closeModal = B;
-window.scrollToPreviousPage = J;
-window.scrollToNextPage = Q;
-window.scrollToBeilage = ee;
-window.shareCurrentPage = te;
-window.generateCitation = ne;
-window.copyPagePermalink = x;
-window.generatePageCitation = S;
-function le() {
-  E(), W(), document.querySelector(".newspaper-page-container") && v(), document.querySelector(".author-section") && y(), htmx.on("htmx:load", function(o) {
-    E();
+window.enlargePage = Y;
+window.closeModal = q;
+window.scrollToPreviousPage = Q;
+window.scrollToNextPage = ee;
+window.scrollToBeilage = te;
+window.shareCurrentPage = ne;
+window.generateCitation = oe;
+window.copyPagePermalink = v;
+window.generatePageCitation = x;
+function ae() {
+  I(), Z(), document.querySelector(".newspaper-page-container") && k(), document.querySelector(".author-section") && L(), htmx.on("htmx:load", function(o) {
+    I();
   }), document.body.addEventListener("htmx:afterSwap", function(o) {
-    setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && v(), document.querySelector(".author-section") && y();
-      const e = document.querySelector("scroll-to-top-button");
-      e && e.reassessScrollPosition();
+    window.htmxNavigating = !0;
+    const t = window.location.pathname, e = t.match(/\/\d+$/), n = t.includes("/akteure/") || t.includes("/autoren");
+    !e && n && setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: "instant"
+        // Use instant instead of smooth to avoid conflicts
+      });
+    }, 50), setTimeout(() => {
+      document.querySelector(".newspaper-page-container") && k(), document.querySelector(".author-section") && L();
+      const i = document.querySelector("scroll-to-top-button");
+      i && i.reassessScrollPosition(), setTimeout(() => {
+        window.htmxNavigating = !1;
+      }, 500);
     }, 100);
-  }), document.body.addEventListener("htmx:afterSettle", function(o) {
-    setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && v(), document.querySelector(".author-section") && y();
-      const e = document.querySelector("scroll-to-top-button");
-      e && e.reassessScrollPosition();
-    }, 200);
-  }), document.body.addEventListener("htmx:load", function(o) {
-    setTimeout(() => {
-      document.querySelector(".newspaper-page-container") && v(), document.querySelector(".author-section") && y();
-      const e = document.querySelector("scroll-to-top-button");
-      e && e.reassessScrollPosition();
-    }, 100);
+  }), document.body.addEventListener("htmx:beforeRequest", function(o) {
+    window.htmxNavigating = !0;
   });
 }
-class ie extends HTMLElement {
+class re extends HTMLElement {
   constructor() {
     super(), this.resizeObserver = null;
   }
   // Dynamically detect sidebar width in pixels
   detectSidebarWidth() {
-    const e = document.querySelector('.lg\\:w-1\\/4, .lg\\:w-1\\/3, [class*="lg:w-1/"]');
-    if (e) {
-      const i = e.getBoundingClientRect().width;
+    const t = document.querySelector('.lg\\:w-1\\/4, .lg\\:w-1\\/3, [class*="lg:w-1/"]');
+    if (t) {
+      const i = t.getBoundingClientRect().width;
       return console.log("Detected sidebar width:", i, "px"), `${i}px`;
     }
-    const t = window.innerWidth;
-    return t < 1024 ? "0px" : t < 1280 ? `${Math.floor(t * 0.25)}px` : `${Math.floor(t * 0.2)}px`;
+    const e = window.innerWidth;
+    return e < 1024 ? "0px" : e < 1280 ? `${Math.floor(e * 0.25)}px` : `${Math.floor(e * 0.2)}px`;
   }
   connectedCallback() {
-    const e = this.detectSidebarWidth();
+    const t = this.detectSidebarWidth();
     this.innerHTML = `
 			<div class="fixed inset-0 z-50 flex pointer-events-none">
 				<!-- Keep Inhaltsverzeichnis area empty/transparent (collapsible) -->
-				<div id="sidebar-spacer" style="width: ${e};" class="flex-shrink-0 transition-all duration-300"></div>
+				<div id="sidebar-spacer" style="width: ${t};" class="flex-shrink-0 transition-all duration-300"></div>
 
 				<!-- Cover the right columns with the zoomed view -->
 				<div class="flex-1 bg-slate-50 overflow-auto pointer-events-auto">
@@ -681,30 +692,30 @@ class ie extends HTMLElement {
   }
   // Update sidebar width when window is resized
   updateSidebarWidth() {
-    const e = this.querySelector("#sidebar-spacer");
-    if (e && !e.style.width.includes("0px")) {
-      const t = this.detectSidebarWidth();
-      e.style.width = t, console.log("Updated sidebar width to:", t);
+    const t = this.querySelector("#sidebar-spacer");
+    if (t && !t.style.width.includes("0px")) {
+      const e = this.detectSidebarWidth();
+      t.style.width = e, console.log("Updated sidebar width to:", e);
     }
   }
-  show(e, t, n, i = !1, r = 0, s = null) {
-    const l = this.querySelector("#single-page-image"), a = this.querySelector("#page-number"), c = this.querySelector("#page-icon");
-    this.querySelector("#page-indicator"), l.src = e, l.alt = t, this.currentPageNumber = n, this.currentIsBeilage = i, this.currentPartNumber = s;
+  show(t, e, n, i = !1, r = 0, l = null) {
+    const s = this.querySelector("#single-page-image"), a = this.querySelector("#page-number"), c = this.querySelector("#page-icon");
+    this.querySelector("#page-indicator"), s.src = t, s.alt = e, this.currentPageNumber = n, this.currentIsBeilage = i, this.currentPartNumber = l;
     const d = this.getIssueContext(n);
     if (a.innerHTML = d ? `${d}, ${n}` : `${n}`, r && n === r) {
       a.style.position = "relative";
-      const u = a.querySelector(".target-page-dot");
-      u && u.remove();
-      const g = document.createElement("span");
-      g.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", g.title = "verlinkte Seite", a.appendChild(g);
+      const g = a.querySelector(".target-page-dot");
+      g && g.remove();
+      const u = document.createElement("span");
+      u.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", u.title = "verlinkte Seite", a.appendChild(u);
     }
-    if (s !== null)
-      c.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${s}. Teil</span>`;
+    if (l !== null)
+      c.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${l}. Teil</span>`;
     else {
-      const u = this.determinePageIconType(n, i);
-      c.innerHTML = this.getPageIconHTML(u);
+      const g = this.determinePageIconType(n, i);
+      c.innerHTML = this.getPageIconHTML(g);
     }
-    this.updateNavigationButtons(), this.style.display = "block", document.body.style.overflow = "hidden", A(n);
+    this.updateNavigationButtons(), this.style.display = "block", document.body.style.overflow = "hidden", H(n);
   }
   close() {
     this.style.display = "none", document.body.style.overflow = "";
@@ -714,107 +725,107 @@ class ie extends HTMLElement {
     this.resizeObserver && (this.resizeObserver.disconnect(), this.resizeObserver = null), document.body.style.overflow = "", this.parentNode && this.parentNode.removeChild(this);
   }
   // Determine page icon type based on page position and whether it's beilage
-  determinePageIconType(e, t) {
-    const n = t ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", r = Array.from(document.querySelectorAll(n)).map((a) => {
+  determinePageIconType(t, e) {
+    const n = e ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", r = Array.from(document.querySelectorAll(n)).map((a) => {
       const c = a.getAttribute("data-page-container");
       return c ? parseInt(c) : null;
     }).filter((a) => a !== null).sort((a, c) => a - c);
     if (r.length === 0)
       return "first";
-    const s = r[0], l = r[r.length - 1];
-    return e === s ? "first" : e === l ? "last" : e === s + 1 ? "even" : e === l - 1 ? "odd" : e % 2 === 0 ? "even" : "odd";
+    const l = r[0], s = r[r.length - 1];
+    return t === l ? "first" : t === s ? "last" : t === l + 1 ? "even" : t === s - 1 ? "odd" : t % 2 === 0 ? "even" : "odd";
   }
   // Generate page icon HTML based on type (same as Go PageIcon function)
-  getPageIconHTML(e) {
-    const t = "ri-file-text-line text-lg";
-    switch (e) {
+  getPageIconHTML(t) {
+    const e = "ri-file-text-line text-lg";
+    switch (t) {
       case "first":
-        return `<i class="${t} text-black"></i>`;
+        return `<i class="${e} text-black"></i>`;
       case "last":
-        return `<i class="${t} text-black" style="transform: scaleX(-1); display: inline-block;"></i>`;
+        return `<i class="${e} text-black" style="transform: scaleX(-1); display: inline-block;"></i>`;
       case "even":
-        return `<i class="${t} text-black" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="${t} text-slate-400"></i>`;
+        return `<i class="${e} text-black" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="${e} text-slate-400"></i>`;
       case "odd":
-        return `<i class="${t} text-slate-400" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="${t} text-black"></i>`;
+        return `<i class="${e} text-slate-400" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="${e} text-black"></i>`;
       default:
-        return `<i class="${t} text-black"></i>`;
+        return `<i class="${e} text-black"></i>`;
     }
   }
   // Share current page
   shareCurrentPage() {
-    if (typeof x == "function") {
-      const e = this.querySelector("#share-btn");
-      x(this.currentPageNumber, e, this.currentIsBeilage);
+    if (typeof v == "function") {
+      const t = this.querySelector("#share-btn");
+      v(this.currentPageNumber, t, this.currentIsBeilage);
     }
   }
   // Generate citation for current page
   generatePageCitation() {
-    if (typeof S == "function") {
-      const e = this.querySelector("#cite-btn");
-      S(this.currentPageNumber, e);
+    if (typeof x == "function") {
+      const t = this.querySelector("#cite-btn");
+      x(this.currentPageNumber, t);
     }
   }
   // Update navigation button visibility based on available pages
   updateNavigationButtons() {
-    const e = this.querySelector("#prev-page-btn"), t = this.querySelector("#next-page-btn"), { prevPage: n, nextPage: i } = this.getAdjacentPages();
-    n !== null ? (e.disabled = !1, e.className = e.className.replace("opacity-50 cursor-not-allowed", ""), e.className = e.className.replace(
-      "bg-gray-50 text-gray-400",
-      "bg-gray-100 text-gray-700"
-    )) : (e.disabled = !0, e.className.includes("opacity-50") || (e.className += " opacity-50 cursor-not-allowed"), e.className = e.className.replace(
-      "bg-gray-100 text-gray-700",
-      "bg-gray-50 text-gray-400"
-    )), i !== null ? (t.disabled = !1, t.className = t.className.replace("opacity-50 cursor-not-allowed", ""), t.className = t.className.replace(
+    const t = this.querySelector("#prev-page-btn"), e = this.querySelector("#next-page-btn"), { prevPage: n, nextPage: i } = this.getAdjacentPages();
+    n !== null ? (t.disabled = !1, t.className = t.className.replace("opacity-50 cursor-not-allowed", ""), t.className = t.className.replace(
       "bg-gray-50 text-gray-400",
       "bg-gray-100 text-gray-700"
     )) : (t.disabled = !0, t.className.includes("opacity-50") || (t.className += " opacity-50 cursor-not-allowed"), t.className = t.className.replace(
+      "bg-gray-100 text-gray-700",
+      "bg-gray-50 text-gray-400"
+    )), i !== null ? (e.disabled = !1, e.className = e.className.replace("opacity-50 cursor-not-allowed", ""), e.className = e.className.replace(
+      "bg-gray-50 text-gray-400",
+      "bg-gray-100 text-gray-700"
+    )) : (e.disabled = !0, e.className.includes("opacity-50") || (e.className += " opacity-50 cursor-not-allowed"), e.className = e.className.replace(
       "bg-gray-100 text-gray-700",
       "bg-gray-50 text-gray-400"
     ));
   }
   // Get previous and next page numbers
   getAdjacentPages() {
-    let e;
-    this.currentIsBeilage ? e = '.newspaper-page-container[data-beilage="true"]' : e = ".newspaper-page-container:not([data-beilage])";
-    const t = Array.from(document.querySelectorAll(e));
+    let t;
+    this.currentIsBeilage ? t = '.newspaper-page-container[data-beilage="true"]' : t = ".newspaper-page-container:not([data-beilage])";
+    const e = Array.from(document.querySelectorAll(t));
     console.log(
       "Found containers:",
-      t.length,
+      e.length,
       "for",
       this.currentIsBeilage ? "beilage" : "main"
     );
-    const n = t.map((l) => {
-      const a = l.getAttribute("data-page-container"), c = a ? parseInt(a) : null;
+    const n = e.map((s) => {
+      const a = s.getAttribute("data-page-container"), c = a ? parseInt(a) : null;
       return console.log("Container page:", a, "parsed:", c), c;
-    }).filter((l) => l !== null).sort((l, a) => l - a);
+    }).filter((s) => s !== null).sort((s, a) => s - a);
     console.log("All pages found:", n), console.log("Current page:", this.currentPageNumber);
     const i = n.indexOf(this.currentPageNumber);
     console.log("Current index:", i);
-    let r = null, s = null;
-    return i > 0 && (r = n[i - 1]), i < n.length - 1 && (s = n[i + 1]), console.log("Adjacent pages - prev:", r, "next:", s), { prevPage: r, nextPage: s };
+    let r = null, l = null;
+    return i > 0 && (r = n[i - 1]), i < n.length - 1 && (l = n[i + 1]), console.log("Adjacent pages - prev:", r, "next:", l), { prevPage: r, nextPage: l };
   }
   // Navigate to previous page
   goToPreviousPage() {
-    const { prevPage: e } = this.getAdjacentPages();
-    e !== null && this.navigateToPage(e);
+    const { prevPage: t } = this.getAdjacentPages();
+    t !== null && this.navigateToPage(t);
   }
   // Navigate to next page
   goToNextPage() {
-    const { nextPage: e } = this.getAdjacentPages();
-    e !== null && this.navigateToPage(e);
+    const { nextPage: t } = this.getAdjacentPages();
+    t !== null && this.navigateToPage(t);
   }
   // Navigate to a specific page
-  navigateToPage(e) {
-    const t = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", n = document.querySelector(
-      `${t}[data-page-container="${e}"]`
+  navigateToPage(t) {
+    const e = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", n = document.querySelector(
+      `${e}[data-page-container="${t}"]`
     );
     if (n) {
       const i = n.querySelector(".newspaper-page-image");
       if (i) {
         let r = null;
-        this.currentPartNumber !== null && (r = this.getPartNumberForPage(e)), this.show(
+        this.currentPartNumber !== null && (r = this.getPartNumberForPage(t)), this.show(
           i.src,
           i.alt,
-          e,
+          t,
           this.currentIsBeilage,
           0,
           r
@@ -823,10 +834,10 @@ class ie extends HTMLElement {
     }
   }
   // Get part number for a specific page in piece view
-  getPartNumberForPage(e) {
-    const t = document.querySelector(`[data-page-container="${e}"]`);
-    if (t) {
-      const n = t.querySelector(".part-number");
+  getPartNumberForPage(t) {
+    const e = document.querySelector(`[data-page-container="${t}"]`);
+    if (e) {
+      const n = e.querySelector(".part-number");
       if (n) {
         const i = n.textContent.match(/(\d+)\./);
         if (i)
@@ -837,28 +848,28 @@ class ie extends HTMLElement {
   }
   // Toggle sidebar visibility
   toggleSidebar() {
-    const e = this.querySelector("#sidebar-spacer"), t = this.querySelector("#sidebar-toggle-btn"), n = t.querySelector("i"), i = e.style.width, r = i === "0px" || i === "0";
+    const t = this.querySelector("#sidebar-spacer"), e = this.querySelector("#sidebar-toggle-btn"), n = e.querySelector("i"), i = t.style.width, r = i === "0px" || i === "0";
     if (console.log("Current state - isCollapsed:", r), console.log("Current width:", i), r) {
-      const s = this.detectSidebarWidth();
-      e.style.width = s, t.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-fold-line text-lg font-bold", t.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", s);
+      const l = this.detectSidebarWidth();
+      t.style.width = l, e.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-fold-line text-lg font-bold", e.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", l);
     } else
-      e.style.width = "0px", t.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-unfold-line text-lg font-bold", t.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
-    console.log("New width:", e.style.width);
+      t.style.width = "0px", e.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-unfold-line text-lg font-bold", e.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
+    console.log("New width:", t.style.width);
   }
   // Extract issue context from document title, URL, or page container
-  getIssueContext(e) {
-    const t = window.location.pathname, n = t.includes("/beitrag/");
+  getIssueContext(t) {
+    const e = window.location.pathname, n = e.includes("/beitrag/");
     if (n) {
-      const s = document.querySelector(`[data-page-container="${e}"]`);
-      if (s) {
-        const c = s.querySelector(".page-indicator");
+      const l = document.querySelector(`[data-page-container="${t}"]`);
+      if (l) {
+        const c = l.querySelector(".page-indicator");
         if (c) {
-          const d = c.textContent.trim(), u = d.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
-          if (u)
-            return u[1];
-          const g = d.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+          const d = c.textContent.trim(), g = d.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
           if (g)
-            return `${g[1]} Nr. ${g[2]}`;
+            return g[1];
+          const u = d.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+          if (u)
+            return `${u[1]} Nr. ${u[2]}`;
         }
       }
       const a = document.title.match(/(\d{4}).*Nr\.\s*(\d+)/);
@@ -866,28 +877,28 @@ class ie extends HTMLElement {
         return `${a[1]} Nr. ${a[2]}`;
     } else
       return "";
-    const i = t.match(/\/(\d{4})\/(\d+)/);
+    const i = e.match(/\/(\d{4})\/(\d+)/);
     if (i)
       return n ? `${i[1]} Nr. ${i[2]}` : "";
     const r = document.querySelector(".page-indicator");
     if (r) {
-      const l = r.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
-      if (l)
-        return `${l[1]} Nr. ${l[2]}`;
+      const s = r.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
+      if (s)
+        return `${s[1]} Nr. ${s[2]}`;
     }
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", ie);
+customElements.define("single-page-viewer", re);
 document.body.addEventListener("htmx:beforeRequest", function(o) {
-  const e = document.querySelector("single-page-viewer");
-  e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.destroy()), $();
+  const t = document.querySelector("single-page-viewer");
+  t && t.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), t.destroy()), M();
 });
 window.addEventListener("beforeunload", function() {
   const o = document.querySelector("single-page-viewer");
   o && o.destroy();
 });
-class re extends HTMLElement {
+class se extends HTMLElement {
   constructor() {
     super(), this.isVisible = !1, this.scrollHandler = null;
   }
@@ -914,10 +925,10 @@ class re extends HTMLElement {
     }, 100);
   }
   handleScroll() {
-    const e = this.querySelector("#scroll-to-top-btn");
-    if (!e) return;
-    const t = window.pageYOffset || document.documentElement.scrollTop, n = window.innerHeight, i = t > n;
-    i && !this.isVisible ? (this.isVisible = !0, e.classList.remove("opacity-0", "pointer-events-none"), e.classList.add("opacity-100", "pointer-events-auto")) : !i && this.isVisible && (this.isVisible = !1, e.classList.remove("opacity-100", "pointer-events-auto"), e.classList.add("opacity-0", "pointer-events-none"));
+    const t = this.querySelector("#scroll-to-top-btn");
+    if (!t) return;
+    const e = window.pageYOffset || document.documentElement.scrollTop, n = window.innerHeight, i = e > n;
+    i && !this.isVisible ? (this.isVisible = !0, t.classList.remove("opacity-0", "pointer-events-none"), t.classList.add("opacity-100", "pointer-events-auto")) : !i && this.isVisible && (this.isVisible = !1, t.classList.remove("opacity-100", "pointer-events-auto"), t.classList.add("opacity-0", "pointer-events-none"));
   }
   scrollToTop() {
     window.scrollTo({
@@ -926,7 +937,7 @@ class re extends HTMLElement {
     });
   }
 }
-customElements.define("scroll-to-top-button", re);
+customElements.define("scroll-to-top-button", se);
 export {
-  le as setup
+  ae as setup
 };

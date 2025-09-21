@@ -833,6 +833,11 @@ function showSimplePopup(button, message) {
 
 // URL navigation functions
 function scrollToPageFromURL() {
+	// Skip auto-scrolling during HTMX navigation to prevent random jumps
+	if (window.htmxNavigating) {
+		return;
+	}
+
 	let pageNumber = "";
 	let targetContainer = null;
 
@@ -1188,8 +1193,28 @@ function initializeScrollspy() {
 	// Store scroll handler reference for cleanup
 	window.scrollspyScrollHandler = function () {
 		clearTimeout(window.scrollspyTimeout);
-		window.scrollspyTimeout = setTimeout(updateActiveLink, 50);
+		window.scrollspyTimeout = setTimeout(() => {
+			updateActiveLink();
+			updateSidebarScrollToTopButton();
+		}, 50);
 	};
+
+	function updateSidebarScrollToTopButton() {
+		const button = document.getElementById("sidebar-scroll-to-top");
+		if (!button) return;
+
+		const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+		const viewportHeight = window.innerHeight;
+		const shouldShow = scrollTop > viewportHeight * 0.5; // Show after scrolling 50% of viewport
+
+		if (shouldShow) {
+			button.classList.remove("opacity-0");
+			button.classList.add("opacity-100");
+		} else {
+			button.classList.remove("opacity-100");
+			button.classList.add("opacity-0");
+		}
+	}
 
 	// Add scroll listener
 	window.addEventListener("scroll", window.scrollspyScrollHandler);
@@ -1228,6 +1253,9 @@ function initializeScrollspy() {
 
 	// Initial active link update
 	updateActiveLink();
+
+	// Initial scroll-to-top button update
+	updateSidebarScrollToTopButton();
 }
 
 // Cleanup scrollspy functionality
@@ -1326,6 +1354,24 @@ function setup() {
 
 	// HTMX event handling for newspaper layout, scrollspy, and scroll-to-top button
 	document.body.addEventListener("htmx:afterSwap", function (event) {
+		// Prevent auto-scrolling during HTMX navigation
+		window.htmxNavigating = true;
+
+		// Scroll to top for normal page navigation (not URL anchors)
+		const currentUrl = window.location.pathname;
+		const hasPageAnchor = currentUrl.match(/\/\d+$/); // Ends with page number like /1768/42/166
+		const isAkteureNavigation = currentUrl.includes('/akteure/') || currentUrl.includes('/autoren');
+
+		if (!hasPageAnchor && isAkteureNavigation) {
+			// Small delay to ensure DOM is ready
+			setTimeout(() => {
+				window.scrollTo({
+					top: 0,
+					behavior: "instant" // Use instant instead of smooth to avoid conflicts
+				});
+			}, 50);
+		}
+
 		setTimeout(() => {
 			if (document.querySelector(".newspaper-page-container")) {
 				initializeNewspaperLayout();
@@ -1338,39 +1384,18 @@ function setup() {
 			if (scrollToTopButton) {
 				scrollToTopButton.reassessScrollPosition();
 			}
+
+			// Re-enable auto-scrolling after a delay
+			setTimeout(() => {
+				window.htmxNavigating = false;
+			}, 500);
 		}, 100);
 	});
 
-	document.body.addEventListener("htmx:afterSettle", function (event) {
-		setTimeout(() => {
-			if (document.querySelector(".newspaper-page-container")) {
-				initializeNewspaperLayout();
-			}
-			if (document.querySelector(".author-section")) {
-				initializeScrollspy();
-			}
-			// Reassess scroll-to-top button visibility after page settle
-			const scrollToTopButton = document.querySelector("scroll-to-top-button");
-			if (scrollToTopButton) {
-				scrollToTopButton.reassessScrollPosition();
-			}
-		}, 200);
-	});
-
-	document.body.addEventListener("htmx:load", function (event) {
-		setTimeout(() => {
-			if (document.querySelector(".newspaper-page-container")) {
-				initializeNewspaperLayout();
-			}
-			if (document.querySelector(".author-section")) {
-				initializeScrollspy();
-			}
-			// Reassess scroll-to-top button visibility after HTMX load
-			const scrollToTopButton = document.querySelector("scroll-to-top-button");
-			if (scrollToTopButton) {
-				scrollToTopButton.reassessScrollPosition();
-			}
-		}, 100);
+	// Remove duplicate event handlers to prevent multiple initialization
+	document.body.addEventListener("htmx:beforeRequest", function (event) {
+		// Set flag to prevent auto-scrolling during navigation
+		window.htmxNavigating = true;
 	});
 }
 

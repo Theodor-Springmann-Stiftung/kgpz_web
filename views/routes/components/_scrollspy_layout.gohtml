@@ -4,7 +4,47 @@
 	{{- $sorted := .Sorted -}}
 
 	<div class="hidden 2xl:block w-96 flex-shrink-0">
-		<div class="sticky top-0 max-h-screen bg-white rounded py-4 flex flex-col ">
+		<div class="sticky top-0 max-h-screen bg-white rounded py-4 flex flex-col">
+			<!-- Compact header for 2xl+ screens -->
+			<div class="px-3 pb-4 border-b border-gray-200 mb-4">
+				{{ if eq .Search "autoren" }}
+					<h2 class="text-2xl font-bold font-serif text-gray-900 mb-1">Autor:innen</h2>
+					<p class="text-base text-gray-600 mb-3">Personen, die Beiträge in der Zeitung verfasst haben</p>
+				{{ else }}
+					<h2 class="text-2xl font-bold font-serif text-gray-900 mb-1">Personen & Körperschaften</h2>
+					<p class="text-base text-gray-600 mb-3">Verzeichnis aller in der Zeitung erwähnten Personen und Institutionen</p>
+				{{ end }}
+
+				<!-- Compact checkbox with scroll to top button -->
+				<div class="flex items-center justify-between">
+					<label class="inline-flex items-center">
+						<input type="checkbox"
+						       class="form-checkbox h-5 w-5 text-red-600 focus:ring-red-500 focus:border-red-500 checked:bg-red-600 checked:border-red-600 rounded"
+						       {{ if eq .Search "autoren" }}checked{{ end }}
+						       autocomplete="off"
+						       hx-get="{{ if eq .Search "autoren" }}/akteure/a{{ else }}/akteure/autoren{{ end }}"
+						       hx-target="body"
+						       hx-push-url="true">
+						<span class="ml-2 text-base text-gray-700">Nur Autor:innen anzeigen</span>
+					</label>
+
+					<!-- Scroll to top button -->
+					<button id="sidebar-scroll-to-top"
+					        onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+					        class="opacity-0 transition-opacity duration-300 {{ if eq .Search "autoren" }}w-8 h-8{{ else }}w-12 h-8 pr-1{{ end }} bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 rounded-full flex items-center justify-center cursor-pointer"
+					        title="Nach oben scrollen">
+						{{ if eq .Search "autoren" }}
+							<i class="ri-arrow-up-line text-lg font-bold"></i>
+						{{ else }}
+							<div class="flex items-center gap-1">
+								<i class="ri-arrow-up-line text-sm font-bold"></i>
+								<span class="text-xs font-bold">A-Z</span>
+							</div>
+						{{ end }}
+					</button>
+				</div>
+			</div>
+
 			<nav class="flex-1 overflow-y-auto overscroll-contain relative" id="scrollspy-nav">
 				<!-- Sliding red background element -->
 				<div id="scrollspy-slider" class="absolute bg-red-100 rounded-sm transition-all duration-300 ease-out opacity-0 z-0" style="width: calc(100% - 1.5rem); height: 0; top: 0; left: 0.75rem;"></div>
