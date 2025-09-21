@@ -10,53 +10,64 @@
 			</div>
 		</div>
 	{{ else }}
-		<div class="max-w-full mx-auto px-8 py-8">
-			<div class="mb-8">
-				{{ $letter := Upper (FirstLetter $agent.ID) }}
-				<a href="/akteure/{{ $letter }}" class="inline-flex items-center text-blue-600
-				hover:text-blue-800 transition-colors text-xl">
-					<i class="ri-arrow-left-line mr-3 text-xl"></i>
-					{{ $letter }}
-				</a>
+		<div class="max-w-6xl mx-auto px-8 py-8">
+			<div class="bg-white px-6 py-6 rounded">
+				<div class="mb-6">
+					{{ $letter := Upper (FirstLetter $agent.ID) }}
+					<a href="/akteure/{{ $letter }}" class="inline-flex items-center text-black hover:text-gray-700 transition-colors text-xl no-underline font-bold">
+						<i class="ri-arrow-left-line mr-3 text-xl font-bold"></i>
+						{{ $letter }}
+					</a>
+				</div>
+				{{ template "_akteur" $agent }}
 			</div>
-			<div>{{ template "_akteur" $agent }}</div>
 		</div>
 	{{ end }}
 
 {{ else }}
 	<div class="max-w-full mx-auto px-8 py-8">
 		<div class="mb-10">
-			<div class="bg-slate-100 px-6 py-4 rounded-lg mb-6">
+			<div class="bg-white px-6 py-4 rounded mb-6">
 				{{ if eq .model.Search "autoren" }}
-					<h1 class="text-4xl font-bold text-gray-900 mb-2">Autoren</h1>
+					<h1 class="text-4xl font-bold text-gray-900 mb-2">Autor:innen</h1>
 					<p class="text-gray-700 text-lg">Personen, die Beiträge in der Zeitung verfasst haben</p>
 				{{ else }}
 					<h1 class="text-4xl font-bold text-gray-900 mb-2">Personen & Körperschaften</h1>
 					<p class="text-gray-700 text-lg">Verzeichnis aller in der Zeitung erwähnten Personen und Institutionen</p>
 				{{ end }}
-			</div>
-			<div class="flex items-center gap-4 mb-6">
-				<label class="inline-flex items-center">
-					<input type="checkbox"
-					       class="form-checkbox h-5 w-5 text-blue-600 rounded"
-					       {{ if eq .model.Search "autoren" }}checked{{ end }}
-					       hx-get="{{ if eq .model.Search "autoren" }}/akteure/a{{ else }}/akteure/autoren{{ end }}"
-					       hx-target="body"
-					       hx-push-url="true">
-					<span class="ml-2 text-lg text-gray-700">Nur Autoren anzeigen</span>
-				</label>
-			</div>
-		</div>
 
-		<!-- Alphabet Navigation -->
-		<div class="mb-10 p-6 bg-gray-50 rounded-lg">
-			<div class="flex flex-wrap gap-3">
-				{{ range $_, $l := .model.AvailableLetters }}
-					<a href="/akteure/{{ $l }}" class="inline-flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 font-medium text-gray-700 hover:text-blue-700 transition-colors text-lg">
-						{{ $l }}
-					</a>
-				{{ end }}
+				<!-- Integrated checkbox into header -->
+				<div class="flex items-center gap-4 mt-4">
+					<label class="inline-flex items-center">
+						<input type="checkbox"
+						       class="form-checkbox h-5 w-5 text-red-600 focus:ring-red-500 focus:border-red-500 checked:bg-red-600 checked:border-red-600 rounded"
+						       {{ if eq .model.Search "autoren" }}checked{{ end }}
+						       hx-get="{{ if eq .model.Search "autoren" }}/akteure/a{{ else }}/akteure/autoren{{ end }}"
+						       hx-target="body"
+						       hx-push-url="true">
+						<span class="ml-2 text-lg text-gray-700">Nur Autor:innen anzeigen</span>
+					</label>
+				</div>
 			</div>
+
+			<!-- Alphabet Navigation - styled like year selector -->
+			{{ if ne .model.Search "autoren" }}
+			<div class="mb-6 w-full">
+				<div class="bg-white px-6 py-4 rounded">
+					<div class="mx-auto flex flex-row flex-wrap gap-x-6 gap-y-3 w-fit items-end leading-none justify-center">
+						{{ range $_, $l := .model.AvailableLetters }}
+							{{ if eq $l (Upper $.model.Search) }}
+								<!-- This is the active letter -->
+								<span class="no-underline leading-none !m-0 !p-0 text-4xl font-bold text-red-600 pointer-events-none" aria-current="true">{{ $l }}</span>
+							{{ else }}
+								<!-- This is an inactive letter -->
+								<a href="/akteure/{{ $l }}" class="no-underline leading-none !m-0 !p-0 text-2xl font-medium text-gray-700 hover:text-red-600 transition-colors">{{ $l }}</a>
+							{{ end }}
+						{{ end }}
+					</div>
+				</div>
+			</div>
+			{{ end }}
 		</div>
 
 		{{ template "_scrollspy_layout" .model }}

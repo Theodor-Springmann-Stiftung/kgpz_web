@@ -5,10 +5,11 @@
 	<!-- Name and external links -->
 	<div class="flex items-start justify-between gap-4">
 		<div class="flex-1">
-			<!-- Large serif name - bold -->
-			<div class="text-xl font-serif font-bold mb-1">
-				<a href="/akteure/{{ $a.ID }}" class="hover:text-slate-900 transition-colors no-underline">
-					{{ index $a.Names 0 }}
+			<!-- Large serif name - bold with inline permalink icon -->
+			<div class="text-xl font-serif font-bold mb-1 flex items-center gap-2">
+				<span>{{ index $a.Names 0 }}</span>
+				<a href="/akteure/{{ $a.ID }}" class="text-gray-500 hover:text-blue-600 transition-colors text-lg no-underline" title="Permalink zu {{ index $a.Names 0 }}">
+					<i class="ri-link text-base"></i>
 				</a>
 			</div>
 
@@ -41,19 +42,19 @@
 		</div>
 
 		<!-- External link symbols on the right -->
-		<div class="flex gap-2 flex-shrink-0">
+		<div class="flex gap-3 flex-shrink-0 items-center">
 			{{- if ne $gnd nil -}}
 				{{- /* Wikipedia link if available */ -}}
 				{{- if ne (len $gnd.Wikipedia) 0 -}}
-					<a href="{{ (index $gnd.Wikipedia 0).ID }}" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors text-lg" title="Wikipedia">
-						<i class="ri-wikipedia-line"></i>
+					<a href="{{ (index $gnd.Wikipedia 0).ID }}" target="_blank" class="hover:opacity-80 transition-opacity" title="Wikipedia">
+						<img src="/assets/wikipedia.png" alt="Wikipedia" class="w-6 h-6">
 					</a>
 				{{- end -}}
 
 				{{- /* GND link if available */ -}}
 				{{- if ne $a.GND "" -}}
-					<a href="{{ $a.GND }}" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors text-lg" title="Gemeinsame Normdatei">
-						<i class="ri-links-line"></i>
+					<a href="{{ $a.GND }}" target="_blank" class="hover:opacity-80 transition-opacity" title="Gemeinsame Normdatei">
+						<img src="/assets/GND.png" alt="GND" class="w-6 h-6">
 					</a>
 				{{- else -}}
 					{{- /* VIAF link if no GND available */ -}}

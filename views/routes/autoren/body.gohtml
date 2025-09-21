@@ -1,22 +1,23 @@
 <div class="max-w-full mx-auto px-8 py-8">
 	<div class="mb-10">
-		<div class="bg-slate-100 px-6 py-4 rounded-lg mb-6">
-			<h1 class="text-4xl font-bold text-gray-900 mb-2">Autoren</h1>
+		<div class="bg-white px-6 py-4 rounded mb-6">
+			<h1 class="text-4xl font-bold text-gray-900 mb-2">Autor:innen</h1>
 			<p class="text-gray-700 text-lg">Personen, die Beiträge in der Zeitung verfasst haben</p>
-		</div>
-		<div class="flex items-center gap-4 mb-6">
-			<label class="inline-flex items-center">
-				<input type="checkbox"
-				       class="form-checkbox h-5 w-5 text-blue-600 rounded"
-				       checked
-				       hx-get="/akteure/a"
-				       hx-target="body"
-				       hx-push-url="true">
-				<span class="ml-2 text-lg text-gray-700">Nur Autoren anzeigen</span>
-			</label>
+
+			<!-- Integrated checkbox into header -->
+			<div class="flex items-center gap-4 mt-4">
+				<label class="inline-flex items-center">
+					<input type="checkbox"
+					       class="form-checkbox h-5 w-5 text-red-600 focus:ring-red-500 focus:border-red-500 checked:bg-red-600 checked:border-red-600 rounded"
+					       checked
+					       hx-get="/akteure/a"
+					       hx-target="body"
+					       hx-push-url="true">
+					<span class="ml-2 text-lg text-gray-700">Nur Autor:innen anzeigen</span>
+				</label>
+			</div>
 		</div>
 	</div>
-
 
 	{{ template "_scrollspy_layout" .model }}
-	</div>
+</div>
