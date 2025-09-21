@@ -96,7 +96,7 @@
 												duration-200">
 														<i class="ri-file-copy-2-line text-xs"></i>
 														<a
-															href="{{ GetPieceURL $individualPiece.PieceByIssue.Reference.When.Year $individualPiece.PieceByIssue.Reference.Nr $individualPiece.PieceByIssue.Reference.Von }}"
+															href="{{ GetPieceURL $individualPiece.PieceByIssue.Reference.When.Year $individualPiece.PieceByIssue.Reference.Nr $individualPiece.PieceByIssue.Reference.Von (index $individualPiece.PieceByIssue.Keys 0) }}"
 															class="">
 															Ganzer Beitrag
 														</a>
@@ -231,7 +231,7 @@
 												duration-200">
 														<i class="ri-file-copy-2-line text-xs"></i>
 														<a
-															href="{{ GetPieceURL $individualPiece.PieceByIssue.Reference.When.Year $individualPiece.PieceByIssue.Reference.Nr $individualPiece.PieceByIssue.Reference.Von }}"
+															href="{{ GetPieceURL $individualPiece.PieceByIssue.Reference.When.Year $individualPiece.PieceByIssue.Reference.Nr $individualPiece.PieceByIssue.Reference.Von (index $individualPiece.PieceByIssue.Keys 0) }}"
 															class="">
 															Ganzer Beitrag
 														</a>

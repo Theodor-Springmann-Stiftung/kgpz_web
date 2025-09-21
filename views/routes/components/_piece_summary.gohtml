@@ -140,61 +140,65 @@
 
 	{{- /* Generate piece descriptions */ -}}
 	{{- if has $categories "Rezension" -}}
-		{{- $authorFound := false -}}
+		{{- /* Collect all additional authors (not current actor) */ -}}
+		{{- $additionalAuthors := slice -}}
+		{{- $currentAuthorFound := false -}}
 		{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
 					{{- if ne $agentref.Ref $currentActorID -}}
-						<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
+						{{- $additionalAuthors = append $additionalAuthors $agent -}}
+					{{- else -}}
+						{{- $currentAuthorFound = true -}}
 					{{- end -}}
-					{{ $categoryName }} von:
-					{{ if $workAuthorName }}
-						<a href="/akteure/{{ $workAuthorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>,
-					{{ end }}
-					{{ if $workTitle }}
-						<em>{{ $workTitle }}</em>
-					{{ else if $title }}
-						<em>{{ $title }}</em>
-					{{ else }}
-						[Werk unbekannt]
-					{{ end }}
-					{{- $authorFound = true -}}
-					{{- break -}}
 				{{- end -}}
 			{{- end -}}
-		{{- end -}}
-		{{- if not $authorFound -}}
-			{{ $categoryName }} von:
-			{{ if $workAuthorName }}
-				<a href="/akteure/{{ $workAuthorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>,
-			{{ end }}
-			{{ if $workTitle }}
-				<em>{{ $workTitle }}</em>
-			{{ else if $title }}
-				<em>{{ $title }}</em>
-			{{ else }}
-				[Werk unbekannt]
-			{{ end }}
 		{{- end -}}
 
+		{{- /* Display review with proper author attribution */ -}}
+		{{- if $additionalAuthors -}}
+			mit {{ range $i, $author := $additionalAuthors }}{{- if gt $i 0 }} und {{ end }}<a href="/akteure/{{ $author.ID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $author.Names 0 }}</a>{{ end }}, {{ $categoryName }} von:
+		{{- else if $currentAuthorFound -}}
+			{{ $categoryName }} von:
+		{{- else -}}
+			{{ $categoryName }} von:
+		{{- end -}}
+		{{ if $workAuthorName }}
+			<a href="/akteure/{{ $workAuthorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>,
+		{{ end }}
+		{{ if $workTitle }}
+			<em>{{ $workTitle }}</em>
+		{{ else if $title }}
+			<em>{{ $title }}</em>
+		{{ else }}
+			[Werk unbekannt]
+		{{ end }}
+
 	{{- else -}}
-		{{- $authorFound := false -}}
+		{{- /* Collect all additional authors (not current actor) */ -}}
+		{{- $additionalAuthors := slice -}}
+		{{- $currentAuthorFound := false -}}
 		{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
 					{{- if ne $agentref.Ref $currentActorID -}}
-						<a href="/akteure/{{ $agentref.Ref }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
+						{{- $additionalAuthors = append $additionalAuthors $agent -}}
+					{{- else -}}
+						{{- $currentAuthorFound = true -}}
 					{{- end -}}
-					{{ $categoryName }}{{ if $title }}: <em>„{{ $title }}"</em>{{ end }}
-					{{- $authorFound = true -}}
-					{{- break -}}
 				{{- end -}}
 			{{- end -}}
 		{{- end -}}
-		{{- if not $authorFound -}}
-			{{ $categoryName }}{{ if $title }}: <em>„{{ $title }}"</em>{{ else if eq $categoryName "Beitrag" }} ohne Titel{{ end }}
+
+		{{- /* Display with proper author attribution */ -}}
+		{{- if $additionalAuthors -}}
+			mit {{ range $i, $author := $additionalAuthors }}{{- if gt $i 0 }} und {{ end }}<a href="/akteure/{{ $author.ID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $author.Names 0 }}</a>{{ end }}, {{ $categoryName }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}
+		{{- else if $currentAuthorFound -}}
+			{{ $categoryName }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}
+		{{- else -}}
+			{{ $categoryName }}{{ if $title }}: <em>{{ $title }}</em>{{ else if eq $categoryName "Beitrag" }} ohne Titel{{ end }}
 		{{- end -}}
 	{{- end -}}
 

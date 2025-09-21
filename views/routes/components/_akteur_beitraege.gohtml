@@ -66,6 +66,16 @@
 								</a>
 							{{- end -}}
 						{{- end -}}
+						{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+						{{- $firstGroupItem := index $groupedItems 0 -}}
+						{{- if gt (len $firstGroupItem.Item.IssueRefs) 1 -}}
+							{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+								<i class="ri-file-copy-2-line text-xs"></i>
+								<a href="{{ GetPieceURL (index $firstGroupItem.Item.IssueRefs 0).When.Year (index $firstGroupItem.Item.IssueRefs 0).Nr (index $firstGroupItem.Item.IssueRefs 0).Von (index $firstGroupItem.Item.Keys 0) }}" class="">
+									Ganzer Beitrag
+								</a>
+							</div>
+						{{- end -}}
 					</div>
 				</div>
 			{{- end -}}

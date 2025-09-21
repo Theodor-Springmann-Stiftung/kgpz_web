@@ -1,6 +1,17 @@
 {{ $a := . }}
 {{ $works := LookupWorks $a }}
-{{- if ne (len $works) 0 -}}
+{{ $allPieces := LookupPieces $a }}
+
+{{- /* Filter pieces for work-related categories */ -}}
+{{- $workPieces := slice -}}
+{{- range $_, $p := $allPieces -}}
+	{{- $categoryFlags := GetCategoryFlags $p.Item -}}
+	{{- if or $categoryFlags.Rezension $categoryFlags.Auszug $categoryFlags.Theaterkritik $categoryFlags.Uebersetzung $categoryFlags.Kommentar $categoryFlags.Replik $categoryFlags.Anzeige $categoryFlags.Provinienz -}}
+		{{- $workPieces = append $workPieces $p -}}
+	{{- end -}}
+{{- end -}}
+
+{{- if or (ne (len $works) 0) (ne (len $workPieces) 0) -}}
 	<div class="mt-4 akteur-werke-section">
 		<div class="py-1 rounded-lg mb-1">
 			<h2 class="text-lg font-bold">
@@ -117,39 +128,48 @@
 							{{- if eq (len $categories) 0 -}}
 								{{- $categories = append $categories "Beitrag" -}}
 							{{- end -}}
-							{{- $categoryName := "" -}}
-							{{- if eq (len $categories) 0 -}}
-								{{- $categoryName = "Beitrag" -}}
-							{{- else -}}
-								{{- $sortedCategories := sortStrings $categories -}}
-								{{- $categoryName = joinWithUnd $sortedCategories -}}
-							{{- end -}}
 
-							{{- $existing := index $groupedByCategory $categoryName -}}
+							{{- /* Get additional authors for this specific piece */ -}}
+							{{- $pieceAdditionalAuthorIDs := slice -}}
+							{{- range $agentref := $p.Item.AgentRefs -}}
+								{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
+									{{- $pieceAdditionalAuthorIDs = append $pieceAdditionalAuthorIDs $agentref.Ref -}}
+								{{- end -}}
+							{{- end -}}
+							{{- $sortedAdditionalAuthorIDs := sortStrings $pieceAdditionalAuthorIDs -}}
+
+							{{- /* Create grouping key with category + additional authors */ -}}
+							{{- $sortedCategories := sortStrings $categories -}}
+							{{- $categoryName := joinWithUnd $sortedCategories -}}
+							{{- $groupKey := printf "%s|%s" $categoryName (joinWithUnd $sortedAdditionalAuthorIDs) -}}
+
+							{{- $existing := index $groupedByCategory $groupKey -}}
 							{{- if $existing -}}
-								{{- $groupedByCategory = merge $groupedByCategory (dict $categoryName (append $existing $p)) -}}
+								{{- $groupedByCategory = merge $groupedByCategory (dict $groupKey (append $existing $p)) -}}
 							{{- else -}}
-								{{- $groupedByCategory = merge $groupedByCategory (dict $categoryName (slice $p)) -}}
+								{{- $groupedByCategory = merge $groupedByCategory (dict $groupKey (slice $p)) -}}
 							{{- end -}}
 						{{- end -}}
 
 						{{- /* Display each category group */ -}}
-						{{- range $categoryName, $categoryPieces := $groupedByCategory -}}
+						{{- range $groupKey, $categoryPieces := $groupedByCategory -}}
 						<div>
 							<span class="inline-block">
+								{{- /* Extract category and additional authors from group key */ -}}
+								{{- $keyParts := split $groupKey "|" -}}
+								{{- $categoryName := index $keyParts 0 -}}
+
 								{{ $categoryName }}
-								{{- /* Check for additional authors (non-current actor) */ -}}
+								{{- /* Get additional authors from first piece in group */ -}}
+								{{- $firstPiece := index $categoryPieces 0 -}}
 								{{- $additionalAuthorIDs := slice -}}
-								{{- range $_, $p := $categoryPieces -}}
-									{{- range $agentref := $p.Item.AgentRefs -}}
-										{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
-											{{- $additionalAuthorIDs = append $additionalAuthorIDs $agentref.Ref -}}
-										{{- end -}}
+								{{- range $agentref := $firstPiece.Item.AgentRefs -}}
+									{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
+										{{- $additionalAuthorIDs = append $additionalAuthorIDs $agentref.Ref -}}
 									{{- end -}}
 								{{- end -}}
-								{{- $uniqueAuthorIDs := unique $additionalAuthorIDs -}}
-								{{- if $uniqueAuthorIDs -}}
-									{{ " " }}von {{ range $i, $authorID := $uniqueAuthorIDs }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}
+								{{- if $additionalAuthorIDs -}}
+									{{ " " }}von {{ range $i, $authorID := $additionalAuthorIDs }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}
 								{{- end -}}{{ ":" }}
 							</span>
 							{{- /* Show all citations for this category inline with commas */ -}}
@@ -174,12 +194,152 @@
 									</a>
 								{{- end -}}
 							{{- end -}}
+							{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+							{{- $firstPiece := index $categoryPieces 0 -}}
+							{{- if gt (len $firstPiece.Item.IssueRefs) 1 -}}
+								{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+									<i class="ri-file-copy-2-line text-xs"></i>
+									<a href="{{ GetPieceURL (index $firstPiece.Item.IssueRefs 0).When.Year (index $firstPiece.Item.IssueRefs 0).Nr (index $firstPiece.Item.IssueRefs 0).Von (index $firstPiece.Item.Keys 0) }}" class="">
+										Ganzer Beitrag
+									</a>
+								</div>
+							{{- end -}}
 							</div>
 						{{- end -}}
 					</div>
 				{{ end }}
 			</div>
 		{{ end }}
+
+		{{- /* Process standalone work pieces that aren't linked to specific works */ -}}
+		{{- if ne (len $workPieces) 0 -}}
+			{{- /* Group standalone work pieces by category and additional authors */ -}}
+			{{- $standaloneGrouped := dict -}}
+			{{- range $_, $p := $workPieces -}}
+				{{- /* Skip pieces that are already covered by works above */ -}}
+				{{- $isPieceInWorks := false -}}
+				{{- range $_, $w := $works -}}
+					{{- $workPiecesCheck := LookupPieces $w.Item -}}
+					{{- range $_, $wp := $workPiecesCheck -}}
+						{{- if eq $wp.Item.ID $p.Item.ID -}}
+							{{- $isPieceInWorks = true -}}
+						{{- end -}}
+					{{- end -}}
+				{{- end -}}
+
+				{{- if not $isPieceInWorks -}}
+					{{- /* Get categories for this piece */ -}}
+					{{- $categoryFlags := GetCategoryFlags $p.Item -}}
+					{{- $categories := slice -}}
+					{{- if $categoryFlags.Rezension -}}
+						{{- $categories = append $categories "Rezension" -}}
+					{{- end -}}
+					{{- if $categoryFlags.Auszug -}}
+						{{- $categories = append $categories "Auszug" -}}
+					{{- end -}}
+					{{- if $categoryFlags.Theaterkritik -}}
+						{{- $categories = append $categories "Theaterkritik" -}}
+					{{- end -}}
+					{{- if $categoryFlags.Uebersetzung -}}
+						{{- $categories = append $categories "Übersetzung" -}}
+					{{- end -}}
+					{{- if $categoryFlags.Kommentar -}}
+						{{- $categories = append $categories "Kommentar" -}}
+					{{- end -}}
+					{{- if $categoryFlags.Replik -}}
+						{{- $categories = append $categories "Replik" -}}
+					{{- end -}}
+					{{- if $categoryFlags.Anzeige -}}
+						{{- $categories = append $categories "Anzeige" -}}
+					{{- end -}}
+					{{- if $categoryFlags.Provinienz -}}
+						{{- $categories = append $categories "Provinienz" -}}
+					{{- end -}}
+
+					{{- if ne (len $categories) 0 -}}
+						{{- /* Get additional authors for this specific piece */ -}}
+						{{- $pieceAdditionalAuthorIDs := slice -}}
+						{{- range $agentref := $p.Item.AgentRefs -}}
+							{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
+								{{- $pieceAdditionalAuthorIDs = append $pieceAdditionalAuthorIDs $agentref.Ref -}}
+							{{- end -}}
+						{{- end -}}
+						{{- $sortedAdditionalAuthorIDs := sortStrings $pieceAdditionalAuthorIDs -}}
+
+						{{- /* Create grouping key with category + additional authors */ -}}
+						{{- $sortedCategories := sortStrings $categories -}}
+						{{- $categoryName := joinWithUnd $sortedCategories -}}
+						{{- $groupKey := printf "%s|%s" $categoryName (joinWithUnd $sortedAdditionalAuthorIDs) -}}
+
+						{{- $existing := index $standaloneGrouped $groupKey -}}
+						{{- if $existing -}}
+							{{- $standaloneGrouped = merge $standaloneGrouped (dict $groupKey (append $existing $p)) -}}
+						{{- else -}}
+							{{- $standaloneGrouped = merge $standaloneGrouped (dict $groupKey (slice $p)) -}}
+						{{- end -}}
+					{{- end -}}
+				{{- end -}}
+			{{- end -}}
+
+			{{- /* Display standalone work pieces */ -}}
+			{{- range $groupKey, $categoryPieces := $standaloneGrouped -}}
+				<div class="mb-1.5 break-inside-avoid max-w-[95ch]">
+					<div class="text-lg">
+						<span class="inline-block">
+							{{- /* Extract category and additional authors from group key */ -}}
+							{{- $keyParts := split $groupKey "|" -}}
+							{{- $categoryName := index $keyParts 0 -}}
+
+							{{ $categoryName }}
+							{{- /* Get additional authors from first piece in group */ -}}
+							{{- $firstPiece := index $categoryPieces 0 -}}
+							{{- $additionalAuthorIDs := slice -}}
+							{{- range $agentref := $firstPiece.Item.AgentRefs -}}
+								{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
+									{{- $additionalAuthorIDs = append $additionalAuthorIDs $agentref.Ref -}}
+								{{- end -}}
+							{{- end -}}
+							{{- if $additionalAuthorIDs -}}
+								{{ " " }}von {{ range $i, $authorID := $additionalAuthorIDs }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}
+							{{- end -}}{{ ":" }}
+						</span>
+						{{- /* Show all citations for this category inline with commas */ -}}
+						{{ " " }}{{- range $pieceIndex, $p := $categoryPieces -}}
+							{{- range $issueIndex, $issue := $p.Item.IssueRefs -}}
+								{{- if or (gt $pieceIndex 0) (gt $issueIndex 0) }}, {{ end -}}
+								{{ $issueData := GetIssue (printf "%d-%d" $issue.When.Year $issue.Nr) }}
+								{{- $url := printf "/%s/%d" $issue.When $issue.Nr -}}
+								{{- if $issue.Von -}}
+									{{- if $issue.Beilage -}}
+										{{- $url = printf "%s#beilage-%d-page-%d" $url $issue.Beilage $issue.Von -}}
+									{{- else -}}
+										{{- $url = printf "%s/%d" $url $issue.Von -}}
+									{{- end -}}
+								{{- end -}}
+								<a href="{{ $url }}" class="text-blue-700 hover:text-blue-800">
+									{{- if $issueData -}}
+										{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
+									{{- else -}}
+										{{ $issue.When.Day }}.{{ $issue.When.Month }}.{{ $issue.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
+									{{- end -}}
+								</a>
+							{{- end -}}
+						{{- end -}}
+						{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+						{{- $firstPiece := index $categoryPieces 0 -}}
+						{{- if gt (len $firstPiece.Item.IssueRefs) 1 -}}
+							{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+								<i class="ri-file-copy-2-line text-xs"></i>
+								<a href="{{ GetPieceURL (index $firstPiece.Item.IssueRefs 0).When.Year (index $firstPiece.Item.IssueRefs 0).Nr (index $firstPiece.Item.IssueRefs 0).Von (index $firstPiece.Item.Keys 0) }}" class="">
+									Ganzer Beitrag
+								</a>
+							</div>
+						{{- end -}}
+					</div>
+				</div>
+			{{- end -}}
+		{{- end -}}
+
 		</div>
 	</div>
 {{ end }}

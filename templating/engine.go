@@ -69,10 +69,15 @@ func PageIcon(iconType string) template.HTML {
 	}
 }
 
-// GetPieceURL generates a piece view URL from year, issue number, and page
-func GetPieceURL(year, issueNum, page int) string {
-	pieceID := fmt.Sprintf("%d-%03d-%03d", year, issueNum, page)
-	return "/beitrag/" + pieceID
+// GetPieceURL generates a piece view URL from year, issue number, page, and optional piece ID
+func GetPieceURL(year, issueNum, page int, pieceID ...string) string {
+	if len(pieceID) > 0 && pieceID[0] != "" && pieceID[0] != "0" {
+		// Use just the piece ID (no year/issue prefix in URL)
+		return "/beitrag/" + pieceID[0]
+	}
+	// Fallback to old format for backward compatibility
+	id := fmt.Sprintf("%d-%03d-%03d", year, issueNum, page)
+	return "/beitrag/" + id
 }
 
 // IssueContext formats an issue reference into a readable context string
@@ -294,6 +299,13 @@ func (e *Engine) funcs() error {
 			}
 		}
 		return result
+	})
+
+	e.AddFunc("split", func(s, delimiter string) []string {
+		if s == "" {
+			return []string{}
+		}
+		return strings.Split(s, delimiter)
 	})
 
 	e.AddFunc("sortStrings", func(items interface{}) []string {
