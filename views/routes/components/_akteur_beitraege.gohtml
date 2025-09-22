@@ -48,7 +48,7 @@
 						{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}
 							{{- range $issueIndex, $issue := $groupItem.Item.IssueRefs -}}
 								{{- if or (gt $groupIndex 0) (gt $issueIndex 0) }}, {{ end -}}
-								{{ template "_citation" $issue }}
+								<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{ template "_citation" $issue }}</span>
 							{{- end -}}
 						{{- end -}}
 						{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}

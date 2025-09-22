@@ -24,14 +24,14 @@
 /{{ $issue.Von }}
 {{- end -}}
 {{- end -}}"
-   class="citation-link text-slate-700 no-underline hover:text-slate-900"
+   class="citation-link no-underline"
    data-citation-url="{{ $url }}">
 {{- if $issueData -}}
 {{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}/{{ $issue.Nr }}
 {{- else -}}
 {{ $issue.When.Year }}/{{ $issue.Nr }}
 {{- end -}}
-{{- if $issue.Von }}, {{ if $issue.Beilage }}Beil. {{ end }}{{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) -}}
+{{- if $issue.Von }}, {{ if $issue.Beilage }}Beil. {{ else }}S. {{ end }}{{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) -}}
 -{{ $issue.Bis }}
 {{- end -}}
 {{- end -}}
@@ -68,13 +68,11 @@ function updateCitationLinks() {
 
         if (isCurrentPage) {
             // Style as current page: red text, no underline, not clickable
-            link.classList.remove('text-slate-700', 'hover:text-slate-900');
             link.classList.add('text-red-700', 'pointer-events-none');
             link.setAttribute('aria-current', 'page');
         } else {
             // Reset to default styling for non-current pages
             link.classList.remove('text-red-700', 'pointer-events-none');
-            link.classList.add('text-slate-700', 'hover:text-slate-900');
             link.removeAttribute('aria-current');
         }
     });

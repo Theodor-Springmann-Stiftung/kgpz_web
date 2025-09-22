@@ -1,7 +1,7 @@
 {{ $model := .model }}
 {{ $date := .model.Datum.When }}
 <!-- Header with year link left, nav buttons right -->
-<div class="flex items-center justify-between mb-3">
+<div class="flex items-center justify-between mb-3 mx-3">
 	<a
 		href="/jahrgang/{{- $date.Year -}}"
 		class="inline-flex items-center gap-1 text-black hover:text-slate-700 text-base font-medium">
@@ -30,11 +30,14 @@
 	</div>
 </div>
 
-<!-- Issue title and date -->
-<div class="border-t border-slate-200 pt-3 mb-4">
+<!-- Compact issue title with Inhalt header -->
+<div class="border-t border-slate-200 pt-3 mb-4 mx-3">
 	<div class="flex items-center justify-between">
-		<div class="flex items-center gap-1">
-			<h1 class="text-lg font-semibold text-slate-800">
+		<div class="flex items-center gap-2">
+			<i class="ri-file-list-3-line text-slate-600"></i>
+			<span class="text-lg font-bold font-serif text-slate-800">Inhalt</span>
+			<span class="text-slate-400">•</span>
+			<h1 class="text-lg font-semibold font-serif text-slate-800">
 				{{ $model.Number.No }}&#8201;/&#8201;{{ $date.Year }}
 			</h1>
 		</div>
