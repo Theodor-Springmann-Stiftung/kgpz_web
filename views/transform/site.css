@@ -5,6 +5,9 @@
 	--font-sans: "Source Sans 3", "Merriweather Sans", ui-sans-serif;
 	--font-serif: "Merriweather", ui-serif;
 
+	/* Custom breakpoint for 4K+ screens */
+	--breakpoint-3xl: 120.0625rem; /* 1921px */
+
 	/* Custom Black Colors */
 	--color-abyss: #0b1215;
 	--color-shadow: #0f171f;

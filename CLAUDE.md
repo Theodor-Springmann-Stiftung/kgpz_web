@@ -176,8 +176,8 @@ Each route has dedicated `head.gohtml` and `body.gohtml` files following Go temp
 **JavaScript Stack**:
 - **HTMX**: Core interactivity and AJAX requests
 - **Alpine.js**: Lightweight reactivity for UI components
-- **Custom Extensions**: HTMX plugins for response targets, client-side templates, loading states
-- **Scrollspy System**: Advanced navigation for agents/authors pages with multi-item highlighting
+- **Modular Architecture**: ES6 modules with focused responsibilities
+- **Web Components**: Custom elements for self-contained functionality
 - **Build Tool**: Vite for module bundling and development server
 
 **CSS Stack**:
@@ -185,6 +185,13 @@ Each route has dedicated `head.gohtml` and `body.gohtml` files following Go temp
 - **PostCSS**: CSS processing pipeline
 - **RemixIcon**: Icon font library
 - **Custom Fonts**: Typography setup in `assets/css/fonts.css`
+
+**JavaScript Module Structure**:
+- **`main.js`**: Entry point, HTMX event handling, citation link management, page backdrop styling
+- **`akteure.js`**: AkteureScrollspy web component for agents/authors navigation
+- **`issue.js`**: Newspaper layout, page navigation, modal functions, citation generation
+- **`single-page-viewer.js`**: SinglePageViewer web component for image modal display
+- **`scroll-to-top.js`**: ScrollToTopButton web component for floating scroll button
 
 **Build Process**:
 - **Source**: `transform/main.js` and `transform/site.css`
