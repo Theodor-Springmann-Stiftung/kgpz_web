@@ -13,9 +13,9 @@ export class AkteureScrollspy extends HTMLElement {
 
 	connectedCallback() {
 		// Small delay to ensure DOM is fully rendered after HTMX swap
-		setTimeout(() => {
+		window.ExecuteNextSettle(() => {
 			this.initializeScrollspyAfterDelay();
-		}, 100);
+		});
 	}
 
 	initializeScrollspyAfterDelay() {

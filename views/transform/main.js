@@ -90,6 +90,28 @@ function applyPageBackdrop() {
 	}
 }
 
+// Function queue system for HTMX settle events
+let settleQueue = [];
+
+// Global function to register functions for next settle event
+window.ExecuteNextSettle = function(fn) {
+	if (typeof fn === 'function') {
+		settleQueue.push(fn);
+	}
+};
+
+// Execute and clear the queue
+function executeSettleQueue() {
+	while (settleQueue.length > 0) {
+		const fn = settleQueue.shift();
+		try {
+			fn();
+		} catch (error) {
+			console.error('Error executing settle queue function:', error);
+		}
+	}
+}
+
 // Export functions for global access
 window.enlargePage = enlargePage;
 window.closeModal = closeModal;
@@ -122,6 +144,9 @@ function setup() {
 		applyPageBackdrop();
 		// Update citation links after navigation
 		updateCitationLinks();
+
+		// Execute all queued functions
+		executeSettleQueue();
 
 		// Use shorter delay since afterSettle ensures DOM is ready
 		setTimeout(() => {

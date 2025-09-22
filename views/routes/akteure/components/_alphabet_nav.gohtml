@@ -1,0 +1,23 @@
+{{- /* Shared alphabet navigation component - A-Z letters plus anonym link */ -}}
+<div class="mb-6 w-full">
+	<div class="bg-white px-6 py-4 rounded">
+		<div class="mx-auto flex flex-row flex-wrap gap-x-6 gap-y-3 w-fit items-end leading-none justify-center">
+			{{ range $_, $l := .AvailableLetters }}
+				{{ if eq $l (Upper $.Search) }}
+					<!-- This is the active letter -->
+					<span class="no-underline leading-none !m-0 !p-0 text-4xl font-bold text-red-600 pointer-events-none" aria-current="true">{{ $l }}</span>
+				{{ else }}
+					<!-- This is an inactive letter -->
+					<a href="/akteure/{{ $l }}" class="no-underline leading-none !m-0 !p-0 text-2xl font-medium text-gray-700 hover:text-red-600 transition-colors">{{ $l }}</a>
+				{{ end }}
+			{{ end }}
+			<!-- Separator and Anonym link -->
+			<span class="text-gray-400 text-2xl">|</span>
+			{{ if eq $.Search "anonym" }}
+				<span class="no-underline leading-none !m-0 !p-0 text-4xl font-bold text-red-600 pointer-events-none" aria-current="true">anonym</span>
+			{{ else }}
+				<a href="/akteure/anonym" class="no-underline leading-none !m-0 !p-0 text-2xl font-medium text-gray-700 hover:text-red-600 transition-colors">anonym</a>
+			{{ end }}
+		</div>
+	</div>
+</div>

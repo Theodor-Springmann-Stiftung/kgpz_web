@@ -1,0 +1,15 @@
+{{- /* Shared back navigation for individual person pages */ -}}
+<div class="mb-6">
+	{{ if eq .ID "anonym" }}
+		<a href="/akteure/a" class="inline-flex items-center text-black hover:text-gray-700 transition-colors text-xl no-underline font-bold">
+			<i class="ri-arrow-left-line mr-3 text-xl font-bold"></i>
+			A
+		</a>
+	{{ else }}
+		{{ $letter := Upper (FirstLetter .ID) }}
+		<a href="/akteure/{{ $letter }}" class="inline-flex items-center text-black hover:text-gray-700 transition-colors text-xl no-underline font-bold">
+			<i class="ri-arrow-left-line mr-3 text-xl font-bold"></i>
+			{{ $letter }}
+		</a>
+	{{ end }}
+</div>

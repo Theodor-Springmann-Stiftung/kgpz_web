@@ -1,0 +1,18 @@
+{{ $agent := index $.model.Agents .model.Search }}
+{{ if not $agent }}
+	<div class="max-w-7xl mx-auto px-8 py-8">
+		<div class="bg-red-50 border border-red-200 rounded-lg p-6">
+			<div class="flex items-center">
+				<i class="ri-error-warning-line text-red-600 text-2xl mr-3"></i>
+				<span class="text-red-800 text-lg">Person nicht gefunden: <strong>{{ .model.Search }}</strong></span>
+			</div>
+		</div>
+	</div>
+{{ else }}
+	<div class="max-w-7xl mx-auto px-8 py-8">
+		<div class="bg-white px-6 py-6 rounded">
+			{{ template "_back_navigation" $agent }}
+			{{ template "_akteur" $agent }}
+		</div>
+	</div>
+{{ end }}

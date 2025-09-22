@@ -1,0 +1,9 @@
+{{ $agent := index .model.Agents .model.Search }}
+<title>
+	KGPZ &ndash;
+	{{ if $agent }}
+		{{ index $agent.Names 0 }}
+	{{ else }}
+		Person nicht gefunden
+	{{ end }}
+</title>

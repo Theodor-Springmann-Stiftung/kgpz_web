@@ -1,0 +1,14 @@
+<div class="max-w-7xl mx-auto px-8 py-8">
+	<div class="mb-10">
+		<!-- Alphabet Navigation -->
+		{{ template "_alphabet_nav" .model }}
+	</div>
+
+	<!-- Single Column Layout - No Scrollspy -->
+	<div class="bg-white px-6 py-6 rounded">
+		{{ range $_, $id := $.model.Sorted }}
+			{{ $a := index $.model.Agents $id }}
+			{{ template "_akteur" $a }}
+		{{ end }}
+	</div>
+</div>
