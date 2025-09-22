@@ -44,6 +44,13 @@ func NewPieceView(piece xmlmodels.Piece, lib *xmlmodels.Library) (*PieceVM, erro
 		IssueContexts: []string{},
 	}
 
+	// DEBUG: Log piece details
+	fmt.Printf("DEBUG PieceView: Creating view for piece ID=%s\n", piece.Identifier.ID)
+	fmt.Printf("DEBUG PieceView: Piece has %d IssueRefs\n", len(piece.IssueRefs))
+	for i, ref := range piece.IssueRefs {
+		fmt.Printf("DEBUG PieceView: IssueRef[%d]: Year=%d, Nr=%d, Von=%d, Bis=%d, Beilage=%d\n", i, ref.When.Year, ref.Nr, ref.Von, ref.Bis, ref.Beilage)
+	}
+
 	// Extract title from piece
 	if len(piece.Title) > 0 {
 		pvm.Title = piece.Title[0]
@@ -71,7 +78,13 @@ func NewPieceView(piece xmlmodels.Piece, lib *xmlmodels.Library) (*PieceVM, erro
 		pvm.IssueContexts = append(pvm.IssueContexts, issueContext)
 
 		// Add pages for this issue reference
-		for pageNum := issueRef.Von; pageNum <= issueRef.Bis; pageNum++ {
+		// Handle case where Bis=0 (should be treated as single page at Von)
+		bis := issueRef.Bis
+		if bis == 0 {
+			bis = issueRef.Von
+		}
+
+		for pageNum := issueRef.Von; pageNum <= bis; pageNum++ {
 			pageEntry := PiecePageEntry{
 				PageNumber:     pageNum,
 				IssueYear:      issueRef.When.Year,
@@ -84,13 +97,17 @@ func NewPieceView(piece xmlmodels.Piece, lib *xmlmodels.Library) (*PieceVM, erro
 			}
 
 			// Get actual image path from registry
-			pageEntry.ImagePath = getImagePathFromRegistry(issueRef.When.Year, pageNum)
+			pageEntry.ImagePath = getImagePathFromRegistryWithBeilage(issueRef.When.Year, issueRef.Nr, pageNum, issueRef.Beilage > 0)
 
 			pvm.AllPages = append(pvm.AllPages, pageEntry)
 		}
 	}
 
 	pvm.TotalPageCount = len(pvm.AllPages)
+
+	// DEBUG: Log final counts
+	fmt.Printf("DEBUG PieceView: Final counts - %d issue contexts, %d total pages\n", len(pvm.IssueContexts), pvm.TotalPageCount)
+	fmt.Printf("DEBUG PieceView: Issue contexts: %v\n", pvm.IssueContexts)
 
 	// Load images and update availability
 	if err := pvm.loadImages(); err != nil {
@@ -214,6 +231,39 @@ func getImagePathFromRegistry(year, page int) string {
 	return fmt.Sprintf("/static/pictures/%d/seite_%d.jpg", year, page)
 }
 
+// getImagePathFromRegistryWithBeilage gets the actual image path, handling both regular and Beilage pages
+func getImagePathFromRegistryWithBeilage(year, issue, page int, isBeilage bool) string {
+	// Initialize registry if needed
+	if err := initImageRegistry(); err != nil {
+		return ""
+	}
+
+	// For regular pages, use the old method
+	if !isBeilage {
+		key := fmt.Sprintf("%d-%d", year, page)
+		if imageFile, exists := imageRegistry.ByYearPage[key]; exists {
+			return imageFile.Path
+		}
+		// Fallback for regular pages
+		return fmt.Sprintf("/static/pictures/%d/seite_%d.jpg", year, page)
+	}
+
+	// For Beilage pages, search through all files for this year-issue
+	yearIssueKey := fmt.Sprintf("%d-%d", year, issue)
+	if issueFiles, exists := imageRegistry.ByYearIssue[yearIssueKey]; exists {
+		for _, file := range issueFiles {
+			if file.IsBeilage && file.Page == page {
+				fmt.Printf("DEBUG: Found Beilage image for year=%d, issue=%d, page=%d: %s\n", year, issue, page, file.Path)
+				return file.Path
+			}
+		}
+	}
+
+	// Fallback for Beilage pages
+	fmt.Printf("DEBUG: No Beilage image found for year=%d, issue=%d, page=%d\n", year, issue, page)
+	return fmt.Sprintf("/static/pictures/%d/%db-beilage-seite_%d.jpg", year, issue, page)
+}
+
 // populateOtherPieces finds and populates other pieces that appear on the same pages as this piece
 func (pvm *PieceVM) populateOtherPieces(lib *xmlmodels.Library) error {
 	fmt.Printf("DEBUG: Starting populateOtherPieces for piece %s\n", pvm.Piece.Identifier.ID)
@@ -243,11 +293,20 @@ func (pvm *PieceVM) populateOtherPieces(lib *xmlmodels.Library) error {
 			continue
 		}
 		fmt.Printf("DEBUG: Found %d total pieces for issue %d/%d\n", len(piecesForIssue.Pages), pageEntry.IssueYear, pageEntry.IssueNumber)
+		fmt.Printf("DEBUG: PiecesForIssue.Pages = %v\n", piecesForIssue.Pages)
 
 		// Create IndividualPiecesByPage using the same function as ausgabe view
 		individualPieces := CreateIndividualPagesWithMetadata(piecesForIssue, lib)
 		fmt.Printf("DEBUG: CreateIndividualPagesWithMetadata created %d pages with pieces\n", len(individualPieces.Pages))
 		fmt.Printf("DEBUG: Pages with pieces: %v\n", individualPieces.Pages)
+
+		// DEBUG: Show what pages are available in the map
+		if pageEntry.PageNumber == 113 {
+			fmt.Printf("DEBUG: Available pages in individualPieces.Items: %v\n", individualPieces.Pages)
+			for pageNum := range individualPieces.Items {
+				fmt.Printf("DEBUG: Page %d has %d pieces\n", pageNum, len(individualPieces.Items[pageNum]))
+			}
+		}
 
 		// Get pieces that appear on this specific page
 		if individualPiecesOnPage, exists := individualPieces.Items[pageEntry.PageNumber]; exists {

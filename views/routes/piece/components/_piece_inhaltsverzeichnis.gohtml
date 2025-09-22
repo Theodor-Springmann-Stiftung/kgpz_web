@@ -42,7 +42,9 @@
 				{{ range $pageEntry := $model.AllPages }}
 					<!-- Find the issue ref for this page to get date -->
 					{{ range $issueRef := $model.AllIssueRefs }}
-						{{ if and (eq $issueRef.When.Year $pageEntry.IssueYear) (eq $issueRef.Nr $pageEntry.IssueNumber) (le $issueRef.Von $pageEntry.PageNumber) (ge $issueRef.Bis $pageEntry.PageNumber) }}
+						{{ $bis := $issueRef.Bis }}
+						{{ if eq $bis 0 }}{{ $bis = $issueRef.Von }}{{ end }}
+						{{ if and (eq $issueRef.When.Year $pageEntry.IssueYear) (eq $issueRef.Nr $pageEntry.IssueNumber) (le $issueRef.Von $pageEntry.PageNumber) (ge $bis $pageEntry.PageNumber) }}
 							<!-- Individual page entry matching issue view style -->
 							<div class="mb-4 pl-4 border-l-4 border-slate-300 page-entry {{ if not $pageEntry.OtherPieces }}py-2{{ end }}"
 								 data-page-container="{{ $pageEntry.PageNumber }}">

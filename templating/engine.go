@@ -55,13 +55,13 @@ func NewEngine(layouts, templates *fs.FS) *Engine {
 func PageIcon(iconType string) template.HTML {
 	switch iconType {
 	case "first":
-		return template.HTML(`<i class="ri-file-text-line text-black text-sm"></i>`)
+		return template.HTML(`<i class="ri-file-text-line text-black text-sm" style="display: inline-block;"></i>`)
 	case "last":
-		return template.HTML(`<i class="ri-file-text-line text-black text-sm" style="transform: scaleX(-1); display: inline-block;"></i>`)
+		return template.HTML(`<i class="ri-file-text-line text-black text-sm" style="display: inline-block; transform: scaleX(-1);"></i>`)
 	case "even":
-		return template.HTML(`<i class="ri-file-text-line text-black text-sm" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-slate-400 text-sm"></i>`)
+		return template.HTML(`<i class="ri-file-text-line text-black text-sm" style="margin-left: 1px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-slate-400 text-sm"></i>`)
 	case "odd":
-		return template.HTML(`<i class="ri-file-text-line text-slate-400 text-sm" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-black text-sm" ></i>`)
+		return template.HTML(`<i class="ri-file-text-line text-slate-400 text-sm" style="margin-left: 1px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-black text-sm" ></i>`)
 	case "single":
 		return template.HTML(`<i class="ri-file-text-line text-black text-sm"></i>`)
 	default:

@@ -23,8 +23,38 @@ export function enlargePage(imgElement, pageNumber, isFromSpread, partNumber = n
 	const targetPage =
 		window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0;
 
-	// Show the page in the viewer
-	viewer.show(imgElement.src, imgElement.alt, pageNumber, isBeilage, targetPage, partNumber);
+	// Extract existing icon type and heading from the page container
+	const pageContainer = imgElement.closest('.newspaper-page-container, .piece-page-container');
+	let extractedIconType = null;
+	let extractedHeading = null;
+
+	if (pageContainer) {
+		// Extract icon type from data attribute
+		extractedIconType = pageContainer.getAttribute('data-page-icon-type');
+
+		// For piece view: check if part number should override icon
+		const partNumberElement = pageContainer.querySelector('.part-number');
+		if (partNumberElement) {
+			extractedIconType = 'part-number';
+		}
+
+		// Extract heading text from page indicator
+		const pageIndicator = pageContainer.querySelector('.page-indicator');
+		if (pageIndicator) {
+			// Clone the page indicator to extract text without buttons/icons
+			const indicatorClone = pageIndicator.cloneNode(true);
+			// Remove any icons to get just the text
+			const icons = indicatorClone.querySelectorAll('i');
+			icons.forEach(icon => icon.remove());
+			// Remove any link indicators
+			const linkIndicators = indicatorClone.querySelectorAll('[class*="target-page-dot"], .target-page-indicator');
+			linkIndicators.forEach(indicator => indicator.remove());
+			extractedHeading = indicatorClone.textContent.trim();
+		}
+	}
+
+	// Show the page in the viewer with extracted data
+	viewer.show(imgElement.src, imgElement.alt, pageNumber, isBeilage, targetPage, partNumber, extractedIconType, extractedHeading);
 }
 
 export function closeModal() {
@@ -124,7 +154,6 @@ export function scrollToPreviousPage() {
 		if (targetIndex >= 0) {
 			window.currentActiveIndex = targetIndex;
 			window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
-				behavior: "smooth",
 				block: "start",
 			});
 
@@ -176,7 +205,6 @@ export function scrollToNextPage() {
 		if (targetIndex >= 0 && targetIndex < window.currentPageContainers.length) {
 			window.currentActiveIndex = targetIndex;
 			window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
-				behavior: "smooth",
 				block: "start",
 			});
 
@@ -197,7 +225,6 @@ export function scrollToBeilage() {
 		const firstMainPage = document.querySelector("#newspaper-content .newspaper-page-container");
 		if (firstMainPage) {
 			firstMainPage.scrollIntoView({
-				behavior: "smooth",
 				block: "start",
 			});
 		}
@@ -206,7 +233,6 @@ export function scrollToBeilage() {
 		const beilageContainer = document.querySelector('[class*="border-t-2 border-amber-200"]');
 		if (beilageContainer) {
 			beilageContainer.scrollIntoView({
-				behavior: "smooth",
 				block: "start",
 			});
 		}
@@ -249,18 +275,30 @@ export function updateButtonStates() {
 	const beilageBtn = document.getElementById("beilageBtn");
 
 	if (prevBtn) {
+		// Always show button, but disable when at first page
+		prevBtn.style.display = "flex";
 		if (window.currentActiveIndex <= 0) {
-			prevBtn.style.display = "none";
+			prevBtn.disabled = true;
+			prevBtn.classList.add("opacity-50", "cursor-not-allowed");
+			prevBtn.classList.remove("hover:bg-gray-200");
 		} else {
-			prevBtn.style.display = "flex";
+			prevBtn.disabled = false;
+			prevBtn.classList.remove("opacity-50", "cursor-not-allowed");
+			prevBtn.classList.add("hover:bg-gray-200");
 		}
 	}
 
 	if (nextBtn) {
+		// Always show button, but disable when at last page
+		nextBtn.style.display = "flex";
 		if (window.currentActiveIndex >= window.currentPageContainers.length - 1) {
-			nextBtn.style.display = "none";
+			nextBtn.disabled = true;
+			nextBtn.classList.add("opacity-50", "cursor-not-allowed");
+			nextBtn.classList.remove("hover:bg-gray-200");
 		} else {
-			nextBtn.style.display = "flex";
+			nextBtn.disabled = false;
+			nextBtn.classList.remove("opacity-50", "cursor-not-allowed");
+			nextBtn.classList.add("hover:bg-gray-200");
 		}
 	}
 

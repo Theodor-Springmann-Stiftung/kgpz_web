@@ -125,7 +125,13 @@
 		{{ $idPrefix = "beilage-1-page" }}
 	{{ end }}
 
-	<div class="newspaper-page-container" id="{{ $idPrefix }}-{{ $page.PageNumber }}" data-page-container="{{ $page.PageNumber }}"{{ if $isBeilage }} data-beilage="true"{{ end }}>
+	<div class="newspaper-page-container" id="{{ $idPrefix }}-{{ $page.PageNumber }}" data-page-container="{{ $page.PageNumber }}" data-page-icon-type="{{ $page.PageIcon }}"{{ if $isBeilage }} data-beilage="true"{{ end }}>
+		<!-- Anchor for navigation -->
+		{{ if $isBeilage }}
+			<div id="beilage-{{ $page.PageNumber }}"></div>
+		{{ else }}
+			<div id="page-{{ $page.PageNumber }}"></div>
+		{{ end }}
 		<!-- Page indicator row -->
 		<div class="flex {{ if $isLeft }}justify-end{{ else }}justify-start{{ end }} items-center gap-1 mb-2">
 			{{ if $isLeft }}
@@ -141,15 +147,15 @@
 				</button>
 				<span class="page-indicator text-sm font-bold text-slate-600 {{ $bgColor }} px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1 relative" data-page="{{ $page.PageNumber }}">
 					{{ $page.PageNumber }}
-					<i class="ri-file-text-line {{ if $isBeilage }}text-amber-600{{ else }}text-black{{ end }} text-sm scale-x-[-1]"></i>
-					{{ template "_page_link_indicator" (dict "pageNumber" $page.PageNumber "targetPage" $targetPage) }}
+					{{ if $isBeilage }}<span class="text-amber-600">{{ PageIcon $page.PageIcon }}</span>{{ else }}{{ PageIcon $page.PageIcon }}{{ end }}
+					{{ template "_page_link_indicator" (dict "pageNumber" $page.PageNumber "targetPage" $targetPage "isBeilage" $isBeilage "isTargetBeilage" $.isBeilage) }}
 				</span>
 			{{ else }}
 				<!-- Right page: page number then buttons -->
 				<span class="page-indicator text-sm font-bold text-slate-600 {{ $bgColor }} px-2 py-1 rounded transition-all duration-300 shadow-sm flex items-center gap-1 relative" data-page="{{ $page.PageNumber }}">
-					<i class="ri-file-text-line {{ if $isBeilage }}text-amber-600{{ else }}text-black{{ end }} text-sm"></i>
+					{{ if $isBeilage }}<span class="text-amber-600">{{ PageIcon $page.PageIcon }}</span>{{ else }}{{ PageIcon $page.PageIcon }}{{ end }}
 					{{ $page.PageNumber }}
-					{{ template "_page_link_indicator" (dict "pageNumber" $page.PageNumber "targetPage" $targetPage) }}
+					{{ template "_page_link_indicator" (dict "pageNumber" $page.PageNumber "targetPage" $targetPage "isBeilage" $isBeilage "isTargetBeilage" $.isBeilage) }}
 				</span>
 				<button onclick="copyPagePermalink('{{ $page.PageNumber }}', this{{ if $isBeilage }}, true{{ end }})" class="w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer" title="Link zu Seite {{ $page.PageNumber }} kopieren">
 					<i class="ri-share-line text-xs"></i>

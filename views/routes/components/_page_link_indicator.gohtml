@@ -1,17 +1,21 @@
 {{- /*
     Red dot indicator for directly linked pages
-    Usage: {{ template "_page_link_indicator" (dict "pageNumber" $page "targetPage" $targetPage) }}
+    Usage: {{ template "_page_link_indicator" (dict "pageNumber" $page "targetPage" $targetPage "isBeilage" $isBeilage "isTargetBeilage" $isTargetBeilage) }}
 
     Parameters:
     - pageNumber (int): The page number being displayed
     - targetPage (int): The target page from URL (0 if none)
+    - isBeilage (bool): Whether this page is a Beilage page
+    - isTargetBeilage (bool): Whether the target page is a Beilage page
 
-    Shows a red dot with tooltip when pageNumber matches targetPage
+    Shows a red dot with tooltip when pageNumber matches targetPage and page types match (both Beilage or both regular)
 */ -}}
 
 {{ $pageNumber := .pageNumber }}
 {{ $targetPage := .targetPage }}
+{{ $isBeilage := .isBeilage }}
+{{ $isTargetBeilage := .isTargetBeilage }}
 
-{{ if and $targetPage (eq $pageNumber $targetPage) }}
+{{ if and $targetPage (eq $pageNumber $targetPage) (eq $isBeilage $isTargetBeilage) }}
 <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10" title="verlinkte Seite"></span>
 {{ end }}

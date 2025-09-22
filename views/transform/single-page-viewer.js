@@ -126,7 +126,7 @@ export class SinglePageViewer extends HTMLElement {
 								id="single-page-image"
 								src=""
 								alt=""
-								class="w-full h-auto rounded-lg shadow-2xl cursor-pointer"
+								class="w-full h-auto rounded-lg shadow-2xl cursor-zoom-out"
 								onclick="this.closest('single-page-viewer').close()"
 								title="Klicken zum Schließen"
 							/>
@@ -138,6 +138,9 @@ export class SinglePageViewer extends HTMLElement {
 
 		// Set up resize observer to handle window resizing
 		this.setupResizeObserver();
+
+		// Set up keyboard navigation
+		this.setupKeyboardNavigation();
 	}
 
 	// Set up resize observer to dynamically update sidebar width
@@ -167,7 +170,16 @@ export class SinglePageViewer extends HTMLElement {
 		}
 	}
 
-	show(imgSrc, imgAlt, pageNumber, isBeilage = false, targetPage = 0, partNumber = null) {
+	show(
+		imgSrc,
+		imgAlt,
+		pageNumber,
+		isBeilage = false,
+		targetPage = 0,
+		partNumber = null,
+		extractedIconType = null,
+		extractedHeading = null,
+	) {
 		const img = this.querySelector("#single-page-image");
 		const pageNumberSpan = this.querySelector("#page-number");
 		const pageIconSpan = this.querySelector("#page-icon");
@@ -181,11 +193,18 @@ export class SinglePageViewer extends HTMLElement {
 		this.currentIsBeilage = isBeilage;
 		this.currentPartNumber = partNumber;
 
-		// Get issue context from document title or URL
-		const issueContext = this.getIssueContext(pageNumber);
+		// Use extracted heading or fallback to generated heading
+		let headingText;
+		if (extractedHeading) {
+			headingText = extractedHeading;
+		} else {
+			// Fallback: generate heading text
+			const issueContext = this.getIssueContext(pageNumber);
+			headingText = issueContext ? `${issueContext}, ${pageNumber}` : `${pageNumber}`;
+		}
 
-		// Set page number with issue context in the box
-		pageNumberSpan.innerHTML = issueContext ? `${issueContext}, ${pageNumber}` : `${pageNumber}`;
+		// Set page number with heading text in the box
+		pageNumberSpan.innerHTML = headingText;
 
 		// Add red dot if this is the target page
 		if (targetPage && pageNumber === targetPage) {
@@ -203,14 +222,18 @@ export class SinglePageViewer extends HTMLElement {
 			pageNumberSpan.appendChild(redDot);
 		}
 
-		// Set page icon or part number based on view type
-		if (partNumber !== null) {
-			// Piece view: Show part number instead of icon
-			pageIconSpan.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${partNumber}. Teil</span>`;
+		// Use extracted icon type or fallback to generated icon
+		if (extractedIconType) {
+			if (extractedIconType === "part-number" && partNumber !== null) {
+				// Piece view: Show part number instead of icon
+				pageIconSpan.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${partNumber}. Teil</span>`;
+			} else {
+				// Use icon type from Go templates
+				pageIconSpan.innerHTML = this.generateIconFromType(extractedIconType);
+			}
 		} else {
-			// Issue view: Show icon based on position and type
-			const iconType = this.determinePageIconType(pageNumber, isBeilage);
-			pageIconSpan.innerHTML = this.getPageIconHTML(iconType);
+			// Fallback: generate simple icon
+			pageIconSpan.innerHTML = this.generateFallbackIcon(pageNumber, isBeilage, partNumber);
 		}
 
 		// Page indicator styling is now consistent (white background)
@@ -219,6 +242,12 @@ export class SinglePageViewer extends HTMLElement {
 		this.updateNavigationButtons();
 
 		this.style.display = "block";
+
+		// Scroll to top of the single page viewer (no smooth scrolling)
+		const scrollContainer = this.querySelector(".flex-1.overflow-auto");
+		if (scrollContainer) {
+			scrollContainer.scrollTop = 0;
+		}
 
 		// Prevent background scrolling but allow scrolling within the viewer
 		document.body.style.overflow = "hidden";
@@ -238,72 +267,64 @@ export class SinglePageViewer extends HTMLElement {
 			this.resizeObserver = null;
 		}
 
+		// Clean up keyboard event listener
+		if (this.keyboardHandler) {
+			document.removeEventListener('keydown', this.keyboardHandler);
+			this.keyboardHandler = null;
+		}
+
 		// Restore background scrolling
 		document.body.style.overflow = "";
 	}
 
-	// Determine page icon type based on page position and whether it's beilage
-	determinePageIconType(pageNumber, isBeilage) {
-		// Get all page containers to determine position
-		const containerSelector = isBeilage
-			? '.newspaper-page-container[data-beilage="true"]'
-			: ".newspaper-page-container:not([data-beilage])";
-		const pageContainers = Array.from(document.querySelectorAll(containerSelector));
-
-		// Extract page numbers and sort them
-		const allPages = pageContainers
-			.map((container) => {
-				const pageAttr = container.getAttribute("data-page-container");
-				return pageAttr ? parseInt(pageAttr) : null;
-			})
-			.filter((p) => p !== null)
-			.sort((a, b) => a - b);
-
-		if (allPages.length === 0) {
-			return "first";
-		}
-
-		const firstPage = allPages[0];
-		const lastPage = allPages[allPages.length - 1];
-
-		// Same logic as Go determinePageIcon function
-		if (pageNumber === firstPage) {
-			return "first"; // Front page - normal icon
-		} else if (pageNumber === lastPage) {
-			return "last"; // Back page - mirrored icon
-		} else {
-			// For middle pages in newspaper layout
-			if (pageNumber === firstPage + 1) {
-				return "even"; // Page 2 - black + mirrored grey
-			} else if (pageNumber === lastPage - 1) {
-				return "odd"; // Page 3 - grey + black
-			} else {
-				// For newspapers with more than 4 pages, use alternating pattern
-				if (pageNumber % 2 === 0) {
-					return "even";
-				} else {
-					return "odd";
-				}
-			}
+	// Generate icon HTML from Go icon type - matches templating/engine.go PageIcon function
+	generateIconFromType(iconType) {
+		switch (iconType) {
+			case "first":
+				return `<i class="ri-file-text-line text-black text-lg" display: inline-block;"></i>`;
+			case "last":
+				return `<i class="ri-file-text-line text-black text-lg" style="transform: scaleX(-1); display: inline-block;"></i>`;
+			case "even":
+				return `<i class="ri-file-text-line text-black text-lg" style="margin-left: 1px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-slate-400 text-lg"></i>`;
+			case "odd":
+				return `<i class="ri-file-text-line text-slate-400 text-lg" style="margin-left: 1px; transform: scaleX(-1); display: inline-block;"></i><i class="ri-file-text-line text-black text-lg"></i>`;
+			case "single":
+				return `<i class="ri-file-text-line text-black text-lg"></i>`;
+			default:
+				return `<i class="ri-file-text-line text-black text-lg"></i>`;
 		}
 	}
 
-	// Generate page icon HTML based on type (same as Go PageIcon function)
-	getPageIconHTML(iconType) {
-		const baseClass = "ri-file-text-line text-lg";
-
-		switch (iconType) {
-			case "first":
-				return `<i class="${baseClass} text-black"></i>`;
-			case "last":
-				return `<i class="${baseClass} text-black" style="transform: scaleX(-1); display: inline-block;"></i>`;
-			case "even":
-				return `<i class="${baseClass} text-black" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="${baseClass} text-slate-400"></i>`;
-			case "odd":
-				return `<i class="${baseClass} text-slate-400" style="margin-left: 2px; transform: scaleX(-1); display: inline-block;"></i><i class="${baseClass} text-black"></i>`;
-			default:
-				return `<i class="${baseClass} text-black"></i>`;
+	// Set up keyboard navigation
+	setupKeyboardNavigation() {
+		// Remove any existing listener to avoid duplicates
+		if (this.keyboardHandler) {
+			document.removeEventListener('keydown', this.keyboardHandler);
 		}
+
+		// Create bound handler
+		this.keyboardHandler = (event) => {
+			// Only handle keyboard events when the viewer is visible
+			if (this.style.display === 'none') return;
+
+			switch (event.key) {
+				case 'ArrowLeft':
+					event.preventDefault();
+					this.goToPreviousPage();
+					break;
+				case 'ArrowRight':
+					event.preventDefault();
+					this.goToNextPage();
+					break;
+				case 'Escape':
+					event.preventDefault();
+					this.close();
+					break;
+			}
+		};
+
+		// Add event listener
+		document.addEventListener('keydown', this.keyboardHandler);
 	}
 
 	// Share current page
@@ -447,13 +468,42 @@ export class SinglePageViewer extends HTMLElement {
 		);
 
 		if (targetContainer) {
-			const imgElement = targetContainer.querySelector(".newspaper-page-image");
+			const imgElement = targetContainer.querySelector(".newspaper-page-image, .piece-page-image");
 			if (imgElement) {
 				// Determine part number for piece view
 				let newPartNumber = null;
 				if (this.currentPartNumber !== null) {
 					// We're in piece view, try to find the part number for the new page
 					newPartNumber = this.getPartNumberForPage(pageNumber);
+				}
+
+				// Extract icon type and heading for the new page
+				let extractedIconType = null;
+				let extractedHeading = null;
+
+				// Extract icon type from data attribute
+				extractedIconType = targetContainer.getAttribute("data-page-icon-type");
+
+				// For piece view: check if part number should override icon
+				const partNumberElement = targetContainer.querySelector(".part-number");
+				if (partNumberElement) {
+					extractedIconType = "part-number";
+				}
+
+				// Extract heading text from page indicator
+				const pageIndicator = targetContainer.querySelector(".page-indicator");
+				if (pageIndicator) {
+					// Clone the page indicator to extract text without buttons/icons
+					const indicatorClone = pageIndicator.cloneNode(true);
+					// Remove any icons to get just the text
+					const icons = indicatorClone.querySelectorAll("i");
+					icons.forEach((icon) => icon.remove());
+					// Remove any link indicators
+					const linkIndicators = indicatorClone.querySelectorAll(
+						'[class*="target-page-dot"], .target-page-indicator',
+					);
+					linkIndicators.forEach((indicator) => indicator.remove());
+					extractedHeading = indicatorClone.textContent.trim();
 				}
 
 				// Update the current view with the new page
@@ -464,6 +514,8 @@ export class SinglePageViewer extends HTMLElement {
 					this.currentIsBeilage,
 					0,
 					newPartNumber,
+					extractedIconType,
+					extractedHeading,
 				);
 			}
 		}
@@ -486,6 +538,19 @@ export class SinglePageViewer extends HTMLElement {
 
 		// Fallback: if we can't find it, return null to show icon instead
 		return null;
+	}
+
+	// Legacy fallback icon generation (only used when extraction fails)
+	generateFallbackIcon(pageNumber, isBeilage, partNumber) {
+		if (partNumber !== null) {
+			// Piece view: Show part number instead of icon
+			return `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${partNumber}. Teil</span>`;
+		} else {
+			// Issue view: Simple fallback icon
+			const baseClass = "ri-file-text-line text-lg";
+			const iconColor = isBeilage ? "text-amber-600" : "text-black";
+			return `<i class="${baseClass} ${iconColor}"></i>`;
+		}
 	}
 
 	// Toggle sidebar visibility
@@ -596,7 +661,7 @@ document.body.addEventListener("htmx:beforeRequest", function (event) {
 	const viewer = document.querySelector("single-page-viewer");
 	if (viewer && viewer.style.display !== "none") {
 		console.log("Cleaning up single page viewer before HTMX navigation");
-		viewer.destroy();
+		viewer.close();
 	}
 });
 
@@ -604,6 +669,6 @@ document.body.addEventListener("htmx:beforeRequest", function (event) {
 window.addEventListener("beforeunload", function () {
 	const viewer = document.querySelector("single-page-viewer");
 	if (viewer) {
-		viewer.destroy();
+		viewer.close();
 	}
 });

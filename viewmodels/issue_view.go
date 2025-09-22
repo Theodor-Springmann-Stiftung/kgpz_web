@@ -143,23 +143,31 @@ func PiecesForIssue(lib *xmlmodels.Library, issue xmlmodels.Issue) (PiecesByPage
 	defer lib.Pieces.Unlock()
 
 	for _, piece := range lib.Pieces.Array {
-		if d, ok := piece.ReferencesIssue(year, issue.Number.No); ok {
-			// Add main entry on starting page
-			p := PieceByIssue{Piece: piece, Reference: *d, IsContinuation: false}
-			if d.Beilage > 0 {
-				functions.MapArrayInsert(ppa.Items, d.Von, p)
-			} else {
-				functions.MapArrayInsert(ppi.Items, d.Von, p)
-			}
+		// Process ALL IssueRefs for this piece, not just the first match
+		for _, issueRef := range piece.IssueRefs {
+			if issueRef.Nr == issue.Number.No && issueRef.When.Year == year {
+				// DEBUG: Log piece details for specific issue
+				if year == 1771 && issue.Number.No == 29 {
+					fmt.Printf("DEBUG PiecesForIssue: Piece ID=%s, Von=%d, Bis=%d, Beilage=%d\n", piece.Identifier.ID, issueRef.Von, issueRef.Bis, issueRef.Beilage)
+				}
 
-			// Add continuation entries for subsequent pages (if Bis > Von)
-			if d.Bis > d.Von {
-				for page := d.Von + 1; page <= d.Bis; page++ {
-					pContinuation := PieceByIssue{Piece: piece, Reference: *d, IsContinuation: true}
-					if d.Beilage > 0 {
-						functions.MapArrayInsert(ppa.Items, page, pContinuation)
-					} else {
-						functions.MapArrayInsert(ppi.Items, page, pContinuation)
+				// Add main entry on starting page
+				p := PieceByIssue{Piece: piece, Reference: issueRef, IsContinuation: false}
+				if issueRef.Beilage > 0 {
+					functions.MapArrayInsert(ppa.Items, issueRef.Von, p)
+				} else {
+					functions.MapArrayInsert(ppi.Items, issueRef.Von, p)
+				}
+
+				// Add continuation entries for subsequent pages (if Bis > Von)
+				if issueRef.Bis > issueRef.Von {
+					for page := issueRef.Von + 1; page <= issueRef.Bis; page++ {
+						pContinuation := PieceByIssue{Piece: piece, Reference: issueRef, IsContinuation: true}
+						if issueRef.Beilage > 0 {
+							functions.MapArrayInsert(ppa.Items, page, pContinuation)
+						} else {
+							functions.MapArrayInsert(ppi.Items, page, pContinuation)
+						}
 					}
 				}
 			}
@@ -273,6 +281,7 @@ func CreateIndividualPagesWithMetadata(pieces PiecesByPage, lib *xmlmodels.Libra
 	for _, page := range pieces.Pages {
 		pageItems := pieces.Items[page]
 
+
 		// Sort pieces according to the ordering rules
 		sortedPageItems := sortPiecesOnPage(pageItems, page)
 
@@ -366,9 +375,12 @@ func determinePageIcon(pageNum int, allPages []int) string {
 		return "first"
 	}
 
-	slices.Sort(allPages)
-	firstPage := allPages[0]
-	lastPage := allPages[len(allPages)-1]
+	// Create a copy to avoid modifying the original slice
+	sortedPages := make([]int, len(allPages))
+	copy(sortedPages, allPages)
+	slices.Sort(sortedPages)
+	firstPage := sortedPages[0]
+	lastPage := sortedPages[len(sortedPages)-1]
 
 	// Newspaper layout logic based on physical page positioning
 	if pageNum == firstPage {
