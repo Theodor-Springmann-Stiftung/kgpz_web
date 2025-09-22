@@ -19,26 +19,7 @@ func GetPiece(kgpz *xmlmodels.Library) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		// Parse the generated ID format: YYYY-NNN-PPP
-		var piece *xmlmodels.Piece
-		if strings.Contains(id, "-") {
-			parts := strings.Split(id, "-")
-			if len(parts) == 3 {
-				year, yearErr := strconv.Atoi(parts[0])
-				issueNum, issueErr := strconv.Atoi(parts[1])
-				page, pageErr := strconv.Atoi(parts[2])
-
-				if yearErr == nil && issueErr == nil && pageErr == nil {
-					piece = findPieceByYearIssuePage(kgpz, year, issueNum, page)
-				}
-			}
-		}
-
-		// Fallback to original ID lookup if generated ID doesn't work
-		if piece == nil {
-			piece = kgpz.Pieces.Item(id)
-		}
-
+		piece := kgpz.Pieces.Item(id)
 		if piece == nil {
 			logging.Error(nil, "Piece could not be found with ID: "+id)
 			return c.SendStatus(fiber.StatusNotFound)
@@ -98,25 +79,7 @@ func GetPieceWithPage(kgpz *xmlmodels.Library) fiber.Handler {
 			}
 		}
 
-		// Parse the generated ID format: YYYY-NNN-PPP
-		var piece *xmlmodels.Piece
-		if strings.Contains(id, "-") {
-			parts := strings.Split(id, "-")
-			if len(parts) == 3 {
-				year, yearErr := strconv.Atoi(parts[0])
-				issueNum, issueErr := strconv.Atoi(parts[1])
-				page, pageErr := strconv.Atoi(parts[2])
-
-				if yearErr == nil && issueErr == nil && pageErr == nil {
-					piece = findPieceByYearIssuePage(kgpz, year, issueNum, page)
-				}
-			}
-		}
-
-		// Fallback to original ID lookup if generated ID doesn't work
-		if piece == nil {
-			piece = kgpz.Pieces.Item(id)
-		}
+		piece := kgpz.Pieces.Item(id)
 
 		if piece == nil {
 			logging.Error(nil, "Piece could not be found with ID: "+id)
@@ -155,17 +118,3 @@ func GetPieceWithPage(kgpz *xmlmodels.Library) fiber.Handler {
 	}
 }
 
-// findPieceByYearIssuePage finds a piece that starts on the given year, issue, and page
-func findPieceByYearIssuePage(kgpz *xmlmodels.Library, year, issueNum, page int) *xmlmodels.Piece {
-	kgpz.Pieces.Lock()
-	defer kgpz.Pieces.Unlock()
-
-	for _, piece := range kgpz.Pieces.Array {
-		for _, issueRef := range piece.IssueRefs {
-			if issueRef.When.Year == year && issueRef.Nr == issueNum && issueRef.Von == page {
-				return &piece
-			}
-		}
-	}
-	return nil
-}

@@ -8,19 +8,12 @@
 			</h2>
 		</div>
 		<div class="space-y-2">
-			{{- /* Group pieces by title and work reference */ -}}
+			{{- /* Group pieces by their own title/incipit, not by work being reviewed */ -}}
 			{{- $groupedPieces := dict -}}
 			{{- range $_, $p := SortPiecesByDate $pieces -}}
 				{{- $groupKey := "" -}}
 				{{- if $p.Item.Title -}}
 					{{- $groupKey = index $p.Item.Title 0 -}}
-				{{- else if $p.Item.WorkRefs -}}
-					{{- $work := GetWork (index $p.Item.WorkRefs 0).Ref -}}
-					{{- if $work.PreferredTitle -}}
-						{{- $groupKey = $work.PreferredTitle -}}
-					{{- else if $work.Citation.Title -}}
-						{{- $groupKey = $work.Citation.Title -}}
-					{{- end -}}
 				{{- else if $p.Item.Incipit -}}
 					{{- $groupKey = index $p.Item.Incipit 0 -}}
 				{{- else -}}
@@ -55,7 +48,7 @@
 						{{- if gt (len $firstGroupItem.Item.IssueRefs) 1 -}}
 							{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
 								<i class="ri-file-copy-2-line text-xs"></i>
-								<a href="{{ GetPieceURL (index $firstGroupItem.Item.IssueRefs 0).When.Year (index $firstGroupItem.Item.IssueRefs 0).Nr (index $firstGroupItem.Item.IssueRefs 0).Von (index $firstGroupItem.Item.Keys 0) }}" class="">
+								<a href="{{ GetPieceURL $firstGroupItem.Item.ID }}" class="">
 									Ganzer Beitrag
 								</a>
 							</div>

@@ -15,6 +15,20 @@
 
 
 		<link href="/assets/css/remixicon.css" rel="stylesheet" />
+		<script>
+			// Configure HTMX scroll behavior
+			document.addEventListener('DOMContentLoaded', function() {
+				if (typeof htmx !== 'undefined') {
+					htmx.config.scrollBehavior = 'instant';
+				}
+			});
+			// Fallback configuration
+			window.addEventListener('load', function() {
+				if (typeof htmx !== 'undefined') {
+					htmx.config.scrollBehavior = 'instant';
+				}
+			});
+		</script>
 		<script src="/assets/js/alpine.min.js" defer></script>
 		<script src="/assets/js/htmx.min.js" defer></script>
 		<script src="/assets/js/htmx-response-targets.js" defer></script>

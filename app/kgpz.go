@@ -202,6 +202,16 @@ func (k *KGPZ) Funcs() map[string]interface{} {
 	e["LookupPieces"] = k.Library.Pieces.ReverseLookup
 	e["LookupWorks"] = k.Library.Works.ReverseLookup
 	e["LookupIssues"] = k.Library.Issues.ReverseLookup
+	e["LookupAnonymWorks"] = func() []xmlmodels.Work {
+		var anonymWorks []xmlmodels.Work
+		for _, work := range k.Library.Works.Array {
+			// Check if work has no agents
+			if len(work.AgentRefs) == 0 {
+				anonymWorks = append(anonymWorks, work)
+			}
+		}
+		return anonymWorks
+	}
 
 	return e
 }

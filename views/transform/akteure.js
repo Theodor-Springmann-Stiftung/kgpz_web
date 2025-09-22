@@ -31,7 +31,7 @@ export class AkteureScrollspy extends HTMLElement {
 				if (this.sections.length > 0 && this.navLinks.length > 0) {
 					this.initializeScrollspy();
 				}
-			}, 200);
+			}, 500);
 			return;
 		}
 
@@ -402,4 +402,3 @@ export class AkteureScrollspy extends HTMLElement {
 
 // Register the web component
 customElements.define("akteure-scrollspy", AkteureScrollspy);
-

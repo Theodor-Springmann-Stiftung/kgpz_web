@@ -1,12 +1,8 @@
 package xmlmodels
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -37,68 +33,6 @@ func (p Piece) String() string {
 	return string(data)
 }
 
-// generateContentBasedID creates a deterministic ID based on piece content
-func (p Piece) generateContentBasedID() string {
-	var parts []string
-
-	// Add title if available
-	if len(p.Title) > 0 && p.Title[0] != "" {
-		parts = append(parts, "title:"+strings.ToLower(strings.TrimSpace(p.Title[0])))
-	}
-
-	// Add incipit if available
-	if len(p.Incipit) > 0 && p.Incipit[0] != "" {
-		incipit := strings.ToLower(strings.TrimSpace(p.Incipit[0]))
-		// Limit incipit to first 50 characters to avoid overly long IDs
-		if len(incipit) > 50 {
-			incipit = incipit[:50]
-		}
-		parts = append(parts, "incipit:"+incipit)
-	}
-
-	// Add author references
-	var authors []string
-	for _, agent := range p.AgentRefs {
-		if agent.Category == "" || agent.Category == "autor" {
-			authors = append(authors, agent.Ref)
-		}
-	}
-	sort.Strings(authors) // Ensure consistent ordering
-	if len(authors) > 0 {
-		parts = append(parts, "authors:"+strings.Join(authors, ","))
-	}
-
-	// Add categories
-	var categories []string
-	for _, cat := range p.CategoryRefs {
-		if cat.Category != "" {
-			categories = append(categories, cat.Category)
-		}
-	}
-	sort.Strings(categories) // Ensure consistent ordering
-	if len(categories) > 0 {
-		parts = append(parts, "categories:"+strings.Join(categories, ","))
-	}
-
-	// If we have no meaningful content, create a minimal hash from issue refs
-	if len(parts) == 0 {
-		// Use issue references as fallback content
-		for _, issue := range p.IssueRefs {
-			parts = append(parts, fmt.Sprintf("issue:%d-%d-%d-%d", issue.When.Year, issue.Nr, issue.Von, issue.Bis))
-		}
-		// If still no content, use a generic identifier
-		if len(parts) == 0 {
-			parts = append(parts, "unknown-piece")
-		}
-	}
-
-	// Create hash of combined content
-	content := strings.Join(parts, "|")
-	hash := sha256.Sum256([]byte(content))
-
-	// Return first 12 characters of hex hash for reasonable ID length
-	return hex.EncodeToString(hash[:])[:12]
-}
 
 func (p Piece) Categories() map[string]bool {
 	cats := make(map[string]bool)
@@ -136,24 +70,8 @@ func (p Piece) Categories() map[string]bool {
 }
 
 func (p Piece) Keys() []string {
-	// Always regenerate keys to ensure we use the new content-based logic
-	ret := make([]string, 0, 3)
-
-	// Primary ID: Use existing ID if available, otherwise content-based ID
-	var primaryID string
-	if p.ID != "" {
-		primaryID = p.ID
-	} else {
-		primaryID = p.generateContentBasedID()
-	}
-	ret = append(ret, primaryID)
-
-	// Create issue-specific keys using the primary ID for lookup
-	for _, i := range p.IssueRefs {
-		ret = append(ret, strconv.Itoa(i.When.Year)+"-"+strconv.Itoa(i.Nr)+"-"+primaryID)
-	}
-
-	return ret
+	// All pieces now have XML IDs, so we just return the ID
+	return []string{p.ID}
 }
 
 func (p Piece) ReferencesIssue(y, no int) (*IssueRef, bool) {

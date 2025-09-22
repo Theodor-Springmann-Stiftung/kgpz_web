@@ -31,6 +31,20 @@ func GetAgents(kgpz *xmlmodels.Library) fiber.Handler {
 			)
 		}
 
+		// Handle special "anonym" route
+		if a == "anonym" {
+			anonymAgent := viewmodels.AnonymView(kgpz)
+			return c.Render(
+				"/akteure/",
+				fiber.Map{"model": &viewmodels.AgentsListView{
+					Search:           "anonym",
+					AvailableLetters: []string{},
+					Agents:          map[string]xmlmodels.Agent{"anonym": *anonymAgent},
+					Sorted:          []string{"anonym"},
+				}},
+			)
+		}
+
 		// Handle normal letter/id lookup
 		agents := viewmodels.AgentsView(a, kgpz)
 		if len(agents.Agents) == 0 {

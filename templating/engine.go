@@ -69,15 +69,9 @@ func PageIcon(iconType string) template.HTML {
 	}
 }
 
-// GetPieceURL generates a piece view URL from year, issue number, page, and optional piece ID
-func GetPieceURL(year, issueNum, page int, pieceID ...string) string {
-	if len(pieceID) > 0 && pieceID[0] != "" && pieceID[0] != "0" {
-		// Use just the piece ID (no year/issue prefix in URL)
-		return "/beitrag/" + pieceID[0]
-	}
-	// Fallback to old format for backward compatibility
-	id := fmt.Sprintf("%d-%03d-%03d", year, issueNum, page)
-	return "/beitrag/" + id
+// GetPieceURL generates a piece view URL from piece ID
+func GetPieceURL(pieceID string) string {
+	return "/beitrag/" + pieceID
 }
 
 // IssueContext formats an issue reference into a readable context string

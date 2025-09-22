@@ -77,3 +77,12 @@ func AuthorsView(lib *xmlmodels.Library) *AgentsListView {
 
 	return &res
 }
+
+// AnonymView creates a synthetic agent for works without associated authors
+func AnonymView(lib *xmlmodels.Library) *xmlmodels.Agent {
+	return &xmlmodels.Agent{
+		Identifier: xmlmodels.Identifier{ID: "anonym"},
+		Names:      []string{"anonym"},
+		Org:        false, // person, not organization
+	}
+}

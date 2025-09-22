@@ -1,17 +1,15 @@
 {{ $a := . }}
-{{ $works := LookupWorks $a }}
-{{ $allPieces := LookupPieces $a }}
+{{ $works := slice }}
+{{ if eq $a.ID "anonym" }}
+	{{ $anonymWorks := LookupAnonymWorks }}
+	{{ range $_, $work := $anonymWorks }}
+		{{ $works = append $works (dict "Item" $work) }}
+	{{ end }}
+{{ else }}
+	{{ $works = LookupWorks $a }}
+{{ end }}
 
-{{- /* Filter pieces for work-related categories */ -}}
-{{- $workPieces := slice -}}
-{{- range $_, $p := $allPieces -}}
-	{{- $categoryFlags := GetCategoryFlags $p.Item -}}
-	{{- if or $categoryFlags.Rezension $categoryFlags.Auszug $categoryFlags.Theaterkritik $categoryFlags.Uebersetzung $categoryFlags.Kommentar $categoryFlags.Replik $categoryFlags.Anzeige $categoryFlags.Provinienz -}}
-		{{- $workPieces = append $workPieces $p -}}
-	{{- end -}}
-{{- end -}}
-
-{{- if or (ne (len $works) 0) (ne (len $workPieces) 0) -}}
+{{ if ne (len $works) 0 }}
 	<div class="mt-4 akteur-werke-section">
 		<div class="py-1 rounded-lg mb-1">
 			<h2 class="font-bold">
@@ -20,7 +18,7 @@
 		</div>
 		<div class="">
 		{{ range $_, $w := $works }}
-			<div class="mb-1.5 break-inside-avoid max-w-[95ch]">
+			<div class="mb-2 break-inside-avoid max-w-[95ch]">
 				{{- if ne (len $w.Item.Citation.InnerXML ) 0 -}}
 					<div class="indent-6">
 						{{- Safe $w.Item.Citation.HTML -}}
@@ -33,94 +31,37 @@
 						{{- end -}}
 					</div>
 				{{- end -}}
+
+				{{- /* Find all pieces that reference this work */ -}}
 				{{ $workPieces := LookupPieces $w.Item }}
 				{{ if len $workPieces }}
-					<div class="mt-1">
-						{{- /* Group pieces by piece ID first to combine all categories per piece, then by additional authors */ -}}
-						{{- $pieceData := dict -}}
+					<div class="">
+						{{- /* Group pieces by category + author combination */ -}}
+						{{- $pieceGroups := dict -}}
 						{{- range $_, $p := $workPieces -}}
+							{{- /* Get categories for this piece */ -}}
 							{{- $categoryFlags := GetCategoryFlags $p.Item -}}
 							{{- $categories := slice -}}
 							{{- if $categoryFlags.Rezension -}}
 								{{- $categories = append $categories "Rezension" -}}
 							{{- end -}}
-							{{- if $categoryFlags.Gedicht -}}
-								{{- $categories = append $categories "Gedicht" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Aufsatz -}}
-								{{- $categories = append $categories "Aufsatz" -}}
+							{{- if $categoryFlags.Auszug -}}
+								{{- $categories = append $categories "Auszug" -}}
 							{{- end -}}
 							{{- if $categoryFlags.Theaterkritik -}}
 								{{- $categories = append $categories "Theaterkritik" -}}
 							{{- end -}}
-							{{- if $categoryFlags.Brief -}}
-								{{- $categories = append $categories "Brief" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Erzaehlung -}}
-								{{- $categories = append $categories "Erzählung" -}}
+							{{- if $categoryFlags.Uebersetzung -}}
+								{{- $categories = append $categories "Übersetzung" -}}
 							{{- end -}}
 							{{- if $categoryFlags.Kommentar -}}
 								{{- $categories = append $categories "Kommentar" -}}
 							{{- end -}}
-							{{- if $categoryFlags.Uebersetzung -}}
-								{{- $categories = append $categories "Übersetzung" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Auszug -}}
-								{{- $categories = append $categories "Auszug" -}}
-							{{- end -}}
 							{{- if $categoryFlags.Replik -}}
 								{{- $categories = append $categories "Replik" -}}
 							{{- end -}}
-							{{- if $categoryFlags.Lokalnachrichten -}}
-								{{- $categories = append $categories "Lokalnachrichten" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Lotterie -}}
-								{{- $categories = append $categories "Lotterie" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Nachruf -}}
-								{{- $categories = append $categories "Nachruf" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Weltnachrichten -}}
-								{{- $categories = append $categories "Weltnachrichten" -}}
-							{{- end -}}
-							{{- if $categoryFlags.EinkommendeFremde -}}
-								{{- $categories = append $categories "Einkommende Fremde" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Wechselkurse -}}
-								{{- $categories = append $categories "Wechselkurse" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Buecher -}}
-								{{- $categories = append $categories "Bücher" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Lokalanzeigen -}}
-								{{- $categories = append $categories "Lokalanzeigen" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Vorladung -}}
-								{{- $categories = append $categories "Vorladung" -}}
-							{{- end -}}
-							{{- if $categoryFlags.GelehrteNachrichten -}}
-								{{- $categories = append $categories "Gelehrte Nachrichten" -}}
-							{{- end -}}
 							{{- if $categoryFlags.Anzeige -}}
 								{{- $categories = append $categories "Anzeige" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Proklamation -}}
-								{{- $categories = append $categories "Proklamation" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Desertionsliste -}}
-								{{- $categories = append $categories "Desertionsliste" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Notenblatt -}}
-								{{- $categories = append $categories "Notenblatt" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Vorlesungsverzeichnis -}}
-								{{- $categories = append $categories "Vorlesungsverzeichnis" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Abbildung -}}
-								{{- $categories = append $categories "Abbildung" -}}
-							{{- end -}}
-							{{- if $categoryFlags.Ineigenersache -}}
-								{{- $categories = append $categories "In eigener Sache" -}}
 							{{- end -}}
 							{{- if $categoryFlags.Provinienz -}}
 								{{- $categories = append $categories "Provinienz" -}}
@@ -129,196 +70,89 @@
 								{{- $categories = append $categories "Beitrag" -}}
 							{{- end -}}
 
-							{{- /* Get additional authors for this specific piece */ -}}
-							{{- $pieceAdditionalAuthorIDs := slice -}}
+							{{- /* Get authors for this piece (excluding current person) */ -}}
+							{{- $pieceAuthors := slice -}}
 							{{- range $agentref := $p.Item.AgentRefs -}}
 								{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
-									{{- $pieceAdditionalAuthorIDs = append $pieceAdditionalAuthorIDs $agentref.Ref -}}
+									{{- $pieceAuthors = append $pieceAuthors $agentref.Ref -}}
 								{{- end -}}
 							{{- end -}}
-							{{- $sortedAdditionalAuthorIDs := sortStrings $pieceAdditionalAuthorIDs -}}
+							{{- $sortedAuthors := sortStrings $pieceAuthors -}}
 
-							{{- /* Store piece data by ID to combine categories and avoid duplicates */ -}}
-							{{- $pieceData = merge $pieceData (dict $p.Item.ID (dict "piece" $p "categories" $categories "additionalAuthorIDs" $sortedAdditionalAuthorIDs)) -}}
-						{{- end -}}
+							{{- /* Create group key: categories + authors */ -}}
+							{{- $sortedCategories := sortStrings $categories -}}
+							{{- $groupKey := printf "%s|%s" (joinWithUnd $sortedCategories) (joinWithUnd $sortedAuthors) -}}
 
-						{{- /* Now group by combined categories and additional authors */ -}}
-						{{- $groupedByCategory := dict -}}
-						{{- range $pieceID, $data := $pieceData -}}
-							{{- $sortedCategories := sortStrings $data.categories -}}
-							{{- $categoryName := joinWithUnd $sortedCategories -}}
-							{{- $groupKey := printf "%s|%s" $categoryName (joinWithUnd $data.additionalAuthorIDs) -}}
-
-							{{- $existing := index $groupedByCategory $groupKey -}}
+							{{- /* Add piece to group (check for duplicates by ID) */ -}}
+							{{- $existing := index $pieceGroups $groupKey -}}
 							{{- if $existing -}}
-								{{- $groupedByCategory = merge $groupedByCategory (dict $groupKey (append $existing $data.piece)) -}}
-							{{- else -}}
-								{{- $groupedByCategory = merge $groupedByCategory (dict $groupKey (slice $data.piece)) -}}
-							{{- end -}}
-						{{- end -}}
-
-						{{- /* Display each category group */ -}}
-						{{- range $groupKey, $categoryPieces := $groupedByCategory -}}
-						<div>
-							<span class="inline-block">
-								{{- /* Extract category and additional authors from group key */ -}}
-								{{- $keyParts := split $groupKey "|" -}}
-								{{- $categoryName := index $keyParts 0 -}}
-
-								{{ $categoryName }}
-								{{- /* Get additional authors from first piece in group */ -}}
-								{{- $firstPiece := index $categoryPieces 0 -}}
-								{{- $additionalAuthorIDs := slice -}}
-								{{- range $agentref := $firstPiece.Item.AgentRefs -}}
-									{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
-										{{- $additionalAuthorIDs = append $additionalAuthorIDs $agentref.Ref -}}
+								{{- /* Check if piece is already in group */ -}}
+								{{- $found := false -}}
+								{{- range $existingPiece := $existing -}}
+									{{- if eq $existingPiece.Item.ID $p.Item.ID -}}
+										{{- $found = true -}}
 									{{- end -}}
 								{{- end -}}
-								{{- if $additionalAuthorIDs -}}
-									{{ " " }}von {{ range $i, $authorID := $additionalAuthorIDs }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}
-								{{- end -}}{{ ":" }}
-							</span>
-							{{- /* Show all citations for this category inline with commas */ -}}
-							{{ " " }}{{- range $pieceIndex, $p := $categoryPieces -}}
-								{{- range $issueIndex, $issue := $p.Item.IssueRefs -}}
-									{{- if or (gt $pieceIndex 0) (gt $issueIndex 0) }}, {{ end -}}
-									<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>{{- end -}}
+								{{- if not $found -}}
+									{{- $pieceGroups = merge $pieceGroups (dict $groupKey (append $existing $p)) -}}
+								{{- end -}}
+							{{- else -}}
+								{{- $pieceGroups = merge $pieceGroups (dict $groupKey (slice $p)) -}}
 							{{- end -}}
-							{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
-							{{- $firstPiece := index $categoryPieces 0 -}}
-							{{- if gt (len $firstPiece.Item.IssueRefs) 1 -}}
-								{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
-									<i class="ri-file-copy-2-line text-xs"></i>
-									<a href="{{ GetPieceURL (index $firstPiece.Item.IssueRefs 0).When.Year (index $firstPiece.Item.IssueRefs 0).Nr (index $firstPiece.Item.IssueRefs 0).Von (index $firstPiece.Item.Keys 0) }}" class="">
-										Ganzer Beitrag
-									</a>
-								</div>
-							{{- end -}}
+						{{- end -}}
+
+						{{- /* Display each group */ -}}
+						{{- range $groupKey, $groupPieces := $pieceGroups -}}
+							<div class="mb-1 text-gray-600">
+								{{- /* Extract categories and authors from group key */ -}}
+								{{- $keyParts := split $groupKey "|" -}}
+								{{- $categoryName := index $keyParts 0 -}}
+								{{- $authorPart := index $keyParts 1 -}}
+
+								{{- /* Use plural if multiple pieces grouped together */ -}}
+								{{- $displayCategory := $categoryName -}}
+								{{- if gt (len $groupPieces) 1 -}}
+									{{- if eq $categoryName "Rezension" -}}
+										{{- $displayCategory = "Rezensionen" -}}
+									{{- else if eq $categoryName "Auszug" -}}
+										{{- $displayCategory = "Auszüge" -}}
+									{{- else if eq $categoryName "Theaterkritik" -}}
+										{{- $displayCategory = "Theaterkritiken" -}}
+									{{- else if eq $categoryName "Übersetzung" -}}
+										{{- $displayCategory = "Übersetzungen" -}}
+									{{- else if eq $categoryName "Kommentar" -}}
+										{{- $displayCategory = "Kommentare" -}}
+									{{- else if eq $categoryName "Replik" -}}
+										{{- $displayCategory = "Repliken" -}}
+									{{- else if eq $categoryName "Anzeige" -}}
+										{{- $displayCategory = "Anzeigen" -}}
+									{{- else if eq $categoryName "Beitrag" -}}
+										{{- $displayCategory = "Beiträge" -}}
+									{{- end -}}
+								{{- end -}}
+								{{ $displayCategory }}{{- if ne $authorPart "" }} von {{ range $i, $authorID := (split $authorPart " und ") }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}{{- end }}:
+								{{- /* Show citations separated by commas */ -}}
+								{{ " " }}{{- range $pieceIndex, $p := $groupPieces -}}
+									{{- range $issueIndex, $issue := $p.Item.IssueRefs -}}
+										{{- if or (gt $pieceIndex 0) (gt $issueIndex 0) }}, {{ end -}}
+										<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>
+									{{- end -}}
+									{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+									{{- if gt (len $p.Item.IssueRefs) 1 -}}
+										{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+											<i class="ri-file-copy-2-line text-xs"></i>
+											<a href="{{ GetPieceURL $p.Item.ID }}" class="">
+												Ganzer Beitrag
+											</a>
+										</div>
+									{{- end -}}
+								{{- end -}}
 							</div>
 						{{- end -}}
 					</div>
 				{{ end }}
 			</div>
 		{{ end }}
-
-		{{- /* Process standalone work pieces that aren't linked to specific works */ -}}
-		{{- if ne (len $workPieces) 0 -}}
-			{{- /* Group standalone work pieces by piece ID first to combine categories, then by additional authors */ -}}
-			{{- $standalonePieceData := dict -}}
-			{{- range $_, $p := $workPieces -}}
-				{{- /* Skip pieces that are already covered by works above */ -}}
-				{{- $isPieceInWorks := false -}}
-				{{- range $_, $w := $works -}}
-					{{- $workPiecesCheck := LookupPieces $w.Item -}}
-					{{- range $_, $wp := $workPiecesCheck -}}
-						{{- if eq $wp.Item.ID $p.Item.ID -}}
-							{{- $isPieceInWorks = true -}}
-						{{- end -}}
-					{{- end -}}
-				{{- end -}}
-
-				{{- if not $isPieceInWorks -}}
-					{{- /* Get categories for this piece */ -}}
-					{{- $categoryFlags := GetCategoryFlags $p.Item -}}
-					{{- $categories := slice -}}
-					{{- if $categoryFlags.Rezension -}}
-						{{- $categories = append $categories "Rezension" -}}
-					{{- end -}}
-					{{- if $categoryFlags.Auszug -}}
-						{{- $categories = append $categories "Auszug" -}}
-					{{- end -}}
-					{{- if $categoryFlags.Theaterkritik -}}
-						{{- $categories = append $categories "Theaterkritik" -}}
-					{{- end -}}
-					{{- if $categoryFlags.Uebersetzung -}}
-						{{- $categories = append $categories "Übersetzung" -}}
-					{{- end -}}
-					{{- if $categoryFlags.Kommentar -}}
-						{{- $categories = append $categories "Kommentar" -}}
-					{{- end -}}
-					{{- if $categoryFlags.Replik -}}
-						{{- $categories = append $categories "Replik" -}}
-					{{- end -}}
-					{{- if $categoryFlags.Anzeige -}}
-						{{- $categories = append $categories "Anzeige" -}}
-					{{- end -}}
-					{{- if $categoryFlags.Provinienz -}}
-						{{- $categories = append $categories "Provinienz" -}}
-					{{- end -}}
-
-					{{- if ne (len $categories) 0 -}}
-						{{- /* Get additional authors for this specific piece */ -}}
-						{{- $pieceAdditionalAuthorIDs := slice -}}
-						{{- range $agentref := $p.Item.AgentRefs -}}
-							{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
-								{{- $pieceAdditionalAuthorIDs = append $pieceAdditionalAuthorIDs $agentref.Ref -}}
-							{{- end -}}
-						{{- end -}}
-						{{- $sortedAdditionalAuthorIDs := sortStrings $pieceAdditionalAuthorIDs -}}
-
-						{{- /* Store piece data by ID to combine categories and avoid duplicates */ -}}
-						{{- $standalonePieceData = merge $standalonePieceData (dict $p.Item.ID (dict "piece" $p "categories" $categories "additionalAuthorIDs" $sortedAdditionalAuthorIDs)) -}}
-					{{- end -}}
-				{{- end -}}
-			{{- end -}}
-
-			{{- /* Now group by combined categories and additional authors */ -}}
-			{{- $standaloneGrouped := dict -}}
-			{{- range $pieceID, $data := $standalonePieceData -}}
-				{{- $sortedCategories := sortStrings $data.categories -}}
-				{{- $categoryName := joinWithUnd $sortedCategories -}}
-				{{- $groupKey := printf "%s|%s" $categoryName (joinWithUnd $data.additionalAuthorIDs) -}}
-
-				{{- $existing := index $standaloneGrouped $groupKey -}}
-				{{- if $existing -}}
-					{{- $standaloneGrouped = merge $standaloneGrouped (dict $groupKey (append $existing $data.piece)) -}}
-				{{- else -}}
-					{{- $standaloneGrouped = merge $standaloneGrouped (dict $groupKey (slice $data.piece)) -}}
-				{{- end -}}
-			{{- end -}}
-
-			{{- /* Display standalone work pieces */ -}}
-			{{- range $groupKey, $categoryPieces := $standaloneGrouped -}}
-				<div class="mb-1.5 break-inside-avoid max-w-[95ch]">
-					<div class="">
-						<span class="inline-block">
-							{{- /* Extract category and additional authors from group key */ -}}
-							{{- $keyParts := split $groupKey "|" -}}
-							{{- $categoryName := index $keyParts 0 -}}
-
-							{{ $categoryName }}
-							{{- /* Get additional authors from first piece in group */ -}}
-							{{- $firstPiece := index $categoryPieces 0 -}}
-							{{- $additionalAuthorIDs := slice -}}
-							{{- range $agentref := $firstPiece.Item.AgentRefs -}}
-								{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
-									{{- $additionalAuthorIDs = append $additionalAuthorIDs $agentref.Ref -}}
-								{{- end -}}
-							{{- end -}}
-							{{- if $additionalAuthorIDs -}}
-								{{ " " }}von {{ range $i, $authorID := $additionalAuthorIDs }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}
-							{{- end -}}{{ ":" }}
-						</span>
-						{{- /* Show all citations for this category inline with commas */ -}}
-						{{ " " }}{{- range $pieceIndex, $p := $categoryPieces -}}
-							{{- range $issueIndex, $issue := $p.Item.IssueRefs -}}
-								{{- if or (gt $pieceIndex 0) (gt $issueIndex 0) }}, {{ end -}}
-								<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>{{- end -}}
-						{{- end -}}
-						{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
-						{{- $firstPiece := index $categoryPieces 0 -}}
-						{{- if gt (len $firstPiece.Item.IssueRefs) 1 -}}
-							{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
-								<i class="ri-file-copy-2-line text-xs"></i>
-								<a href="{{ GetPieceURL (index $firstPiece.Item.IssueRefs 0).When.Year (index $firstPiece.Item.IssueRefs 0).Nr (index $firstPiece.Item.IssueRefs 0).Von (index $firstPiece.Item.Keys 0) }}" class="">
-									Ganzer Beitrag
-								</a>
-							</div>
-						{{- end -}}
-					</div>
-				</div>
-			{{- end -}}
-		{{- end -}}
 
 		</div>
 	</div>

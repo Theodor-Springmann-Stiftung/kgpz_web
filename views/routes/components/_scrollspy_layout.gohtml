@@ -23,7 +23,9 @@
 						       {{ if eq .Search "autoren" }}checked{{ end }}
 						       autocomplete="off"
 						       hx-get="{{ if eq .Search "autoren" }}/akteure/a{{ else }}/akteure/autoren{{ end }}"
-						       hx-target="body"
+									 hx-select="main"
+						       hx-target="main"
+									 hx-swap="innerHTML show:window:top focus-scroll:false"
 						       hx-push-url="true">
 						<span class="ml-2 text-base text-gray-700">Nur Autor:innen anzeigen</span>
 					</label>

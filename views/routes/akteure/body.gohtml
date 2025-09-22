@@ -13,11 +13,18 @@
 		<div class="max-w-7xl mx-auto px-8 py-8">
 			<div class="bg-white px-6 py-6 rounded">
 				<div class="mb-6">
-					{{ $letter := Upper (FirstLetter $agent.ID) }}
-					<a href="/akteure/{{ $letter }}" class="inline-flex items-center text-black hover:text-gray-700 transition-colors text-xl no-underline font-bold">
-						<i class="ri-arrow-left-line mr-3 text-xl font-bold"></i>
-						{{ $letter }}
-					</a>
+					{{ if eq $agent.ID "anonym" }}
+						<a href="/akteure/a" class="inline-flex items-center text-black hover:text-gray-700 transition-colors text-xl no-underline font-bold">
+							<i class="ri-arrow-left-line mr-3 text-xl font-bold"></i>
+							A
+						</a>
+					{{ else }}
+						{{ $letter := Upper (FirstLetter $agent.ID) }}
+						<a href="/akteure/{{ $letter }}" class="inline-flex items-center text-black hover:text-gray-700 transition-colors text-xl no-underline font-bold">
+							<i class="ri-arrow-left-line mr-3 text-xl font-bold"></i>
+							{{ $letter }}
+						</a>
+					{{ end }}
 				</div>
 				{{ template "_akteur" $agent }}
 			</div>
@@ -65,6 +72,13 @@
 								<!-- This is an inactive letter -->
 								<a href="/akteure/{{ $l }}" class="no-underline leading-none !m-0 !p-0 text-2xl font-medium text-gray-700 hover:text-red-600 transition-colors">{{ $l }}</a>
 							{{ end }}
+						{{ end }}
+						<!-- Separator and Anonym link -->
+						<span class="text-gray-400 text-2xl">|</span>
+						{{ if eq $.model.Search "anonym" }}
+							<span class="no-underline leading-none !m-0 !p-0 text-4xl font-bold text-red-600 pointer-events-none" aria-current="true">anonym</span>
+						{{ else }}
+							<a href="/akteure/anonym" class="no-underline leading-none !m-0 !p-0 text-2xl font-medium text-gray-700 hover:text-red-600 transition-colors">anonym</a>
 						{{ end }}
 					</div>
 				</div>

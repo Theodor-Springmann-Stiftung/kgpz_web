@@ -11,7 +11,7 @@ class H extends HTMLElement {
     if (this.sections = document.querySelectorAll(".author-section"), this.navLinks = document.querySelectorAll(".scrollspy-link"), this.sections.length === 0 || this.navLinks.length === 0) {
       setTimeout(() => {
         this.sections = document.querySelectorAll(".author-section"), this.navLinks = document.querySelectorAll(".scrollspy-link"), this.sections.length > 0 && this.navLinks.length > 0 && this.initializeScrollspy();
-      }, 200);
+      }, 500);
       return;
     }
     this.initializeScrollspy();

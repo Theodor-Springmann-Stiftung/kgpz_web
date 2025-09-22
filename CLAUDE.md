@@ -256,16 +256,15 @@ The application supports viewing pieces/articles that span multiple issues throu
 
 ### URL Structure & Routing
 
-**URL Pattern**: `/beitrag/:id` where ID format is `YYYY-NNN-PPP` (year-issue-page)
-- **Example**: `/beitrag/1768-020-079` (piece starting at year 1768, issue 20, page 79)
+**URL Pattern**: `/beitrag/:id` where ID is the piece's XML ID
+- **Example**: `/beitrag/piece-abc123` (piece with XML ID "piece-abc123")
 - **Route Definition**: `PIECE_URL = "/beitrag/:id"` in `app/kgpz.go`
 - **Controller**: `controllers.GetPiece(k.Library)` handles piece lookup and rendering
 
 ### Architecture & Components
 
 **Controller** (`controllers/piece_controller.go`):
-- Parses YYYY-NNN-PPP ID format using regex pattern matching
-- Looks up pieces by year/issue/page when XML IDs aren't reliable
+- Looks up pieces directly by XML ID
 - Handles piece aggregation across multiple issues
 - Returns 404 for invalid IDs or non-existent pieces
 
@@ -327,7 +326,7 @@ The application supports viewing pieces/articles that span multiple issues throu
 
 **Linking to Pieces**:
 ```gohtml
-<a href="{{ GetPieceURL $piece.Reference.When.Year $piece.Reference.Nr $piece.Reference.Von }}">
+<a href="{{ GetPieceURL $piece.ID }}">
     gesamten beitrag anzeigen
 </a>
 ```
@@ -342,7 +341,7 @@ The application supports viewing pieces/articles that span multiple issues throu
 
 ### Error Handling
 
-**Invalid IDs**: Returns 404 for malformed YYYY-NNN-PPP format
+**Invalid IDs**: Returns 404 for non-existent piece IDs
 **Missing Pieces**: Returns 404 when piece lookup fails in XML data
 **Missing Images**: Graceful fallback with "Keine Bilder verfügbar" message
 **Cross-Issue Navigation**: Handles pieces spanning non-consecutive issues
