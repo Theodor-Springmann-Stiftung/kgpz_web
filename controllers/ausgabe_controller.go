@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/viewmodels"
@@ -31,16 +32,39 @@ func GetIssue(kgpz *xmlmodels.Library) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		// Handle optional page parameter
+		// Handle optional page parameter (supports regular pages and Beilage format like b1-1, b2-2)
 		pageParam := c.Params("page")
 		var targetPage int
+		var beilageNumber int
+		var isBeilage bool
 		if pageParam != "" {
-			pi, err := strconv.Atoi(pageParam)
-			if err != nil || pi < 1 {
-				logging.Error(err, "Page is not a valid number")
-				return c.SendStatus(fiber.StatusNotFound)
+			if strings.HasPrefix(pageParam, "b") {
+				// Handle Beilage format: b1-1, b2-2, etc.
+				parts := strings.Split(pageParam[1:], "-")
+				if len(parts) == 2 {
+					beilageNum, beilageErr := strconv.Atoi(parts[0])
+					pageNum, pageErr := strconv.Atoi(parts[1])
+					if beilageErr == nil && pageErr == nil && beilageNum > 0 && pageNum > 0 {
+						beilageNumber = beilageNum
+						targetPage = pageNum
+						isBeilage = true
+					} else {
+						logging.Error(nil, "Beilage page format is invalid")
+						return c.SendStatus(fiber.StatusNotFound)
+					}
+				} else {
+					logging.Error(nil, "Beilage page format is invalid")
+					return c.SendStatus(fiber.StatusNotFound)
+				}
+			} else {
+				// Handle regular page number
+				pi, err := strconv.Atoi(pageParam)
+				if err != nil || pi < 1 {
+					logging.Error(err, "Page is not a valid number")
+					return c.SendStatus(fiber.StatusNotFound)
+				}
+				targetPage = pi
 			}
-			targetPage = pi
 		}
 
 		issue, err := viewmodels.NewSingleIssueView(yi, di, kgpz)
@@ -52,12 +76,20 @@ func GetIssue(kgpz *xmlmodels.Library) fiber.Handler {
 
 		// If a page was specified, validate it exists in this issue
 		if targetPage > 0 {
-			if targetPage < issue.Issue.Von || targetPage > issue.Issue.Bis {
-				logging.Debug(fmt.Sprintf("Page %d not found in issue %d/%d (range: %d-%d)", targetPage, yi, di, issue.Issue.Von, issue.Issue.Bis))
-				return c.SendStatus(fiber.StatusNotFound)
+			if isBeilage {
+				// For Beilage pages, check if the issue has supplements and validate the page range
+				// This validation is more complex as it depends on the actual Beilage structure
+				// For now, we'll accept any valid Beilage format and let the template handle validation
+				logging.Debug(fmt.Sprintf("Accessing Beilage %d, page %d in issue %d/%d", beilageNumber, targetPage, yi, di))
+			} else {
+				// For regular pages, validate against the issue's page range
+				if targetPage < issue.Issue.Von || targetPage > issue.Issue.Bis {
+					logging.Debug(fmt.Sprintf("Page %d not found in issue %d/%d (range: %d-%d)", targetPage, yi, di, issue.Issue.Von, issue.Issue.Bis))
+					return c.SendStatus(fiber.StatusNotFound)
+				}
 			}
 		}
 
-		return c.Render("/ausgabe/", fiber.Map{"model": issue, "year": yi, "issue": di, "targetPage": targetPage}, "fullwidth")
+		return c.Render("/ausgabe/", fiber.Map{"model": issue, "year": yi, "issue": di, "targetPage": targetPage, "beilageNumber": beilageNumber, "isBeilage": isBeilage}, "fullwidth")
 	}
 }

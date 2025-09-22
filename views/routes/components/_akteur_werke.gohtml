@@ -182,22 +182,7 @@
 							{{ " " }}{{- range $pieceIndex, $p := $categoryPieces -}}
 								{{- range $issueIndex, $issue := $p.Item.IssueRefs -}}
 									{{- if or (gt $pieceIndex 0) (gt $issueIndex 0) }}, {{ end -}}
-									{{ $issueData := GetIssue (printf "%d-%d" $issue.When.Year $issue.Nr) }}
-									{{- $url := printf "/%s/%d" $issue.When $issue.Nr -}}
-									{{- if $issue.Von -}}
-										{{- if $issue.Beilage -}}
-											{{- $url = printf "%s#beilage-%d-page-%d" $url $issue.Beilage $issue.Von -}}
-										{{- else -}}
-											{{- $url = printf "%s/%d" $url $issue.Von -}}
-										{{- end -}}
-									{{- end -}}
-									<a href="{{ $url }}" class="text-blue-700 hover:text-blue-800">
-										{{- if $issueData -}}
-											{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
-										{{- else -}}
-											{{ $issue.When.Day }}.{{ $issue.When.Month }}.{{ $issue.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
-										{{- end -}}
-									</a>
+									{{ template "_citation" $issue }}
 								{{- end -}}
 							{{- end -}}
 							{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
@@ -319,22 +304,7 @@
 						{{ " " }}{{- range $pieceIndex, $p := $categoryPieces -}}
 							{{- range $issueIndex, $issue := $p.Item.IssueRefs -}}
 								{{- if or (gt $pieceIndex 0) (gt $issueIndex 0) }}, {{ end -}}
-								{{ $issueData := GetIssue (printf "%d-%d" $issue.When.Year $issue.Nr) }}
-								{{- $url := printf "/%s/%d" $issue.When $issue.Nr -}}
-								{{- if $issue.Von -}}
-									{{- if $issue.Beilage -}}
-										{{- $url = printf "%s#beilage-%d-page-%d" $url $issue.Beilage $issue.Von -}}
-									{{- else -}}
-										{{- $url = printf "%s/%d" $url $issue.Von -}}
-									{{- end -}}
-								{{- end -}}
-								<a href="{{ $url }}" class="text-blue-700 hover:text-blue-800">
-									{{- if $issueData -}}
-										{{ $issueData.Datum.When.Day }}.{{ $issueData.Datum.When.Month }}.{{ $issueData.Datum.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
-									{{- else -}}
-										{{ $issue.When.Day }}.{{ $issue.When.Month }}.{{ $issue.When.Year }}/{{ $issue.Nr }}, S. {{ $issue.Von }}{{- if and $issue.Bis (ne $issue.Von $issue.Bis) }}-{{ $issue.Bis }}{{ end }}
-									{{- end -}}
-								</a>
+								{{ template "_citation" $issue }}
 							{{- end -}}
 						{{- end -}}
 						{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
