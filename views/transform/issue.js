@@ -229,12 +229,20 @@ export function scrollToBeilage() {
 			});
 		}
 	} else {
-		// Go to first beilage container
-		const beilageContainer = document.querySelector('[class*="border-t-2 border-amber-200"]');
+		// Go to first beilage container - look for the first beilage page container
+		const beilageContainer = document.querySelector('[data-beilage="true"]');
 		if (beilageContainer) {
 			beilageContainer.scrollIntoView({
 				block: "start",
 			});
+		} else {
+			// Fallback: try to find beilage header section
+			const beilageHeader = document.querySelector('.bg-amber-50');
+			if (beilageHeader) {
+				beilageHeader.scrollIntoView({
+					block: "start",
+				});
+			}
 		}
 	}
 }

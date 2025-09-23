@@ -134,8 +134,8 @@ class H extends HTMLElement {
       document.documentElement.offsetHeight
     ), o = window.innerHeight, s = n - o, a = s > 0 ? window.scrollY / s : 0, l = t.clientHeight, d = t.scrollHeight - l;
     if (d > 0) {
-      const g = a * d, u = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = u.top - p.top + t.scrollTop, m = l / 2, L = f - m, y = 0.7, I = y * g + (1 - y) * L, x = Math.max(0, Math.min(d, I)), T = t.scrollTop;
-      Math.abs(x - T) > 10 && t.scrollTo({
+      const g = a * d, u = i.getBoundingClientRect(), p = t.getBoundingClientRect(), b = u.top - p.top + t.scrollTop, m = l / 2, I = b - m, y = 0.7, T = y * g + (1 - y) * I, x = Math.max(0, Math.min(d, T)), L = t.scrollTop;
+      Math.abs(x - L) > 10 && t.scrollTo({
         top: x,
         behavior: "smooth"
       });
@@ -289,13 +289,13 @@ class A extends HTMLElement {
     if (l)
       u = l;
     else {
-      const f = this.getIssueContext(i);
-      u = f ? `${f}, ${i}` : `${i}`;
+      const b = this.getIssueContext(i);
+      u = b ? `${b}, ${i}` : `${i}`;
     }
     if (d.innerHTML = u, o && i === o) {
       d.style.position = "relative";
-      const f = d.querySelector(".target-page-dot");
-      f && f.remove();
+      const b = d.querySelector(".target-page-dot");
+      b && b.remove();
       const m = document.createElement("span");
       m.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", m.title = "verlinkte Seite", d.appendChild(m);
     }
@@ -580,7 +580,7 @@ class N extends HTMLElement {
         const n = i.target.getAttribute("data-page-container"), o = this.pageContainers.get(n);
         if (o) {
           const a = i.isIntersecting && i.intersectionRatio >= 0.5 || this.singlePageViewerActive ? "full" : "short";
-          o.state !== a && (o.state = a, this.updateEntriesState(o));
+          o.state !== a ? (o.state = a, this.updateEntriesState(o)) : a === "full" && i.isIntersecting && i.intersectionRatio >= 0.5 && this.scrollPageIntoInhaltsverzeichnis(o);
         }
       });
     }, {
@@ -611,12 +611,44 @@ class N extends HTMLElement {
     const i = e.container.getAttribute("data-page-container"), n = this.querySelector(`[data-page-number="${i}"]`);
     (a = n == null ? void 0 : n.closest(".page-entry")) == null || a.querySelector(".icon-container");
     const o = n == null ? void 0 : n.closest(".page-entry");
-    o && (t ? (o.classList.add("!border-l-red-500"), o.classList.remove("border-slate-300")) : (o.classList.remove("!border-l-red-500"), o.classList.add("border-slate-300")));
+    o && (t ? (o.classList.add("!border-l-red-500"), o.classList.remove("border-slate-300")) : (o.classList.remove("!border-l-red-500"), o.classList.add("border-slate-300")), t && this.scrollEntryIntoView(o));
     const s = document.querySelector(`[data-page="${i}"].page-indicator`);
     if (s) {
       const l = s.querySelectorAll("i:not(.text-slate-400)");
       t ? (s.classList.add("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.add("!text-red-600"))) : (s.classList.remove("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.remove("!text-red-600")));
     }
+  }
+  scrollEntryIntoView(e) {
+    const t = document.querySelector(".overflow-y-auto");
+    if (!t || !e)
+      return;
+    const i = t.querySelectorAll(".page-entry"), n = i.length > 0 && i[0] === e, o = i.length > 0 && i[i.length - 1] === e;
+    if (n) {
+      t.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+      return;
+    }
+    if (o) {
+      t.scrollTo({
+        top: t.scrollHeight,
+        behavior: "smooth"
+      });
+      return;
+    }
+    const s = t.getBoundingClientRect(), a = e.getBoundingClientRect();
+    if (!(a.top >= s.top && a.bottom <= s.bottom)) {
+      const c = t.scrollTop, d = a.top - s.top + c, g = s.height, u = a.height, p = d - (g - u) / 2;
+      t.scrollTo({
+        top: Math.max(0, p),
+        behavior: "smooth"
+      });
+    }
+  }
+  scrollPageIntoInhaltsverzeichnis(e) {
+    const t = e.container.getAttribute("data-page-container"), i = this.querySelector(`[data-page-number="${t}"]`), n = i == null ? void 0 : i.closest(".page-entry");
+    n && this.scrollEntryIntoView(n);
   }
   setupSinglePageViewerDetection() {
     document.addEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.checkSinglePageViewerState();
@@ -664,7 +696,7 @@ function k() {
   document.getElementById("pageModal").classList.add("hidden");
 }
 function V() {
-  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, b(), document.querySelector(".newspaper-page-container")) {
+  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, f(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
       (t) => {
@@ -673,7 +705,7 @@ function V() {
           n !== -1 && (i.isIntersecting ? e.add(n) : e.delete(n));
         }), e.size > 0) {
           const n = Array.from(e).sort((o, s) => o - s)[0];
-          n !== window.currentActiveIndex && (window.currentActiveIndex = n, b());
+          n !== window.currentActiveIndex && (window.currentActiveIndex = n, f());
         }
       },
       {
@@ -701,7 +733,7 @@ function $() {
     r === -1 && t > 0 && (r = t - 1), r >= 0 && (window.currentActiveIndex = r, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
-      b();
+      f();
     }, 100));
   }
 }
@@ -722,7 +754,7 @@ function M() {
     r === -1 && t < window.currentPageContainers.length - 1 && (r = t + 1), r >= 0 && r < window.currentPageContainers.length && (window.currentActiveIndex = r, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
-      b();
+      f();
     }, 100));
   }
 }
@@ -733,10 +765,17 @@ function R() {
       block: "start"
     });
   } else {
-    const e = document.querySelector('[class*="border-t-2 border-amber-200"]');
-    e && e.scrollIntoView({
-      block: "start"
-    });
+    const e = document.querySelector('[data-beilage="true"]');
+    if (e)
+      e.scrollIntoView({
+        block: "start"
+      });
+    else {
+      const t = document.querySelector(".bg-amber-50");
+      t && t.scrollIntoView({
+        block: "start"
+      });
+    }
   }
 }
 function E() {
@@ -752,7 +791,7 @@ function E() {
   }
   return !1;
 }
-function b() {
+function f() {
   const r = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
   if (r && (r.style.display = "flex", window.currentActiveIndex <= 0 ? (r.disabled = !0, r.classList.add("opacity-50", "cursor-not-allowed"), r.classList.remove("hover:bg-gray-200")) : (r.disabled = !1, r.classList.remove("opacity-50", "cursor-not-allowed"), r.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
     const i = E(), n = t.querySelector("i");
@@ -910,7 +949,7 @@ function D(r, e) {
 function P() {
   V(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
-      b();
+      f();
     }, 50);
   }), document.addEventListener("keydown", function(r) {
     r.key === "Escape" && k();
@@ -968,7 +1007,7 @@ window.shareCurrentPage = z;
 window.generateCitation = O;
 window.copyPagePermalink = K;
 window.generatePageCitation = D;
-function Z() {
+function W() {
   C(), w(), document.querySelector(".newspaper-page-container") && P();
   let r = function(t) {
     C(), w(), j(), setTimeout(() => {
@@ -979,5 +1018,5 @@ function Z() {
   document.body.addEventListener("htmx:afterSettle", r), document.body.addEventListener("htmx:afterSettle", w), document.body.addEventListener("htmx:beforeRequest", e);
 }
 export {
-  Z as setup
+  W as setup
 };

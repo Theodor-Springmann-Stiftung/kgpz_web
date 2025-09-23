@@ -44,13 +44,12 @@
 						</button>
 
 						{{ if $model.HasBeilageButton }}
-							<button
-								id="beilageBtn"
-								onclick="scrollToBeilage()"
-								class="w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer"
+							<a
+								href="#beilage"
+								class="w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer no-underline"
 								title="Zu Beilage">
 								<i class="ri-attachment-line text-lg lg:text-xl"></i>
-							</button>
+							</a>
 						{{ end }}
 
 

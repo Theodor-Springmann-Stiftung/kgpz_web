@@ -8,7 +8,7 @@
 		{{ $pageCount := len $pages }}
 
 		<!-- Historical printing layout grid -->
-		<div class="grid grid-cols-2 gap-4">
+		<div class="grid grid-cols-2">
 			{{ template "_historical_layout" (dict "pages" $pages "pageCount" $pageCount "isBeilage" false "targetPage" $.targetPage) }}
 		</div>
 	{{ end }}
@@ -19,14 +19,14 @@
 		{{ if $beilagePages }}
 			<div class="mt-12 pt-8">
 				<!-- Header for beilage -->
-				<div class="flex items-center gap-3 mb-6 bg-amber-50 px-4 py-3 rounded border border-amber-200">
+				<div id="beilage" class="flex items-center gap-3 mb-6 bg-amber-50 px-4 py-3 rounded border border-amber-200">
 					<i class="ri-attachment-line text-2xl text-amber-600"></i>
 					<h2 class="text-xl font-semibold text-slate-800">Beilage</h2>
 				</div>
 				{{ $pageCount := len $beilagePages }}
 
 				<!-- Historical printing layout grid for Beilage -->
-				<div class="grid grid-cols-2 gap-4">
+				<div class="grid grid-cols-2">
 					{{ template "_historical_layout" (dict "pages" $beilagePages "pageCount" $pageCount "isBeilage" true "targetPage" $.targetPage) }}
 				</div>
 			</div>
@@ -125,7 +125,7 @@
 		{{ $idPrefix = "beilage-1-page" }}
 	{{ end }}
 
-	<div class="newspaper-page-container" id="{{ $idPrefix }}-{{ $page.PageNumber }}" data-page-container="{{ $page.PageNumber }}" data-page-icon-type="{{ $page.PageIcon }}"{{ if $isBeilage }} data-beilage="true"{{ end }}>
+	<div class="newspaper-page-container pt-4" id="{{ $idPrefix }}-{{ $page.PageNumber }}" data-page-container="{{ $page.PageNumber }}" data-page-icon-type="{{ $page.PageIcon }}"{{ if $isBeilage }} data-beilage="true"{{ end }}>
 		<!-- Anchor for navigation -->
 		{{ if $isBeilage }}
 			<div id="beilage-{{ $page.PageNumber }}"></div>

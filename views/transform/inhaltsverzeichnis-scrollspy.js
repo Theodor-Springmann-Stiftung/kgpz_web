@@ -67,9 +67,13 @@ export class InhaltsverzeichnisScrollspy extends HTMLElement {
                     const shouldBeFullMode = entry.isIntersecting && entry.intersectionRatio >= 0.5;
                     const newState = shouldBeFullMode || this.singlePageViewerActive ? 'full' : 'short';
 
-                    if (pageData.state !== newState) {
+                    const stateChanged = pageData.state !== newState;
+                    if (stateChanged) {
                         pageData.state = newState;
                         this.updateEntriesState(pageData);
+                    } else if (newState === 'full' && entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                        // Page is becoming visible and should be highlighted - trigger scroll even if state didn't change
+                        this.scrollPageIntoInhaltsverzeichnis(pageData);
                     }
                 }
             });
@@ -142,6 +146,11 @@ export class InhaltsverzeichnisScrollspy extends HTMLElement {
                 pageEntryContainer.classList.remove('!border-l-red-500');
                 pageEntryContainer.classList.add('border-slate-300');
             }
+
+            // Always scroll highlighted entry into view when it becomes active
+            if (highlight) {
+                this.scrollEntryIntoView(pageEntryContainer);
+            }
         }
 
         // 2. Highlight in layout view (page indicator above image)
@@ -160,6 +169,71 @@ export class InhaltsverzeichnisScrollspy extends HTMLElement {
         }
     }
 
+    scrollEntryIntoView(pageEntryContainer) {
+        // Find the scrollable Inhaltsverzeichnis container
+        const scrollableContainer = document.querySelector('.overflow-y-auto');
+
+        if (!scrollableContainer || !pageEntryContainer) {
+            return;
+        }
+
+        // Check if this is the first or last page entry to handle edge cases
+        const allPageEntries = scrollableContainer.querySelectorAll('.page-entry');
+        const isFirstPage = allPageEntries.length > 0 && allPageEntries[0] === pageEntryContainer;
+        const isLastPage = allPageEntries.length > 0 && allPageEntries[allPageEntries.length - 1] === pageEntryContainer;
+
+        if (isFirstPage) {
+            // Scroll to the very top for the first page
+            scrollableContainer.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            return;
+        }
+
+        if (isLastPage) {
+            // Scroll to the very bottom for the last page
+            scrollableContainer.scrollTo({
+                top: scrollableContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+            return;
+        }
+
+        // Get container and element positions for middle pages
+        const containerRect = scrollableContainer.getBoundingClientRect();
+        const elementRect = pageEntryContainer.getBoundingClientRect();
+
+        // Check if element is already fully visible
+        const isVisible = elementRect.top >= containerRect.top &&
+                         elementRect.bottom <= containerRect.bottom;
+
+        if (!isVisible) {
+            // Calculate the scroll position to center the element in the container
+            const containerScrollTop = scrollableContainer.scrollTop;
+            const elementTop = elementRect.top - containerRect.top + containerScrollTop;
+            const containerHeight = containerRect.height;
+            const elementHeight = elementRect.height;
+
+            // Center the element in the container
+            const scrollTo = elementTop - (containerHeight - elementHeight) / 2;
+
+            scrollableContainer.scrollTo({
+                top: Math.max(0, scrollTo),
+                behavior: 'smooth'
+            });
+        }
+    }
+
+    scrollPageIntoInhaltsverzeichnis(pageData) {
+        const pageNumber = pageData.container.getAttribute('data-page-container');
+        const pageLink = this.querySelector(`[data-page-number="${pageNumber}"]`);
+        const pageEntryContainer = pageLink?.closest('.page-entry');
+
+        if (pageEntryContainer) {
+            this.scrollEntryIntoView(pageEntryContainer);
+        }
+    }
 
     setupSinglePageViewerDetection() {
         // Listen for single page viewer events
