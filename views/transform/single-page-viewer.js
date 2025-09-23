@@ -585,8 +585,34 @@ export class SinglePageViewer extends HTMLElement {
 	// Update image transform based on zoom and pan
 	updateImageTransform() {
 		const img = this.querySelector('#single-page-image');
+		const imageContainer = this.querySelector('#image-container');
+
 		// Use translate3d for hardware acceleration and better performance
 		img.style.transform = `scale(${this.zoomLevel}) translate3d(${this.panX / this.zoomLevel}px, ${this.panY / this.zoomLevel}px, 0)`;
+
+		// Make the container grow with the zoom level to provide scrollable area
+		if (this.zoomLevel > 1.0) {
+			// Use viewport dimensions as base and scale them up
+			const viewportWidth = window.innerWidth;
+			const viewportHeight = window.innerHeight;
+
+			// Make container much larger than viewport to ensure scrollable area
+			const containerWidth = viewportWidth * this.zoomLevel * 1.5;
+			const containerHeight = viewportHeight * this.zoomLevel * 1.5;
+
+			imageContainer.style.width = `${containerWidth}px`;
+			imageContainer.style.height = `${containerHeight}px`;
+			imageContainer.style.minWidth = `${containerWidth}px`;
+			imageContainer.style.minHeight = `${containerHeight}px`;
+
+			console.log(`Zoom ${this.zoomLevel}: Container size set to ${containerWidth}x${containerHeight}`);
+		} else {
+			// Reset container size at 100% zoom
+			imageContainer.style.width = '';
+			imageContainer.style.height = '';
+			imageContainer.style.minWidth = '';
+			imageContainer.style.minHeight = '';
+		}
 	}
 
 
@@ -637,20 +663,27 @@ export class SinglePageViewer extends HTMLElement {
 	// Update scroll behavior based on zoom level
 	updateScrollBehavior() {
 		const mainContainer = this.querySelector('.flex-1.bg-slate-50.overflow-auto');
-		const imageContainer = this.querySelector('#image-scroll-container');
+		const imageScrollContainer = this.querySelector('#image-scroll-container');
 
-		if (!mainContainer || !imageContainer) return;
+		if (!mainContainer || !imageScrollContainer) return;
 
 		if (this.zoomLevel > 1.0) {
 			// Disable scrolling on main container and make image container full height
 			mainContainer.style.overflow = 'hidden';
-			imageContainer.style.height = '100vh';
-			imageContainer.style.overflow = 'hidden';
+			imageScrollContainer.style.height = '100vh';
+			// Allow overflow in both directions for panning with scroll wheel/two fingers
+			imageScrollContainer.style.overflow = 'auto';
+			// Remove the centering behavior when zoomed to allow full scrolling
+			imageScrollContainer.style.alignItems = 'flex-start';
+			imageScrollContainer.style.justifyContent = 'flex-start';
 		} else {
 			// Reset to normal scrolling behavior
 			mainContainer.style.overflow = 'auto';
-			imageContainer.style.height = '';
-			imageContainer.style.overflow = 'auto';
+			imageScrollContainer.style.height = '';
+			imageScrollContainer.style.overflow = 'auto';
+			// Restore centering at 100% zoom
+			imageScrollContainer.style.alignItems = 'center';
+			imageScrollContainer.style.justifyContent = 'center';
 		}
 	}
 

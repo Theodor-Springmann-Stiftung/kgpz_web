@@ -424,8 +424,12 @@ class B extends HTMLElement {
   }
   // Update image transform based on zoom and pan
   updateImageTransform() {
-    const e = this.querySelector("#single-page-image");
-    e.style.transform = `scale(${this.zoomLevel}) translate3d(${this.panX / this.zoomLevel}px, ${this.panY / this.zoomLevel}px, 0)`;
+    const e = this.querySelector("#single-page-image"), t = this.querySelector("#image-container");
+    if (e.style.transform = `scale(${this.zoomLevel}) translate3d(${this.panX / this.zoomLevel}px, ${this.panY / this.zoomLevel}px, 0)`, this.zoomLevel > 1) {
+      const i = window.innerWidth, n = window.innerHeight, o = i * this.zoomLevel * 1.5, r = n * this.zoomLevel * 1.5;
+      t.style.width = `${o}px`, t.style.height = `${r}px`, t.style.minWidth = `${o}px`, t.style.minHeight = `${r}px`, console.log(`Zoom ${this.zoomLevel}: Container size set to ${o}x${r}`);
+    } else
+      t.style.width = "", t.style.height = "", t.style.minWidth = "", t.style.minHeight = "";
   }
   // Update cursor based on zoom state
   updateCursor() {
@@ -440,7 +444,7 @@ class B extends HTMLElement {
   // Update scroll behavior based on zoom level
   updateScrollBehavior() {
     const e = this.querySelector(".flex-1.bg-slate-50.overflow-auto"), t = this.querySelector("#image-scroll-container");
-    !e || !t || (this.zoomLevel > 1 ? (e.style.overflow = "hidden", t.style.height = "100vh", t.style.overflow = "hidden") : (e.style.overflow = "auto", t.style.height = "", t.style.overflow = "auto"));
+    !e || !t || (this.zoomLevel > 1 ? (e.style.overflow = "hidden", t.style.height = "100vh", t.style.overflow = "auto", t.style.alignItems = "flex-start", t.style.justifyContent = "flex-start") : (e.style.overflow = "auto", t.style.height = "", t.style.overflow = "auto", t.style.alignItems = "center", t.style.justifyContent = "center"));
   }
   // Reset zoom state when showing new image
   resetZoom() {
@@ -744,7 +748,7 @@ customElements.define("inhaltsverzeichnis-scrollspy", q);
 window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
-function M(s, e, t, i = null) {
+function z(s, e, t, i = null) {
   let n = document.querySelector("single-page-viewer");
   n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
   const o = s.closest('[data-beilage="true"]') !== null, r = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, a = s.closest(".newspaper-page-container, .piece-page-container");
@@ -762,7 +766,7 @@ function M(s, e, t, i = null) {
 function C() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function z() {
+function M() {
   if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, b(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
@@ -1007,7 +1011,7 @@ function O(s, e) {
   }
 }
 function P() {
-  z(), window.addEventListener("scroll", function() {
+  M(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
       b();
     }, 50);
@@ -1058,7 +1062,7 @@ function Y() {
     }
   }
 }
-window.enlargePage = M;
+window.enlargePage = z;
 window.closeModal = C;
 window.scrollToPreviousPage = N;
 window.scrollToNextPage = $;
