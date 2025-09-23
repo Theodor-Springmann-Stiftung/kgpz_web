@@ -1,10 +1,10 @@
 {{ $model := .model }}
 
 
-<div class="hyphens-auto mx-3">
+<inhaltsverzeichnis-scrollspy class="hyphens-auto mx-3">
 	{{- if $model.Pieces.Pages -}}
 		<div class="space-y-4">
-			<div class="mb-4"></div>
+			<div class="mb-2"></div>
 			{{ range $page := $model.Pieces.Pages }}
 				{{ $pageItems := (index $model.Pieces.Items $page) }}
 				{{ $firstItem := "" }}
@@ -13,7 +13,7 @@
 
 				<!-- Individual page entry -->
 				<div
-					class="mb-6 first:mb-0 pl-4 border-l-4 border-slate-300 page-entry"
+					class="mb-4 first:mb-0 pl-2 3xl:pl-4 border-l-4 border-slate-300 page-entry"
 					data-page-container="{{ $page }}">
 					<div class="flex items-center justify-between gap-2 mb-2">
 						<div class="flex items-center gap-2">
@@ -46,12 +46,15 @@
 						{{ if $pageItems }}
 							{{ range $individualPiece := $pageItems }}
 								<div
-									class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200 {{ if $individualPiece.PieceByIssue.IsContinuation }}
+									class="inhalts-entry py-1 px-0 rounded {{ if $individualPiece.PieceByIssue.IsContinuation }}
 										continuation-entry
 									{{ end }}"
 									data-page="{{ $page }}"
 									{{ if $individualPiece.PieceByIssue.IsContinuation }}
 										data-is-continuation="true"
+									{{ end }}
+									{{ if $individualPiece.PieceByIssue.ID }}
+										data-multipart-id="{{ $individualPiece.PieceByIssue.ID }}"
 									{{ end }}
 									style="{{ if $individualPiece.PieceByIssue.IsContinuation }}
 										display: none;
@@ -61,7 +64,7 @@
 
 									<!-- Links zu anderen Teilen: -->
 									{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
-										<div class="mt-1 pt-1 border-t border-slate-100">
+										<div class="multipart-parts mt-1 pt-1 border-t border-slate-100">
 											<div class="flex items-center flex-wrap gap-1">
 												<i class="ri-links-line text-slate-600 text-sm mr-1"></i>
 												{{ range $index, $issue := $individualPiece.IssueRefs }}
@@ -147,7 +150,7 @@
 
 				<!-- Individual beilage page entry -->
 				<div
-					class="mb-6 first:mb-0 pl-4 border-l-4 border-amber-400 page-entry"
+					class="mb-4 first:mb-0 pl-2 3xl:pl-4 border-l-4 border-amber-400 page-entry"
 					data-page-container="{{ $page }}"
 					data-beilage="true">
 					<div class="flex items-center justify-between gap-2 mb-2">
@@ -188,6 +191,9 @@
 									{{ if $individualPiece.PieceByIssue.IsContinuation }}
 										data-is-continuation="true"
 									{{ end }}
+									{{ if $individualPiece.PieceByIssue.ID }}
+										data-multipart-id="{{ $individualPiece.PieceByIssue.ID }}"
+									{{ end }}
 									style="{{ if $individualPiece.PieceByIssue.IsContinuation }}
 										display: none;
 									{{ end }}">
@@ -196,7 +202,7 @@
 
 									<!-- Links zu anderen Teilen: -->
 									{{ if and (not $individualPiece.PieceByIssue.IsContinuation) (gt (len $individualPiece.IssueRefs) 1) }}
-										<div class="mt-1 pt-1 border-t border-slate-100">
+										<div class="multipart-parts mt-1 pt-1 border-t border-slate-100">
 											<div class="flex items-center flex-wrap gap-1">
 												<i class="ri-links-line text-slate-600 text-sm mr-1"></i>
 												{{ range $index, $issue := $individualPiece.IssueRefs }}
@@ -254,4 +260,4 @@
 		</div>
 	{{- end -}}
 
-</div>
+</inhaltsverzeichnis-scrollspy>

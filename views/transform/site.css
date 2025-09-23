@@ -345,4 +345,20 @@ body.page-edition::before {
 	.scrollspy-hover:hover:not(.font-medium) {
 		background-color: rgb(254 242 242); /* red-50 */
 	}
+
+	/* =============================
+	   INHALTSVERZEICHNIS SCROLLSPY STYLES
+	   ============================= */
+
+	/* Remove default spacing from custom element */
+	inhaltsverzeichnis-scrollspy {
+		display: block;
+		margin: 0;
+		padding: 0;
+	}
+
+	/* Simple transition for entry visibility */
+	.inhalts-entry {
+		transition: opacity 0.3s ease;
+	}
 }

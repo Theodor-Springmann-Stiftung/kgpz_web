@@ -5,10 +5,10 @@
 			{{ range $_, $l := .AvailableLetters }}
 				{{ if eq $l (Upper $.Search) }}
 					<!-- This is the active letter -->
-					<span class="no-underline leading-none !m-0 !p-0 text-4xl font-bold text-red-600 pointer-events-none" aria-current="true">{{ $l }}</span>
+					<span class="no-underline leading-none !m-0 !p-0 text-3xl font-bold text-red-600 pointer-events-none" aria-current="true">{{ $l }}</span>
 				{{ else }}
 					<!-- This is an inactive letter -->
-					<a href="/akteure/{{ $l }}" class="no-underline leading-none !m-0 !p-0 text-2xl font-medium text-gray-700 hover:text-red-600 transition-colors">{{ $l }}</a>
+					<a href="/akteure/{{ $l }}" class="no-underline leading-none !m-0 !p-0 text-xl font-medium text-gray-700 hover:text-red-600 transition-colors">{{ $l }}</a>
 				{{ end }}
 			{{ end }}
 			<!-- Separator and Anonym link -->

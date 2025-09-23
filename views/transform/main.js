@@ -2,6 +2,7 @@ import "./site.css";
 import "./akteure.js";
 import { SinglePageViewer } from "./single-page-viewer.js";
 import { ScrollToTopButton } from "./scroll-to-top.js";
+import { InhaltsverzeichnisScrollspy } from "./inhaltsverzeichnis-scrollspy.js";
 import {
 	enlargePage,
 	closeModal,

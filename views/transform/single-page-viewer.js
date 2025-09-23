@@ -242,6 +242,7 @@ export class SinglePageViewer extends HTMLElement {
 		this.updateNavigationButtons();
 
 		this.style.display = "block";
+		this.setAttribute("active", "true");
 
 		// Scroll to top of the single page viewer (no smooth scrolling)
 		const scrollContainer = this.querySelector(".flex-1.overflow-auto");
@@ -251,13 +252,24 @@ export class SinglePageViewer extends HTMLElement {
 
 		// Prevent background scrolling but allow scrolling within the viewer
 		document.body.style.overflow = "hidden";
+
+		// Dispatch event for scrollspy
+		document.dispatchEvent(new CustomEvent('singlepageviewer:opened', {
+			detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
+		}));
 	}
 
 	close() {
 		this.style.display = "none";
+		this.removeAttribute("active");
 
 		// Restore background scrolling
 		document.body.style.overflow = "";
+
+		// Dispatch event for scrollspy
+		document.dispatchEvent(new CustomEvent('singlepageviewer:closed', {
+			detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
+		}));
 	}
 
 	disconnectedCallback() {
@@ -517,6 +529,11 @@ export class SinglePageViewer extends HTMLElement {
 					extractedIconType,
 					extractedHeading,
 				);
+
+				// Dispatch event for scrollspy to update highlighting
+				document.dispatchEvent(new CustomEvent('singlepageviewer:pagechanged', {
+					detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
+				}));
 			}
 		}
 	}

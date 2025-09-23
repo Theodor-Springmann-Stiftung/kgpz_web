@@ -29,11 +29,11 @@
 			{{- end -}}
 
 
-		<div class="columns-2 gap-6">
+		<div class="columns-2 gap-1 hyphens-auto">
 			{{- /* Display grouped pieces */ -}}
 			{{- range $groupKey, $groupedItems := $groupedPieces -}}
 				<div class="break-inside-avoid pl-4">
-					<div class="pb-1">
+					<div class="pb-1 indent-4">
 						{{- /* Use first piece for display text */ -}}
 						{{ template "_piece_summary" (dict "Piece" (index $groupedItems 0).Item "CurrentActorID" $a.ID) }}
 
@@ -46,7 +46,10 @@
 						{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
 						{{- $firstGroupItem := index $groupedItems 0 -}}
 						{{- if gt (len $firstGroupItem.Item.IssueRefs) 1 -}}
-							{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+							{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
+							hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
+							hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200
+							indent-0">
 								<i class="ri-file-copy-2-line text-xs"></i>
 								<a href="{{ GetPieceURL $firstGroupItem.Item.ID }}" class="">
 									Ganzer Beitrag
