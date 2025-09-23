@@ -18,6 +18,11 @@ export class SinglePageViewer extends HTMLElement {
 		this.isDragging = false;
 		this.lastMouseX = 0;
 		this.lastMouseY = 0;
+
+		// Click tracking for close functionality
+		this.clickStartTime = null;
+		this.clickStartX = null;
+		this.clickStartY = null;
 	}
 
 	// Dynamically detect sidebar width in pixels
@@ -154,9 +159,9 @@ export class SinglePageViewer extends HTMLElement {
 									id="single-page-image"
 									src=""
 									alt=""
-									class="rounded-lg shadow-2xl cursor-zoom-in select-none"
+									class="rounded-lg shadow-2xl cursor-zoom-out select-none"
 									style="transform: scale(1) translate3d(0px, 0px, 0); transform-origin: center center; will-change: transform;"
-									title="Zoom mit Strg + Mausrad oder +/- Tasten"
+									title="Klicken zum Schließen oder Zoom mit Strg + Mausrad / +/- Tasten"
 									draggable="false"
 								/>
 							</div>
@@ -470,20 +475,28 @@ export class SinglePageViewer extends HTMLElement {
 			}
 		};
 
-		// Mouse down for pan start
+		// Mouse down for pan start or close
 		this.mouseDownHandler = (event) => {
-			if (this.style.display === 'none' || this.zoomLevel <= 1.0) return;
+			if (this.style.display === 'none') return;
 
-			// Only start dragging on left mouse button
+			// Only handle left mouse button
 			if (event.button !== 0) return;
 
-			event.preventDefault();
-			this.isDragging = true;
-			this.lastMouseX = event.clientX;
-			this.lastMouseY = event.clientY;
+			if (this.zoomLevel <= 1.0) {
+				// At 100% zoom - prepare for close on click
+				this.clickStartTime = Date.now();
+				this.clickStartX = event.clientX;
+				this.clickStartY = event.clientY;
+			} else {
+				// Above 100% zoom - prepare for pan
+				event.preventDefault();
+				this.isDragging = true;
+				this.lastMouseX = event.clientX;
+				this.lastMouseY = event.clientY;
 
-			// Update cursor
-			this.updateCursor();
+				// Update cursor
+				this.updateCursor();
+			}
 		};
 
 		// Mouse move for panning
@@ -512,11 +525,28 @@ export class SinglePageViewer extends HTMLElement {
 			}
 		};
 
-		// Mouse up for pan end
+		// Mouse up for pan end or close
 		this.mouseUpHandler = (event) => {
 			if (this.isDragging) {
 				this.isDragging = false;
 				this.updateCursor();
+			} else if (this.zoomLevel <= 1.0 && this.clickStartTime) {
+				// Check if this was a click (not a drag) at 100% zoom
+				const clickDuration = Date.now() - this.clickStartTime;
+				const clickDistance = Math.sqrt(
+					Math.pow(event.clientX - this.clickStartX, 2) +
+					Math.pow(event.clientY - this.clickStartY, 2)
+				);
+
+				// If it was a quick click with minimal movement, close the viewer
+				if (clickDuration < 300 && clickDistance < 10) {
+					this.close();
+				}
+
+				// Reset click tracking
+				this.clickStartTime = null;
+				this.clickStartX = null;
+				this.clickStartY = null;
 			}
 		};
 
@@ -594,8 +624,8 @@ export class SinglePageViewer extends HTMLElement {
 				img.style.cursor = 'grab';
 			}
 		} else {
-			// At 100% zoom
-			img.style.cursor = 'zoom-in';
+			// At 100% zoom - zoom-out cursor indicates click to close
+			img.style.cursor = 'zoom-out';
 		}
 	}
 
@@ -631,6 +661,11 @@ export class SinglePageViewer extends HTMLElement {
 		this.panX = 0;
 		this.panY = 0;
 		this.isDragging = false;
+
+		// Reset click tracking
+		this.clickStartTime = null;
+		this.clickStartX = null;
+		this.clickStartY = null;
 
 
 		this.updateImageTransform();
