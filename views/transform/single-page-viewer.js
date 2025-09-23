@@ -8,6 +8,16 @@ export class SinglePageViewer extends HTMLElement {
 		super();
 		// No shadow DOM - use regular DOM to allow Tailwind CSS
 		this.resizeObserver = null;
+
+		// Zoom and pan state
+		this.zoomLevel = 1;
+		this.minZoom = 1; // No zoom below 100%
+		this.maxZoom = 3;
+		this.zoomStep = 0.1;
+		this.isPanning = false;
+		this.panStart = { x: 0, y: 0 };
+		this.panOffset = { x: 0, y: 0 };
+		this.dragDistance = 0;
 	}
 
 	// Dynamically detect sidebar width in pixels
@@ -50,7 +60,7 @@ export class SinglePageViewer extends HTMLElement {
 				<div class="flex-1 bg-slate-50 overflow-auto pointer-events-auto">
 					<div class="relative min-h-full flex flex-col">
 						<!-- Header with page info and buttons -->
-						<div class="flex items-center justify-between p-4">
+						<div class="flex items-center justify-between p-4 bg-slate-50 relative z-10 border-b border-slate-200">
 							<!-- Left: Sidebar toggle and page indicator -->
 							<div class="flex items-center gap-3">
 								<!-- Sidebar toggle button -->
@@ -66,6 +76,18 @@ export class SinglePageViewer extends HTMLElement {
 								<div id="page-indicator" class="text-slate-800 flex items-center gap-3">
 									<span id="page-icon" class="text-lg"></span>
 									<span id="page-number" class="text-lg font-bold bg-blue-50 px-2 py-1 rounded flex items-center gap-1"></span>
+								</div>
+
+								<!-- Zoom indicator and reset -->
+								<div class="flex items-center gap-2">
+									<span id="zoom-indicator" class="text-sm font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded">100%</span>
+									<button
+										id="zoom-reset-btn"
+										onclick="this.closest('single-page-viewer').resetZoom()"
+										class="w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer text-xs"
+										title="Zoom zurücksetzen (1:1)">
+										<i class="ri-zoom-out-line text-sm"></i>
+									</button>
 								</div>
 							</div>
 
@@ -126,9 +148,9 @@ export class SinglePageViewer extends HTMLElement {
 								id="single-page-image"
 								src=""
 								alt=""
-								class="w-full h-auto rounded-lg shadow-2xl cursor-zoom-out"
-								onclick="this.closest('single-page-viewer').close()"
-								title="Klicken zum Schließen"
+								class="w-full h-auto rounded-lg shadow-2xl cursor-zoom-in"
+								onclick="this.closest('single-page-viewer').handleImageClick()"
+								title="Klicken zum Vergrößern oder Schließen"
 							/>
 						</div>
 					</div>
@@ -141,6 +163,9 @@ export class SinglePageViewer extends HTMLElement {
 
 		// Set up keyboard navigation
 		this.setupKeyboardNavigation();
+
+		// Set up zoom and pan functionality
+		this.setupZoomAndPan();
 	}
 
 	// Set up resize observer to dynamically update sidebar width
@@ -243,6 +268,9 @@ export class SinglePageViewer extends HTMLElement {
 
 		this.style.display = "block";
 
+		// Reset zoom and pan state for new page
+		this.resetZoom();
+
 		// Scroll to top of the single page viewer (no smooth scrolling)
 		const scrollContainer = this.querySelector(".flex-1.overflow-auto");
 		if (scrollContainer) {
@@ -272,6 +300,20 @@ export class SinglePageViewer extends HTMLElement {
 			document.removeEventListener('keydown', this.keyboardHandler);
 			this.keyboardHandler = null;
 		}
+
+		// Clean up zoom and pan event listeners
+		const imageContainer = this.querySelector('.flex-1.flex.items-center.justify-center');
+		const image = this.querySelector('#single-page-image');
+
+		if (imageContainer && this.wheelHandler) {
+			imageContainer.removeEventListener('wheel', this.wheelHandler);
+		}
+		if (image) {
+			if (this.mouseDownHandler) image.removeEventListener('mousedown', this.mouseDownHandler);
+			if (this.doubleClickHandler) image.removeEventListener('dblclick', this.doubleClickHandler);
+		}
+		if (this.mouseMoveHandler) document.removeEventListener('mousemove', this.mouseMoveHandler);
+		if (this.mouseUpHandler) document.removeEventListener('mouseup', this.mouseUpHandler);
 
 		// Restore background scrolling
 		document.body.style.overflow = "";
@@ -320,11 +362,219 @@ export class SinglePageViewer extends HTMLElement {
 					event.preventDefault();
 					this.close();
 					break;
+				case '+':
+				case '=':
+					event.preventDefault();
+					this.adjustZoom(this.zoomStep, { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 });
+					break;
+				case '-':
+					event.preventDefault();
+					this.adjustZoom(-this.zoomStep, { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 });
+					break;
+				case '0':
+					event.preventDefault();
+					this.resetZoom();
+					break;
 			}
 		};
 
 		// Add event listener
 		document.addEventListener('keydown', this.keyboardHandler);
+	}
+
+	// Set up zoom and pan functionality
+	setupZoomAndPan() {
+		const imageContainer = this.querySelector('.flex-1.flex.items-center.justify-center');
+		const image = this.querySelector('#single-page-image');
+
+		if (!imageContainer || !image) return;
+
+		// Mouse wheel zoom
+		this.wheelHandler = (event) => {
+			// Only zoom with Ctrl+scroll for better UX
+			if (!event.ctrlKey) return;
+
+			event.preventDefault();
+
+			const delta = event.deltaY > 0 ? -this.zoomStep : this.zoomStep;
+			this.adjustZoom(delta, event);
+		};
+
+		// Pan functionality
+		this.mouseDownHandler = (event) => {
+			if (this.zoomLevel <= 1) return; // Only pan when zoomed in
+
+			event.preventDefault();
+			this.isPanning = true;
+			this.dragDistance = 0;
+			this.panStart.x = event.clientX - this.panOffset.x;
+			this.panStart.y = event.clientY - this.panOffset.y;
+
+			image.style.cursor = 'grabbing';
+		};
+
+		this.mouseMoveHandler = (event) => {
+			if (!this.isPanning || this.zoomLevel <= 1) return;
+
+			event.preventDefault();
+
+			const newX = event.clientX - this.panStart.x;
+			const newY = event.clientY - this.panStart.y;
+
+			// Track drag distance to determine if it was a real drag
+			const deltaX = newX - this.panOffset.x;
+			const deltaY = newY - this.panOffset.y;
+			this.dragDistance += Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+			this.panOffset.x = newX;
+			this.panOffset.y = newY;
+
+			this.updateImageTransform();
+		};
+
+		this.mouseUpHandler = (event) => {
+			if (this.isPanning) {
+				this.isPanning = false;
+				this.updateImageCursor();
+			}
+		};
+
+		// Double click to reset zoom
+		this.doubleClickHandler = (event) => {
+			event.preventDefault();
+			this.resetZoom();
+		};
+
+		// Add event listeners
+		imageContainer.addEventListener('wheel', this.wheelHandler, { passive: false });
+		image.addEventListener('mousedown', this.mouseDownHandler);
+		document.addEventListener('mousemove', this.mouseMoveHandler);
+		document.addEventListener('mouseup', this.mouseUpHandler);
+		image.addEventListener('dblclick', this.doubleClickHandler);
+	}
+
+	// Adjust zoom level
+	adjustZoom(delta, event) {
+		const newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + delta));
+
+		if (newZoom === this.zoomLevel) return;
+
+		// Calculate zoom center point relative to image
+		const image = this.querySelector('#single-page-image');
+		const rect = image.getBoundingClientRect();
+		const centerX = (event.clientX - rect.left) / rect.width;
+		const centerY = (event.clientY - rect.top) / rect.height;
+
+		// Adjust pan offset to zoom around mouse position
+		const zoomRatio = newZoom / this.zoomLevel;
+		this.panOffset.x = centerX * rect.width * (1 - zoomRatio) + this.panOffset.x * zoomRatio;
+		this.panOffset.y = centerY * rect.height * (1 - zoomRatio) + this.panOffset.y * zoomRatio;
+
+		this.zoomLevel = newZoom;
+		this.updateImageTransform();
+		this.updateImageCursor();
+		this.updateZoomIndicator();
+	}
+
+	// Reset zoom to fit
+	resetZoom() {
+		this.zoomLevel = 1;
+		this.panOffset.x = 0;
+		this.panOffset.y = 0;
+		this.updateImageTransform();
+		this.updateImageCursor();
+		this.updateZoomIndicator();
+	}
+
+	// Update image transform with boundaries
+	updateImageTransform() {
+		const image = this.querySelector('#single-page-image');
+		if (!image) return;
+
+		// Apply pan boundaries to keep image within view
+		this.constrainPanOffset();
+
+		if (this.zoomLevel === 1 && this.panOffset.x === 0 && this.panOffset.y === 0) {
+			image.style.transform = '';
+		} else {
+			image.style.transform = `scale(${this.zoomLevel}) translate(${this.panOffset.x / this.zoomLevel}px, ${this.panOffset.y / this.zoomLevel}px)`;
+		}
+
+		// Update transform origin for better zoom behavior
+		image.style.transformOrigin = 'center center';
+	}
+
+	// Constrain pan offset to keep image within container bounds
+	constrainPanOffset() {
+		const image = this.querySelector('#single-page-image');
+		const container = this.querySelector('.flex-1.flex.items-center.justify-center');
+		if (!image || !container) return;
+
+		const imageRect = image.getBoundingClientRect();
+		const containerRect = container.getBoundingClientRect();
+
+		// Calculate the scaled image dimensions
+		const scaledWidth = imageRect.width * this.zoomLevel;
+		const scaledHeight = imageRect.height * this.zoomLevel;
+
+		// Calculate maximum allowed pan offsets
+		const maxPanX = Math.max(0, (scaledWidth - containerRect.width) / 2);
+		const maxPanY = Math.max(0, (scaledHeight - containerRect.height) / 2);
+
+		// Constrain pan offsets
+		this.panOffset.x = Math.max(-maxPanX, Math.min(maxPanX, this.panOffset.x));
+		this.panOffset.y = Math.max(-maxPanY, Math.min(maxPanY, this.panOffset.y));
+	}
+
+	// Update cursor based on zoom state
+	updateImageCursor() {
+		const image = this.querySelector('#single-page-image');
+		if (!image) return;
+
+		if (this.zoomLevel > 1) {
+			// When zoomed in: show grab cursor for panning
+			image.className = image.className.replace('cursor-zoom-in', 'cursor-grab');
+			image.title = 'Ziehen zum Verschieben';
+		} else {
+			// At 100%: show zoom-in cursor for zooming in
+			image.className = image.className.replace('cursor-grab', 'cursor-zoom-in');
+			image.title = 'Klicken zum Vergrößern oder Schließen';
+		}
+	}
+
+	// Update zoom level indicator
+	updateZoomIndicator() {
+		const indicator = this.querySelector('#zoom-indicator');
+		const resetBtn = this.querySelector('#zoom-reset-btn');
+		if (!indicator || !resetBtn) return;
+
+		if (this.zoomLevel === 1) {
+			// At 100%: Show helpful text and hide reset button
+			indicator.textContent = 'Strg + Mausrad oder +/- für Zoom';
+			indicator.className = 'text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded';
+			resetBtn.style.display = 'none';
+		} else {
+			// Zoomed: Show percentage and reset button
+			const percentage = Math.round(this.zoomLevel * 100);
+			indicator.textContent = `${percentage}%`;
+			indicator.className = 'text-sm font-medium text-blue-700 bg-blue-100 px-2 py-1 rounded';
+			resetBtn.style.display = 'flex';
+		}
+	}
+
+	// Handle image click (always close viewer)
+	handleImageClick(event) {
+		// If it was a drag, don't do anything
+		if (this.dragDistance >= 5) {
+			this.dragDistance = 0;
+			return;
+		}
+
+		// Always close the viewer when clicking
+		this.close();
+
+		// Reset drag distance for next interaction
+		this.dragDistance = 0;
 	}
 
 	// Share current page
