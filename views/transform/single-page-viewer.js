@@ -8,6 +8,16 @@ export class SinglePageViewer extends HTMLElement {
 		super();
 		// No shadow DOM - use regular DOM to allow Tailwind CSS
 		this.resizeObserver = null;
+
+		// Zoom state management
+		this.zoomLevel = 1.0; // 100% zoom
+		this.minZoom = 1.0; // Cannot zoom below 100%
+		this.maxZoom = 4.0; // Maximum 400% zoom
+		this.panX = 0; // Pan offset X
+		this.panY = 0; // Pan offset Y
+		this.isDragging = false;
+		this.lastMouseX = 0;
+		this.lastMouseY = 0;
 	}
 
 	// Dynamically detect sidebar width in pixels
@@ -92,6 +102,23 @@ export class SinglePageViewer extends HTMLElement {
 								<!-- Separator -->
 								<div class="w-px h-6 bg-gray-300"></div>
 
+								<!-- Zoom level indicator -->
+								<div id="zoom-level-display" class="bg-purple-50 border border-purple-200 rounded px-3 py-2 text-purple-700 text-sm font-medium whitespace-nowrap">
+									Strg + Mausrad oder +/- für Zoom
+								</div>
+
+								<!-- Reset zoom button -->
+								<button
+									id="zoom-reset-btn"
+									onclick="this.closest('single-page-viewer').resetZoom()"
+									class="w-10 h-10 bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+									title="Zoom zurücksetzen (100%)">
+									<i class="ri-fullscreen-exit-line text-lg font-bold"></i>
+								</button>
+
+								<!-- Separator -->
+								<div class="w-px h-6 bg-gray-300"></div>
+
 								<!-- Share button -->
 								<button
 									id="share-btn"
@@ -121,15 +148,18 @@ export class SinglePageViewer extends HTMLElement {
 						</div>
 
 						<!-- Image container that can scroll -->
-						<div class="flex-1 flex items-center justify-center p-4 pb-8">
-							<img
-								id="single-page-image"
-								src=""
-								alt=""
-								class="w-full h-auto rounded-lg shadow-2xl cursor-zoom-out"
-								onclick="this.closest('single-page-viewer').close()"
-								title="Klicken zum Schließen"
-							/>
+						<div id="image-scroll-container" class="flex-1 flex items-center justify-center p-4 pb-8 overflow-auto relative">
+							<div id="image-container" class="relative">
+								<img
+									id="single-page-image"
+									src=""
+									alt=""
+									class="rounded-lg shadow-2xl cursor-zoom-in select-none"
+									style="transform: scale(1) translate3d(0px, 0px, 0); transform-origin: center center; will-change: transform;"
+									title="Zoom mit Strg + Mausrad oder +/- Tasten"
+									draggable="false"
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -141,6 +171,9 @@ export class SinglePageViewer extends HTMLElement {
 
 		// Set up keyboard navigation
 		this.setupKeyboardNavigation();
+
+		// Set up zoom functionality
+		this.setupZoomEvents();
 	}
 
 	// Set up resize observer to dynamically update sidebar width
@@ -244,6 +277,9 @@ export class SinglePageViewer extends HTMLElement {
 		this.style.display = "block";
 		this.setAttribute("active", "true");
 
+		// Reset zoom state for new image
+		this.resetZoom();
+
 		// Scroll to top of the single page viewer (no smooth scrolling)
 		const scrollContainer = this.querySelector(".flex-1.overflow-auto");
 		if (scrollContainer) {
@@ -279,14 +315,51 @@ export class SinglePageViewer extends HTMLElement {
 			this.resizeObserver = null;
 		}
 
-		// Clean up keyboard event listener
+		// Clean up keyboard event listeners
 		if (this.keyboardHandler) {
 			document.removeEventListener('keydown', this.keyboardHandler);
 			this.keyboardHandler = null;
 		}
 
+		// Clean up zoom event listeners
+		this.cleanupZoomEvents();
+
 		// Restore background scrolling
 		document.body.style.overflow = "";
+	}
+
+	// Clean up zoom event listeners
+	cleanupZoomEvents() {
+		const container = this.querySelector('#image-scroll-container');
+		const img = this.querySelector('#single-page-image');
+
+		if (this.wheelHandler && container) {
+			container.removeEventListener('wheel', this.wheelHandler);
+			this.wheelHandler = null;
+		}
+
+
+		if (this.mouseDownHandler && img) {
+			img.removeEventListener('mousedown', this.mouseDownHandler);
+			this.mouseDownHandler = null;
+		}
+
+		if (this.mouseMoveHandler) {
+			document.removeEventListener('mousemove', this.mouseMoveHandler);
+			this.mouseMoveHandler = null;
+		}
+
+		if (this.mouseUpHandler) {
+			document.removeEventListener('mouseup', this.mouseUpHandler);
+			this.mouseUpHandler = null;
+		}
+
+
+		// Cancel any pending animation frames
+		if (this.animationFrameId) {
+			cancelAnimationFrame(this.animationFrameId);
+			this.animationFrameId = null;
+		}
 	}
 
 	// Generate icon HTML from Go icon type - matches templating/engine.go PageIcon function
@@ -337,6 +410,232 @@ export class SinglePageViewer extends HTMLElement {
 
 		// Add event listener
 		document.addEventListener('keydown', this.keyboardHandler);
+	}
+
+	// Set up zoom event listeners
+	setupZoomEvents() {
+		const img = this.querySelector('#single-page-image');
+		const container = this.querySelector('#image-scroll-container');
+
+		// Mouse wheel zoom with Ctrl key
+		this.wheelHandler = (event) => {
+			// Only handle wheel events when viewer is visible and Ctrl is pressed
+			if (this.style.display === 'none' || !event.ctrlKey) return;
+
+			event.preventDefault();
+
+			// Calculate zoom direction
+			const zoomDirection = event.deltaY > 0 ? -1 : 1;
+			const zoomFactor = 0.1;
+
+			// Get mouse position relative to image
+			const rect = img.getBoundingClientRect();
+			const mouseX = event.clientX - rect.left;
+			const mouseY = event.clientY - rect.top;
+
+			this.zoom(zoomDirection * zoomFactor, mouseX, mouseY);
+		};
+
+		// Update existing keyboard handler to include zoom
+		const originalKeyboardHandler = this.keyboardHandler;
+		this.keyboardHandler = (event) => {
+			// Only handle keyboard events when the viewer is visible
+			if (this.style.display === 'none') return;
+
+			// Handle zoom keys first
+			if (event.key === '+' || event.key === '=') {
+				event.preventDefault();
+				this.zoom(0.1); // Zoom in by 10%
+				return;
+			} else if (event.key === '-') {
+				event.preventDefault();
+				this.zoom(-0.1); // Zoom out by 10%
+				return;
+			}
+
+			// Handle original navigation keys
+			switch (event.key) {
+				case 'ArrowLeft':
+					event.preventDefault();
+					this.goToPreviousPage();
+					break;
+				case 'ArrowRight':
+					event.preventDefault();
+					this.goToNextPage();
+					break;
+				case 'Escape':
+					event.preventDefault();
+					this.close();
+					break;
+			}
+		};
+
+		// Mouse down for pan start
+		this.mouseDownHandler = (event) => {
+			if (this.style.display === 'none' || this.zoomLevel <= 1.0) return;
+
+			// Only start dragging on left mouse button
+			if (event.button !== 0) return;
+
+			event.preventDefault();
+			this.isDragging = true;
+			this.lastMouseX = event.clientX;
+			this.lastMouseY = event.clientY;
+
+			// Update cursor
+			this.updateCursor();
+		};
+
+		// Mouse move for panning
+		this.mouseMoveHandler = (event) => {
+			if (this.style.display === 'none') return;
+
+			if (this.isDragging && this.zoomLevel > 1.0) {
+				event.preventDefault();
+
+				const deltaX = event.clientX - this.lastMouseX;
+				const deltaY = event.clientY - this.lastMouseY;
+
+				this.panX += deltaX;
+				this.panY += deltaY;
+
+				this.lastMouseX = event.clientX;
+				this.lastMouseY = event.clientY;
+
+				// Use requestAnimationFrame for smooth updates
+				if (!this.animationFrameId) {
+					this.animationFrameId = requestAnimationFrame(() => {
+						this.updateImageTransform();
+						this.animationFrameId = null;
+					});
+				}
+			}
+		};
+
+		// Mouse up for pan end
+		this.mouseUpHandler = (event) => {
+			if (this.isDragging) {
+				this.isDragging = false;
+				this.updateCursor();
+			}
+		};
+
+		// Add event listeners
+		container.addEventListener('wheel', this.wheelHandler, { passive: false });
+		img.addEventListener('mousedown', this.mouseDownHandler);
+		document.addEventListener('mousemove', this.mouseMoveHandler);
+		document.addEventListener('mouseup', this.mouseUpHandler);
+
+		// Prevent context menu on image
+		img.addEventListener('contextmenu', (e) => e.preventDefault());
+	}
+
+	// Zoom function
+	zoom(deltaZoom, mouseX = null, mouseY = null) {
+		const newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + deltaZoom));
+
+		if (newZoom === this.zoomLevel) return; // No change
+
+		const img = this.querySelector('#single-page-image');
+		const rect = img.getBoundingClientRect();
+
+		// If mouse position provided, zoom towards that point
+		if (mouseX !== null && mouseY !== null) {
+			// Calculate zoom point relative to image center
+			const centerX = rect.width / 2;
+			const centerY = rect.height / 2;
+
+			// Offset from center
+			const offsetX = mouseX - centerX;
+			const offsetY = mouseY - centerY;
+
+			// Calculate new pan position to keep mouse point stationary
+			const zoomRatio = newZoom / this.zoomLevel;
+			this.panX = this.panX * zoomRatio - offsetX * (zoomRatio - 1);
+			this.panY = this.panY * zoomRatio - offsetY * (zoomRatio - 1);
+		} else {
+			// Zoom from center - adjust pan to keep image centered
+			const zoomRatio = newZoom / this.zoomLevel;
+			this.panX *= zoomRatio;
+			this.panY *= zoomRatio;
+		}
+
+		this.zoomLevel = newZoom;
+
+		// Reset pan when back to 100%
+		if (this.zoomLevel <= 1.0) {
+			this.panX = 0;
+			this.panY = 0;
+		}
+
+		this.updateImageTransform();
+		this.updateCursor();
+		this.updateZoomDisplay();
+	}
+
+	// Update image transform based on zoom and pan
+	updateImageTransform() {
+		const img = this.querySelector('#single-page-image');
+		// Use translate3d for hardware acceleration and better performance
+		img.style.transform = `scale(${this.zoomLevel}) translate3d(${this.panX / this.zoomLevel}px, ${this.panY / this.zoomLevel}px, 0)`;
+	}
+
+
+	// Update cursor based on zoom state
+	updateCursor() {
+		const img = this.querySelector('#single-page-image');
+
+		if (this.isDragging) {
+			img.style.cursor = 'grabbing';
+		} else if (this.zoomLevel > 1.0) {
+			if (this.zoomLevel >= this.maxZoom) {
+				img.style.cursor = 'zoom-out';
+			} else {
+				img.style.cursor = 'grab';
+			}
+		} else {
+			// At 100% zoom
+			img.style.cursor = 'zoom-in';
+		}
+	}
+
+	// Update zoom level display and reset button
+	updateZoomDisplay() {
+		const zoomDisplay = this.querySelector('#zoom-level-display');
+		const zoomResetBtn = this.querySelector('#zoom-reset-btn');
+
+		if (!zoomDisplay) return;
+
+		if (this.zoomLevel <= this.minZoom) {
+			// At 100% zoom - show instructions
+			zoomDisplay.textContent = 'Strg + Mausrad oder +/- für Zoom';
+
+			// Hide reset button at 100%
+			if (zoomResetBtn) {
+				zoomResetBtn.style.display = 'none';
+			}
+		} else {
+			// Above 100% zoom - show percentage
+			zoomDisplay.textContent = `${Math.round(this.zoomLevel * 100)}%`;
+
+			// Show reset button when zoomed
+			if (zoomResetBtn) {
+				zoomResetBtn.style.display = 'flex';
+			}
+		}
+	}
+
+	// Reset zoom state when showing new image
+	resetZoom() {
+		this.zoomLevel = 1.0;
+		this.panX = 0;
+		this.panY = 0;
+		this.isDragging = false;
+
+
+		this.updateImageTransform();
+		this.updateCursor();
+		this.updateZoomDisplay();
 	}
 
 	// Share current page
