@@ -1,4 +1,4 @@
-class I extends HTMLElement {
+class H extends HTMLElement {
   constructor() {
     super(), this.scrollHandler = null, this.scrollTimeout = null, this.clickHandlers = [], this.manualNavigation = !1;
   }
@@ -42,9 +42,9 @@ class I extends HTMLElement {
     const e = document.getElementById("scrollspy-slider"), t = document.getElementById("scrollspy-nav");
     if (!e || !t || e.style.opacity === "0")
       return;
-    const i = t.getBoundingClientRect(), n = parseFloat(e.style.top), o = parseFloat(e.style.height), r = n + o, a = t.scrollTop, l = a + i.height;
-    if (r > l) {
-      const c = r - i.height + 20;
+    const i = t.getBoundingClientRect(), n = parseFloat(e.style.top), o = parseFloat(e.style.height), s = n + o, a = t.scrollTop, l = a + i.height;
+    if (s > l) {
+      const c = s - i.height + 20;
       t.scrollTo({
         top: c,
         behavior: "smooth"
@@ -64,21 +64,21 @@ class I extends HTMLElement {
     try {
       this.sections.forEach((n) => {
         if (!n || !n.getAttribute) return;
-        const o = n.getAttribute("id"), r = n.querySelector(".akteur-werke-section"), a = n.querySelector(".akteur-beitraege-section");
+        const o = n.getAttribute("id"), s = n.querySelector(".akteur-werke-section"), a = n.querySelector(".akteur-beitraege-section");
         let l = !1;
-        if (r) {
-          const c = r.getBoundingClientRect(), d = c.top < window.innerHeight, u = c.bottom > 0;
-          d && u && (l = !0);
+        if (s) {
+          const c = s.getBoundingClientRect(), d = c.top < window.innerHeight, g = c.bottom > 0;
+          d && g && (l = !0);
         }
         if (a && !l) {
-          const c = a.getBoundingClientRect(), d = c.top < window.innerHeight, u = c.bottom > 0;
-          d && u && (l = !0);
+          const c = a.getBoundingClientRect(), d = c.top < window.innerHeight, g = c.bottom > 0;
+          d && g && (l = !0);
         }
-        if (!r && !a) {
+        if (!s && !a) {
           const c = n.querySelector("div:first-child");
           if (c) {
-            const d = c.getBoundingClientRect(), u = d.top >= 0, g = d.bottom <= window.innerHeight;
-            u && g && (l = !0);
+            const d = c.getBoundingClientRect(), g = d.top >= 0, u = d.bottom <= window.innerHeight;
+            g && u && (l = !0);
           }
         }
         l && e.push(o);
@@ -93,13 +93,13 @@ class I extends HTMLElement {
       e.includes(o) && (n.classList.add("font-medium"), t.push(n));
     }), t.length > 0 && i) {
       const n = document.getElementById("scrollspy-nav"), o = n.getBoundingClientRect();
-      let r = 1 / 0, a = -1 / 0;
+      let s = 1 / 0, a = -1 / 0;
       t.forEach((c) => {
-        const d = c.getBoundingClientRect(), u = d.top - o.top + n.scrollTop, g = u + d.height;
-        r = Math.min(r, u), a = Math.max(a, g);
+        const d = c.getBoundingClientRect(), g = d.top - o.top + n.scrollTop, u = g + d.height;
+        s = Math.min(s, g), a = Math.max(a, u);
       });
-      let l = a - r;
-      i.style.top = `${r}px`, i.style.height = `${l}px`, i.style.opacity = "1", setTimeout(() => this.ensureMarkerVisibility(), 100);
+      let l = a - s;
+      i.style.top = `${s}px`, i.style.height = `${l}px`, i.style.opacity = "1", setTimeout(() => this.ensureMarkerVisibility(), 100);
     } else i && (i.style.opacity = "0");
     t.length > 0 && this.updateSidebarScroll(t);
   }
@@ -117,8 +117,8 @@ class I extends HTMLElement {
     if (i && (i.classList.add("font-medium"), t)) {
       const n = document.getElementById("scrollspy-nav");
       if (n) {
-        const o = n.getBoundingClientRect(), r = i.getBoundingClientRect(), a = r.top - o.top + n.scrollTop;
-        t.style.top = `${a}px`, t.style.height = `${r.height}px`, t.style.opacity = "1";
+        const o = n.getBoundingClientRect(), s = i.getBoundingClientRect(), a = s.top - o.top + n.scrollTop;
+        t.style.top = `${a}px`, t.style.height = `${s.height}px`, t.style.opacity = "1";
       }
     }
   }
@@ -132,9 +132,9 @@ class I extends HTMLElement {
       document.documentElement.clientHeight,
       document.documentElement.scrollHeight,
       document.documentElement.offsetHeight
-    ), o = window.innerHeight, r = n - o, a = r > 0 ? window.scrollY / r : 0, l = t.clientHeight, d = t.scrollHeight - l;
+    ), o = window.innerHeight, s = n - o, a = s > 0 ? window.scrollY / s : 0, l = t.clientHeight, d = t.scrollHeight - l;
     if (d > 0) {
-      const u = a * d, g = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = g.top - p.top + t.scrollTop, m = l / 2, E = f - m, y = 0.7, H = y * u + (1 - y) * E, x = Math.max(0, Math.min(d, H)), T = t.scrollTop;
+      const g = a * d, u = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = u.top - p.top + t.scrollTop, m = l / 2, L = f - m, y = 0.7, I = y * g + (1 - y) * L, x = Math.max(0, Math.min(d, I)), T = t.scrollTop;
       Math.abs(x - T) > 10 && t.scrollTo({
         top: x,
         behavior: "smooth"
@@ -155,10 +155,10 @@ class I extends HTMLElement {
     e && (e.style.opacity = "0", e.style.height = "0"), this.sections = null, this.navLinks = null, this.clickHandlers = [], this.manualNavigation = !1;
   }
 }
-customElements.define("akteure-scrollspy", I);
-class B extends HTMLElement {
+customElements.define("akteure-scrollspy", H);
+class A extends HTMLElement {
   constructor() {
-    super(), this.resizeObserver = null, this.zoomLevel = 1, this.minZoom = 1, this.maxZoom = 4, this.panX = 0, this.panY = 0, this.isDragging = !1, this.lastMouseX = 0, this.lastMouseY = 0, this.clickStartTime = null, this.clickStartX = null, this.clickStartY = null;
+    super(), this.resizeObserver = null;
   }
   // Dynamically detect sidebar width in pixels
   detectSidebarWidth() {
@@ -223,23 +223,6 @@ class B extends HTMLElement {
 								<!-- Separator -->
 								<div class="w-px h-6 bg-gray-300"></div>
 
-								<!-- Zoom level indicator -->
-								<div id="zoom-level-display" class="bg-purple-50 border border-purple-200 rounded px-3 py-2 text-purple-700 text-sm font-medium whitespace-nowrap">
-									Strg + Mausrad oder +/- für Zoom
-								</div>
-
-								<!-- Reset zoom button -->
-								<button
-									id="zoom-reset-btn"
-									onclick="this.closest('single-page-viewer').resetZoom()"
-									class="w-10 h-10 bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
-									title="Zoom zurücksetzen (100%)">
-									<i class="ri-zoom-out-line text-lg font-bold"></i>
-								</button>
-
-								<!-- Separator -->
-								<div class="w-px h-6 bg-gray-300"></div>
-
 								<!-- Share button -->
 								<button
 									id="share-btn"
@@ -268,24 +251,22 @@ class B extends HTMLElement {
 							</div>
 						</div>
 
-						<!-- Image container that can scroll -->
-						<div id="image-scroll-container" class="flex-1 flex items-center justify-center p-4 pb-8 overflow-auto relative">
-							<div id="image-container" class="relative">
-								<img
-									id="single-page-image"
-									src=""
-									alt=""
-									class="rounded-lg shadow-2xl cursor-zoom-out select-none"
-									style="transform: scale(1) translate3d(0px, 0px, 0); transform-origin: center center; will-change: transform;"
-									title="Klicken zum Schließen oder Zoom mit Strg + Mausrad / +/- Tasten"
-									draggable="false"
-								/>
-							</div>
+						<!-- Image display container -->
+						<div id="image-container" class="flex-1 flex items-center justify-center p-4 pb-8 overflow-auto">
+							<img
+								id="single-page-image"
+								src=""
+								alt=""
+								class="rounded-lg shadow-2xl cursor-pointer select-none max-w-full max-h-full"
+								title="Klicken zum Schließen"
+								draggable="false"
+								onclick="this.closest('single-page-viewer').close()"
+							/>
 						</div>
 					</div>
 				</div>
 			</div>
-		`, this.setupResizeObserver(), this.setupKeyboardNavigation(), this.setupZoomEvents();
+		`, this.setupResizeObserver(), this.setupKeyboardNavigation();
   }
   // Set up resize observer to dynamically update sidebar width
   setupResizeObserver() {
@@ -301,24 +282,24 @@ class B extends HTMLElement {
       e.style.width = t, console.log("Updated sidebar width to:", t);
     }
   }
-  show(e, t, i, n = !1, o = 0, r = null, a = null, l = null) {
-    const c = this.querySelector("#single-page-image"), d = this.querySelector("#page-number"), u = this.querySelector("#page-icon");
-    this.querySelector("#page-indicator"), c.src = e, c.alt = t, this.currentPageNumber = i, this.currentIsBeilage = n, this.currentPartNumber = r;
-    let g;
+  show(e, t, i, n = !1, o = 0, s = null, a = null, l = null) {
+    const c = this.querySelector("#single-page-image"), d = this.querySelector("#page-number"), g = this.querySelector("#page-icon");
+    this.querySelector("#page-indicator"), c.src = e, c.alt = t, this.currentPageNumber = i, this.currentIsBeilage = n, this.currentPartNumber = s;
+    let u;
     if (l)
-      g = l;
+      u = l;
     else {
       const f = this.getIssueContext(i);
-      g = f ? `${f}, ${i}` : `${i}`;
+      u = f ? `${f}, ${i}` : `${i}`;
     }
-    if (d.innerHTML = g, o && i === o) {
+    if (d.innerHTML = u, o && i === o) {
       d.style.position = "relative";
       const f = d.querySelector(".target-page-dot");
       f && f.remove();
       const m = document.createElement("span");
       m.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", m.title = "verlinkte Seite", d.appendChild(m);
     }
-    a ? a === "part-number" && r !== null ? u.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${r}. Teil</span>` : u.innerHTML = this.generateIconFromType(a) : u.innerHTML = this.generateFallbackIcon(i, n, r), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true"), this.resetZoom();
+    a ? a === "part-number" && s !== null ? g.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${s}. Teil</span>` : g.innerHTML = this.generateIconFromType(a) : g.innerHTML = this.generateFallbackIcon(i, n, s), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true");
     const p = this.querySelector(".flex-1.overflow-auto");
     p && (p.scrollTop = 0), document.body.style.overflow = "hidden", document.dispatchEvent(new CustomEvent("singlepageviewer:opened", {
       detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
@@ -330,12 +311,7 @@ class B extends HTMLElement {
     }));
   }
   disconnectedCallback() {
-    this.resizeObserver && (this.resizeObserver.disconnect(), this.resizeObserver = null), this.keyboardHandler && (document.removeEventListener("keydown", this.keyboardHandler), this.keyboardHandler = null), this.cleanupZoomEvents(), document.body.style.overflow = "";
-  }
-  // Clean up zoom event listeners
-  cleanupZoomEvents() {
-    const e = this.querySelector("#image-scroll-container"), t = this.querySelector("#single-page-image");
-    this.wheelHandler && e && (e.removeEventListener("wheel", this.wheelHandler), this.wheelHandler = null), this.mouseDownHandler && t && (t.removeEventListener("mousedown", this.mouseDownHandler), this.mouseDownHandler = null), this.mouseMoveHandler && (document.removeEventListener("mousemove", this.mouseMoveHandler), this.mouseMoveHandler = null), this.mouseUpHandler && (document.removeEventListener("mouseup", this.mouseUpHandler), this.mouseUpHandler = null), this.animationFrameId && (cancelAnimationFrame(this.animationFrameId), this.animationFrameId = null);
+    this.resizeObserver && (this.resizeObserver.disconnect(), this.resizeObserver = null), this.keyboardHandler && (document.removeEventListener("keydown", this.keyboardHandler), this.keyboardHandler = null), document.body.style.overflow = "";
   }
   // Generate icon HTML from Go icon type - matches templating/engine.go PageIcon function
   generateIconFromType(e) {
@@ -357,14 +333,7 @@ class B extends HTMLElement {
   // Set up keyboard navigation
   setupKeyboardNavigation() {
     this.keyboardHandler && document.removeEventListener("keydown", this.keyboardHandler), this.keyboardHandler = (e) => {
-      if (this.style.display !== "none") {
-        if (e.key === "+" || e.key === "=") {
-          e.preventDefault(), this.zoom(0.1);
-          return;
-        } else if (e.key === "-") {
-          e.preventDefault(), this.zoom(-0.1);
-          return;
-        }
+      if (this.style.display !== "none")
         switch (e.key) {
           case "ArrowLeft":
             e.preventDefault(), this.goToPreviousPage();
@@ -376,79 +345,7 @@ class B extends HTMLElement {
             e.preventDefault(), this.close();
             break;
         }
-      }
     }, document.addEventListener("keydown", this.keyboardHandler);
-  }
-  // Set up zoom event listeners
-  setupZoomEvents() {
-    const e = this.querySelector("#single-page-image"), t = this.querySelector("#image-scroll-container");
-    this.wheelHandler = (i) => {
-      if (this.style.display === "none" || !i.ctrlKey) return;
-      i.preventDefault();
-      const n = i.deltaY > 0 ? -1 : 1, o = 0.1, r = e.getBoundingClientRect(), a = i.clientX - r.left, l = i.clientY - r.top;
-      this.zoom(n * o, a, l);
-    }, this.mouseDownHandler = (i) => {
-      this.style.display !== "none" && i.button === 0 && (this.zoomLevel <= 1 ? (this.clickStartTime = Date.now(), this.clickStartX = i.clientX, this.clickStartY = i.clientY) : (i.preventDefault(), this.isDragging = !0, this.lastMouseX = i.clientX, this.lastMouseY = i.clientY, this.updateCursor()));
-    }, this.mouseMoveHandler = (i) => {
-      if (this.style.display !== "none" && this.isDragging && this.zoomLevel > 1) {
-        i.preventDefault();
-        const n = i.clientX - this.lastMouseX, o = i.clientY - this.lastMouseY;
-        this.panX += n, this.panY += o, this.lastMouseX = i.clientX, this.lastMouseY = i.clientY, this.animationFrameId || (this.animationFrameId = requestAnimationFrame(() => {
-          this.updateImageTransform(), this.animationFrameId = null;
-        }));
-      }
-    }, this.mouseUpHandler = (i) => {
-      if (this.isDragging)
-        this.isDragging = !1, this.updateCursor();
-      else if (this.zoomLevel <= 1 && this.clickStartTime) {
-        const n = Date.now() - this.clickStartTime, o = Math.sqrt(
-          Math.pow(i.clientX - this.clickStartX, 2) + Math.pow(i.clientY - this.clickStartY, 2)
-        );
-        n < 300 && o < 10 && this.close(), this.clickStartTime = null, this.clickStartX = null, this.clickStartY = null;
-      }
-    }, t.addEventListener("wheel", this.wheelHandler, { passive: !1 }), e.addEventListener("mousedown", this.mouseDownHandler), document.addEventListener("mousemove", this.mouseMoveHandler), document.addEventListener("mouseup", this.mouseUpHandler), e.addEventListener("contextmenu", (i) => i.preventDefault());
-  }
-  // Zoom function
-  zoom(e, t = null, i = null) {
-    const n = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + e));
-    if (n === this.zoomLevel) return;
-    const r = this.querySelector("#single-page-image").getBoundingClientRect();
-    if (t !== null && i !== null) {
-      const a = r.width / 2, l = r.height / 2, c = t - a, d = i - l, u = n / this.zoomLevel;
-      this.panX = this.panX * u - c * (u - 1), this.panY = this.panY * u - d * (u - 1);
-    } else {
-      const a = n / this.zoomLevel;
-      this.panX *= a, this.panY *= a;
-    }
-    this.zoomLevel = n, this.zoomLevel <= 1 && (this.panX = 0, this.panY = 0), this.updateImageTransform(), this.updateCursor(), this.updateZoomDisplay(), this.updateScrollBehavior();
-  }
-  // Update image transform based on zoom and pan
-  updateImageTransform() {
-    const e = this.querySelector("#single-page-image"), t = this.querySelector("#image-container");
-    if (e.style.transform = `scale(${this.zoomLevel}) translate3d(${this.panX / this.zoomLevel}px, ${this.panY / this.zoomLevel}px, 0)`, this.zoomLevel > 1) {
-      const i = window.innerWidth, n = window.innerHeight, o = i * this.zoomLevel * 1.5, r = n * this.zoomLevel * 1.5;
-      t.style.width = `${o}px`, t.style.height = `${r}px`, t.style.minWidth = `${o}px`, t.style.minHeight = `${r}px`, console.log(`Zoom ${this.zoomLevel}: Container size set to ${o}x${r}`);
-    } else
-      t.style.width = "", t.style.height = "", t.style.minWidth = "", t.style.minHeight = "";
-  }
-  // Update cursor based on zoom state
-  updateCursor() {
-    const e = this.querySelector("#single-page-image");
-    this.isDragging ? e.style.cursor = "grabbing" : this.zoomLevel > 1 ? this.zoomLevel >= this.maxZoom ? e.style.cursor = "zoom-out" : e.style.cursor = "grab" : e.style.cursor = "zoom-out";
-  }
-  // Update zoom level display and reset button
-  updateZoomDisplay() {
-    const e = this.querySelector("#zoom-level-display"), t = this.querySelector("#zoom-reset-btn");
-    e && (this.zoomLevel <= this.minZoom ? (e.innerHTML = "Strg + Mausrad oder +/- für Zoom", t && (t.style.display = "none")) : (e.innerHTML = `<span class="font-bold">Zoom aktiv</span> • ${Math.round(this.zoomLevel * 100)}%`, t && (t.style.display = "flex")));
-  }
-  // Update scroll behavior based on zoom level
-  updateScrollBehavior() {
-    const e = this.querySelector(".flex-1.bg-slate-50.overflow-auto"), t = this.querySelector("#image-scroll-container");
-    !e || !t || (this.zoomLevel > 1 ? (e.style.overflow = "hidden", t.style.height = "100vh", t.style.overflow = "auto", t.style.alignItems = "flex-start", t.style.justifyContent = "flex-start") : (e.style.overflow = "auto", t.style.height = "", t.style.overflow = "auto", t.style.alignItems = "center", t.style.justifyContent = "center"));
-  }
-  // Reset zoom state when showing new image
-  resetZoom() {
-    this.zoomLevel = 1, this.panX = 0, this.panY = 0, this.isDragging = !1, this.clickStartTime = null, this.clickStartX = null, this.clickStartY = null, this.updateImageTransform(), this.updateCursor(), this.updateZoomDisplay(), this.updateScrollBehavior();
   }
   // Share current page
   shareCurrentPage() {
@@ -499,8 +396,8 @@ class B extends HTMLElement {
     console.log("All pages found:", i), console.log("Current page:", this.currentPageNumber);
     const n = i.indexOf(this.currentPageNumber);
     console.log("Current index:", n);
-    let o = null, r = null;
-    return n > 0 && (o = i[n - 1]), n < i.length - 1 && (r = i[n + 1]), console.log("Adjacent pages - prev:", o, "next:", r), { prevPage: o, nextPage: r };
+    let o = null, s = null;
+    return n > 0 && (o = i[n - 1]), n < i.length - 1 && (s = i[n + 1]), console.log("Adjacent pages - prev:", o, "next:", s), { prevPage: o, nextPage: s };
   }
   // Navigate to previous page
   goToPreviousPage() {
@@ -522,8 +419,8 @@ class B extends HTMLElement {
       if (n) {
         let o = null;
         this.currentPartNumber !== null && (o = this.getPartNumberForPage(e));
-        let r = null, a = null;
-        r = i.getAttribute("data-page-icon-type"), i.querySelector(".part-number") && (r = "part-number");
+        let s = null, a = null;
+        s = i.getAttribute("data-page-icon-type"), i.querySelector(".part-number") && (s = "part-number");
         const c = i.querySelector(".page-indicator");
         if (c) {
           const d = c.cloneNode(!0);
@@ -538,7 +435,7 @@ class B extends HTMLElement {
           this.currentIsBeilage,
           0,
           o,
-          r,
+          s,
           a
         ), document.dispatchEvent(new CustomEvent("singlepageviewer:pagechanged", {
           detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
@@ -567,8 +464,8 @@ class B extends HTMLElement {
   toggleSidebar() {
     const e = this.querySelector("#sidebar-spacer"), t = this.querySelector("#sidebar-toggle-btn"), i = t.querySelector("i"), n = e.style.width, o = n === "0px" || n === "0";
     if (console.log("Current state - isCollapsed:", o), console.log("Current width:", n), o) {
-      const r = this.detectSidebarWidth();
-      e.style.width = r, t.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-fold-line text-lg font-bold", t.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", r);
+      const s = this.detectSidebarWidth();
+      e.style.width = s, t.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-fold-line text-lg font-bold", t.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", s);
     } else
       e.style.width = "0px", t.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-unfold-line text-lg font-bold", t.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
     console.log("New width:", e.style.width);
@@ -577,16 +474,16 @@ class B extends HTMLElement {
   getIssueContext(e) {
     const t = window.location.pathname, i = t.includes("/beitrag/");
     if (i) {
-      const r = document.querySelector(`[data-page-container="${e}"]`);
-      if (r) {
-        const c = r.querySelector(".page-indicator");
+      const s = document.querySelector(`[data-page-container="${e}"]`);
+      if (s) {
+        const c = s.querySelector(".page-indicator");
         if (c) {
-          const d = c.textContent.trim(), u = d.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
-          if (u)
-            return u[1];
-          const g = d.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+          const d = c.textContent.trim(), g = d.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
           if (g)
-            return `${g[1]} Nr. ${g[2]}`;
+            return g[1];
+          const u = d.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+          if (u)
+            return `${u[1]} Nr. ${u[2]}`;
         }
       }
       const l = document.title.match(/(\d{4}).*Nr\.\s*(\d+)/);
@@ -606,16 +503,16 @@ class B extends HTMLElement {
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", B);
-document.body.addEventListener("htmx:beforeRequest", function(s) {
+customElements.define("single-page-viewer", A);
+document.body.addEventListener("htmx:beforeRequest", function(r) {
   const e = document.querySelector("single-page-viewer");
   e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.close());
 });
 window.addEventListener("beforeunload", function() {
-  const s = document.querySelector("single-page-viewer");
-  s && s.close();
+  const r = document.querySelector("single-page-viewer");
+  r && r.close();
 });
-class A extends HTMLElement {
+class B extends HTMLElement {
   constructor() {
     super(), this.isVisible = !1, this.scrollHandler = null, this.htmxAfterSwapHandler = null;
   }
@@ -656,8 +553,8 @@ class A extends HTMLElement {
     });
   }
 }
-customElements.define("scroll-to-top-button", A);
-class q extends HTMLElement {
+customElements.define("scroll-to-top-button", B);
+class N extends HTMLElement {
   constructor() {
     super(), this.pageObserver = null, this.pageContainers = /* @__PURE__ */ new Map(), this.singlePageViewerActive = !1, this.singlePageViewerCurrentPage = null, this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this);
   }
@@ -715,10 +612,10 @@ class q extends HTMLElement {
     (a = n == null ? void 0 : n.closest(".page-entry")) == null || a.querySelector(".icon-container");
     const o = n == null ? void 0 : n.closest(".page-entry");
     o && (t ? (o.classList.add("!border-l-red-500"), o.classList.remove("border-slate-300")) : (o.classList.remove("!border-l-red-500"), o.classList.add("border-slate-300")));
-    const r = document.querySelector(`[data-page="${i}"].page-indicator`);
-    if (r) {
-      const l = r.querySelectorAll("i:not(.text-slate-400)");
-      t ? (r.classList.add("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.add("!text-red-600"))) : (r.classList.remove("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.remove("!text-red-600")));
+    const s = document.querySelector(`[data-page="${i}"].page-indicator`);
+    if (s) {
+      const l = s.querySelectorAll("i:not(.text-slate-400)");
+      t ? (s.classList.add("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.add("!text-red-600"))) : (s.classList.remove("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.remove("!text-red-600")));
     }
   }
   setupSinglePageViewerDetection() {
@@ -737,36 +634,36 @@ class q extends HTMLElement {
     this.singlePageViewerActive = e !== null;
   }
   isPageContainerVisible(e) {
-    const t = e.getBoundingClientRect(), i = window.innerHeight, n = Math.max(t.top, 0), o = Math.min(t.bottom, i), r = Math.max(0, o - n), a = t.height;
-    return r / a >= 0.5;
+    const t = e.getBoundingClientRect(), i = window.innerHeight, n = Math.max(t.top, 0), o = Math.min(t.bottom, i), s = Math.max(0, o - n), a = t.height;
+    return s / a >= 0.5;
   }
   cleanup() {
     this.pageObserver && (this.pageObserver.disconnect(), this.pageObserver = null), document.removeEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.pageContainers.clear();
   }
 }
-customElements.define("inhaltsverzeichnis-scrollspy", q);
+customElements.define("inhaltsverzeichnis-scrollspy", N);
 window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
-function z(s, e, t, i = null) {
+function q(r, e, t, i = null) {
   let n = document.querySelector("single-page-viewer");
   n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
-  const o = s.closest('[data-beilage="true"]') !== null, r = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, a = s.closest(".newspaper-page-container, .piece-page-container");
+  const o = r.closest('[data-beilage="true"]') !== null, s = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, a = r.closest(".newspaper-page-container, .piece-page-container");
   let l = null, c = null;
   if (a) {
     l = a.getAttribute("data-page-icon-type"), a.querySelector(".part-number") && (l = "part-number");
-    const u = a.querySelector(".page-indicator");
-    if (u) {
-      const g = u.cloneNode(!0);
-      g.querySelectorAll("i").forEach((m) => m.remove()), g.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((m) => m.remove()), c = g.textContent.trim();
+    const g = a.querySelector(".page-indicator");
+    if (g) {
+      const u = g.cloneNode(!0);
+      u.querySelectorAll("i").forEach((m) => m.remove()), u.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((m) => m.remove()), c = u.textContent.trim();
     }
   }
-  n.show(s.src, s.alt, e, o, r, i, l, c);
+  n.show(r.src, r.alt, e, o, s, i, l, c);
 }
-function C() {
+function k() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function M() {
+function V() {
   if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, b(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
@@ -775,7 +672,7 @@ function M() {
           const n = window.currentPageContainers.indexOf(i.target);
           n !== -1 && (i.isIntersecting ? e.add(n) : e.delete(n));
         }), e.size > 0) {
-          const n = Array.from(e).sort((o, r) => o - r)[0];
+          const n = Array.from(e).sort((o, s) => o - s)[0];
           n !== window.currentActiveIndex && (window.currentActiveIndex = n, b());
         }
       },
@@ -787,50 +684,50 @@ function M() {
     });
   }
 }
-function N() {
+function $() {
   if (window.currentActiveIndex > 0) {
-    let s = -1;
+    let r = -1;
     const e = [];
     window.currentPageContainers.forEach((i, n) => {
-      const o = i.getBoundingClientRect(), r = window.innerHeight, a = Math.max(o.top, 0), l = Math.min(o.bottom, r), c = Math.max(0, l - a), d = o.height;
+      const o = i.getBoundingClientRect(), s = window.innerHeight, a = Math.max(o.top, 0), l = Math.min(o.bottom, s), c = Math.max(0, l - a), d = o.height;
       c / d >= 0.3 && e.push(n);
     });
     const t = Math.min(...e);
     for (let i = t - 1; i >= 0; i--)
       if (!e.includes(i)) {
-        s = i;
+        r = i;
         break;
       }
-    s === -1 && t > 0 && (s = t - 1), s >= 0 && (window.currentActiveIndex = s, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+    r === -1 && t > 0 && (r = t - 1), r >= 0 && (window.currentActiveIndex = r, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
       b();
     }, 100));
   }
 }
-function $() {
+function M() {
   if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
-    let s = -1;
+    let r = -1;
     const e = [];
     window.currentPageContainers.forEach((i, n) => {
-      const o = i.getBoundingClientRect(), r = window.innerHeight, a = Math.max(o.top, 0), l = Math.min(o.bottom, r), c = Math.max(0, l - a), d = o.height;
+      const o = i.getBoundingClientRect(), s = window.innerHeight, a = Math.max(o.top, 0), l = Math.min(o.bottom, s), c = Math.max(0, l - a), d = o.height;
       c / d >= 0.3 && e.push(n);
     });
     const t = Math.max(...e);
     for (let i = t + 1; i < window.currentPageContainers.length; i++)
       if (!e.includes(i)) {
-        s = i;
+        r = i;
         break;
       }
-    s === -1 && t < window.currentPageContainers.length - 1 && (s = t + 1), s >= 0 && s < window.currentPageContainers.length && (window.currentActiveIndex = s, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+    r === -1 && t < window.currentPageContainers.length - 1 && (r = t + 1), r >= 0 && r < window.currentPageContainers.length && (window.currentActiveIndex = r, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
       b();
     }, 100));
   }
 }
-function V() {
-  if (L()) {
+function R() {
+  if (E()) {
     const e = document.querySelector("#newspaper-content .newspaper-page-container");
     e && e.scrollIntoView({
       block: "start"
@@ -842,13 +739,13 @@ function V() {
     });
   }
 }
-function L() {
-  const s = [];
+function E() {
+  const r = [];
   window.currentPageContainers.forEach((e, t) => {
-    const i = e.getBoundingClientRect(), n = window.innerHeight, o = Math.max(i.top, 0), r = Math.min(i.bottom, n), a = Math.max(0, r - o), l = i.height;
-    a / l >= 0.3 && s.push(t);
+    const i = e.getBoundingClientRect(), n = window.innerHeight, o = Math.max(i.top, 0), s = Math.min(i.bottom, n), a = Math.max(0, s - o), l = i.height;
+    a / l >= 0.3 && r.push(t);
   });
-  for (const e of s) {
+  for (const e of r) {
     const t = window.currentPageContainers[e];
     if (t && t.id && t.id.includes("beilage-"))
       return !0;
@@ -856,14 +753,14 @@ function L() {
   return !1;
 }
 function b() {
-  const s = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
-  if (s && (s.style.display = "flex", window.currentActiveIndex <= 0 ? (s.disabled = !0, s.classList.add("opacity-50", "cursor-not-allowed"), s.classList.remove("hover:bg-gray-200")) : (s.disabled = !1, s.classList.remove("opacity-50", "cursor-not-allowed"), s.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
-    const i = L(), n = t.querySelector("i");
+  const r = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
+  if (r && (r.style.display = "flex", window.currentActiveIndex <= 0 ? (r.disabled = !0, r.classList.add("opacity-50", "cursor-not-allowed"), r.classList.remove("hover:bg-gray-200")) : (r.disabled = !1, r.classList.remove("opacity-50", "cursor-not-allowed"), r.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
+    const i = E(), n = t.querySelector("i");
     i ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
-function R() {
-  const s = document.getElementById("shareLinkBtn");
+function z() {
+  const r = document.getElementById("shareLinkBtn");
   let e = "";
   if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
     const n = window.currentPageContainers[window.currentActiveIndex].querySelector("[data-page]");
@@ -874,19 +771,19 @@ function R() {
     title: document.title,
     url: t
   }).catch((i) => {
-    S(t, s);
-  }) : S(t, s);
+    S(t, r);
+  }) : S(t, r);
 }
-function S(s, e) {
+function S(r, e) {
   if (navigator.clipboard)
-    navigator.clipboard.writeText(s).then(() => {
+    navigator.clipboard.writeText(r).then(() => {
       h(e, "Link kopiert!");
     }).catch((t) => {
       h(e, "Kopieren fehlgeschlagen");
     });
   else {
     const t = document.createElement("textarea");
-    t.value = s, document.body.appendChild(t), t.select();
+    t.value = r, document.body.appendChild(t), t.select();
     try {
       const i = document.execCommand("copy");
       h(e, i ? "Link kopiert!" : "Kopieren fehlgeschlagen");
@@ -897,31 +794,31 @@ function S(s, e) {
     }
   }
 }
-function D() {
-  const s = document.getElementById("citationBtn"), e = document.title || "KGPZ";
+function O() {
+  const r = document.getElementById("citationBtn"), e = document.title || "KGPZ";
   let t = window.location.origin + window.location.pathname;
   t.includes("#") && (t = t.split("#")[0]);
   const i = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), n = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}. Digital verfügbar unter: ${t} (Zugriff: ${i}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
-      h(s, "Zitation kopiert!");
+      h(r, "Zitation kopiert!");
     }).catch((o) => {
-      h(s, "Kopieren fehlgeschlagen");
+      h(r, "Kopieren fehlgeschlagen");
     });
   else {
     const o = document.createElement("textarea");
     o.value = n, document.body.appendChild(o), o.select();
     try {
-      const r = document.execCommand("copy");
-      h(s, r ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      const s = document.execCommand("copy");
+      h(r, s ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      h(s, "Kopieren fehlgeschlagen");
+      h(r, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(o);
     }
   }
 }
-function h(s, e) {
+function h(r, e) {
   const t = document.querySelector(".simple-popup");
   t && t.remove();
   const i = document.createElement("div");
@@ -939,10 +836,10 @@ function h(s, e) {
 		transition: opacity 0.2s ease;
 		white-space: nowrap;
 	`;
-  const n = s.getBoundingClientRect(), o = window.innerHeight, r = window.innerWidth;
+  const n = r.getBoundingClientRect(), o = window.innerHeight, s = window.innerWidth;
   let a = n.left - 10, l = n.bottom + 8;
   const c = 120, d = 32;
-  a + c > r && (a = n.right - c + 10), l + d > o && (l = n.top - d - 8), i.style.left = Math.max(5, a) + "px", i.style.top = Math.max(5, l) + "px", document.body.appendChild(i), setTimeout(() => {
+  a + c > s && (a = n.right - c + 10), l + d > o && (l = n.top - d - 8), i.style.left = Math.max(5, a) + "px", i.style.top = Math.max(5, l) + "px", document.body.appendChild(i), setTimeout(() => {
     i.style.opacity = "1";
   }, 10), setTimeout(() => {
     i.style.opacity = "0", setTimeout(() => {
@@ -950,17 +847,17 @@ function h(s, e) {
     }, 200);
   }, 2e3);
 }
-function Z(s, e, t = !1) {
+function K(r, e, t = !1) {
   let i = "";
   if (t)
-    i = window.location.origin + window.location.pathname + `#beilage-1-page-${s}`;
+    i = window.location.origin + window.location.pathname + `#beilage-1-page-${r}`;
   else {
     const o = window.location.pathname.split("/");
     if (o.length >= 3) {
-      const r = o[1], a = o[2];
-      i = `${window.location.origin}/${r}/${a}/${s}`;
+      const s = o[1], a = o[2];
+      i = `${window.location.origin}/${s}/${a}/${r}`;
     } else
-      i = window.location.origin + window.location.pathname + `/${s}`;
+      i = window.location.origin + window.location.pathname + `/${r}`;
   }
   const n = i;
   if (navigator.clipboard)
@@ -973,8 +870,8 @@ function Z(s, e, t = !1) {
     const o = document.createElement("textarea");
     o.value = n, document.body.appendChild(o), o.select();
     try {
-      const r = document.execCommand("copy");
-      h(e, r ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      const s = document.execCommand("copy");
+      h(e, s ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
       h(e, "Kopieren fehlgeschlagen");
     } finally {
@@ -982,15 +879,15 @@ function Z(s, e, t = !1) {
     }
   }
 }
-function O(s, e) {
+function D(r, e) {
   const t = document.title || "KGPZ", i = window.location.pathname.split("/");
   let n;
   if (i.length >= 3) {
     const l = i[1], c = i[2];
-    n = `${window.location.origin}/${l}/${c}/${s}`;
+    n = `${window.location.origin}/${l}/${c}/${r}`;
   } else
-    n = `${window.location.origin}${window.location.pathname}/${s}`;
-  const o = n, r = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), a = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${s}. Digital verfügbar unter: ${o} (Zugriff: ${r}).`;
+    n = `${window.location.origin}${window.location.pathname}/${r}`;
+  const o = n, s = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), a = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${r}. Digital verfügbar unter: ${o} (Zugriff: ${s}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(a).then(() => {
       h(e, "Zitation kopiert!");
@@ -1011,33 +908,33 @@ function O(s, e) {
   }
 }
 function P() {
-  M(), window.addEventListener("scroll", function() {
+  V(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
       b();
     }, 50);
-  }), document.addEventListener("keydown", function(s) {
-    s.key === "Escape" && C();
+  }), document.addEventListener("keydown", function(r) {
+    r.key === "Escape" && k();
   });
 }
 function w() {
-  const s = window.location.pathname;
+  const r = window.location.pathname;
   document.querySelectorAll(".citation-link[data-citation-url]").forEach((t) => {
     const i = t.getAttribute("data-citation-url");
     let n = !1;
-    if (i === s)
+    if (i === r)
       n = !0;
     else {
-      const o = s.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/), r = i.match(/^\/(\d{4})\/(\d+)$/);
-      if (o && r) {
-        const [, a, l, c] = o, [, d, u] = r;
-        a === d && l === u && (n = !0);
+      const o = r.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/), s = i.match(/^\/(\d{4})\/(\d+)$/);
+      if (o && s) {
+        const [, a, l, c] = o, [, d, g] = s;
+        a === d && l === g && (n = !0);
       }
     }
     n ? (t.classList.add("text-red-700", "pointer-events-none"), t.setAttribute("aria-current", "page")) : (t.classList.remove("text-red-700", "pointer-events-none"), t.removeAttribute("aria-current"));
   });
 }
-function k() {
-  const s = window.location.pathname, e = document.body;
+function C() {
+  const r = window.location.pathname, e = document.body;
   e.classList.remove(
     "page-akteure",
     "page-ausgabe",
@@ -1046,41 +943,41 @@ function k() {
     "page-kategorie",
     "page-piece",
     "page-edition"
-  ), s.includes("/akteure/") || s.includes("/autoren") ? e.classList.add("page-akteure") : s.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : s.includes("/search") || s.includes("/suche") ? e.classList.add("page-search") : s.includes("/ort/") ? e.classList.add("page-ort") : s.includes("/kategorie/") ? e.classList.add("page-kategorie") : s.includes("/beitrag/") ? e.classList.add("page-piece") : s.includes("/edition") && e.classList.add("page-edition");
+  ), r.includes("/akteure/") || r.includes("/autoren") ? e.classList.add("page-akteure") : r.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : r.includes("/search") || r.includes("/suche") ? e.classList.add("page-search") : r.includes("/ort/") ? e.classList.add("page-ort") : r.includes("/kategorie/") ? e.classList.add("page-kategorie") : r.includes("/beitrag/") ? e.classList.add("page-piece") : r.includes("/edition") && e.classList.add("page-edition");
 }
 let v = [];
-window.ExecuteNextSettle = function(s) {
-  typeof s == "function" && v.push(s);
+window.ExecuteNextSettle = function(r) {
+  typeof r == "function" && v.push(r);
 };
-function Y() {
+function j() {
   for (; v.length > 0; ) {
-    const s = v.shift();
+    const r = v.shift();
     try {
-      s();
+      r();
     } catch (e) {
       console.error("Error executing settle queue function:", e);
     }
   }
 }
-window.enlargePage = z;
-window.closeModal = C;
-window.scrollToPreviousPage = N;
-window.scrollToNextPage = $;
-window.scrollToBeilage = V;
-window.shareCurrentPage = R;
-window.generateCitation = D;
-window.copyPagePermalink = Z;
-window.generatePageCitation = O;
-function F() {
-  k(), w(), document.querySelector(".newspaper-page-container") && P();
-  let s = function(t) {
-    k(), w(), Y(), setTimeout(() => {
+window.enlargePage = q;
+window.closeModal = k;
+window.scrollToPreviousPage = $;
+window.scrollToNextPage = M;
+window.scrollToBeilage = R;
+window.shareCurrentPage = z;
+window.generateCitation = O;
+window.copyPagePermalink = K;
+window.generatePageCitation = D;
+function Z() {
+  C(), w(), document.querySelector(".newspaper-page-container") && P();
+  let r = function(t) {
+    C(), w(), j(), setTimeout(() => {
       document.querySelector(".newspaper-page-container") && P();
     }, 50);
   }, e = function(t) {
   };
-  document.body.addEventListener("htmx:afterSettle", s), document.body.addEventListener("htmx:afterSettle", w), document.body.addEventListener("htmx:beforeRequest", e);
+  document.body.addEventListener("htmx:afterSettle", r), document.body.addEventListener("htmx:afterSettle", w), document.body.addEventListener("htmx:beforeRequest", e);
 }
 export {
-  F as setup
+  Z as setup
 };
