@@ -25,8 +25,8 @@ class I extends HTMLElement {
         this.updateActiveLink(), this.updateSidebarScrollToTopButton();
       }, 50);
     }, window.addEventListener("scroll", this.scrollHandler), this.navLinks.forEach((e) => {
-      const i = (t) => {
-        t.preventDefault();
+      const t = (i) => {
+        i.preventDefault();
         const n = e.getAttribute("data-target"), o = document.getElementById(n);
         o && (this.updateActiveLinkImmediate(n), this.manualNavigation = !0, o.scrollIntoView({
           behavior: "smooth",
@@ -35,23 +35,23 @@ class I extends HTMLElement {
           this.manualNavigation = !1, this.ensureMarkerVisibility();
         }, 1e3));
       };
-      this.clickHandlers.push({ link: e, handler: i }), e.addEventListener("click", i);
+      this.clickHandlers.push({ link: e, handler: t }), e.addEventListener("click", t);
     }), this.updateActiveLink(), this.updateSidebarScrollToTopButton();
   }
   ensureMarkerVisibility() {
-    const e = document.getElementById("scrollspy-slider"), i = document.getElementById("scrollspy-nav");
-    if (!e || !i || e.style.opacity === "0")
+    const e = document.getElementById("scrollspy-slider"), t = document.getElementById("scrollspy-nav");
+    if (!e || !t || e.style.opacity === "0")
       return;
-    const t = i.getBoundingClientRect(), n = parseFloat(e.style.top), o = parseFloat(e.style.height), r = n + o, a = i.scrollTop, l = a + t.height;
+    const i = t.getBoundingClientRect(), n = parseFloat(e.style.top), o = parseFloat(e.style.height), r = n + o, a = t.scrollTop, l = a + i.height;
     if (r > l) {
-      const c = r - t.height + 20;
-      i.scrollTo({
+      const c = r - i.height + 20;
+      t.scrollTo({
         top: c,
         behavior: "smooth"
       });
     } else if (n < a) {
       const c = n - 20;
-      i.scrollTo({
+      t.scrollTo({
         top: Math.max(0, c),
         behavior: "smooth"
       });
@@ -86,26 +86,26 @@ class I extends HTMLElement {
     } catch {
       return;
     }
-    const i = [], t = document.getElementById("scrollspy-slider");
+    const t = [], i = document.getElementById("scrollspy-slider");
     if (this.navLinks.forEach((n) => {
       n.classList.remove("font-medium");
       const o = n.getAttribute("data-target");
-      e.includes(o) && (n.classList.add("font-medium"), i.push(n));
-    }), i.length > 0 && t) {
+      e.includes(o) && (n.classList.add("font-medium"), t.push(n));
+    }), t.length > 0 && i) {
       const n = document.getElementById("scrollspy-nav"), o = n.getBoundingClientRect();
       let r = 1 / 0, a = -1 / 0;
-      i.forEach((c) => {
+      t.forEach((c) => {
         const d = c.getBoundingClientRect(), u = d.top - o.top + n.scrollTop, g = u + d.height;
         r = Math.min(r, u), a = Math.max(a, g);
       });
       let l = a - r;
-      t.style.top = `${r}px`, t.style.height = `${l}px`, t.style.opacity = "1", setTimeout(() => this.ensureMarkerVisibility(), 100);
-    } else t && (t.style.opacity = "0");
-    i.length > 0 && this.updateSidebarScroll(i);
+      i.style.top = `${r}px`, i.style.height = `${l}px`, i.style.opacity = "1", setTimeout(() => this.ensureMarkerVisibility(), 100);
+    } else i && (i.style.opacity = "0");
+    t.length > 0 && this.updateSidebarScroll(t);
   }
   updateActiveLinkImmediate(e) {
     if (!this.navLinks) return;
-    const i = document.getElementById("scrollspy-slider");
+    const t = document.getElementById("scrollspy-slider");
     try {
       this.navLinks.forEach((n) => {
         n && n.classList && n.classList.remove("font-medium");
@@ -113,29 +113,29 @@ class I extends HTMLElement {
     } catch {
       return;
     }
-    const t = document.querySelector(`[data-target="${e}"]`);
-    if (t && (t.classList.add("font-medium"), i)) {
+    const i = document.querySelector(`[data-target="${e}"]`);
+    if (i && (i.classList.add("font-medium"), t)) {
       const n = document.getElementById("scrollspy-nav");
       if (n) {
-        const o = n.getBoundingClientRect(), r = t.getBoundingClientRect(), a = r.top - o.top + n.scrollTop;
-        i.style.top = `${a}px`, i.style.height = `${r.height}px`, i.style.opacity = "1";
+        const o = n.getBoundingClientRect(), r = i.getBoundingClientRect(), a = r.top - o.top + n.scrollTop;
+        t.style.top = `${a}px`, t.style.height = `${r.height}px`, t.style.opacity = "1";
       }
     }
   }
   updateSidebarScroll(e) {
     if (this.manualNavigation) return;
-    const i = document.getElementById("scrollspy-nav");
-    if (!i) return;
-    const t = e[0], n = Math.max(
+    const t = document.getElementById("scrollspy-nav");
+    if (!t) return;
+    const i = e[0], n = Math.max(
       document.body.scrollHeight,
       document.body.offsetHeight,
       document.documentElement.clientHeight,
       document.documentElement.scrollHeight,
       document.documentElement.offsetHeight
-    ), o = window.innerHeight, r = n - o, a = r > 0 ? window.scrollY / r : 0, l = i.clientHeight, d = i.scrollHeight - l;
+    ), o = window.innerHeight, r = n - o, a = r > 0 ? window.scrollY / r : 0, l = t.clientHeight, d = t.scrollHeight - l;
     if (d > 0) {
-      const u = a * d, g = t.getBoundingClientRect(), p = i.getBoundingClientRect(), f = g.top - p.top + i.scrollTop, m = l / 2, E = f - m, y = 0.7, H = y * u + (1 - y) * E, x = Math.max(0, Math.min(d, H)), T = i.scrollTop;
-      Math.abs(x - T) > 10 && i.scrollTo({
+      const u = a * d, g = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = g.top - p.top + t.scrollTop, m = l / 2, E = f - m, y = 0.7, H = y * u + (1 - y) * E, x = Math.max(0, Math.min(d, H)), T = t.scrollTop;
+      Math.abs(x - T) > 10 && t.scrollTo({
         top: x,
         behavior: "smooth"
       });
@@ -144,19 +144,19 @@ class I extends HTMLElement {
   updateSidebarScrollToTopButton() {
     const e = document.getElementById("sidebar-scroll-to-top");
     if (!e) return;
-    const i = window.pageYOffset || document.documentElement.scrollTop, t = window.innerHeight;
-    i > t * 0.5 ? (e.classList.remove("opacity-0"), e.classList.add("opacity-100")) : (e.classList.remove("opacity-100"), e.classList.add("opacity-0"));
+    const t = window.pageYOffset || document.documentElement.scrollTop, i = window.innerHeight;
+    t > i * 0.5 ? (e.classList.remove("opacity-0"), e.classList.add("opacity-100")) : (e.classList.remove("opacity-100"), e.classList.add("opacity-0"));
   }
   cleanup() {
-    this.scrollHandler && (window.removeEventListener("scroll", this.scrollHandler), this.scrollHandler = null), this.scrollTimeout && (clearTimeout(this.scrollTimeout), this.scrollTimeout = null), this.clickHandlers && this.clickHandlers.length > 0 && this.clickHandlers.forEach(({ link: i, handler: t }) => {
-      i && t && i.removeEventListener("click", t);
+    this.scrollHandler && (window.removeEventListener("scroll", this.scrollHandler), this.scrollHandler = null), this.scrollTimeout && (clearTimeout(this.scrollTimeout), this.scrollTimeout = null), this.clickHandlers && this.clickHandlers.length > 0 && this.clickHandlers.forEach(({ link: t, handler: i }) => {
+      t && i && t.removeEventListener("click", i);
     });
     const e = document.getElementById("scrollspy-slider");
     e && (e.style.opacity = "0", e.style.height = "0"), this.sections = null, this.navLinks = null, this.clickHandlers = [], this.manualNavigation = !1;
   }
 }
 customElements.define("akteure-scrollspy", I);
-class A extends HTMLElement {
+class B extends HTMLElement {
   constructor() {
     super(), this.resizeObserver = null, this.zoomLevel = 1, this.minZoom = 1, this.maxZoom = 4, this.panX = 0, this.panY = 0, this.isDragging = !1, this.lastMouseX = 0, this.lastMouseY = 0, this.clickStartTime = null, this.clickStartX = null, this.clickStartY = null;
   }
@@ -167,8 +167,8 @@ class A extends HTMLElement {
       const n = e.getBoundingClientRect().width;
       return console.log("Detected sidebar width:", n, "px"), `${n}px`;
     }
-    const i = window.innerWidth;
-    return i < 1024 ? "0px" : i < 1280 ? `${Math.floor(i * 0.25)}px` : `${Math.floor(i * 0.2)}px`;
+    const t = window.innerWidth;
+    return t < 1024 ? "0px" : t < 1280 ? `${Math.floor(t * 0.25)}px` : `${Math.floor(t * 0.2)}px`;
   }
   connectedCallback() {
     const e = this.detectSidebarWidth();
@@ -181,7 +181,7 @@ class A extends HTMLElement {
 				<div class="flex-1 bg-slate-50 overflow-auto pointer-events-auto">
 					<div class="relative min-h-full flex flex-col">
 						<!-- Header with page info and buttons -->
-						<div class="flex items-center justify-between p-4">
+						<div class="sticky top-0 z-30 bg-slate-50 flex items-center justify-between p-4">
 							<!-- Left: Sidebar toggle and page indicator -->
 							<div class="flex items-center gap-3">
 								<!-- Sidebar toggle button -->
@@ -234,7 +234,7 @@ class A extends HTMLElement {
 									onclick="this.closest('single-page-viewer').resetZoom()"
 									class="w-10 h-10 bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
 									title="Zoom zurücksetzen (100%)">
-									<i class="ri-fullscreen-exit-line text-lg font-bold"></i>
+									<i class="ri-zoom-out-line text-lg font-bold"></i>
 								</button>
 
 								<!-- Separator -->
@@ -297,28 +297,28 @@ class A extends HTMLElement {
   updateSidebarWidth() {
     const e = this.querySelector("#sidebar-spacer");
     if (e && !e.style.width.includes("0px")) {
-      const i = this.detectSidebarWidth();
-      e.style.width = i, console.log("Updated sidebar width to:", i);
+      const t = this.detectSidebarWidth();
+      e.style.width = t, console.log("Updated sidebar width to:", t);
     }
   }
-  show(e, i, t, n = !1, o = 0, r = null, a = null, l = null) {
+  show(e, t, i, n = !1, o = 0, r = null, a = null, l = null) {
     const c = this.querySelector("#single-page-image"), d = this.querySelector("#page-number"), u = this.querySelector("#page-icon");
-    this.querySelector("#page-indicator"), c.src = e, c.alt = i, this.currentPageNumber = t, this.currentIsBeilage = n, this.currentPartNumber = r;
+    this.querySelector("#page-indicator"), c.src = e, c.alt = t, this.currentPageNumber = i, this.currentIsBeilage = n, this.currentPartNumber = r;
     let g;
     if (l)
       g = l;
     else {
-      const f = this.getIssueContext(t);
-      g = f ? `${f}, ${t}` : `${t}`;
+      const f = this.getIssueContext(i);
+      g = f ? `${f}, ${i}` : `${i}`;
     }
-    if (d.innerHTML = g, o && t === o) {
+    if (d.innerHTML = g, o && i === o) {
       d.style.position = "relative";
       const f = d.querySelector(".target-page-dot");
       f && f.remove();
       const m = document.createElement("span");
       m.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", m.title = "verlinkte Seite", d.appendChild(m);
     }
-    a ? a === "part-number" && r !== null ? u.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${r}. Teil</span>` : u.innerHTML = this.generateIconFromType(a) : u.innerHTML = this.generateFallbackIcon(t, n, r), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true"), this.resetZoom();
+    a ? a === "part-number" && r !== null ? u.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${r}. Teil</span>` : u.innerHTML = this.generateIconFromType(a) : u.innerHTML = this.generateFallbackIcon(i, n, r), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true"), this.resetZoom();
     const p = this.querySelector(".flex-1.overflow-auto");
     p && (p.scrollTop = 0), document.body.style.overflow = "hidden", document.dispatchEvent(new CustomEvent("singlepageviewer:opened", {
       detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
@@ -334,8 +334,8 @@ class A extends HTMLElement {
   }
   // Clean up zoom event listeners
   cleanupZoomEvents() {
-    const e = this.querySelector("#image-scroll-container"), i = this.querySelector("#single-page-image");
-    this.wheelHandler && e && (e.removeEventListener("wheel", this.wheelHandler), this.wheelHandler = null), this.mouseDownHandler && i && (i.removeEventListener("mousedown", this.mouseDownHandler), this.mouseDownHandler = null), this.mouseMoveHandler && (document.removeEventListener("mousemove", this.mouseMoveHandler), this.mouseMoveHandler = null), this.mouseUpHandler && (document.removeEventListener("mouseup", this.mouseUpHandler), this.mouseUpHandler = null), this.animationFrameId && (cancelAnimationFrame(this.animationFrameId), this.animationFrameId = null);
+    const e = this.querySelector("#image-scroll-container"), t = this.querySelector("#single-page-image");
+    this.wheelHandler && e && (e.removeEventListener("wheel", this.wheelHandler), this.wheelHandler = null), this.mouseDownHandler && t && (t.removeEventListener("mousedown", this.mouseDownHandler), this.mouseDownHandler = null), this.mouseMoveHandler && (document.removeEventListener("mousemove", this.mouseMoveHandler), this.mouseMoveHandler = null), this.mouseUpHandler && (document.removeEventListener("mouseup", this.mouseUpHandler), this.mouseUpHandler = null), this.animationFrameId && (cancelAnimationFrame(this.animationFrameId), this.animationFrameId = null);
   }
   // Generate icon HTML from Go icon type - matches templating/engine.go PageIcon function
   generateIconFromType(e) {
@@ -357,7 +357,14 @@ class A extends HTMLElement {
   // Set up keyboard navigation
   setupKeyboardNavigation() {
     this.keyboardHandler && document.removeEventListener("keydown", this.keyboardHandler), this.keyboardHandler = (e) => {
-      if (this.style.display !== "none")
+      if (this.style.display !== "none") {
+        if (e.key === "+" || e.key === "=") {
+          e.preventDefault(), this.zoom(0.1);
+          return;
+        } else if (e.key === "-") {
+          e.preventDefault(), this.zoom(-0.1);
+          return;
+        }
         switch (e.key) {
           case "ArrowLeft":
             e.preventDefault(), this.goToPreviousPage();
@@ -369,71 +376,51 @@ class A extends HTMLElement {
             e.preventDefault(), this.close();
             break;
         }
+      }
     }, document.addEventListener("keydown", this.keyboardHandler);
   }
   // Set up zoom event listeners
   setupZoomEvents() {
-    const e = this.querySelector("#single-page-image"), i = this.querySelector("#image-scroll-container");
-    this.wheelHandler = (t) => {
-      if (this.style.display === "none" || !t.ctrlKey) return;
-      t.preventDefault();
-      const n = t.deltaY > 0 ? -1 : 1, o = 0.1, r = e.getBoundingClientRect(), a = t.clientX - r.left, l = t.clientY - r.top;
+    const e = this.querySelector("#single-page-image"), t = this.querySelector("#image-scroll-container");
+    this.wheelHandler = (i) => {
+      if (this.style.display === "none" || !i.ctrlKey) return;
+      i.preventDefault();
+      const n = i.deltaY > 0 ? -1 : 1, o = 0.1, r = e.getBoundingClientRect(), a = i.clientX - r.left, l = i.clientY - r.top;
       this.zoom(n * o, a, l);
-    }, this.keyboardHandler, this.keyboardHandler = (t) => {
-      if (this.style.display !== "none") {
-        if (t.key === "+" || t.key === "=") {
-          t.preventDefault(), this.zoom(0.1);
-          return;
-        } else if (t.key === "-") {
-          t.preventDefault(), this.zoom(-0.1);
-          return;
-        }
-        switch (t.key) {
-          case "ArrowLeft":
-            t.preventDefault(), this.goToPreviousPage();
-            break;
-          case "ArrowRight":
-            t.preventDefault(), this.goToNextPage();
-            break;
-          case "Escape":
-            t.preventDefault(), this.close();
-            break;
-        }
-      }
-    }, this.mouseDownHandler = (t) => {
-      this.style.display !== "none" && t.button === 0 && (this.zoomLevel <= 1 ? (this.clickStartTime = Date.now(), this.clickStartX = t.clientX, this.clickStartY = t.clientY) : (t.preventDefault(), this.isDragging = !0, this.lastMouseX = t.clientX, this.lastMouseY = t.clientY, this.updateCursor()));
-    }, this.mouseMoveHandler = (t) => {
+    }, this.mouseDownHandler = (i) => {
+      this.style.display !== "none" && i.button === 0 && (this.zoomLevel <= 1 ? (this.clickStartTime = Date.now(), this.clickStartX = i.clientX, this.clickStartY = i.clientY) : (i.preventDefault(), this.isDragging = !0, this.lastMouseX = i.clientX, this.lastMouseY = i.clientY, this.updateCursor()));
+    }, this.mouseMoveHandler = (i) => {
       if (this.style.display !== "none" && this.isDragging && this.zoomLevel > 1) {
-        t.preventDefault();
-        const n = t.clientX - this.lastMouseX, o = t.clientY - this.lastMouseY;
-        this.panX += n, this.panY += o, this.lastMouseX = t.clientX, this.lastMouseY = t.clientY, this.animationFrameId || (this.animationFrameId = requestAnimationFrame(() => {
+        i.preventDefault();
+        const n = i.clientX - this.lastMouseX, o = i.clientY - this.lastMouseY;
+        this.panX += n, this.panY += o, this.lastMouseX = i.clientX, this.lastMouseY = i.clientY, this.animationFrameId || (this.animationFrameId = requestAnimationFrame(() => {
           this.updateImageTransform(), this.animationFrameId = null;
         }));
       }
-    }, this.mouseUpHandler = (t) => {
+    }, this.mouseUpHandler = (i) => {
       if (this.isDragging)
         this.isDragging = !1, this.updateCursor();
       else if (this.zoomLevel <= 1 && this.clickStartTime) {
         const n = Date.now() - this.clickStartTime, o = Math.sqrt(
-          Math.pow(t.clientX - this.clickStartX, 2) + Math.pow(t.clientY - this.clickStartY, 2)
+          Math.pow(i.clientX - this.clickStartX, 2) + Math.pow(i.clientY - this.clickStartY, 2)
         );
         n < 300 && o < 10 && this.close(), this.clickStartTime = null, this.clickStartX = null, this.clickStartY = null;
       }
-    }, i.addEventListener("wheel", this.wheelHandler, { passive: !1 }), e.addEventListener("mousedown", this.mouseDownHandler), document.addEventListener("mousemove", this.mouseMoveHandler), document.addEventListener("mouseup", this.mouseUpHandler), e.addEventListener("contextmenu", (t) => t.preventDefault());
+    }, t.addEventListener("wheel", this.wheelHandler, { passive: !1 }), e.addEventListener("mousedown", this.mouseDownHandler), document.addEventListener("mousemove", this.mouseMoveHandler), document.addEventListener("mouseup", this.mouseUpHandler), e.addEventListener("contextmenu", (i) => i.preventDefault());
   }
   // Zoom function
-  zoom(e, i = null, t = null) {
+  zoom(e, t = null, i = null) {
     const n = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + e));
     if (n === this.zoomLevel) return;
     const r = this.querySelector("#single-page-image").getBoundingClientRect();
-    if (i !== null && t !== null) {
-      const a = r.width / 2, l = r.height / 2, c = i - a, d = t - l, u = n / this.zoomLevel;
+    if (t !== null && i !== null) {
+      const a = r.width / 2, l = r.height / 2, c = t - a, d = i - l, u = n / this.zoomLevel;
       this.panX = this.panX * u - c * (u - 1), this.panY = this.panY * u - d * (u - 1);
     } else {
       const a = n / this.zoomLevel;
       this.panX *= a, this.panY *= a;
     }
-    this.zoomLevel = n, this.zoomLevel <= 1 && (this.panX = 0, this.panY = 0), this.updateImageTransform(), this.updateCursor(), this.updateZoomDisplay();
+    this.zoomLevel = n, this.zoomLevel <= 1 && (this.panX = 0, this.panY = 0), this.updateImageTransform(), this.updateCursor(), this.updateZoomDisplay(), this.updateScrollBehavior();
   }
   // Update image transform based on zoom and pan
   updateImageTransform() {
@@ -447,12 +434,17 @@ class A extends HTMLElement {
   }
   // Update zoom level display and reset button
   updateZoomDisplay() {
-    const e = this.querySelector("#zoom-level-display"), i = this.querySelector("#zoom-reset-btn");
-    e && (this.zoomLevel <= this.minZoom ? (e.textContent = "Strg + Mausrad oder +/- für Zoom", i && (i.style.display = "none")) : (e.textContent = `${Math.round(this.zoomLevel * 100)}%`, i && (i.style.display = "flex")));
+    const e = this.querySelector("#zoom-level-display"), t = this.querySelector("#zoom-reset-btn");
+    e && (this.zoomLevel <= this.minZoom ? (e.innerHTML = "Strg + Mausrad oder +/- für Zoom", t && (t.style.display = "none")) : (e.innerHTML = `<span class="font-bold">Zoom aktiv</span> • ${Math.round(this.zoomLevel * 100)}%`, t && (t.style.display = "flex")));
+  }
+  // Update scroll behavior based on zoom level
+  updateScrollBehavior() {
+    const e = this.querySelector(".flex-1.bg-slate-50.overflow-auto"), t = this.querySelector("#image-scroll-container");
+    !e || !t || (this.zoomLevel > 1 ? (e.style.overflow = "hidden", t.style.height = "100vh", t.style.overflow = "hidden") : (e.style.overflow = "auto", t.style.height = "", t.style.overflow = "auto"));
   }
   // Reset zoom state when showing new image
   resetZoom() {
-    this.zoomLevel = 1, this.panX = 0, this.panY = 0, this.isDragging = !1, this.clickStartTime = null, this.clickStartX = null, this.clickStartY = null, this.updateImageTransform(), this.updateCursor(), this.updateZoomDisplay();
+    this.zoomLevel = 1, this.panX = 0, this.panY = 0, this.isDragging = !1, this.clickStartTime = null, this.clickStartX = null, this.clickStartY = null, this.updateImageTransform(), this.updateCursor(), this.updateZoomDisplay(), this.updateScrollBehavior();
   }
   // Share current page
   shareCurrentPage() {
@@ -470,17 +462,17 @@ class A extends HTMLElement {
   }
   // Update navigation button visibility based on available pages
   updateNavigationButtons() {
-    const e = this.querySelector("#prev-page-btn"), i = this.querySelector("#next-page-btn"), { prevPage: t, nextPage: n } = this.getAdjacentPages();
-    t !== null ? (e.disabled = !1, e.className = e.className.replace("opacity-50 cursor-not-allowed", ""), e.className = e.className.replace(
+    const e = this.querySelector("#prev-page-btn"), t = this.querySelector("#next-page-btn"), { prevPage: i, nextPage: n } = this.getAdjacentPages();
+    i !== null ? (e.disabled = !1, e.className = e.className.replace("opacity-50 cursor-not-allowed", ""), e.className = e.className.replace(
       "bg-gray-50 text-gray-400",
       "bg-gray-100 text-gray-700"
     )) : (e.disabled = !0, e.className.includes("opacity-50") || (e.className += " opacity-50 cursor-not-allowed"), e.className = e.className.replace(
       "bg-gray-100 text-gray-700",
       "bg-gray-50 text-gray-400"
-    )), n !== null ? (i.disabled = !1, i.className = i.className.replace("opacity-50 cursor-not-allowed", ""), i.className = i.className.replace(
+    )), n !== null ? (t.disabled = !1, t.className = t.className.replace("opacity-50 cursor-not-allowed", ""), t.className = t.className.replace(
       "bg-gray-50 text-gray-400",
       "bg-gray-100 text-gray-700"
-    )) : (i.disabled = !0, i.className.includes("opacity-50") || (i.className += " opacity-50 cursor-not-allowed"), i.className = i.className.replace(
+    )) : (t.disabled = !0, t.className.includes("opacity-50") || (t.className += " opacity-50 cursor-not-allowed"), t.className = t.className.replace(
       "bg-gray-100 text-gray-700",
       "bg-gray-50 text-gray-400"
     ));
@@ -489,22 +481,22 @@ class A extends HTMLElement {
   getAdjacentPages() {
     let e;
     this.currentIsBeilage ? e = '.newspaper-page-container[data-beilage="true"]' : e = ".newspaper-page-container:not([data-beilage])";
-    const i = Array.from(document.querySelectorAll(e));
+    const t = Array.from(document.querySelectorAll(e));
     console.log(
       "Found containers:",
-      i.length,
+      t.length,
       "for",
       this.currentIsBeilage ? "beilage" : "main"
     );
-    const t = i.map((a) => {
+    const i = t.map((a) => {
       const l = a.getAttribute("data-page-container"), c = l ? parseInt(l) : null;
       return console.log("Container page:", l, "parsed:", c), c;
     }).filter((a) => a !== null).sort((a, l) => a - l);
-    console.log("All pages found:", t), console.log("Current page:", this.currentPageNumber);
-    const n = t.indexOf(this.currentPageNumber);
+    console.log("All pages found:", i), console.log("Current page:", this.currentPageNumber);
+    const n = i.indexOf(this.currentPageNumber);
     console.log("Current index:", n);
     let o = null, r = null;
-    return n > 0 && (o = t[n - 1]), n < t.length - 1 && (r = t[n + 1]), console.log("Adjacent pages - prev:", o, "next:", r), { prevPage: o, nextPage: r };
+    return n > 0 && (o = i[n - 1]), n < i.length - 1 && (r = i[n + 1]), console.log("Adjacent pages - prev:", o, "next:", r), { prevPage: o, nextPage: r };
   }
   // Navigate to previous page
   goToPreviousPage() {
@@ -518,17 +510,17 @@ class A extends HTMLElement {
   }
   // Navigate to a specific page
   navigateToPage(e) {
-    const i = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", t = document.querySelector(
-      `${i}[data-page-container="${e}"]`
+    const t = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", i = document.querySelector(
+      `${t}[data-page-container="${e}"]`
     );
-    if (t) {
-      const n = t.querySelector(".newspaper-page-image, .piece-page-image");
+    if (i) {
+      const n = i.querySelector(".newspaper-page-image, .piece-page-image");
       if (n) {
         let o = null;
         this.currentPartNumber !== null && (o = this.getPartNumberForPage(e));
         let r = null, a = null;
-        r = t.getAttribute("data-page-icon-type"), t.querySelector(".part-number") && (r = "part-number");
-        const c = t.querySelector(".page-indicator");
+        r = i.getAttribute("data-page-icon-type"), i.querySelector(".part-number") && (r = "part-number");
+        const c = i.querySelector(".page-indicator");
         if (c) {
           const d = c.cloneNode(!0);
           d.querySelectorAll("i").forEach((p) => p.remove()), d.querySelectorAll(
@@ -552,11 +544,11 @@ class A extends HTMLElement {
   }
   // Get part number for a specific page in piece view
   getPartNumberForPage(e) {
-    const i = document.querySelector(`[data-page-container="${e}"]`);
-    if (i) {
-      const t = i.querySelector(".part-number");
-      if (t) {
-        const n = t.textContent.match(/(\d+)\./);
+    const t = document.querySelector(`[data-page-container="${e}"]`);
+    if (t) {
+      const i = t.querySelector(".part-number");
+      if (i) {
+        const n = i.textContent.match(/(\d+)\./);
         if (n)
           return parseInt(n[1]);
       }
@@ -564,23 +556,23 @@ class A extends HTMLElement {
     return null;
   }
   // Legacy fallback icon generation (only used when extraction fails)
-  generateFallbackIcon(e, i, t) {
-    return t !== null ? `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${t}. Teil</span>` : `<i class="ri-file-text-line text-lg ${i ? "text-amber-600" : "text-black"}"></i>`;
+  generateFallbackIcon(e, t, i) {
+    return i !== null ? `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${i}. Teil</span>` : `<i class="ri-file-text-line text-lg ${t ? "text-amber-600" : "text-black"}"></i>`;
   }
   // Toggle sidebar visibility
   toggleSidebar() {
-    const e = this.querySelector("#sidebar-spacer"), i = this.querySelector("#sidebar-toggle-btn"), t = i.querySelector("i"), n = e.style.width, o = n === "0px" || n === "0";
+    const e = this.querySelector("#sidebar-spacer"), t = this.querySelector("#sidebar-toggle-btn"), i = t.querySelector("i"), n = e.style.width, o = n === "0px" || n === "0";
     if (console.log("Current state - isCollapsed:", o), console.log("Current width:", n), o) {
       const r = this.detectSidebarWidth();
-      e.style.width = r, i.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", t.className = "ri-sidebar-fold-line text-lg font-bold", i.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", r);
+      e.style.width = r, t.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-fold-line text-lg font-bold", t.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", r);
     } else
-      e.style.width = "0px", i.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", t.className = "ri-sidebar-unfold-line text-lg font-bold", i.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
+      e.style.width = "0px", t.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-unfold-line text-lg font-bold", t.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
     console.log("New width:", e.style.width);
   }
   // Extract issue context from document title, URL, or page container
   getIssueContext(e) {
-    const i = window.location.pathname, t = i.includes("/beitrag/");
-    if (t) {
+    const t = window.location.pathname, i = t.includes("/beitrag/");
+    if (i) {
       const r = document.querySelector(`[data-page-container="${e}"]`);
       if (r) {
         const c = r.querySelector(".page-indicator");
@@ -598,9 +590,9 @@ class A extends HTMLElement {
         return `${l[1]} Nr. ${l[2]}`;
     } else
       return "";
-    const n = i.match(/\/(\d{4})\/(\d+)/);
+    const n = t.match(/\/(\d{4})\/(\d+)/);
     if (n)
-      return t ? `${n[1]} Nr. ${n[2]}` : "";
+      return i ? `${n[1]} Nr. ${n[2]}` : "";
     const o = document.querySelector(".page-indicator");
     if (o) {
       const a = o.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
@@ -610,7 +602,7 @@ class A extends HTMLElement {
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", A);
+customElements.define("single-page-viewer", B);
 document.body.addEventListener("htmx:beforeRequest", function(s) {
   const e = document.querySelector("single-page-viewer");
   e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.close());
@@ -619,7 +611,7 @@ window.addEventListener("beforeunload", function() {
   const s = document.querySelector("single-page-viewer");
   s && s.close();
 });
-class B extends HTMLElement {
+class A extends HTMLElement {
   constructor() {
     super(), this.isVisible = !1, this.scrollHandler = null, this.htmxAfterSwapHandler = null;
   }
@@ -650,7 +642,7 @@ class B extends HTMLElement {
   handleScroll() {
     const e = this.querySelector("#scroll-to-top-btn");
     if (!e) return;
-    const i = window.pageYOffset || document.documentElement.scrollTop, t = window.innerHeight, n = i > t;
+    const t = window.pageYOffset || document.documentElement.scrollTop, i = window.innerHeight, n = t > i;
     n && !this.isVisible ? (this.isVisible = !0, e.classList.remove("opacity-0", "pointer-events-none"), e.classList.add("opacity-100", "pointer-events-auto")) : !n && this.isVisible && (this.isVisible = !1, e.classList.remove("opacity-100", "pointer-events-auto"), e.classList.add("opacity-0", "pointer-events-none"));
   }
   scrollToTop() {
@@ -660,7 +652,7 @@ class B extends HTMLElement {
     });
   }
 }
-customElements.define("scroll-to-top-button", B);
+customElements.define("scroll-to-top-button", A);
 class q extends HTMLElement {
   constructor() {
     super(), this.pageObserver = null, this.pageContainers = /* @__PURE__ */ new Map(), this.singlePageViewerActive = !1, this.singlePageViewerCurrentPage = null, this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this);
@@ -673,20 +665,20 @@ class q extends HTMLElement {
   }
   setupScrollspy() {
     const e = document.querySelectorAll(".newspaper-page-container[data-page-container]");
-    e.length !== 0 && (e.forEach((i) => {
-      const t = i.getAttribute("data-page-container"), n = i.hasAttribute("data-beilage"), o = this.findInhaltsEntriesForPage(t, n);
-      o.length > 0 && this.pageContainers.set(t, {
-        container: i,
+    e.length !== 0 && (e.forEach((t) => {
+      const i = t.getAttribute("data-page-container"), n = t.hasAttribute("data-beilage"), o = this.findInhaltsEntriesForPage(i, n);
+      o.length > 0 && this.pageContainers.set(i, {
+        container: t,
         entries: o,
         state: "short",
         // Default state
         isBeilage: n
       });
-    }), this.pageObserver = new IntersectionObserver((i) => {
-      i.forEach((t) => {
-        const n = t.target.getAttribute("data-page-container"), o = this.pageContainers.get(n);
+    }), this.pageObserver = new IntersectionObserver((t) => {
+      t.forEach((i) => {
+        const n = i.target.getAttribute("data-page-container"), o = this.pageContainers.get(n);
         if (o) {
-          const a = t.isIntersecting && t.intersectionRatio >= 0.5 || this.singlePageViewerActive ? "full" : "short";
+          const a = i.isIntersecting && i.intersectionRatio >= 0.5 || this.singlePageViewerActive ? "full" : "short";
           o.state !== a && (o.state = a, this.updateEntriesState(o));
         }
       });
@@ -694,46 +686,46 @@ class q extends HTMLElement {
       threshold: [0, 0.5, 1],
       // Watch for 50% threshold
       rootMargin: "0px"
-    }), this.pageContainers.forEach(({ container: i }) => {
-      this.pageObserver.observe(i);
-    }), this.pageContainers.forEach((i) => {
-      this.updateEntriesState(i);
+    }), this.pageContainers.forEach(({ container: t }) => {
+      this.pageObserver.observe(t);
+    }), this.pageContainers.forEach((t) => {
+      this.updateEntriesState(t);
     }));
   }
-  findInhaltsEntriesForPage(e, i = !1) {
-    const t = i ? `[data-page-container="${e}"][data-beilage="true"]` : `[data-page-container="${e}"]:not([data-beilage])`, n = this.querySelector(t);
+  findInhaltsEntriesForPage(e, t = !1) {
+    const i = t ? `[data-page-container="${e}"][data-beilage="true"]` : `[data-page-container="${e}"]:not([data-beilage])`, n = this.querySelector(i);
     return n ? Array.from(n.querySelectorAll(".inhalts-entry")) : [];
   }
   updateEntriesState(e) {
-    const { entries: i, state: t } = e;
-    t === "full" ? (i.forEach((n) => {
+    const { entries: t, state: i } = e;
+    i === "full" ? (t.forEach((n) => {
       n.style.display = "";
-    }), this.highlightPageElements(e, !0)) : (i.forEach((n) => {
+    }), this.highlightPageElements(e, !0)) : (t.forEach((n) => {
       const o = n.hasAttribute("data-is-continuation");
       n.style.display = o ? "none" : "";
     }), this.highlightPageElements(e, !1));
   }
-  highlightPageElements(e, i) {
+  highlightPageElements(e, t) {
     var a;
-    const t = e.container.getAttribute("data-page-container"), n = this.querySelector(`[data-page-number="${t}"]`);
+    const i = e.container.getAttribute("data-page-container"), n = this.querySelector(`[data-page-number="${i}"]`);
     (a = n == null ? void 0 : n.closest(".page-entry")) == null || a.querySelector(".icon-container");
     const o = n == null ? void 0 : n.closest(".page-entry");
-    o && (i ? (o.classList.add("!border-l-red-500"), o.classList.remove("border-slate-300")) : (o.classList.remove("!border-l-red-500"), o.classList.add("border-slate-300")));
-    const r = document.querySelector(`[data-page="${t}"].page-indicator`);
+    o && (t ? (o.classList.add("!border-l-red-500"), o.classList.remove("border-slate-300")) : (o.classList.remove("!border-l-red-500"), o.classList.add("border-slate-300")));
+    const r = document.querySelector(`[data-page="${i}"].page-indicator`);
     if (r) {
       const l = r.querySelectorAll("i:not(.text-slate-400)");
-      i ? (r.classList.add("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.add("!text-red-600"))) : (r.classList.remove("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.remove("!text-red-600")));
+      t ? (r.classList.add("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.add("!text-red-600"))) : (r.classList.remove("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.remove("!text-red-600")));
     }
   }
   setupSinglePageViewerDetection() {
     document.addEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.checkSinglePageViewerState();
   }
   handleSinglePageViewer(e) {
-    var i;
-    this.singlePageViewerActive, this.singlePageViewerActive = e.type === "singlepageviewer:opened" || e.type === "singlepageviewer:pagechanged" && this.singlePageViewerActive, (this.singlePageViewerActive || e.type === "singlepageviewer:pagechanged") && ((i = e.detail) != null && i.pageNumber) ? this.singlePageViewerCurrentPage = e.detail.pageNumber.toString() : e.type === "singlepageviewer:closed" && (this.singlePageViewerCurrentPage = null, this.singlePageViewerActive = !1), this.pageContainers.forEach((t) => {
-      const n = t.container.getAttribute("data-page-container");
+    var t;
+    this.singlePageViewerActive, this.singlePageViewerActive = e.type === "singlepageviewer:opened" || e.type === "singlepageviewer:pagechanged" && this.singlePageViewerActive, (this.singlePageViewerActive || e.type === "singlepageviewer:pagechanged") && ((t = e.detail) != null && t.pageNumber) ? this.singlePageViewerCurrentPage = e.detail.pageNumber.toString() : e.type === "singlepageviewer:closed" && (this.singlePageViewerCurrentPage = null, this.singlePageViewerActive = !1), this.pageContainers.forEach((i) => {
+      const n = i.container.getAttribute("data-page-container");
       let o;
-      this.singlePageViewerActive ? o = n === this.singlePageViewerCurrentPage ? "full" : "short" : o = this.isPageContainerVisible(t.container) ? "full" : "short", t.state !== o && (t.state = o, this.updateEntriesState(t));
+      this.singlePageViewerActive ? o = n === this.singlePageViewerCurrentPage ? "full" : "short" : o = this.isPageContainerVisible(i.container) ? "full" : "short", i.state !== o && (i.state = o, this.updateEntriesState(i));
     });
   }
   checkSinglePageViewerState() {
@@ -741,7 +733,7 @@ class q extends HTMLElement {
     this.singlePageViewerActive = e !== null;
   }
   isPageContainerVisible(e) {
-    const i = e.getBoundingClientRect(), t = window.innerHeight, n = Math.max(i.top, 0), o = Math.min(i.bottom, t), r = Math.max(0, o - n), a = i.height;
+    const t = e.getBoundingClientRect(), i = window.innerHeight, n = Math.max(t.top, 0), o = Math.min(t.bottom, i), r = Math.max(0, o - n), a = t.height;
     return r / a >= 0.5;
   }
   cleanup() {
@@ -752,7 +744,7 @@ customElements.define("inhaltsverzeichnis-scrollspy", q);
 window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
-function M(s, e, i, t = null) {
+function M(s, e, t, i = null) {
   let n = document.querySelector("single-page-viewer");
   n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
   const o = s.closest('[data-beilage="true"]') !== null, r = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, a = s.closest(".newspaper-page-container, .piece-page-container");
@@ -765,19 +757,19 @@ function M(s, e, i, t = null) {
       g.querySelectorAll("i").forEach((m) => m.remove()), g.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((m) => m.remove()), c = g.textContent.trim();
     }
   }
-  n.show(s.src, s.alt, e, o, r, t, l, c);
+  n.show(s.src, s.alt, e, o, r, i, l, c);
 }
 function C() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function N() {
+function z() {
   if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, b(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
-      (i) => {
-        if (i.forEach((t) => {
-          const n = window.currentPageContainers.indexOf(t.target);
-          n !== -1 && (t.isIntersecting ? e.add(n) : e.delete(n));
+      (t) => {
+        if (t.forEach((i) => {
+          const n = window.currentPageContainers.indexOf(i.target);
+          n !== -1 && (i.isIntersecting ? e.add(n) : e.delete(n));
         }), e.size > 0) {
           const n = Array.from(e).sort((o, r) => o - r)[0];
           n !== window.currentActiveIndex && (window.currentActiveIndex = n, b());
@@ -786,26 +778,26 @@ function N() {
       {
         rootMargin: "-20% 0px -70% 0px"
       }
-    ), window.currentPageContainers.forEach((i) => {
-      window.pageObserver.observe(i);
+    ), window.currentPageContainers.forEach((t) => {
+      window.pageObserver.observe(t);
     });
   }
 }
-function z() {
+function N() {
   if (window.currentActiveIndex > 0) {
     let s = -1;
     const e = [];
-    window.currentPageContainers.forEach((t, n) => {
-      const o = t.getBoundingClientRect(), r = window.innerHeight, a = Math.max(o.top, 0), l = Math.min(o.bottom, r), c = Math.max(0, l - a), d = o.height;
+    window.currentPageContainers.forEach((i, n) => {
+      const o = i.getBoundingClientRect(), r = window.innerHeight, a = Math.max(o.top, 0), l = Math.min(o.bottom, r), c = Math.max(0, l - a), d = o.height;
       c / d >= 0.3 && e.push(n);
     });
-    const i = Math.min(...e);
-    for (let t = i - 1; t >= 0; t--)
-      if (!e.includes(t)) {
-        s = t;
+    const t = Math.min(...e);
+    for (let i = t - 1; i >= 0; i--)
+      if (!e.includes(i)) {
+        s = i;
         break;
       }
-    s === -1 && i > 0 && (s = i - 1), s >= 0 && (window.currentActiveIndex = s, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+    s === -1 && t > 0 && (s = t - 1), s >= 0 && (window.currentActiveIndex = s, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
       b();
@@ -816,17 +808,17 @@ function $() {
   if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
     let s = -1;
     const e = [];
-    window.currentPageContainers.forEach((t, n) => {
-      const o = t.getBoundingClientRect(), r = window.innerHeight, a = Math.max(o.top, 0), l = Math.min(o.bottom, r), c = Math.max(0, l - a), d = o.height;
+    window.currentPageContainers.forEach((i, n) => {
+      const o = i.getBoundingClientRect(), r = window.innerHeight, a = Math.max(o.top, 0), l = Math.min(o.bottom, r), c = Math.max(0, l - a), d = o.height;
       c / d >= 0.3 && e.push(n);
     });
-    const i = Math.max(...e);
-    for (let t = i + 1; t < window.currentPageContainers.length; t++)
-      if (!e.includes(t)) {
-        s = t;
+    const t = Math.max(...e);
+    for (let i = t + 1; i < window.currentPageContainers.length; i++)
+      if (!e.includes(i)) {
+        s = i;
         break;
       }
-    s === -1 && i < window.currentPageContainers.length - 1 && (s = i + 1), s >= 0 && s < window.currentPageContainers.length && (window.currentActiveIndex = s, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+    s === -1 && t < window.currentPageContainers.length - 1 && (s = t + 1), s >= 0 && s < window.currentPageContainers.length && (window.currentActiveIndex = s, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
       b();
@@ -848,22 +840,22 @@ function V() {
 }
 function L() {
   const s = [];
-  window.currentPageContainers.forEach((e, i) => {
-    const t = e.getBoundingClientRect(), n = window.innerHeight, o = Math.max(t.top, 0), r = Math.min(t.bottom, n), a = Math.max(0, r - o), l = t.height;
-    a / l >= 0.3 && s.push(i);
+  window.currentPageContainers.forEach((e, t) => {
+    const i = e.getBoundingClientRect(), n = window.innerHeight, o = Math.max(i.top, 0), r = Math.min(i.bottom, n), a = Math.max(0, r - o), l = i.height;
+    a / l >= 0.3 && s.push(t);
   });
   for (const e of s) {
-    const i = window.currentPageContainers[e];
-    if (i && i.id && i.id.includes("beilage-"))
+    const t = window.currentPageContainers[e];
+    if (t && t.id && t.id.includes("beilage-"))
       return !0;
   }
   return !1;
 }
 function b() {
-  const s = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), i = document.getElementById("beilageBtn");
-  if (s && (s.style.display = "flex", window.currentActiveIndex <= 0 ? (s.disabled = !0, s.classList.add("opacity-50", "cursor-not-allowed"), s.classList.remove("hover:bg-gray-200")) : (s.disabled = !1, s.classList.remove("opacity-50", "cursor-not-allowed"), s.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), i) {
-    const t = L(), n = i.querySelector("i");
-    t ? (i.title = "Zur Hauptausgabe", i.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-file-text-line text-lg lg:text-xl")) : (i.title = "Zu Beilage", i.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-attachment-line text-lg lg:text-xl"));
+  const s = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
+  if (s && (s.style.display = "flex", window.currentActiveIndex <= 0 ? (s.disabled = !0, s.classList.add("opacity-50", "cursor-not-allowed"), s.classList.remove("hover:bg-gray-200")) : (s.disabled = !1, s.classList.remove("opacity-50", "cursor-not-allowed"), s.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
+    const i = L(), n = t.querySelector("i");
+    i ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
 function R() {
@@ -873,39 +865,39 @@ function R() {
     const n = window.currentPageContainers[window.currentActiveIndex].querySelector("[data-page]");
     n && (e = `/${n.getAttribute("data-page")}`);
   }
-  const i = window.location.origin + window.location.pathname + e;
+  const t = window.location.origin + window.location.pathname + e;
   navigator.share ? navigator.share({
     title: document.title,
-    url: i
-  }).catch((t) => {
-    S(i, s);
-  }) : S(i, s);
+    url: t
+  }).catch((i) => {
+    S(t, s);
+  }) : S(t, s);
 }
 function S(s, e) {
   if (navigator.clipboard)
     navigator.clipboard.writeText(s).then(() => {
       h(e, "Link kopiert!");
-    }).catch((i) => {
+    }).catch((t) => {
       h(e, "Kopieren fehlgeschlagen");
     });
   else {
-    const i = document.createElement("textarea");
-    i.value = s, document.body.appendChild(i), i.select();
+    const t = document.createElement("textarea");
+    t.value = s, document.body.appendChild(t), t.select();
     try {
-      const t = document.execCommand("copy");
-      h(e, t ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      const i = document.execCommand("copy");
+      h(e, i ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
       h(e, "Kopieren fehlgeschlagen");
     } finally {
-      document.body.removeChild(i);
+      document.body.removeChild(t);
     }
   }
 }
 function D() {
   const s = document.getElementById("citationBtn"), e = document.title || "KGPZ";
-  let i = window.location.origin + window.location.pathname;
-  i.includes("#") && (i = i.split("#")[0]);
-  const t = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), n = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}. Digital verfügbar unter: ${i} (Zugriff: ${t}).`;
+  let t = window.location.origin + window.location.pathname;
+  t.includes("#") && (t = t.split("#")[0]);
+  const i = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), n = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}. Digital verfügbar unter: ${t} (Zugriff: ${i}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
       h(s, "Zitation kopiert!");
@@ -926,10 +918,10 @@ function D() {
   }
 }
 function h(s, e) {
-  const i = document.querySelector(".simple-popup");
-  i && i.remove();
-  const t = document.createElement("div");
-  t.className = "simple-popup", t.textContent = e, t.style.cssText = `
+  const t = document.querySelector(".simple-popup");
+  t && t.remove();
+  const i = document.createElement("div");
+  i.className = "simple-popup", i.textContent = e, i.style.cssText = `
 		position: fixed;
 		background: #374151;
 		color: white;
@@ -946,27 +938,27 @@ function h(s, e) {
   const n = s.getBoundingClientRect(), o = window.innerHeight, r = window.innerWidth;
   let a = n.left - 10, l = n.bottom + 8;
   const c = 120, d = 32;
-  a + c > r && (a = n.right - c + 10), l + d > o && (l = n.top - d - 8), t.style.left = Math.max(5, a) + "px", t.style.top = Math.max(5, l) + "px", document.body.appendChild(t), setTimeout(() => {
-    t.style.opacity = "1";
+  a + c > r && (a = n.right - c + 10), l + d > o && (l = n.top - d - 8), i.style.left = Math.max(5, a) + "px", i.style.top = Math.max(5, l) + "px", document.body.appendChild(i), setTimeout(() => {
+    i.style.opacity = "1";
   }, 10), setTimeout(() => {
-    t.style.opacity = "0", setTimeout(() => {
-      t.parentNode && t.remove();
+    i.style.opacity = "0", setTimeout(() => {
+      i.parentNode && i.remove();
     }, 200);
   }, 2e3);
 }
-function Z(s, e, i = !1) {
-  let t = "";
-  if (i)
-    t = window.location.origin + window.location.pathname + `#beilage-1-page-${s}`;
+function Z(s, e, t = !1) {
+  let i = "";
+  if (t)
+    i = window.location.origin + window.location.pathname + `#beilage-1-page-${s}`;
   else {
     const o = window.location.pathname.split("/");
     if (o.length >= 3) {
       const r = o[1], a = o[2];
-      t = `${window.location.origin}/${r}/${a}/${s}`;
+      i = `${window.location.origin}/${r}/${a}/${s}`;
     } else
-      t = window.location.origin + window.location.pathname + `/${s}`;
+      i = window.location.origin + window.location.pathname + `/${s}`;
   }
-  const n = t;
+  const n = i;
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
       h(e, "Link kopiert!");
@@ -987,14 +979,14 @@ function Z(s, e, i = !1) {
   }
 }
 function O(s, e) {
-  const i = document.title || "KGPZ", t = window.location.pathname.split("/");
+  const t = document.title || "KGPZ", i = window.location.pathname.split("/");
   let n;
-  if (t.length >= 3) {
-    const l = t[1], c = t[2];
+  if (i.length >= 3) {
+    const l = i[1], c = i[2];
     n = `${window.location.origin}/${l}/${c}/${s}`;
   } else
     n = `${window.location.origin}${window.location.pathname}/${s}`;
-  const o = n, r = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), a = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${i}, Seite ${s}. Digital verfügbar unter: ${o} (Zugriff: ${r}).`;
+  const o = n, r = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), a = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${s}. Digital verfügbar unter: ${o} (Zugriff: ${r}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(a).then(() => {
       h(e, "Zitation kopiert!");
@@ -1015,7 +1007,7 @@ function O(s, e) {
   }
 }
 function P() {
-  N(), window.addEventListener("scroll", function() {
+  z(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
       b();
     }, 50);
@@ -1025,19 +1017,19 @@ function P() {
 }
 function w() {
   const s = window.location.pathname;
-  document.querySelectorAll(".citation-link[data-citation-url]").forEach((i) => {
-    const t = i.getAttribute("data-citation-url");
+  document.querySelectorAll(".citation-link[data-citation-url]").forEach((t) => {
+    const i = t.getAttribute("data-citation-url");
     let n = !1;
-    if (t === s)
+    if (i === s)
       n = !0;
     else {
-      const o = s.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/), r = t.match(/^\/(\d{4})\/(\d+)$/);
+      const o = s.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/), r = i.match(/^\/(\d{4})\/(\d+)$/);
       if (o && r) {
         const [, a, l, c] = o, [, d, u] = r;
         a === d && l === u && (n = !0);
       }
     }
-    n ? (i.classList.add("text-red-700", "pointer-events-none"), i.setAttribute("aria-current", "page")) : (i.classList.remove("text-red-700", "pointer-events-none"), i.removeAttribute("aria-current"));
+    n ? (t.classList.add("text-red-700", "pointer-events-none"), t.setAttribute("aria-current", "page")) : (t.classList.remove("text-red-700", "pointer-events-none"), t.removeAttribute("aria-current"));
   });
 }
 function k() {
@@ -1068,7 +1060,7 @@ function Y() {
 }
 window.enlargePage = M;
 window.closeModal = C;
-window.scrollToPreviousPage = z;
+window.scrollToPreviousPage = N;
 window.scrollToNextPage = $;
 window.scrollToBeilage = V;
 window.shareCurrentPage = R;
@@ -1077,11 +1069,11 @@ window.copyPagePermalink = Z;
 window.generatePageCitation = O;
 function F() {
   k(), w(), document.querySelector(".newspaper-page-container") && P();
-  let s = function(i) {
+  let s = function(t) {
     k(), w(), Y(), setTimeout(() => {
       document.querySelector(".newspaper-page-container") && P();
     }, 50);
-  }, e = function(i) {
+  }, e = function(t) {
   };
   document.body.addEventListener("htmx:afterSettle", s), document.body.addEventListener("htmx:afterSettle", w), document.body.addEventListener("htmx:beforeRequest", e);
 }

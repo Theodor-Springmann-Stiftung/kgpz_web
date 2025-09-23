@@ -65,7 +65,7 @@ export class SinglePageViewer extends HTMLElement {
 				<div class="flex-1 bg-slate-50 overflow-auto pointer-events-auto">
 					<div class="relative min-h-full flex flex-col">
 						<!-- Header with page info and buttons -->
-						<div class="flex items-center justify-between p-4">
+						<div class="sticky top-0 z-30 bg-slate-50 flex items-center justify-between p-4">
 							<!-- Left: Sidebar toggle and page indicator -->
 							<div class="flex items-center gap-3">
 								<!-- Sidebar toggle button -->
@@ -118,7 +118,7 @@ export class SinglePageViewer extends HTMLElement {
 									onclick="this.closest('single-page-viewer').resetZoom()"
 									class="w-10 h-10 bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
 									title="Zoom zurücksetzen (100%)">
-									<i class="ri-fullscreen-exit-line text-lg font-bold"></i>
+									<i class="ri-zoom-out-line text-lg font-bold"></i>
 								</button>
 
 								<!-- Separator -->
@@ -397,6 +397,17 @@ export class SinglePageViewer extends HTMLElement {
 			// Only handle keyboard events when the viewer is visible
 			if (this.style.display === 'none') return;
 
+			// Handle zoom keys first
+			if (event.key === '+' || event.key === '=') {
+				event.preventDefault();
+				this.zoom(0.1); // Zoom in by 10%
+				return;
+			} else if (event.key === '-') {
+				event.preventDefault();
+				this.zoom(-0.1); // Zoom out by 10%
+				return;
+			}
+
 			switch (event.key) {
 				case 'ArrowLeft':
 					event.preventDefault();
@@ -441,39 +452,6 @@ export class SinglePageViewer extends HTMLElement {
 			this.zoom(zoomDirection * zoomFactor, mouseX, mouseY);
 		};
 
-		// Update existing keyboard handler to include zoom
-		const originalKeyboardHandler = this.keyboardHandler;
-		this.keyboardHandler = (event) => {
-			// Only handle keyboard events when the viewer is visible
-			if (this.style.display === 'none') return;
-
-			// Handle zoom keys first
-			if (event.key === '+' || event.key === '=') {
-				event.preventDefault();
-				this.zoom(0.1); // Zoom in by 10%
-				return;
-			} else if (event.key === '-') {
-				event.preventDefault();
-				this.zoom(-0.1); // Zoom out by 10%
-				return;
-			}
-
-			// Handle original navigation keys
-			switch (event.key) {
-				case 'ArrowLeft':
-					event.preventDefault();
-					this.goToPreviousPage();
-					break;
-				case 'ArrowRight':
-					event.preventDefault();
-					this.goToNextPage();
-					break;
-				case 'Escape':
-					event.preventDefault();
-					this.close();
-					break;
-			}
-		};
 
 		// Mouse down for pan start or close
 		this.mouseDownHandler = (event) => {
@@ -601,6 +579,7 @@ export class SinglePageViewer extends HTMLElement {
 		this.updateImageTransform();
 		this.updateCursor();
 		this.updateZoomDisplay();
+		this.updateScrollBehavior();
 	}
 
 	// Update image transform based on zoom and pan
@@ -638,20 +617,40 @@ export class SinglePageViewer extends HTMLElement {
 
 		if (this.zoomLevel <= this.minZoom) {
 			// At 100% zoom - show instructions
-			zoomDisplay.textContent = 'Strg + Mausrad oder +/- für Zoom';
+			zoomDisplay.innerHTML = 'Strg + Mausrad oder +/- für Zoom';
 
 			// Hide reset button at 100%
 			if (zoomResetBtn) {
 				zoomResetBtn.style.display = 'none';
 			}
 		} else {
-			// Above 100% zoom - show percentage
-			zoomDisplay.textContent = `${Math.round(this.zoomLevel * 100)}%`;
+			// Above 100% zoom - show zoom mode with percentage
+			zoomDisplay.innerHTML = `<span class="font-bold">Zoom aktiv</span> • ${Math.round(this.zoomLevel * 100)}%`;
 
 			// Show reset button when zoomed
 			if (zoomResetBtn) {
 				zoomResetBtn.style.display = 'flex';
 			}
+		}
+	}
+
+	// Update scroll behavior based on zoom level
+	updateScrollBehavior() {
+		const mainContainer = this.querySelector('.flex-1.bg-slate-50.overflow-auto');
+		const imageContainer = this.querySelector('#image-scroll-container');
+
+		if (!mainContainer || !imageContainer) return;
+
+		if (this.zoomLevel > 1.0) {
+			// Disable scrolling on main container and make image container full height
+			mainContainer.style.overflow = 'hidden';
+			imageContainer.style.height = '100vh';
+			imageContainer.style.overflow = 'hidden';
+		} else {
+			// Reset to normal scrolling behavior
+			mainContainer.style.overflow = 'auto';
+			imageContainer.style.height = '';
+			imageContainer.style.overflow = 'auto';
 		}
 	}
 
@@ -671,6 +670,7 @@ export class SinglePageViewer extends HTMLElement {
 		this.updateImageTransform();
 		this.updateCursor();
 		this.updateZoomDisplay();
+		this.updateScrollBehavior();
 	}
 
 	// Share current page
