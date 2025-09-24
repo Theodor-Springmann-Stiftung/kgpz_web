@@ -1,0 +1,125 @@
+{{ if .model.SelectedPlace }}
+	<!-- Single Place Detail View -->
+	<div class="max-w-7xl mx-auto px-8 py-8">
+		<div class="bg-white px-6 py-6 rounded w-full">
+			<!-- Back Navigation -->
+			<div class="mb-6">
+				<a href="/ort/" class="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm">
+					<i class="ri-arrow-left-line mr-2"></i>
+					Zurück zur Übersicht
+				</a>
+			</div>
+
+			<!-- Place Header -->
+			<div class="mb-8">
+				<h1 class="text-3xl font-bold text-slate-800 mb-2">
+					{{ if .model.SelectedPlace.Place.Names }}
+						{{ index .model.SelectedPlace.Place.Names 0 }}
+					{{ else }}
+						{{ .model.SelectedPlace.Place.ID }}
+					{{ end }}
+				</h1>
+				{{ if .model.SelectedPlace.Place.Geo }}
+					<p class="text-slate-600">
+						<i class="ri-map-pin-line mr-1"></i>
+						Geonames: {{ .model.SelectedPlace.Place.Geo }}
+					</p>
+				{{ end }}
+			</div>
+
+			<!-- Associated Pieces -->
+			<div>
+				<h2 class="text-xl font-semibold text-slate-800 mb-4">
+					Beiträge ({{ len .model.SelectedPlace.Pieces }})
+				</h2>
+
+				{{ if .model.SelectedPlace.Pieces }}
+					<div class="space-y-4">
+						{{ range $piece := .model.SelectedPlace.Pieces }}
+							<div class="border border-slate-200 rounded-lg p-4 hover:bg-slate-50">
+								<h3 class="font-medium text-slate-800 mb-2">
+									{{ if $piece.Title }}
+										{{ index $piece.Title 0 }}
+									{{ else }}
+										Untitled
+									{{ end }}
+								</h3>
+
+								{{ if $piece.IssueRefs }}
+									<div class="text-sm text-slate-600">
+										{{ range $issueRef := $piece.IssueRefs }}
+											<span class="inline-block mr-4">
+												<i class="ri-calendar-line mr-1"></i>
+												<a href="/{{ $issueRef.When.Year }}/{{ $issueRef.IssueNumber }}" class="text-blue-600 hover:text-blue-700">
+													{{ $issueRef.When.Year }} Nr. {{ $issueRef.IssueNumber }}
+												</a>
+											</span>
+										{{ end }}
+									</div>
+								{{ end }}
+							</div>
+						{{ end }}
+					</div>
+				{{ else }}
+					<p class="text-slate-500 italic">Keine Beiträge für diesen Ort gefunden.</p>
+				{{ end }}
+			</div>
+		</div>
+	</div>
+
+{{ else }}
+	<!-- Places Overview -->
+	<div class="max-w-7xl mx-auto px-8 py-8">
+		<div class="bg-white px-6 py-6 rounded w-full">
+			<h1 class="text-3xl font-bold text-slate-800 mb-8">Orte</h1>
+
+			<!-- Available Letters Navigation -->
+			{{ if .model.AvailableLetters }}
+				<div class="mb-8">
+					<h2 class="text-lg font-semibold text-slate-700 mb-4">Nach Anfangsbuchstabe</h2>
+					<div class="flex flex-wrap gap-2">
+						{{ range $letter := .model.AvailableLetters }}
+							<span class="px-3 py-2 bg-slate-100 text-slate-700 rounded text-sm">
+								{{ $letter }}
+							</span>
+						{{ end }}
+					</div>
+				</div>
+			{{ end }}
+
+			<!-- Places List -->
+			{{ if .model.Places }}
+				<div>
+					<h2 class="text-lg font-semibold text-slate-700 mb-4">
+						Alle Orte ({{ len .model.Places }})
+					</h2>
+
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						{{ range $placeID := .model.Sorted }}
+							{{ $place := index $.model.Places $placeID }}
+							<div class="border border-slate-200 rounded-lg hover:bg-slate-50">
+								<a href="/ort/{{ $place.ID }}" class="block p-4">
+									<h3 class="font-medium text-slate-800 mb-1">
+										{{ if $place.Names }}
+											{{ index $place.Names 0 }}
+										{{ else }}
+											{{ $place.ID }}
+										{{ end }}
+									</h3>
+									{{ if $place.Geo }}
+										<p class="text-sm text-slate-600">
+											<i class="ri-map-pin-line mr-1"></i>
+											{{ $place.Geo }}
+										</p>
+									{{ end }}
+								</a>
+							</div>
+						{{ end }}
+					</div>
+				</div>
+			{{ else }}
+				<p class="text-slate-500 italic">Keine Orte gefunden.</p>
+			{{ end }}
+		</div>
+	</div>
+{{ end }}

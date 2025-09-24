@@ -19,13 +19,7 @@ import (
 
 const (
 	ASSETS_URL_PREFIX = "/assets"
-	CLEAR_LAYOUT      = `
-<html>
-<head>
-	{{ block "head" . }}{{ end }}
-</head>
-   {{ block "body" . }}{{ end }}
-</html>`
+	CLEAR_LAYOUT      = `{{ block "head" . }}{{ end }}{{ block "body" . }}{{ end }}`
 )
 
 type Engine struct {

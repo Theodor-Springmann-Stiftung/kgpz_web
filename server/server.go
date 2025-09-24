@@ -139,16 +139,11 @@ func (s *Server) Start() {
 
 	srv.Use(recover.New())
 
+	// INFO: No caching middleware in debug mode to avoid cache issues during development
+	// We cant do it with cach busting the files via ?v=XXX, since we also cache the templates.
 	// TODO: Dont cache static assets, bc storage gets huge on images.
 	// -> Maybe fiber does this already, automatically?
-	if s.Config.Debug {
-		srv.Use(cache.New(cache.Config{
-			Next:         CacheFunc,
-			Expiration:   CACHE_TIME,
-			CacheControl: false,
-			Storage:      s.cache,
-		}))
-	} else {
+	if !s.Config.Debug {
 		srv.Use(cache.New(cache.Config{
 			Next:         CacheFunc,
 			Expiration:   CACHE_TIME,
@@ -166,7 +161,6 @@ func (s *Server) Start() {
 	}
 
 	s.runner(srv)
-
 }
 
 func (s *Server) Stop() {
@@ -232,5 +226,4 @@ func (s *Server) runner(srv *fiber.App) {
 			}
 		}
 	}()
-
 }

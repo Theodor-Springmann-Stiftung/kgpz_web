@@ -1,6 +1,5 @@
 {{ $y := .model.Year }}
 
-
 <div class="mt-6 w-full">
 	<div class="mx-auto flex flex-row gap-x-4 w-fit items-end leading-none">
 		{{ range $year := .model.AvailableYears }}
@@ -13,63 +12,6 @@
 		{{ end }}
 	</div>
 </div>
-
-<!-- Page Jump Form -->
-<div class="mt-8 w-full">
-	<div class="mx-auto text-center">
-		<h3 class="text-lg font-medium text-slate-700 mb-6">Direkt zu Seite springen</h3>
-
-		<form hx-post="/jump" hx-target="#jump-errors" hx-swap="innerHTML" hx-target-4*="#jump-errors" hx-target-5*="#jump-errors" hx-ext="response-targets" class="inline-flex items-center gap-3">
-			<!-- Year Selection -->
-			<div class="flex items-center gap-2">
-				<label for="jump-year" class="text-sm text-slate-600 whitespace-nowrap">Jahr</label>
-				<select id="jump-year" name="year" value="{{ $y }}" class="px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400">
-					{{ range $year := .model.AvailableYears }}
-						<option value="{{ $year }}" {{ if eq $year $y }}selected{{ end }}>{{ $year }}</option>
-					{{ end }}
-				</select>
-			</div>
-
-			<!-- Page Input -->
-			<div class="flex items-center gap-2">
-				<label for="jump-page" class="text-sm text-slate-600 whitespace-nowrap">Seite</label>
-				<input type="number" id="jump-page" name="page" min="1" placeholder="42" class="w-20 px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400">
-			</div>
-
-			<!-- Submit Button -->
-			<button type="submit" class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
-				<i class="ri-arrow-right-line mr-1"></i>
-				Springen
-			</button>
-		</form>
-
-		<!-- Error Display Area -->
-		<div id="jump-errors" class="mt-3 min-h-[1.5rem]"></div>
-
-		<!-- Instructions -->
-		<div class="mt-4 text-sm text-slate-500">
-			<p>Geben Sie Jahr und Seitenzahl ein, um direkt zur entsprechenden Ausgabe zu springen.</p>
-		</div>
-	</div>
-</div>
-
-<script>
-// Clear errors when user starts typing
-document.addEventListener('DOMContentLoaded', function() {
-	const errorContainer = document.getElementById('jump-errors');
-	const yearSelect = document.getElementById('jump-year');
-	const pageInput = document.getElementById('jump-page');
-
-	function clearErrors() {
-		if (errorContainer) {
-			errorContainer.innerHTML = '';
-		}
-	}
-
-	if (yearSelect) yearSelect.addEventListener('change', clearErrors);
-	if (pageInput) pageInput.addEventListener('input', clearErrors);
-});
-</script>
 
 <div class="grid grid-cols-11 gap-x-2 gap-y-4 pt-8">
 	{{ range $index, $month := .model.Issues }}

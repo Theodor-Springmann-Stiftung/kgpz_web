@@ -255,9 +255,11 @@ export class SinglePageViewer extends HTMLElement {
 		document.body.style.overflow = "hidden";
 
 		// Dispatch event for scrollspy
-		document.dispatchEvent(new CustomEvent('singlepageviewer:opened', {
-			detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
-		}));
+		document.dispatchEvent(
+			new CustomEvent("singlepageviewer:opened", {
+				detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage },
+			}),
+		);
 	}
 
 	close() {
@@ -268,9 +270,11 @@ export class SinglePageViewer extends HTMLElement {
 		document.body.style.overflow = "";
 
 		// Dispatch event for scrollspy
-		document.dispatchEvent(new CustomEvent('singlepageviewer:closed', {
-			detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
-		}));
+		document.dispatchEvent(
+			new CustomEvent("singlepageviewer:closed", {
+				detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage },
+			}),
+		);
 	}
 
 	disconnectedCallback() {
@@ -282,15 +286,13 @@ export class SinglePageViewer extends HTMLElement {
 
 		// Clean up keyboard event listeners
 		if (this.keyboardHandler) {
-			document.removeEventListener('keydown', this.keyboardHandler);
+			document.removeEventListener("keydown", this.keyboardHandler);
 			this.keyboardHandler = null;
 		}
-
 
 		// Restore background scrolling
 		document.body.style.overflow = "";
 	}
-
 
 	// Generate icon HTML from Go icon type - matches templating/engine.go PageIcon function
 	generateIconFromType(iconType) {
@@ -314,24 +316,24 @@ export class SinglePageViewer extends HTMLElement {
 	setupKeyboardNavigation() {
 		// Remove any existing listener to avoid duplicates
 		if (this.keyboardHandler) {
-			document.removeEventListener('keydown', this.keyboardHandler);
+			document.removeEventListener("keydown", this.keyboardHandler);
 		}
 
 		// Create bound handler
 		this.keyboardHandler = (event) => {
 			// Only handle keyboard events when the viewer is visible
-			if (this.style.display === 'none') return;
+			if (this.style.display === "none") return;
 
 			switch (event.key) {
-				case 'ArrowLeft':
+				case "ArrowLeft":
 					event.preventDefault();
 					this.goToPreviousPage();
 					break;
-				case 'ArrowRight':
+				case "ArrowRight":
 					event.preventDefault();
 					this.goToNextPage();
 					break;
-				case 'Escape':
+				case "Escape":
 					event.preventDefault();
 					this.close();
 					break;
@@ -339,9 +341,8 @@ export class SinglePageViewer extends HTMLElement {
 		};
 
 		// Add event listener
-		document.addEventListener('keydown', this.keyboardHandler);
+		document.addEventListener("keydown", this.keyboardHandler);
 	}
-
 
 	// Share current page
 	shareCurrentPage() {
@@ -411,11 +412,12 @@ export class SinglePageViewer extends HTMLElement {
 	getAdjacentPages() {
 		// Get all page containers of the same type (main or beilage)
 		let containerSelector;
-		if (this.currentIsBeilage) {
-			containerSelector = '.newspaper-page-container[data-beilage="true"]';
-		} else {
-			containerSelector = ".newspaper-page-container:not([data-beilage])";
-		}
+		containerSelector = ".newspaper-page-container";
+		// if (this.currentIsBeilage) {
+		// 	containerSelector = '.newspaper-page-container[data-beilage="true"]';
+		// } else {
+		// 	containerSelector = ".newspaper-page-container:not([data-beilage])";
+		// }
 
 		const pageContainers = Array.from(document.querySelectorAll(containerSelector));
 		console.log(
@@ -433,8 +435,7 @@ export class SinglePageViewer extends HTMLElement {
 				console.log("Container page:", pageAttr, "parsed:", pageNum);
 				return pageNum;
 			})
-			.filter((p) => p !== null)
-			.sort((a, b) => a - b);
+			.filter((p) => p !== null);
 
 		console.log("All pages found:", allPages);
 		console.log("Current page:", this.currentPageNumber);
@@ -535,9 +536,11 @@ export class SinglePageViewer extends HTMLElement {
 				);
 
 				// Dispatch event for scrollspy to update highlighting
-				document.dispatchEvent(new CustomEvent('singlepageviewer:pagechanged', {
-					detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
-				}));
+				document.dispatchEvent(
+					new CustomEvent("singlepageviewer:pagechanged", {
+						detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage },
+					}),
+				);
 			}
 		}
 	}

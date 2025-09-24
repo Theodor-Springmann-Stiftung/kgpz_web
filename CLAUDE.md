@@ -12,7 +12,7 @@ The application follows a modular Go architecture:
 
 - **Main Application**: `kgpz_web.go` - Entry point and application lifecycle management
 - **App Core**: `app/kgpz.go` - Core business logic and data processing
-- **Controllers**: Route handlers for different content types (issues, agents, places, categories, search)
+- **Controllers**: Route handlers for different content types (issues, agents, places, categories, search, quickfilters)
 - **View Models**: Data structures for template rendering with pre-processed business logic (`viewmodels/`)
 - **XML Models**: Data structures for parsing source XML files (`xmlmodels/`)
 - **Providers**: External service integrations (Git, GND, XML parsing, search)
@@ -129,6 +129,7 @@ views/
 │   │   └── _piece_summary.gohtml   # Individual piece display logic
 │   ├── datenschutz/       # Privacy policy
 │   ├── edition/           # Edition pages
+│   ├── filter/            # Quickfilter system
 │   ├── kategorie/         # Category pages
 │   ├── kontakt/           # Contact pages
 │   ├── ort/               # Places pages
@@ -454,6 +455,138 @@ const pageUrl = `/${year}/${issue}/${pageNumber}`;
 // Old format still used for beilage pages
 const beilageUrl = `${window.location.pathname}#beilage-1-page-${pageNumber}`;
 ```
+
+## Quickfilter System (/filter)
+
+The application provides a universal quickfilter system accessible from any page via a header button, offering quick access to common navigation and filtering tools.
+
+### Architecture & Integration
+
+**Header Integration** (`views/layouts/components/_header.gohtml` & `_menu.gohtml`):
+- **Universal Access**: Schnellfilter button available in every page header
+- **Expandable Design**: Header expands downwards to show filter content
+- **HTMX-Powered**: Dynamic loading of filter content without page refresh
+- **Seamless UI**: Integrates with existing header styling and layout
+
+**Controller** (`controllers/filter_controller.go`):
+- `GetQuickFilter(kgpz *xmlmodels.Library)` - Renders filter interface
+- Uses "clear" layout for partial HTML fragments
+- Dynamically extracts available years from issue data
+
+**Template System** (`views/routes/filter/body.gohtml`):
+- Clean, responsive filter interface with modern styling
+- Expandable structure for future filter options
+- Integrates existing functionality (page jump) in unified interface
+
+### Current Features
+
+**Page Jump Integration**:
+- **Moved from year pages**: "Direkt zu Seite springen" functionality relocated from `/jahrgang/` pages to header
+- **Universal availability**: Now accessible from any page in the application
+- **Same functionality**: Year dropdown, page input, error handling, HTMX validation
+- **Consistent UX**: Maintains all existing behavior and error feedback
+
+**UI Components**:
+- **Toggle Button**: Filter icon in header with hover effects and visual feedback
+- **Expandable Container**: Header expands naturally to accommodate filter content
+- **Responsive Design**: Mobile-friendly with proper touch interactions
+- **Click-Outside Close**: Filter closes when clicking outside the container
+
+### Technical Implementation
+
+**URL Structure**:
+- **Filter Endpoint**: `GET /filter` - Renders filter interface using clear layout
+- **Route Configuration**: `FILTER_URL = "/filter"` defined in `app/kgpz.go`
+
+**JavaScript Functionality** (`views/layouts/components/_menu.gohtml`):
+```javascript
+// Toggle filter visibility
+function toggleFilter() {
+    const filterContainer = document.getElementById('filter-container');
+    const filterButton = document.getElementById('filter-toggle');
+
+    if (filterContainer.classList.contains('hidden')) {
+        filterContainer.classList.remove('hidden');
+        filterButton.classList.add('bg-slate-200');
+    } else {
+        filterContainer.classList.add('hidden');
+        filterButton.classList.remove('bg-slate-200');
+    }
+}
+
+// Close filter when clicking outside
+document.addEventListener('click', function(event) {
+    // Automatic close functionality
+});
+```
+
+**HTMX Integration**:
+```html
+<button id="filter-toggle"
+        hx-get="/filter"
+        hx-target="#filter-container > div"
+        hx-swap="innerHTML"
+        onclick="toggleFilter()">
+    <i class="ri-filter-2-line"></i> Schnellfilter
+</button>
+```
+
+### Layout System
+
+**Header Expansion**:
+- **Natural Flow**: Filter container expands header downwards using normal document flow
+- **Content Displacement**: Page content moves down automatically when filter is open
+- **Visual Consistency**: Uses same `bg-slate-50` background as header
+- **Centered Content**: Filter content centered within expanded header area
+
+**Template Structure**:
+```html
+<!-- Header container expands naturally -->
+<div id="filter-container" class="mt-6 hidden">
+    <div class="flex justify-center">
+        <!-- Filter content loaded here via HTMX -->
+    </div>
+</div>
+```
+
+### Extensible Design
+
+**Future Enhancement Ready**:
+- Modular template structure allows easy addition of new filter options
+- Controller can be extended to handle additional filter types
+- Template includes placeholder section for "Weitere Filter"
+- Architecture supports complex filtering without performance impact
+
+**Data Processing**:
+- Efficient year extraction from issue data using same pattern as `year_view.go`
+- Sorted year list generation with proper deduplication
+- Ready for additional data aggregation (categories, agents, places)
+
+### Usage Examples
+
+**Template Integration**:
+```gohtml
+<!-- Filter automatically available in all pages via header -->
+<!-- No additional template includes needed -->
+```
+
+**Controller Extension**:
+```go
+// Example of extending filter data
+data := fiber.Map{
+    "AvailableYears": availableYears,
+    "Categories":     categories,     // Future enhancement
+    "TopAgents":      topAgents,      // Future enhancement
+}
+```
+
+### Migration Impact
+
+**Improved User Experience**:
+- **Reduced Page Clutter**: Removed page jump form from year overview pages
+- **Universal Access**: Page jumping now available from anywhere in the application
+- **Cleaner Year Pages**: `/jahrgang/` pages now focus purely on year navigation
+- **Consistent Interface**: Single location for all quick navigation tools
 
 ## Agents/Authors View System (/akteure/ and /autoren/)
 

@@ -1,4 +1,14 @@
 <div class="flex flex-row justify-center mt-12 mb-8">
+	<!-- Schnellfilter Button -->
+	<div>
+	<button
+		id="filter-toggle"
+		class="mr-2 text-lg border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
+		title="Schnellfilter öffnen/schließen">
+		<i class="ri-filter-2-line"></i> <div class="inline-block text-lg">Schnellauswahl</div>
+	</button>
+	</div>
+
 	<div class="w-6/12">
 		<input
 			type="search"
@@ -14,7 +24,7 @@
 
 	<div x-data="{ open: false }">
 		<button
-			class="ml-2 text-2xl border px-4 h-full"
+			class="ml-2 text-2xl border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
 			:class="open? 'open bg-slate-200' : 'closed'"
 			@click="open = !open">
 			<i class="ri-menu-line"></i>
@@ -38,14 +48,3 @@
 	</div>
 </div>
 
-<script>
-	document.body.addEventListener("htmx:configRequest", function (event) {
-		console.log("Before request event triggered");
-		let t = event.detail.elt; // Get the element triggering the request
-
-		if (t.id === "search" && t.value === "") {
-			event.detail.parameters = {};
-			event.detail.path = window.location.pathname + window.location.search;
-		}
-	});
-</script>
