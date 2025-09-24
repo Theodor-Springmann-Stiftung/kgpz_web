@@ -122,6 +122,7 @@ if (document.querySelector(".newspaper-page-container")) {
 let htmxAfterSwapHandler = function (event) {
 	// Apply page-specific backdrop styling after navigation
 	applyPageBackdrop();
+
 	// Update citation links after navigation
 	updateCitationLinks();
 

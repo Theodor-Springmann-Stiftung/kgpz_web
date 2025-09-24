@@ -1,64 +1,3 @@
-const filterBtn = document.getElementById("filter-toggle");
-if (filterBtn) {
-	filterBtn.addEventListener("click", toggleFilter);
-}
-
-// Filter toggle functionality
-function toggleFilter() {
-	const filterContainer = document.getElementById("filter-container");
-	const filterButton = document.getElementById("filter-toggle");
-	const filterContentDiv = filterContainer?.querySelector("div.flex.justify-center");
-
-	if (filterContainer.classList.contains("hidden")) {
-		// Show the filter
-		filterContainer.classList.remove("hidden");
-		filterButton.classList.add("bg-slate-200");
-
-		// Load content only if it doesn't exist - check for actual content
-		const hasContent = filterContentDiv && filterContentDiv.querySelector("div, form, h3");
-		if (!hasContent) {
-			htmx
-				.ajax("GET", "/filter", {
-					target: "#filter-container",
-					select: "#filter",
-					swap: "innerHTML",
-				})
-				.then(() => {
-					console.log("HTMX request completed");
-					// Re-query the element to see if it changed
-					const updatedDiv = document.querySelector("#filter-container .flex.justify-center");
-				})
-				.catch((error) => {
-					console.log("HTMX request failed:", error);
-				});
-		}
-	} else {
-		filterContainer.classList.add("hidden");
-		filterButton.classList.remove("bg-slate-200");
-	}
-}
-
-// Export for global access
-window.toggleFilter = toggleFilter;
-
-// Close filter when clicking outside
-document.addEventListener("click", function (event) {
-	const filterContainer = document.getElementById("filter-container");
-	const filterButton = document.getElementById("filter-toggle");
-
-	if (
-		filterContainer &&
-		filterButton &&
-		!filterContainer.contains(event.target) &&
-		!filterButton.contains(event.target)
-	) {
-		if (!filterContainer.classList.contains("hidden")) {
-			filterContainer.classList.add("hidden");
-			filterButton.classList.remove("bg-slate-200");
-		}
-	}
-});
-
 // Handle search input logic
 document.body.addEventListener("htmx:configRequest", function (event) {
 	let element = event.detail.elt;
@@ -157,6 +96,60 @@ class PersonJumpFilter extends HTMLElement {
 
 // Register the custom element
 customElements.define('person-jump-filter', PersonJumpFilter);
+
+/**
+ * PlaceJumpFilter - Web component for filtering places list
+ * Works with server-rendered place list and provides client-side filtering
+ */
+class PlaceJumpFilter extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        const searchInput = this.querySelector('#place-search');
+        const allPlacesList = this.querySelector('#all-places');
+
+        if (!searchInput || !allPlacesList) {
+            return;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            this.filterPlaces(query);
+        });
+    }
+
+    filterPlaces(query) {
+        const allPlacesList = this.querySelector('#all-places');
+
+        if (!allPlacesList) {
+            return;
+        }
+
+        const placeItems = allPlacesList.querySelectorAll('.place-item');
+
+        placeItems.forEach(item => {
+            const name = item.querySelector('.place-name')?.textContent || '';
+
+            const matches = !query || name.toLowerCase().includes(query);
+
+            if (matches) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+}
+
+// Register the custom element
+customElements.define('place-jump-filter', PlaceJumpFilter);
 
 /**
  * YearJumpFilter - Unified web component for Jahr-based navigation
@@ -408,3 +401,303 @@ class YearJumpFilter extends HTMLElement {
 
 // Register the custom element
 customElements.define('year-jump-filter', YearJumpFilter);
+
+/**
+ * SchnellauswahlButton - Web component for the quick selection/filter button
+ * Encapsulates the toggle functionality and HTMX content loading
+ */
+class SchnellauswahlButton extends HTMLElement {
+    constructor() {
+        super();
+        this.isOpen = false;
+    }
+
+    connectedCallback() {
+        this.createButton();
+        this.setupEventListeners();
+    }
+
+    disconnectedCallback() {
+        // Clean up event listeners when component is removed
+        document.removeEventListener('click', this.handleOutsideClick);
+        document.removeEventListener('quickfilter:selection', this.handleSelectionEvent);
+    }
+
+    createButton() {
+        this.innerHTML = `
+            <button
+                id="filter-toggle"
+                class="mr-2 text-lg border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
+                title="Schnellfilter öffnen/schließen">
+                <i class="ri-filter-2-line"></i> <div class="inline-block text-lg">Schnellauswahl</div>
+            </button>
+        `;
+    }
+
+    setupEventListeners() {
+        const button = this.querySelector('button');
+        if (button) {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleFilter();
+            });
+        }
+
+        // Bind event handlers to maintain 'this' context
+        this.handleSelectionEvent = this.handleSelectionEvent.bind(this);
+        this.handleOutsideClick = this.handleOutsideClick.bind(this);
+
+        // Listen for person/place selection events
+        document.addEventListener('quickfilter:selection', this.handleSelectionEvent);
+
+        // Listen for outside clicks
+        document.addEventListener('click', this.handleOutsideClick);
+    }
+
+    toggleFilter() {
+        const filterContainer = document.getElementById("filter-container");
+        const filterButton = this.querySelector('button');
+
+        if (!filterContainer || !filterButton) {
+            return;
+        }
+
+        const filterContentDiv = filterContainer.querySelector("div.flex.justify-center");
+
+        if (filterContainer.classList.contains("hidden")) {
+            // Show the filter
+            filterContainer.classList.remove("hidden");
+            filterButton.classList.add("bg-slate-200");
+            this.isOpen = true;
+
+            // Load content only if it doesn't exist - check for actual content
+            const hasContent = filterContentDiv && filterContentDiv.querySelector("div, form, h3");
+            if (!hasContent) {
+                htmx
+                    .ajax("GET", "/filter", {
+                        target: "#filter-container",
+                        select: "#filter",
+                        swap: "innerHTML",
+                    })
+                    .then(() => {
+                        console.log("HTMX request completed");
+                        // Re-query the element to see if it changed
+                        const updatedDiv = document.querySelector("#filter-container .flex.justify-center");
+                    })
+                    .catch((error) => {
+                        console.log("HTMX request failed:", error);
+                    });
+            }
+        } else {
+            this.hideFilter();
+        }
+    }
+
+    hideFilter() {
+        const filterContainer = document.getElementById("filter-container");
+        const filterButton = this.querySelector('button');
+
+        if (!filterContainer || !filterButton) {
+            return;
+        }
+
+        filterContainer.classList.add("hidden");
+        filterButton.classList.remove("bg-slate-200");
+        this.isOpen = false;
+    }
+
+    handleSelectionEvent(event) {
+        if (this.isOpen) {
+            this.hideFilter();
+        }
+    }
+
+    handleOutsideClick(event) {
+        const filterContainer = document.getElementById("filter-container");
+        const filterButton = this.querySelector('button');
+
+        if (
+            this.isOpen &&
+            filterContainer &&
+            filterButton &&
+            !filterContainer.contains(event.target) &&
+            !this.contains(event.target)
+        ) {
+            this.hideFilter();
+        }
+    }
+}
+
+// Register the custom element
+customElements.define('schnellauswahl-button', SchnellauswahlButton);
+
+/**
+ * NavigationMenu - Web component for the main navigation menu
+ * Web component for the main navigation menu with proper event handling
+ */
+class NavigationMenu extends HTMLElement {
+    constructor() {
+        super();
+        this.isOpen = false;
+    }
+
+    connectedCallback() {
+        this.createMenu();
+        this.setupEventListeners();
+    }
+
+    disconnectedCallback() {
+        document.removeEventListener('click', this.handleOutsideClick);
+        document.removeEventListener('quickfilter:selection', this.handleSelectionEvent);
+    }
+
+    createMenu() {
+        this.innerHTML = `
+            <div>
+                <button
+                    class="ml-2 text-2xl border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
+                    id="menu-toggle">
+                    <i class="ri-menu-line"></i>
+                </button>
+                <div id="menu-dropdown" class="hidden absolute bg-slate-50 px-5 py-3 z-50">
+                    <div>
+                        <div>Übersicht nach</div>
+                        <div class="ml-2 flex flex-col gap-y-2 mt-2">
+                            <a href="/">Jahrgängen</a>
+                            <a href="/akteure/a">Personen</a>
+                            <a href="/kategorie/">Betragsarten</a>
+                            <a href="/ort/">Orten</a>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-y-2 mt-2">
+                        <a href="/edition/">Geschichte & Edition der KGPZ</a>
+                        <a href="/zitation/">Zitation</a>
+                        <a href="/kontakt/">Kontakt</a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    setupEventListeners() {
+        const button = this.querySelector('#menu-toggle');
+        const dropdown = this.querySelector('#menu-dropdown');
+
+        if (button) {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleMenu();
+            });
+        }
+
+        // Listen for link clicks within the menu
+        if (dropdown) {
+            dropdown.addEventListener('click', (e) => {
+                const link = e.target.closest('a[href]');
+                if (link) {
+                    // Dispatch selection event
+                    const selectionEvent = new CustomEvent('quickfilter:selection', {
+                        detail: {
+                            type: 'navigation',
+                            source: 'menu',
+                            url: link.getAttribute('href'),
+                            text: link.textContent.trim()
+                        },
+                        bubbles: true
+                    });
+
+                    document.dispatchEvent(selectionEvent);
+                }
+            });
+        }
+
+        // Bind event handlers for cleanup
+        this.handleOutsideClick = this.handleOutsideClick.bind(this);
+        this.handleSelectionEvent = this.handleSelectionEvent.bind(this);
+
+        // Listen for outside clicks
+        document.addEventListener('click', this.handleOutsideClick);
+
+        // Listen for selection events to close menu
+        document.addEventListener('quickfilter:selection', this.handleSelectionEvent);
+    }
+
+    toggleMenu() {
+        const button = this.querySelector('#menu-toggle');
+        const dropdown = this.querySelector('#menu-dropdown');
+
+        if (!button || !dropdown) return;
+
+        if (this.isOpen) {
+            this.hideMenu();
+        } else {
+            this.showMenu();
+        }
+    }
+
+    showMenu() {
+        const button = this.querySelector('#menu-toggle');
+        const dropdown = this.querySelector('#menu-dropdown');
+
+        if (!button || !dropdown) return;
+
+        dropdown.classList.remove('hidden');
+        button.classList.add('bg-slate-200');
+        this.isOpen = true;
+    }
+
+    hideMenu() {
+        const button = this.querySelector('#menu-toggle');
+        const dropdown = this.querySelector('#menu-dropdown');
+
+        if (!button || !dropdown) return;
+
+        dropdown.classList.add('hidden');
+        button.classList.remove('bg-slate-200');
+        this.isOpen = false;
+    }
+
+    handleSelectionEvent(event) {
+        // Close menu when any selection is made (from quickfilter or menu)
+        if (this.isOpen) {
+            this.hideMenu();
+        }
+    }
+
+    handleOutsideClick(event) {
+        if (this.isOpen && !this.contains(event.target)) {
+            this.hideMenu();
+        }
+    }
+}
+
+// Register the custom element
+customElements.define('navigation-menu', NavigationMenu);
+
+/**
+ * Global event handler for quickfilter selections
+ * Dispatches custom events when users select persons or places from quickfilter
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event delegation for person and place links in quickfilter
+    document.addEventListener('click', function(event) {
+        // Check if the clicked element is a person or place link within the quickfilter
+        const quickfilterTarget = event.target.closest('a[href^="/akteure/"], a[href^="/ort/"]');
+        const filterContainer = document.getElementById('filter-container');
+
+        if (quickfilterTarget && filterContainer && filterContainer.contains(quickfilterTarget)) {
+            // Dispatch custom event to notify components
+            const selectionEvent = new CustomEvent('quickfilter:selection', {
+                detail: {
+                    type: quickfilterTarget.getAttribute('href').startsWith('/akteure/') ? 'person' : 'place',
+                    source: 'quickfilter',
+                    id: quickfilterTarget.getAttribute('href').split('/').pop(),
+                    url: quickfilterTarget.getAttribute('href')
+                },
+                bubbles: true
+            });
+
+            document.dispatchEvent(selectionEvent);
+        }
+    });
+});

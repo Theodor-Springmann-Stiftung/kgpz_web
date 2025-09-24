@@ -6,7 +6,7 @@
 			<div class="mb-6">
 				<a href="/ort/" class="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm">
 					<i class="ri-arrow-left-line mr-2"></i>
-					Zurück zur Übersicht
+					Zurï¿½ck zur ï¿½bersicht
 				</a>
 			</div>
 
@@ -22,7 +22,9 @@
 				{{ if .model.SelectedPlace.Place.Geo }}
 					<p class="text-slate-600">
 						<i class="ri-map-pin-line mr-1"></i>
-						Geonames: {{ .model.SelectedPlace.Place.Geo }}
+						<a href="{{ .model.SelectedPlace.Place.Geo }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">
+							Geonames
+						</a>
 					</p>
 				{{ end }}
 			</div>
@@ -30,38 +32,66 @@
 			<!-- Associated Pieces -->
 			<div>
 				<h2 class="text-xl font-semibold text-slate-800 mb-4">
-					Beiträge ({{ len .model.SelectedPlace.Pieces }})
+					<i class="ri-newspaper-line mr-2"></i><u class="decoration underline-offset-3">BeitrÃ¤ge</u> ({{ len .model.SelectedPlace.Pieces }})
 				</h2>
 
 				{{ if .model.SelectedPlace.Pieces }}
-					<div class="space-y-4">
-						{{ range $piece := .model.SelectedPlace.Pieces }}
-							<div class="border border-slate-200 rounded-lg p-4 hover:bg-slate-50">
-								<h3 class="font-medium text-slate-800 mb-2">
-									{{ if $piece.Title }}
-										{{ index $piece.Title 0 }}
-									{{ else }}
-										Untitled
-									{{ end }}
-								</h3>
+					<div class="space-y-2">
+						{{- /* Group pieces by their own title/incipit */ -}}
+						{{- $groupedPieces := dict -}}
+						{{- range $_, $p := .model.SelectedPlace.Pieces -}}
+							{{- $groupKey := "" -}}
+							{{- if $p.Title -}}
+								{{- $groupKey = index $p.Title 0 -}}
+							{{- else if $p.Incipit -}}
+								{{- $groupKey = index $p.Incipit 0 -}}
+							{{- else -}}
+								{{- $groupKey = printf "untitled-%s" $p.ID -}}
+							{{- end -}}
 
-								{{ if $piece.IssueRefs }}
-									<div class="text-sm text-slate-600">
-										{{ range $issueRef := $piece.IssueRefs }}
-											<span class="inline-block mr-4">
-												<i class="ri-calendar-line mr-1"></i>
-												<a href="/{{ $issueRef.When.Year }}/{{ $issueRef.IssueNumber }}" class="text-blue-600 hover:text-blue-700">
-													{{ $issueRef.When.Year }} Nr. {{ $issueRef.IssueNumber }}
+							{{- $existing := index $groupedPieces $groupKey -}}
+							{{- if $existing -}}
+								{{- $groupedPieces = merge $groupedPieces (dict $groupKey (append $existing $p)) -}}
+							{{- else -}}
+								{{- $groupedPieces = merge $groupedPieces (dict $groupKey (slice $p)) -}}
+							{{- end -}}
+						{{- end -}}
+
+						<div class="columns-2 gap-1 hyphens-auto">
+							{{- /* Display grouped pieces */ -}}
+							{{- range $groupKey, $groupedItems := $groupedPieces -}}
+								<div class="break-inside-avoid pl-4">
+									<div class="pb-1 indent-4">
+										{{- /* Use first piece for display text with colon format for places */ -}}
+										{{ template "_piece_summary_for_place" (dict "Piece" (index $groupedItems 0) "CurrentActorID" "") }}
+
+										{{- /* Show all citations from all pieces in this group inline with commas */ -}}
+										{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}
+											{{- range $issueIndex, $issue := $groupItem.IssueRefs -}}
+												{{- if or (gt $groupIndex 0) (gt $issueIndex 0) }}, {{ end -}}
+												<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>{{- end -}}
+										{{- end -}}
+
+										{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+										{{- $firstGroupItem := index $groupedItems 0 -}}
+										{{- if gt (len $firstGroupItem.IssueRefs) 1 -}}
+											{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
+											hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
+											hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200
+											indent-0">
+												<i class="ri-file-copy-2-line text-xs"></i>
+												<a href="{{ GetPieceURL $firstGroupItem.ID }}" class="">
+													Ganzer Beitrag
 												</a>
-											</span>
-										{{ end }}
+											</div>
+										{{- end }}
 									</div>
-								{{ end }}
-							</div>
-						{{ end }}
+								</div>
+							{{- end -}}
+						</div>
 					</div>
 				{{ else }}
-					<p class="text-slate-500 italic">Keine Beiträge für diesen Ort gefunden.</p>
+					<p class="text-slate-500 italic">Keine BeitrÃ¤ge fÃ¼r diesen Ort gefunden.</p>
 				{{ end }}
 			</div>
 		</div>

@@ -176,9 +176,9 @@ Each route has dedicated `head.gohtml` and `body.gohtml` files following Go temp
 
 **JavaScript Stack**:
 - **HTMX**: Core interactivity and AJAX requests
-- **Alpine.js**: Lightweight reactivity for UI components
+- **Web Components**: Custom elements for self-contained functionality (replaced Alpine.js)
 - **Modular Architecture**: ES6 modules with focused responsibilities
-- **Web Components**: Custom elements for self-contained functionality
+- **Event-Driven Architecture**: Custom events for inter-component communication
 - **Build Tool**: Vite for module bundling and development server
 
 **CSS Stack**:

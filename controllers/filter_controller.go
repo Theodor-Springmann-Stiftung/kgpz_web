@@ -102,11 +102,49 @@ func GetQuickFilter(kgpz *xmlmodels.Library) fiber.Handler {
 			return strings.Compare(a.ID, b.ID)
 		})
 
+		// Get all places that are referenced in pieces
+		places := make([]PlaceSummary, 0)
+		referencedPlaces := make(map[string]bool)
+
+		for _, piece := range kgpz.Pieces.Array {
+			for _, placeRef := range piece.PlaceRefs {
+				referencedPlaces[placeRef.Ref] = true
+			}
+		}
+
+		kgpz.Places.Lock()
+		for _, place := range kgpz.Places.Array {
+			// Only include places that are actually referenced in pieces
+			if referencedPlaces[place.ID] {
+				// Get the primary name (first name in the list)
+				var name string
+				if len(place.Names) > 0 {
+					name = place.Names[0]
+				} else {
+					name = place.ID // fallback to ID if no names
+				}
+
+				placeSummary := PlaceSummary{
+					ID:   place.ID,
+					Name: name,
+				}
+
+				places = append(places, placeSummary)
+			}
+		}
+		kgpz.Places.Unlock()
+
+		// Sort places list by ID
+		slices.SortFunc(places, func(a, b PlaceSummary) int {
+			return strings.Compare(a.ID, b.ID)
+		})
+
 		// Prepare data for the filter template
 		data := fiber.Map{
 			"AvailableYears":    availableYears,
 			"Persons":           persons,
 			"Authors":           authors,
+			"Places":            places,
 			"IssuesByYearJSON":  string(issuesByYearJSON),
 		}
 
@@ -120,6 +158,12 @@ type PersonSummary struct {
 	ID   string
 	Name string
 	Life string
+}
+
+// PlaceSummary represents a simplified place for the filter list
+type PlaceSummary struct {
+	ID   string
+	Name string
 }
 
 // IssueSummary represents an issue for the Jahr/Ausgabe filter

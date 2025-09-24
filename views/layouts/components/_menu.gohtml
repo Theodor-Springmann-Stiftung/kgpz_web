@@ -1,13 +1,6 @@
 <div class="flex flex-row justify-center mt-12 mb-8">
 	<!-- Schnellfilter Button -->
-	<div>
-	<button
-		id="filter-toggle"
-		class="mr-2 text-lg border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
-		title="Schnellfilter öffnen/schließen">
-		<i class="ri-filter-2-line"></i> <div class="inline-block text-lg">Schnellauswahl</div>
-	</button>
-	</div>
+	<schnellauswahl-button></schnellauswahl-button>
 
 	<div class="w-6/12">
 		<input
@@ -22,29 +15,6 @@
 			hx-target="main" />
 	</div>
 
-	<div x-data="{ open: false }">
-		<button
-			class="ml-2 text-2xl border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
-			:class="open? 'open bg-slate-200' : 'closed'"
-			@click="open = !open">
-			<i class="ri-menu-line"></i>
-		</button>
-		<div :class="open? 'open' : 'closed'" x-show="open" class="absolute bg-slate-50 px-5 py-3 z-50">
-			<div>
-				<div>Übersicht nach</div>
-				<div class="ml-2 flex flex-col gap-y-2 mt-2">
-					<a href="/">Jahrgängen</a>
-					<a href="/akteure/a">Personen</a>
-					<a href="/kategorie/">Betragsarten</a>
-					<a href="/ort/">Orten</a>
-				</div>
-			</div>
-			<div class="flex flex-col gap-y-2 mt-2">
-				<a href="/edition/">Geschichte &amp; Edition der KGPZ</a>
-				<a href="/zitation/">Zitation</a>
-				<a href="/kontakt/">Kontakt</a>
-			</div>
-		</div>
-	</div>
+	<navigation-menu></navigation-menu>
 </div>
 
