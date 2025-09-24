@@ -55,9 +55,15 @@
 	</div>
 
 	<div class="p-4 w-full max-w-md flex flex-col h-full">
-		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-			<i class="ri-user-line text-slate-600"></i>
-			Auswahl nach Person
+		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center justify-between">
+			<div class="flex items-center gap-2">
+				<i class="ri-user-line text-slate-600"></i>
+				Auswahl nach Person
+			</div>
+			<div class="flex items-center gap-1">
+				<i class="ri-arrow-right-line"></i>
+				<a href="/akteure/a" class="text-sm text-slate-600 hover:underline">Personen</a>
+			</div>
 		</h3>
 
 		<!-- Person Jump Filter -->
@@ -111,14 +117,21 @@
 						{{ end }}
 					</div>
 				</div>
+
 			</div>
 		</person-jump-filter>
 	</div>
 
 	<div class="p-4 w-full max-w-md flex flex-col h-full">
-		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-			<i class="ri-map-pin-line text-slate-600"></i>
-			Auswahl nach Ort
+		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center justify-between">
+			<div class="flex items-center gap-2">
+				<i class="ri-map-pin-line text-slate-600"></i>
+				Auswahl nach Ort
+			</div>
+			<div class="flex items-center gap-1">
+				<i class="ri-arrow-right-line"></i>
+				<a href="/ort/" class="text-sm text-slate-600 hover:underline">Orte</a>
+			</div>
 		</h3>
 
 		<!-- Place Jump Filter -->
@@ -146,6 +159,7 @@
 						{{ end }}
 					</div>
 				</div>
+
 			</div>
 		</place-jump-filter>
 	</div>
