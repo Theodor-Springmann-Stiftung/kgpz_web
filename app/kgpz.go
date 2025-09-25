@@ -3,6 +3,7 @@ package app
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
@@ -211,6 +212,14 @@ func (k *KGPZ) Funcs() map[string]interface{} {
 	e["GetPiece"] = k.Library.Pieces.Item
 	e["GetGND"] = k.GND.Person
 	e["GetGeonames"] = k.Geonames.Place
+
+	// Math functions
+	e["sub"] = func(a, b int) int { return a - b }
+	e["add"] = func(a, b int) int { return a + b }
+
+	// String functions
+	e["contains"] = func(s, substr string) bool { return strings.Contains(s, substr) }
+	e["lower"] = func(s string) string { return strings.ToLower(s) }
 
 	e["LookupPieces"] = k.Library.Pieces.ReverseLookup
 	e["LookupWorks"] = k.Library.Works.ReverseLookup

@@ -1,12 +1,12 @@
-{{ $place := .place }}
-{{ if $place }}
-	<title>{{ index $place.Names 0 }} - KGPZ</title>
-	<meta name="description" content="Informationen zu {{ index $place.Names 0 }} in der K�nigsberger Gelehrten und Politischen Zeitung.">
-	<meta name="keywords" content="{{ index $place.Names 0 }}, Ort, KGPZ, K�nigsberg, Zeitung">
+{{ if .model.SelectedPlace }}
+	{{ $place := .model.SelectedPlace.Place }}
+	<title>{{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }} - KGPZ</title>
+	<meta name="description" content="Informationen zu {{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }} in der Königsberger Gelehrten und Politischen Zeitung.">
+	<meta name="keywords" content="{{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }}, Ort, KGPZ, Königsberg, Zeitung">
 
 	<!-- Open Graph tags for social media -->
-	<meta property="og:title" content="{{ index $place.Names 0 }} - KGPZ">
-	<meta property="og:description" content="Informationen zu {{ index $place.Names 0 }} in der K�nigsberger Gelehrten und Politischen Zeitung.">
+	<meta property="og:title" content="{{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }} - KGPZ">
+	<meta property="og:description" content="Informationen zu {{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }} in der Königsberger Gelehrten und Politischen Zeitung.">
 	<meta property="og:type" content="article">
 	<meta property="og:url" content="/ort/{{ $place.ID }}">
 
@@ -17,17 +17,17 @@
 		{
 			"@context": "https://schema.org",
 			"@type": "Place",
-			"name": "{{ index $place.Names 0 }}",
-			"description": "Historischer Ort erw�hnt in der K�nigsberger Gelehrten und Politischen Zeitung",
+			"name": "{{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }}",
+			"description": "Historischer Ort erwähnt in der Königsberger Gelehrten und Politischen Zeitung"{{ if or (and (ne $geonames.Lat "") (ne $geonames.Lng "")) (ne $geonames.CountryName "") (ne $place.Geo "") }},{{ end }}
 			{{ if and (ne $geonames.Lat "") (ne $geonames.Lng "") }}
 			"geo": {
 				"@type": "GeoCoordinates",
 				"latitude": {{ $geonames.Lat }},
 				"longitude": {{ $geonames.Lng }}
-			},
+			}{{ if or (ne $geonames.CountryName "") (ne $place.Geo "") }},{{ end }}
 			{{ end }}
 			{{ if ne $geonames.CountryName "" }}
-			"addressCountry": "{{ $geonames.CountryName }}",
+			"addressCountry": "{{ $geonames.CountryName }}"{{ if ne $place.Geo "" }},{{ end }}
 			{{ end }}
 			{{ if ne $place.Geo "" }}
 			"sameAs": "{{ $place.Geo }}"
@@ -36,6 +36,7 @@
 		</script>
 	{{ end }}
 {{ else }}
-	<title>Ort nicht gefunden - KGPZ</title>
-	<meta name="description" content="Der angeforderte Ort wurde nicht gefunden.">
+	<title>Orte - KGPZ</title>
+	<meta name="description" content="Übersicht aller Orte in der Königsberger Gelehrten und Politischen Zeitung.">
+	<meta name="keywords" content="Orte, Geografie, KGPZ, Königsberg, Zeitung">
 {{ end }}

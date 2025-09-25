@@ -4,35 +4,118 @@
 		<div class="bg-white px-6 py-6 rounded w-full">
 			<!-- Back Navigation -->
 			<div class="mb-6">
-				<a href="/ort/" class="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm">
-					<i class="ri-arrow-left-line mr-2"></i>
-					ZurÃ¼ck zur Ãbersicht
+				<a href="/ort/" class="inline-flex items-center hover:text-black text-gray-600 transition-colors text-xl no-underline font-bold">
+					<i class="ri-arrow-left-line mr-1 text-xl font-bold"></i>
+					Orte
 				</a>
 			</div>
 
 			<!-- Place Header -->
 			<div class="mb-8">
-				<h1 class="text-3xl font-bold text-slate-800 mb-2">
-					{{ if .model.SelectedPlace.Place.Names }}
-						{{ index .model.SelectedPlace.Place.Names 0 }}
-					{{ else }}
-						{{ .model.SelectedPlace.Place.ID }}
-					{{ end }}
-				</h1>
-				{{ if .model.SelectedPlace.Place.Geo }}
-					<p class="text-slate-600">
-						<i class="ri-map-pin-line mr-1"></i>
-						<a href="{{ .model.SelectedPlace.Place.Geo }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">
-							Geonames
-						</a>
-					</p>
-				{{ end }}
+				{{ $geonames := GetGeonames .model.SelectedPlace.Place.Geo }}
+
+				<!-- Name and external links - similar to akteure header -->
+				<div class="flex items-start justify-between gap-4">
+					<div class="flex-1">
+						<h1 class="text-3xl font-bold text-slate-800 mb-2">
+							{{ if .model.SelectedPlace.Place.Names }}
+								{{ index .model.SelectedPlace.Place.Names 0 }}
+							{{ else }}
+								{{ .model.SelectedPlace.Place.ID }}
+							{{ end }}
+						</h1>
+
+						<!-- Geographic Information from Geonames -->
+						{{ if ne $geonames nil }}
+							<div class="text-lg text-slate-700 mb-2">
+								<!-- Modern Country Info (only if not Germany) -->
+								{{ if and (ne $geonames.CountryName "") (ne $geonames.CountryName "Germany") }}
+									<div class="mb-1">
+										{{ $mainPlaceName := "" }}
+										{{ if .model.SelectedPlace.Place.Names }}
+											{{ $mainPlaceName = index .model.SelectedPlace.Place.Names 0 }}
+										{{ end }}
+										{{ if eq $geonames.CountryName "France" }}
+											heutiges Frankreich{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "United Kingdom" }}
+											heutiges Großbritannien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Russia" }}
+											heutiges Russland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if or (eq $geonames.CountryName "Czech Republic") (eq $geonames.CountryName "Czechia") }}
+											heutiges Tschechien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if or (eq $geonames.CountryName "Netherlands") (eq $geonames.CountryName "The Netherlands") }}
+											heutige Niederlande{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Poland" }}
+											heutiges Polen{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Switzerland" }}
+											heutige Schweiz{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Latvia" }}
+											heutiges Lettland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Sweden" }}
+											heutiges Schweden{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Austria" }}
+											heutiges Österreich{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Belgium" }}
+											heutiges Belgien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Slovakia" }}
+											heutige Slowakei{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Finland" }}
+											heutiges Finnland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else if eq $geonames.CountryName "Denmark" }}
+											heutiges Dänemark{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+										{{ else }}
+											{{ $geonames.CountryName }}
+										{{ end }}
+									</div>
+								{{ end }}
+
+								<!-- Coordinates -->
+								<div class="text-slate-600 text-base space-y-1">
+									{{ if and (ne $geonames.Lat "") (ne $geonames.Lng "") }}
+										<div>
+											<i class="ri-map-pin-line mr-1"></i><a href="https://www.openstreetmap.org/?mlat={{ $geonames.Lat }}&mlon={{ $geonames.Lng }}&zoom=12" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">{{ $geonames.Lat }}, {{ $geonames.Lng }}</a>
+										</div>
+									{{ end }}
+								</div>
+							</div>
+						{{ else }}
+							<!-- Fallback when no Geonames data -->
+							{{ if .model.SelectedPlace.Place.Geo }}
+								<p class="text-slate-600 mb-2">
+									<i class="ri-map-pin-line mr-1"></i>
+									<a href="{{ .model.SelectedPlace.Place.Geo }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">
+										Geonames
+									</a>
+								</p>
+							{{ end }}
+						{{ end }}
+					</div>
+
+					<!-- External link symbols on the right - similar to akteure -->
+					<div class="flex gap-3 flex-shrink-0 items-center">
+						{{ if ne $geonames nil }}
+							<!-- Wikipedia link if available -->
+							{{ if ne $geonames.WikipediaURL "" }}
+								<a href="https://{{ $geonames.WikipediaURL }}" target="_blank" class="hover:opacity-80 transition-opacity" title="Wikipedia">
+									<img src="/assets/wikipedia.png" alt="Wikipedia" class="w-6 h-6">
+								</a>
+							{{ end }}
+						{{ end }}
+
+						<!-- Geonames link -->
+						{{ if .model.SelectedPlace.Place.Geo }}
+							<a href="{{ .model.SelectedPlace.Place.Geo }}" target="_blank" class="hover:opacity-80 transition-opacity no-underline" title="Geonames">
+								<i class="ri-global-line text-xl text-blue-600"></i>
+							</a>
+						{{ end }}
+					</div>
+				</div>
 			</div>
 
 			<!-- Associated Pieces -->
 			<div>
 				<h2 class="text-xl font-semibold text-slate-800 mb-4">
-					<i class="ri-newspaper-line mr-2"></i><u class="decoration underline-offset-3">BeitrÃ¤ge</u> ({{ len .model.SelectedPlace.Pieces }})
+					<i class="ri-newspaper-line mr-2"></i><u class="decoration underline-offset-3">Verlinkte Beiträge</u> ({{ len .model.SelectedPlace.Pieces }})
 				</h2>
 
 				{{ if .model.SelectedPlace.Pieces }}
@@ -91,9 +174,10 @@
 						</div>
 					</div>
 				{{ else }}
-					<p class="text-slate-500 italic">Keine BeitrÃ¤ge fÃ¼r diesen Ort gefunden.</p>
+					<p class="text-slate-500 italic">Keine verlinkten Beiträge für diesen Ort gefunden.</p>
 				{{ end }}
 			</div>
+
 		</div>
 	</div>
 
@@ -127,21 +211,68 @@
 					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						{{ range $placeID := .model.Sorted }}
 							{{ $place := index $.model.Places $placeID }}
-							<div class="border border-slate-200 rounded-lg hover:bg-slate-50">
-								<a href="/ort/{{ $place.ID }}" class="block p-4">
-									<h3 class="font-medium text-slate-800 mb-1">
-										{{ if $place.Names }}
-											{{ index $place.Names 0 }}
-										{{ else }}
-											{{ $place.ID }}
-										{{ end }}
-									</h3>
-									{{ if $place.Geo }}
-										<p class="text-sm text-slate-600">
-											<i class="ri-map-pin-line mr-1"></i>
-											{{ $place.Geo }}
-										</p>
-									{{ end }}
+							{{ $geonames := GetGeonames $place.Geo }}
+							<div class="border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors h-24">
+								<a href="/ort/{{ $place.ID }}" class="block p-4 h-full flex flex-col justify-between">
+									<div class="flex items-start justify-between gap-2">
+										<div class="flex-1">
+											<h3 class="font-medium text-slate-800 mb-1">
+												{{ if $place.Names }}
+													{{ index $place.Names 0 }}
+												{{ else }}
+													{{ $place.ID }}
+												{{ end }}
+											</h3>
+											<!-- Show geographic info if available (only if not Germany) -->
+											{{ if ne $geonames nil }}
+												{{ if and (ne $geonames.CountryName "") (ne $geonames.CountryName "Germany") }}
+													<p class="text-sm text-slate-600 mb-1">
+														<i class="ri-map-pin-line mr-1"></i>
+														{{ $mainPlaceName := "" }}
+														{{ if $place.Names }}
+															{{ $mainPlaceName = index $place.Names 0 }}
+														{{ end }}
+														{{ if eq $geonames.CountryName "France" }}
+															heutiges Frankreich{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "United Kingdom" }}
+															heutiges Großbritannien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Russia" }}
+															heutiges Russland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if or (eq $geonames.CountryName "Czech Republic") (eq $geonames.CountryName "Czechia") }}
+															heutiges Tschechien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if or (eq $geonames.CountryName "Netherlands") (eq $geonames.CountryName "The Netherlands") }}
+															heutige Niederlande{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Poland" }}
+															heutiges Polen{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Switzerland" }}
+															heutige Schweiz{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Latvia" }}
+															heutiges Lettland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Sweden" }}
+															heutiges Schweden{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Austria" }}
+															heutiges Österreich{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Belgium" }}
+															heutiges Belgien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Slovakia" }}
+															heutige Slowakei{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Finland" }}
+															heutiges Finnland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else if eq $geonames.CountryName "Denmark" }}
+															heutiges Dänemark{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+														{{ else }}
+															{{ $geonames.CountryName }}
+														{{ end }}
+													</p>
+												{{ end }}
+											{{ else if $place.Geo }}
+												<p class="text-sm text-slate-600">
+													<i class="ri-map-pin-line mr-1"></i>Geonames verfügbar
+												</p>
+											{{ end }}
+										</div>
+
+									</div>
 								</a>
 							</div>
 						{{ end }}
