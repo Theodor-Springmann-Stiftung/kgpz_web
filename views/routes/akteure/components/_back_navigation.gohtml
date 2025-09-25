@@ -1,7 +1,7 @@
 {{- /* Shared back navigation for individual person pages */ -}}
 <div class="mb-6">
 		{{ $letter := Upper (FirstLetter .ID) }}
-		<a href="/akteure/{{ $letter }}" class="inline-flex items-center hover:text-black text-gray-600 transition-colors text-xl no-underline font-bold">
+		<a href="/akteure/{{ $letter }}#{{ .ID }}" class="inline-flex items-center hover:text-black text-gray-600 transition-colors text-xl no-underline font-bold">
 			<i class="ri-arrow-left-line mr-1 text-xl font-bold"></i>
 			{{ $letter }}
 		</a>

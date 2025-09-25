@@ -354,19 +354,19 @@ class O extends HTMLElement {
     super(), this.scrollTimeout = null, this.clickHandlers = [], this.manualNavigation = !1, this.handleScroll = this.handleScroll.bind(this);
   }
   handleScroll() {
-    console.log("Scroll event fired!"), clearTimeout(this.scrollTimeout), this.scrollTimeout = setTimeout(() => {
+    clearTimeout(this.scrollTimeout), this.scrollTimeout = setTimeout(() => {
       this.updateActiveLink(), this.updateSidebarScrollToTopButton();
     }, 50);
   }
   connectedCallback() {
-    console.log("AkteureScrollspy connected"), setTimeout(() => {
+    setTimeout(() => {
       this.initializeScrollspyAfterDelay();
     }, 50), window.addEventListener("pageshow", (e) => {
       e.persisted && (this.cleanup(), this.initializeScrollspy());
     });
   }
   initializeScrollspyAfterDelay() {
-    if (console.log("initializeScrollspyAfterDelay running"), this.sections = document.querySelectorAll(".author-section"), this.navLinks = document.querySelectorAll(".scrollspy-link"), this.sections.length === 0 || this.navLinks.length === 0) {
+    if (this.sections = document.querySelectorAll(".author-section"), this.navLinks = document.querySelectorAll(".scrollspy-link"), this.sections.length === 0 || this.navLinks.length === 0) {
       setTimeout(() => {
         this.sections = document.querySelectorAll(".author-section"), this.navLinks = document.querySelectorAll(".scrollspy-link"), this.sections.length > 0 && this.navLinks.length > 0 && this.initializeScrollspy();
       }, 500);
@@ -375,10 +375,10 @@ class O extends HTMLElement {
     this.initializeScrollspy();
   }
   disconnectedCallback() {
-    console.log("AkteureScrollspy disconnected"), this.cleanup();
+    this.cleanup();
   }
   initializeScrollspy() {
-    console.log("initializeScrollspy running"), window.addEventListener("scroll", this.handleScroll), this.navLinks.forEach((e) => {
+    window.addEventListener("scroll", this.handleScroll), this.navLinks.forEach((e) => {
       const t = (i) => {
         i.preventDefault();
         const n = e.getAttribute("data-target"), s = document.getElementById(n);
@@ -490,9 +490,9 @@ class O extends HTMLElement {
       document.documentElement.offsetHeight
     ), s = window.innerHeight, o = n - s, r = o > 0 ? window.scrollY / o : 0, l = t.clientHeight, d = t.scrollHeight - l;
     if (d > 0) {
-      const u = r * d, g = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = g.top - p.top + t.scrollTop, m = l / 2, q = f - m, y = 0.7, I = y * u + (1 - y) * q, v = Math.max(0, Math.min(d, I)), T = t.scrollTop;
-      Math.abs(v - T) > 10 && t.scrollTo({
-        top: v,
+      const u = r * d, g = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = g.top - p.top + t.scrollTop, m = l / 2, q = f - m, v = 0.7, I = v * u + (1 - v) * q, y = Math.max(0, Math.min(d, I)), T = t.scrollTop;
+      Math.abs(y - T) > 10 && t.scrollTo({
+        top: y,
         behavior: "smooth"
       });
     }
@@ -504,7 +504,7 @@ class O extends HTMLElement {
     t > i * 0.5 ? (e.classList.remove("opacity-0"), e.classList.add("opacity-100")) : (e.classList.remove("opacity-100"), e.classList.add("opacity-0"));
   }
   cleanup() {
-    console.log("Scrollspy cleanup running"), window.removeEventListener("scroll", this.handleScroll), this.scrollTimeout && (clearTimeout(this.scrollTimeout), this.scrollTimeout = null), this.clickHandlers && this.clickHandlers.length > 0 && this.clickHandlers.forEach(({ link: t, handler: i }) => {
+    window.removeEventListener("scroll", this.handleScroll), this.scrollTimeout && (clearTimeout(this.scrollTimeout), this.scrollTimeout = null), this.clickHandlers && this.clickHandlers.length > 0 && this.clickHandlers.forEach(({ link: t, handler: i }) => {
       t && i && t.removeEventListener("click", i);
     });
     const e = document.getElementById("scrollspy-slider");

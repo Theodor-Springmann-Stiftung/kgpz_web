@@ -13,7 +13,6 @@ export class AkteureScrollspy extends HTMLElement {
 	}
 
 	handleScroll() {
-		console.log("Scroll event fired!");
 		clearTimeout(this.scrollTimeout);
 		this.scrollTimeout = setTimeout(() => {
 			this.updateActiveLink();
@@ -22,7 +21,6 @@ export class AkteureScrollspy extends HTMLElement {
 	}
 
 	connectedCallback() {
-		console.log("AkteureScrollspy connected");
 		// Use a simple timeout to ensure DOM is settled after the component is connected.
 		// This is more reliable than the external settleQueue for popstate navigation.
 		setTimeout(() => {
@@ -40,7 +38,6 @@ export class AkteureScrollspy extends HTMLElement {
 	}
 
 	initializeScrollspyAfterDelay() {
-		console.log("initializeScrollspyAfterDelay running");
 		// Find sections and nav links
 		this.sections = document.querySelectorAll(".author-section");
 		this.navLinks = document.querySelectorAll(".scrollspy-link");
@@ -61,12 +58,10 @@ export class AkteureScrollspy extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.log("AkteureScrollspy disconnected");
 		this.cleanup();
 	}
 
 	initializeScrollspy() {
-		console.log("initializeScrollspy running");
 		window.addEventListener("scroll", this.handleScroll);
 
 		// Add smooth scroll on link click
@@ -381,7 +376,6 @@ export class AkteureScrollspy extends HTMLElement {
 	}
 
 	cleanup() {
-		console.log("Scrollspy cleanup running");
 		// Remove scroll listener
 		window.removeEventListener("scroll", this.handleScroll);
 
