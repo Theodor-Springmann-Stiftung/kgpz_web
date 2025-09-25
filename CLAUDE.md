@@ -15,7 +15,7 @@ The application follows a modular Go architecture:
 - **Controllers**: Route handlers for different content types (issues, agents, places, categories, search, quickfilters)
 - **View Models**: Data structures for template rendering with pre-processed business logic (`viewmodels/`)
 - **XML Models**: Data structures for parsing source XML files (`xmlmodels/`)
-- **Providers**: External service integrations (Git, GND, XML parsing, search)
+- **Providers**: External service integrations (Git, GND, Geonames, XML parsing, search)
 - **Templating**: Custom template engine with Go template integration and helper functions
 - **Views**: Frontend assets and templates in `views/` directory
 
@@ -763,3 +763,191 @@ The application provides sophisticated person and organization browsing through 
 - Automatic fallback for missing letters
 - Smooth transitions between view modes
 - Proper state management across HTMX swaps
+
+## Places System (/ort/) with Geonames Integration
+
+The application provides comprehensive place browsing with sophisticated geographic information integration through the Geonames API, offering modern place names, coordinates, and Wikipedia links.
+
+### Architecture & Data Flow
+
+**Geonames Provider** (`providers/geonames/`):
+- Local JSON file caching system for offline operation
+- API integration with geonames.org for geographic data enrichment
+- Structured data models for places, coordinates, alternate names, and external links
+- Automatic fallback between cached data and live API calls
+
+**Places Controller** (`controllers/ort_controller.go`):
+- Handles both overview (`/ort/`) and individual place views (`/ort/{id}`)
+- Integrates Geonames data with XML place data
+- Template rendering with pre-processed geographic information
+
+**View Models** (`viewmodels/place_view.go`):
+- `PlaceVM` struct for individual place display with Geonames integration
+- `PlacesOverviewVM` for places listing with geographic context
+- Pre-processed modern country names and local toponyms
+
+### Geonames Data Integration
+
+**Template Functions** (`app/kgpz.go`):
+- `GetGeonames` - Retrieves cached or live Geonames data for places
+- Geographic data accessible throughout all templates
+- String manipulation functions for name comparisons and formatting
+
+**Data Structure**:
+```go
+type GeonamesPlace struct {
+    GeonameID       int                    `json:"geonameId"`
+    Name            string                 `json:"name"`
+    ToponymName     string                 `json:"toponymName"`
+    CountryName     string                 `json:"countryName"`
+    Lat             string                 `json:"lat"`
+    Lng             string                 `json:"lng"`
+    AlternateNames  []AlternateName        `json:"alternateNames"`
+    WikipediaURL    string                 `json:"wikipediaURL"`
+}
+```
+
+### Modern Place Name Display Logic
+
+**German Name Priority System**:
+1. **Primary**: Search for German (`"de"`) alternate names in Geonames data
+2. **Preferred Names**: Prioritize names with `IsPreferredName = true`
+3. **Fallback**: Use `ToponymName` if no German names available
+4. **Display Rule**: Only show modern names if they differ from historical German names
+
+**Implementation**:
+```gohtml
+{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
+```
+
+### Country Name Translations
+
+**Supported Countries with German Translations**:
+- **France** → "heutiges Frankreich"
+- **United Kingdom** → "heutiges Großbritannien"
+- **Russia** → "heutiges Russland"
+- **Czech Republic/Czechia** → "heutiges Tschechien"
+- **Netherlands/The Netherlands** → "heutige Niederlande"
+- **Poland** → "heutiges Polen"
+- **Switzerland** → "heutige Schweiz"
+- **Latvia** → "heutiges Lettland"
+- **Sweden** → "heutiges Schweden"
+- **Austria** → "heutiges Österreich"
+- **Belgium** → "heutiges Belgien"
+- **Slovakia** → "heutige Slowakei"
+- **Finland** → "heutiges Finnland"
+- **Denmark** → "heutiges Dänemark"
+
+**Display Format**: "heutiges [Country], [Local Name]" (only when local name differs)
+
+### Geographic Features
+
+**Coordinate Integration**:
+- Clickable coordinates linking to OpenStreetMap
+- Format: `https://www.openstreetmap.org/?mlat={lat}&mlon={lng}&zoom=12`
+- Visual styling with map pin icons and hover effects
+
+**External Links**:
+- **Wikipedia Integration**: Automatic Wikipedia link detection and display
+- **Geonames Links**: Direct links to Geonames.org entries
+- Consistent icon styling with external link security (`target="_blank"`, `rel="noopener noreferrer"`)
+
+### Template Structure
+
+**Individual Place View** (`views/routes/ort/body.gohtml`):
+- **Header Section**: Place name with back navigation styled like agent pages
+- **Geographic Info**: Modern country name with local toponyms when different
+- **Coordinates**: Clickable OpenStreetMap links with proper formatting
+- **External Links**: Wikipedia and Geonames integration with appropriate icons
+- **Linked Articles**: "Verlinkte Beiträge" section showing associated newspaper pieces
+
+**Places Overview** (`views/routes/ort/`):
+- **Streamlined Layout**: Removed non-functional alphabet navigation
+- **Card Grid**: Responsive place cards with consistent heights (`h-24`)
+- **Geographic Context**: Modern country names with local toponyms in overview cards
+- **Clean Design**: Focus on essential information without cluttered indicators
+
+### Navigation & UI Improvements
+
+**Back Navigation**:
+- **Style Consistency**: Matches agent page back button styling
+- **Typography**: Large, bold text with arrow icon (`ri-arrow-left-line`)
+- **Simplified Text**: "Orte" instead of "Zurück zur Übersicht"
+- **Color Scheme**: Gray text with black hover, transition effects
+
+**External Link Styling**:
+- **Consistent Icons**: Smaller Geonames symbols (`text-xl` instead of `text-2xl`)
+- **No Underlines**: `no-underline` class for cleaner appearance
+- **Hover Effects**: Opacity transitions for better user feedback
+
+### Data Processing & Caching
+
+**Geonames Provider Features**:
+- **Local Caching**: JSON files stored locally to reduce API dependency
+- **Automatic Fallback**: Graceful degradation when API unavailable
+- **Data Enrichment**: Combines XML place data with geographic information
+- **Performance**: Cached lookups for frequently accessed places
+
+**Template Integration**:
+- **Helper Functions**: Accessible via `GetGeonames` template function
+- **Error Handling**: Safe handling of missing or incomplete geographic data
+- **Responsive Design**: Geographic information hidden for German places to reduce clutter
+
+### Usage Examples
+
+**Template Integration**:
+```gohtml
+{{ $geonames := GetGeonames .model.SelectedPlace.Place.ID }}
+{{ if and (ne $geonames nil) (ne $geonames.CountryName "Germany") }}
+    <p>{{ $geonames.CountryName }}</p>
+{{ end }}
+```
+
+**External Links**:
+```gohtml
+{{ if ne $geonames.WikipediaURL "" }}
+    <a href="{{ $geonames.WikipediaURL }}" target="_blank" rel="noopener noreferrer">
+        <i class="ri-wikipedia-line"></i> Wikipedia
+    </a>
+{{ end }}
+```
+
+**Coordinates**:
+```gohtml
+{{ if and (ne $geonames.Lat "") (ne $geonames.Lng "") }}
+    <a href="https://www.openstreetmap.org/?mlat={{ $geonames.Lat }}&mlon={{ $geonames.Lng }}&zoom=12"
+       target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">
+        {{ $geonames.Lat }}, {{ $geonames.Lng }}
+    </a>
+{{ end }}
+```
+
+### Error Handling & Fallbacks
+
+**Geographic Data Safety**:
+- Graceful handling of missing Geonames data
+- Safe template evaluation with null checks
+- Fallback display for places without geographic information
+- Error boundaries for external API failures
+
+**Template Robustness**:
+- Case-insensitive name comparisons using `lower` template function
+- Proper handling of empty alternate names arrays
+- Safe string manipulation with whitespace control
+- Consistent behavior across detail and overview templates

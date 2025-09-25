@@ -36,33 +36,257 @@
 											{{ $mainPlaceName = index .model.SelectedPlace.Place.Names 0 }}
 										{{ end }}
 										{{ if eq $geonames.CountryName "France" }}
-											heutiges Frankreich{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Frankreich{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "United Kingdom" }}
-											heutiges Großbritannien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Großbritannien{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Russia" }}
-											heutiges Russland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Russland{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if or (eq $geonames.CountryName "Czech Republic") (eq $geonames.CountryName "Czechia") }}
-											heutiges Tschechien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Tschechien{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if or (eq $geonames.CountryName "Netherlands") (eq $geonames.CountryName "The Netherlands") }}
-											heutige Niederlande{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutige Niederlande{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Poland" }}
-											heutiges Polen{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Polen{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Switzerland" }}
-											heutige Schweiz{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutige Schweiz{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Latvia" }}
-											heutiges Lettland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Lettland{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Sweden" }}
-											heutiges Schweden{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Schweden{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Austria" }}
-											heutiges Österreich{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Österreich{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Belgium" }}
-											heutiges Belgien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Belgien{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Slovakia" }}
-											heutige Slowakei{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutige Slowakei{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Finland" }}
-											heutiges Finnland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Finnland{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else if eq $geonames.CountryName "Denmark" }}
-											heutiges Dänemark{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+											heutiges Dänemark{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 										{{ else }}
 											{{ $geonames.CountryName }}
 										{{ end }}
@@ -188,18 +412,6 @@
 			<h1 class="text-3xl font-bold text-slate-800 mb-8">Orte</h1>
 
 			<!-- Available Letters Navigation -->
-			{{ if .model.AvailableLetters }}
-				<div class="mb-8">
-					<h2 class="text-lg font-semibold text-slate-700 mb-4">Nach Anfangsbuchstabe</h2>
-					<div class="flex flex-wrap gap-2">
-						{{ range $letter := .model.AvailableLetters }}
-							<span class="px-3 py-2 bg-slate-100 text-slate-700 rounded text-sm">
-								{{ $letter }}
-							</span>
-						{{ end }}
-					</div>
-				</div>
-			{{ end }}
 
 			<!-- Places List -->
 			{{ if .model.Places }}
@@ -233,33 +445,257 @@
 															{{ $mainPlaceName = index $place.Names 0 }}
 														{{ end }}
 														{{ if eq $geonames.CountryName "France" }}
-															heutiges Frankreich{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Frankreich{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "United Kingdom" }}
-															heutiges Großbritannien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Großbritannien{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Russia" }}
-															heutiges Russland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Russland{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if or (eq $geonames.CountryName "Czech Republic") (eq $geonames.CountryName "Czechia") }}
-															heutiges Tschechien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Tschechien{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if or (eq $geonames.CountryName "Netherlands") (eq $geonames.CountryName "The Netherlands") }}
-															heutige Niederlande{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutige Niederlande{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Poland" }}
-															heutiges Polen{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Polen{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Switzerland" }}
-															heutige Schweiz{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutige Schweiz{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Latvia" }}
-															heutiges Lettland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Lettland{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Sweden" }}
-															heutiges Schweden{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Schweden{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Austria" }}
-															heutiges Österreich{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Österreich{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Belgium" }}
-															heutiges Belgien{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Belgien{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Slovakia" }}
-															heutige Slowakei{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutige Slowakei{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Finland" }}
-															heutiges Finnland{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Finnland{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else if eq $geonames.CountryName "Denmark" }}
-															heutiges Dänemark{{- if and (ne $geonames.ToponymName "") (ne (lower $geonames.ToponymName) (lower $mainPlaceName)) -}}, {{ $geonames.ToponymName }}{{- end }}
+															heutiges Dänemark{{- $modernName := "" -}}
+{{- $hasGermanName := false -}}
+{{- range $altName := $geonames.AlternateNames -}}
+{{- if eq $altName.Lang "de" -}}
+{{- $hasGermanName = true -}}
+{{- if $altName.IsPreferredName -}}
+{{- $modernName = $altName.Name -}}
+{{- break -}}
+{{- else if eq $modernName "" -}}
+{{- $modernName = $altName.Name -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $hasGermanName -}}
+{{- $modernName = $geonames.ToponymName -}}
+{{- end -}}
+{{- if and (ne $modernName "") (ne (lower $modernName) (lower $mainPlaceName)) -}}, {{ $modernName }}{{- end }}
 														{{ else }}
 															{{ $geonames.CountryName }}
 														{{ end }}
