@@ -1,51 +1,20 @@
 <div class="flex flex-row justify-center mt-12 mb-8">
+	<!-- Schnellfilter Button -->
+	<schnellauswahl-button></schnellauswahl-button>
+
 	<div class="w-6/12">
 		<input
 			type="search"
 			name="q"
 			id="search"
 			placeholder="Suche"
-			class="px-2.5 py-1.5 border w-full"
+			class="px-2.5 py-1.5 border w-full bg-white"
 			hx-get="/suche/?noCache=true"
 			hx-trigger="input changed delay:200ms, keyup[key=='Enter']"
 			hx-select="main"
 			hx-target="main" />
 	</div>
 
-	<div x-data="{ open: false }">
-		<button
-			class="ml-2 text-2xl border px-4 h-full"
-			:class="open? 'open bg-slate-200' : 'closed'"
-			@click="open = !open">
-			<i class="ri-menu-line"></i>
-		</button>
-		<div :class="open? 'open' : 'closed'" x-show="open" class="absolute bg-slate-50 px-5 py-3 z-50">
-			<div>
-				<div>Übersicht nach</div>
-				<div class="ml-2 flex flex-col gap-y-2 mt-2">
-					<a href="/">Jahrgängen</a>
-					<a href="/akteure/a">Personen</a>
-					<a href="/kategorie/">Betragsarten</a>
-					<a href="/ort/">Orten</a>
-				</div>
-			</div>
-			<div class="flex flex-col gap-y-2 mt-2">
-				<a href="/edition/">Geschichte &amp; Edition der KGPZ</a>
-				<a href="/zitation/">Zitation</a>
-				<a href="/kontakt/">Kontakt</a>
-			</div>
-		</div>
-	</div>
+	<navigation-menu></navigation-menu>
 </div>
 
-<script>
-	document.body.addEventListener("htmx:configRequest", function (event) {
-		console.log("Before request event triggered");
-		let t = event.detail.elt; // Get the element triggering the request
-
-		if (t.id === "search" && t.value === "") {
-			event.detail.parameters = {};
-			event.detail.path = window.location.pathname + window.location.search;
-		}
-	});
-</script>

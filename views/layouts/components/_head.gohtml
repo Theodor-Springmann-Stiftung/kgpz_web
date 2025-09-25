@@ -1,0 +1,27 @@
+<meta charset="UTF-8" />
+
+{{ block "head" . }}
+	<!-- Default Head elements -->
+{{ end }}
+
+{{ if .isDev }}
+	<link rel="icon" href="/assets/logo/dev_favicon.png" />
+{{ else }}
+	<link rel="icon" href="/assets/logo/favicon.png" />
+{{ end }}
+
+
+<link href="/assets/css/remixicon.css" rel="stylesheet" />
+<script src="/assets/scripts.js" type="module"></script>
+<script src="/assets/js/htmx.min.js" defer></script>
+<script src="/assets/js/htmx-response-targets.js" defer></script>
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+			if (typeof htmx !== 'undefined') {
+				htmx.config.scrollBehavior = 'instant';
+			}
+		});
+</script>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/fonts.css?v={{ .timestamp }}" />
+<link rel="stylesheet" type="text/css" href="/assets/style.css?v={{ .timestamp }}" />

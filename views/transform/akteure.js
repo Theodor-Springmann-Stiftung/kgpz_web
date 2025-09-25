@@ -1,3 +1,4 @@
+import { ExecuteNextSettle } from "./helpers.js";
 // ===========================
 // AKTEURE/AUTHORS SCROLLSPY WEB COMPONENT
 // ===========================
@@ -13,7 +14,7 @@ export class AkteureScrollspy extends HTMLElement {
 
 	connectedCallback() {
 		// Small delay to ensure DOM is fully rendered after HTMX swap
-		window.ExecuteNextSettle(() => {
+		ExecuteNextSettle(() => {
 			this.initializeScrollspyAfterDelay();
 		});
 	}
@@ -68,7 +69,7 @@ export class AkteureScrollspy extends HTMLElement {
 					this.manualNavigation = true;
 
 					target.scrollIntoView({
-						behavior: "smooth",
+						behavior: "instant",
 						block: "start",
 					});
 

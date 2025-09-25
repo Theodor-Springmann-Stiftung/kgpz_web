@@ -1,8 +1,11 @@
 import "./site.css";
+import "./search.js";
 import "./akteure.js";
 import { SinglePageViewer } from "./single-page-viewer.js";
 import { ScrollToTopButton } from "./scroll-to-top.js";
 import { InhaltsverzeichnisScrollspy } from "./inhaltsverzeichnis-scrollspy.js";
+import { ErrorModal } from "./error-modal.js";
+import { ExecuteSettleQueue } from "./helpers.js";
 import {
 	enlargePage,
 	closeModal,
@@ -91,29 +94,7 @@ function applyPageBackdrop() {
 	}
 }
 
-// Function queue system for HTMX settle events
-let settleQueue = [];
-
-// Global function to register functions for next settle event
-window.ExecuteNextSettle = function(fn) {
-	if (typeof fn === 'function') {
-		settleQueue.push(fn);
-	}
-};
-
-// Execute and clear the queue
-function executeSettleQueue() {
-	while (settleQueue.length > 0) {
-		const fn = settleQueue.shift();
-		try {
-			fn();
-		} catch (error) {
-			console.error('Error executing settle queue function:', error);
-		}
-	}
-}
-
-// Export functions for global access
+// Export functions for global access - moved outside setup() so they're available immediately
 window.enlargePage = enlargePage;
 window.closeModal = closeModal;
 window.scrollToPreviousPage = scrollToPreviousPage;
@@ -124,44 +105,36 @@ window.generateCitation = generateCitation;
 window.copyPagePermalink = copyPagePermalink;
 window.generatePageCitation = generatePageCitation;
 
-// INFO: This is intended to be called once on website load
-function setup() {
-	// Apply page-specific backdrop styling
-	applyPageBackdrop();
+// Apply page-specific backdrop styling
+applyPageBackdrop();
 
-	// Update citation links on initial load
-	updateCitationLinks();
+// Update citation links on initial load
+updateCitationLinks();
 
-	// Initialize newspaper layout if present
-	if (document.querySelector(".newspaper-page-container")) {
-		initializeNewspaperLayout();
-	}
-
-	// Akteure scrollspy web component will auto-initialize when present in template
-
-	// HTMX event handling for newspaper layout, scrollspy, and scroll-to-top button
-	let htmxAfterSwapHandler = function (event) {
-		// Apply page-specific backdrop styling after navigation
-		applyPageBackdrop();
-		// Update citation links after navigation
-		updateCitationLinks();
-
-		// Execute all queued functions
-		executeSettleQueue();
-
-		// Use shorter delay since afterSettle ensures DOM is ready
-		setTimeout(() => {
-			if (document.querySelector(".newspaper-page-container")) {
-				initializeNewspaperLayout();
-			}
-		}, 50);
-	};
-
-	let htmxBeforeRequestHandler = function (event) {};
-
-	document.body.addEventListener("htmx:afterSettle", htmxAfterSwapHandler);
-	document.body.addEventListener("htmx:afterSettle", updateCitationLinks);
-	document.body.addEventListener("htmx:beforeRequest", htmxBeforeRequestHandler);
+// Initialize newspaper layout if present
+if (document.querySelector(".newspaper-page-container")) {
+	initializeNewspaperLayout();
 }
 
-export { setup };
+// Akteure scrollspy web component will auto-initialize when present in template
+
+// HTMX event handling for newspaper layout, scrollspy, and scroll-to-top button
+let htmxAfterSwapHandler = function (event) {
+	// Apply page-specific backdrop styling after navigation
+	applyPageBackdrop();
+
+	// Update citation links after navigation
+	updateCitationLinks();
+
+	// Execute all queued functions
+	ExecuteSettleQueue();
+
+	// Use shorter delay since afterSettle ensures DOM is ready
+	setTimeout(() => {
+		if (document.querySelector(".newspaper-page-container")) {
+			initializeNewspaperLayout();
+		}
+	}, 50);
+};
+
+document.body.addEventListener("htmx:afterSettle", htmxAfterSwapHandler);

@@ -8,7 +8,7 @@
 		{{ $pageCount := len $pages }}
 
 		<!-- Historical printing layout grid -->
-		<div class="grid grid-cols-2">
+		<div class="grid grid-cols-2 gap-x-2">
 			{{ template "_historical_layout" (dict "pages" $pages "pageCount" $pageCount "isBeilage" false "targetPage" $.targetPage) }}
 		</div>
 	{{ end }}
@@ -26,7 +26,7 @@
 				{{ $pageCount := len $beilagePages }}
 
 				<!-- Historical printing layout grid for Beilage -->
-				<div class="grid grid-cols-2">
+				<div class="grid grid-cols-2 gap-x-2">
 					{{ template "_historical_layout" (dict "pages" $beilagePages "pageCount" $pageCount "isBeilage" true "targetPage" $.targetPage) }}
 				</div>
 			</div>
@@ -117,6 +117,9 @@
 	{{ $hoverColor := "hover:border-slate-300" }}
 	{{ $bgColor := "bg-blue-50" }}
 	{{ $idPrefix := "page" }}
+	{{ if $isBeilage }}
+		{{ $idPrefix = "beilage" }}
+	{{ end }}
 
 	{{ if $isBeilage }}
 		{{ $borderColor = "border-amber-200" }}
@@ -127,11 +130,6 @@
 
 	<div class="newspaper-page-container pt-4" id="{{ $idPrefix }}-{{ $page.PageNumber }}" data-page-container="{{ $page.PageNumber }}" data-page-icon-type="{{ $page.PageIcon }}"{{ if $isBeilage }} data-beilage="true"{{ end }}>
 		<!-- Anchor for navigation -->
-		{{ if $isBeilage }}
-			<div id="beilage-{{ $page.PageNumber }}"></div>
-		{{ else }}
-			<div id="page-{{ $page.PageNumber }}"></div>
-		{{ end }}
 		<!-- Page indicator row -->
 		<div class="flex {{ if $isLeft }}justify-end{{ else }}justify-start{{ end }} items-center gap-1 mb-2">
 			{{ if $isLeft }}

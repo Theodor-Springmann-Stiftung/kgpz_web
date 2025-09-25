@@ -1,0 +1,167 @@
+<div class="flex flex-row justify-center gap-4 h-96" id="filter">
+	<div class="p-4 w-full max-w-md flex flex-col h-full">
+		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+			<i class="ri-calendar-line text-slate-600"></i>
+				Auswahl nach Datum, Nummer od. Seite
+		</h3>
+
+		<!-- Unified Year Jump Filter -->
+		<year-jump-filter data-issues="{{ .IssuesByYearJSON }}">
+			<div class="space-y-3">
+				<!-- Year Selection -->
+				<div class="flex items-center gap-2 mb-4">
+					<label for="year-select" class="text-sm text-slate-600 w-12 hidden">Jahr wählen...</label>
+					<select id="year-select" class="tabular-nums flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" style="max-height: 200px; overflow-y: auto;">
+						<option value="">Jahr wählen</option>
+						{{ range $year := .AvailableYears }}
+							<option value="{{ $year }}">{{ $year }}</option>
+						{{ end }}
+					</select>
+				</div>
+
+				<!-- Ausgabe Selection - Two Selects -->
+				<div class="flex items-center gap-2">
+					<select id="issue-number-select" disabled class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed">
+						<option value="">Nr.</option>
+					</select>
+					<select id="issue-date-select" disabled class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed">
+						<option value="">Datum</option>
+					</select>
+				</div>
+
+				<!-- OR Divider -->
+				<div class="flex items-center my-3">
+					<div class="flex-1 border-t border-slate-300"></div>
+					<span class="px-2 text-xs text-slate-500 bg-white">oder</span>
+					<div class="flex-1 border-t border-slate-300"></div>
+				</div>
+
+				<!-- Page Input -->
+				<div class="flex items-center gap-2">
+					<label for="page-input" class="text-sm text-slate-600 w-12 hidden"> oder Seite eingeben...</label>
+					<input type="number" id="page-input" min="1" placeholder="Seite eingeben" disabled class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500">
+				</div>
+
+				<!-- Page Jump Button -->
+				<button id="page-jump-btn" type="button" disabled class="w-full inline-flex items-center justify-center px-3 py-2 bg-slate-400 text-white text-sm rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-1 disabled:bg-slate-400 disabled:cursor-not-allowed enabled:bg-blue-600 enabled:hover:bg-blue-700 enabled:focus:ring-blue-500">
+					<i class="ri-arrow-right-line mr-2"></i>
+					Zur Seite springen
+				</button>
+
+				<!-- Error Display Area -->
+				<div id="jump-errors" class="mt-2 min-h-[1rem]"></div>
+			</div>
+		</year-jump-filter>
+	</div>
+
+	<div class="p-4 w-full max-w-md flex flex-col h-full">
+		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center justify-between">
+			<div class="flex items-center gap-2">
+				<i class="ri-user-line text-slate-600"></i>
+				Auswahl nach Person
+			</div>
+			<div class="flex items-center gap-1">
+				<i class="ri-arrow-right-line"></i>
+				<a href="/akteure/a" class="text-sm text-slate-600 hover:underline">Personen</a>
+			</div>
+		</h3>
+
+		<!-- Person Jump Filter -->
+		<person-jump-filter class="flex-1 flex flex-col min-h-0">
+			<div class="space-y-3 flex flex-col h-full">
+				<div class="flex items-center gap-2">
+					<label for="person-search" class="hidden text-sm text-slate-600 w-16">Filter</label>
+					<input
+						type="text"
+						id="person-search"
+						placeholder="Name oder Lebensdaten eingeben..."
+						class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+					>
+				</div>
+
+				<div class="flex items-center gap-2">
+					<input
+						type="checkbox"
+						id="authors-only"
+						class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+					>
+					<label for="authors-only" class="text-sm text-slate-600">Nur Autor:innen anzeigen</label>
+				</div>
+
+				<div class="flex-1 min-h-0 overflow-y-auto border border-slate-300 rounded bg-white text-sm">
+					<!-- All Persons List -->
+					<div id="all-persons">
+						{{ range $person := .Persons }}
+							<div class="person-item odd:bg-slate-50 even:bg-white">
+								<a href="/akteure/{{ $person.ID }}" class="block px-2 py-1 hover:bg-blue-50 border-b border-slate-100 last:border-b-0">
+									<span class="person-name font-medium text-slate-800">{{ $person.Name }}</span>
+									{{ if $person.Life }}
+										<span class="person-life text-xs text-slate-500 ml-2">{{ $person.Life }}</span>
+									{{ end }}
+								</a>
+							</div>
+						{{ end }}
+					</div>
+
+					<!-- Authors Only List (initially hidden) -->
+					<div id="authors-only-list" style="display: none;">
+						{{ range $author := .Authors }}
+							<div class="person-item odd:bg-slate-50 even:bg-white">
+								<a href="/akteure/{{ $author.ID }}" class="block px-2 py-1 hover:bg-blue-50 border-b border-slate-100 last:border-b-0">
+									<span class="person-name font-medium text-slate-800">{{ $author.Name }}</span>
+									{{ if $author.Life }}
+										<span class="person-life text-xs text-slate-500 ml-2">{{ $author.Life }}</span>
+									{{ end }}
+								</a>
+							</div>
+						{{ end }}
+					</div>
+				</div>
+
+			</div>
+		</person-jump-filter>
+	</div>
+
+	<div class="p-4 w-full max-w-md flex flex-col h-full">
+		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center justify-between">
+			<div class="flex items-center gap-2">
+				<i class="ri-map-pin-line text-slate-600"></i>
+				Auswahl nach Ort
+			</div>
+			<div class="flex items-center gap-1">
+				<i class="ri-arrow-right-line"></i>
+				<a href="/ort/" class="text-sm text-slate-600 hover:underline">Orte</a>
+			</div>
+		</h3>
+
+		<!-- Place Jump Filter -->
+		<place-jump-filter class="flex-1 flex flex-col min-h-0">
+			<div class="space-y-3 flex flex-col h-full">
+				<div class="flex items-center gap-2">
+					<label for="place-search" class="hidden text-sm text-slate-600 w-16">Filter</label>
+					<input
+						type="text"
+						id="place-search"
+						placeholder="Ortsname eingeben..."
+						class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+					>
+				</div>
+
+				<div class="flex-1 min-h-0 overflow-y-auto border border-slate-300 rounded bg-white text-sm">
+					<!-- All Places List -->
+					<div id="all-places">
+						{{ range $place := .Places }}
+							<div class="place-item odd:bg-slate-50 even:bg-white">
+								<a href="/ort/{{ $place.ID }}" class="block px-2 py-1 hover:bg-blue-50 border-b border-slate-100 last:border-b-0">
+									<span class="place-name font-medium text-slate-800">{{ $place.Name }}</span>
+								</a>
+							</div>
+						{{ end }}
+					</div>
+				</div>
+
+			</div>
+		</place-jump-filter>
+	</div>
+</div>
+

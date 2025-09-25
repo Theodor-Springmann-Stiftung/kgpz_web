@@ -30,11 +30,12 @@ const (
 	CONTACT_URL  = "/kontakt/"
 	CITATION_URL = "/zitation/"
 	SEARCH_URL   = "/suche/"
+	FILTER_URL   = "/filter"
 
 	INDEX_URL = "/jahrgang/1764"
 
 	YEAR_OVERVIEW_URL     = "/jahrgang/:year"
-	PLACE_OVERVIEW_URL    = "/ort/:place"
+	PLACE_OVERVIEW_URL    = "/ort/:place?"
 	AGENTS_OVERVIEW_URL   = "/akteure/:letterorid"
 	CATEGORY_OVERVIEW_URL = "/kategorie/:category"
 
@@ -158,6 +159,7 @@ func (k *KGPZ) Routes(srv *fiber.App) error {
 	})
 
 	srv.Get(SEARCH_URL, controllers.GetSearch(k.Library, k.Search))
+	srv.Get(FILTER_URL, controllers.GetQuickFilter(k.Library))
 	srv.Get(PLACE_OVERVIEW_URL, controllers.GetPlace(k.Library))
 	srv.Get(CATEGORY_OVERVIEW_URL, controllers.GetCategory(k.Library))
 	srv.Get(AGENTS_OVERVIEW_URL, controllers.GetAgents(k.Library))

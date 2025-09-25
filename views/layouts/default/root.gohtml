@@ -1,63 +1,31 @@
 <!doctype html>
 <html class="w-full h-full" {{ if .lang }}lang="{{ .lang }}"{{ end }}>
 	<head>
-		<meta charset="UTF-8" />
-
-		{{ block "head" . }}
-			<!-- Default Head elements -->
-		{{ end }}
-
-		{{ if .isDev }}
-			<link rel="icon" href="/assets/logo/dev_favicon.png" />
-		{{ else }}
-			<link rel="icon" href="/assets/logo/favicon.png" />
-		{{ end }}
-
-
-		<link href="/assets/css/remixicon.css" rel="stylesheet" />
-		<script>
-			// Configure HTMX scroll behavior
-			document.addEventListener('DOMContentLoaded', function() {
-				if (typeof htmx !== 'undefined') {
-					htmx.config.scrollBehavior = 'instant';
-				}
-			});
-			// Fallback configuration
-			window.addEventListener('load', function() {
-				if (typeof htmx !== 'undefined') {
-					htmx.config.scrollBehavior = 'instant';
-				}
-			});
-		</script>
-		<script src="/assets/js/alpine.min.js" defer></script>
-		<script src="/assets/js/htmx.min.js" defer></script>
-		<script src="/assets/js/htmx-response-targets.js" defer></script>
-		<script src="/assets/js/client-side-templates.js" defer></script>
-
-		<link rel="stylesheet" type="text/css" href="/assets/css/fonts.css?v=1.0" />
-		<link rel="stylesheet" type="text/css" href="/assets/style.css?v=1.0" />
-
-		<script type="module">
-			import { setup } from "/assets/scripts.js";
-			setup();
-		</script>
+		{{ template "_head" . }}
 	</head>
 
-	<body class="w-full" hx-ext="response-targets" hx-boost="true">
+	<body class="w-full"
+		hx-ext="response-targets"
+		hx-boost="true"
+		hx-swap="outerHTML show:window:top"
+		hx-select="main"
+		hx-target="main"
+		hx-target-4="#error-content"
+		hx-target-5="#error-content"
+	>
 		{{ template "_header" . }}
-		<div class="container flex flex-col min-h-screen max-w-(--breakpoint-2xl) mx-auto">
-			<main class="">
-				{{ block "body" . }}
-					<!-- Default app body... -->
-				{{ end }}
-			</main>
-		</div>
-		{{ block "_footer" . }}
-		{{ end }}
+		<main class="container flex flex-col min-h-screen max-w-(--breakpoint-2xl) mx-auto">
+			{{ block "body" . }}
+				<!-- Default app body... -->
+			{{ end }}
+		</main>
+		{{ template "_footer" . }}
 
 		<!-- Scroll to Top Button -->
 		<scroll-to-top-button></scroll-to-top-button>
 
-		{{ EmbedXSLT "xslt/transform-citation.xsl" }}
+		<!-- Error Modal Web Component -->
+		<error-modal></error-modal>
+
 	</body>
 </html>

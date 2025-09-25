@@ -1,12 +1,16 @@
-<div class="pb-6 mx-auto bg-slate-50 w-full border-t-8 border-slate-600 ">
+<div class="py-3 mx-auto bg-slate-50 w-full border-t-8 border-slate-600 ">
 	<header class="mx-auto w-fit mt-12">
 		<a href="/" class="no-underline">
 			<h1 class="text-2xl">Königsberger gelehrte und politische Zeitungen</h1>
 		</a>
 	</header>
 
-	<nav>
+	<nav class="relative">
 		{{ block "_menu" . }}
 		{{ end }}
 	</nav>
+
+	<!-- Filter Expansion Container -->
+	<div id="filter-container" class="mt-6 hidden">
+	</div>
 </div>

@@ -151,6 +151,7 @@ func Run(app *App) {
 func Engine(kgpz *app.KGPZ, c *providers.ConfigProvider) *templating.Engine {
 	e := templating.NewEngine(&views.LayoutFS, &views.RoutesFS)
 	e.AddFuncs(kgpz.Funcs())
-	e.Globals(fiber.Map{"isDev": c.Config.Debug, "name": "KGPZ", "lang": "de"})
+	timestamp := time.Now().Unix()
+	e.Globals(fiber.Map{"isDev": c.Config.Debug, "name": "KGPZ", "lang": "de", "timestamp": timestamp})
 	return e
 }

@@ -1,130 +1,155 @@
-{{ $place := .place }}
-{{ if $place }}
-	{{ $geonames := GetGeonames $place.Geo }}
+{{ if .model.SelectedPlace }}
+	<!-- Single Place Detail View -->
+	<div class="max-w-7xl mx-auto px-8 py-8">
+		<div class="bg-white px-6 py-6 rounded w-full">
+			<!-- Back Navigation -->
+			<div class="mb-6">
+				<a href="/ort/" class="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm">
+					<i class="ri-arrow-left-line mr-2"></i>
+					ZurÃ¼ck zur Ãbersicht
+				</a>
+			</div>
 
-	<div class="container mx-auto px-4 py-8">
-		<!-- Place Header -->
-		<div class="flex items-start justify-between gap-4 mb-6">
-			<div class="flex-1">
-				<!-- Large serif name with permalink -->
-				<div class="text-2xl font-serif font-bold mb-2 flex items-center gap-3">
-					<span>{{ index $place.Names 0 }}</span>
-					<a href="/ort/{{ $place.ID }}" class="text-gray-500 hover:text-blue-600 transition-colors no-underline" title="Permalink zu {{ index $place.Names 0 }}">
-						<i class="ri-link text-lg"></i>
-					</a>
+			<!-- Place Header -->
+			<div class="mb-8">
+				<h1 class="text-3xl font-bold text-slate-800 mb-2">
+					{{ if .model.SelectedPlace.Place.Names }}
+						{{ index .model.SelectedPlace.Place.Names 0 }}
+					{{ else }}
+						{{ .model.SelectedPlace.Place.ID }}
+					{{ end }}
+				</h1>
+				{{ if .model.SelectedPlace.Place.Geo }}
+					<p class="text-slate-600">
+						<i class="ri-map-pin-line mr-1"></i>
+						<a href="{{ .model.SelectedPlace.Place.Geo }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">
+							Geonames
+						</a>
+					</p>
+				{{ end }}
+			</div>
+
+			<!-- Associated Pieces -->
+			<div>
+				<h2 class="text-xl font-semibold text-slate-800 mb-4">
+					<i class="ri-newspaper-line mr-2"></i><u class="decoration underline-offset-3">BeitrÃ¤ge</u> ({{ len .model.SelectedPlace.Pieces }})
+				</h2>
+
+				{{ if .model.SelectedPlace.Pieces }}
+					<div class="space-y-2">
+						{{- /* Group pieces by their own title/incipit */ -}}
+						{{- $groupedPieces := dict -}}
+						{{- range $_, $p := .model.SelectedPlace.Pieces -}}
+							{{- $groupKey := "" -}}
+							{{- if $p.Title -}}
+								{{- $groupKey = index $p.Title 0 -}}
+							{{- else if $p.Incipit -}}
+								{{- $groupKey = index $p.Incipit 0 -}}
+							{{- else -}}
+								{{- $groupKey = printf "untitled-%s" $p.ID -}}
+							{{- end -}}
+
+							{{- $existing := index $groupedPieces $groupKey -}}
+							{{- if $existing -}}
+								{{- $groupedPieces = merge $groupedPieces (dict $groupKey (append $existing $p)) -}}
+							{{- else -}}
+								{{- $groupedPieces = merge $groupedPieces (dict $groupKey (slice $p)) -}}
+							{{- end -}}
+						{{- end -}}
+
+						<div class="columns-2 gap-1 hyphens-auto">
+							{{- /* Display grouped pieces */ -}}
+							{{- range $groupKey, $groupedItems := $groupedPieces -}}
+								<div class="break-inside-avoid pl-4">
+									<div class="pb-1 indent-4">
+										{{- /* Use first piece for display text with colon format for places */ -}}
+										{{ template "_piece_summary_for_place" (dict "Piece" (index $groupedItems 0) "CurrentActorID" "") }}
+
+										{{- /* Show all citations from all pieces in this group inline with commas */ -}}
+										{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}
+											{{- range $issueIndex, $issue := $groupItem.IssueRefs -}}
+												{{- if or (gt $groupIndex 0) (gt $issueIndex 0) }}, {{ end -}}
+												<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>{{- end -}}
+										{{- end -}}
+
+										{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+										{{- $firstGroupItem := index $groupedItems 0 -}}
+										{{- if gt (len $firstGroupItem.IssueRefs) 1 -}}
+											{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
+											hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
+											hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200
+											indent-0">
+												<i class="ri-file-copy-2-line text-xs"></i>
+												<a href="{{ GetPieceURL $firstGroupItem.ID }}" class="">
+													Ganzer Beitrag
+												</a>
+											</div>
+										{{- end }}
+									</div>
+								</div>
+							{{- end -}}
+						</div>
+					</div>
+				{{ else }}
+					<p class="text-slate-500 italic">Keine BeitrÃ¤ge fÃ¼r diesen Ort gefunden.</p>
+				{{ end }}
+			</div>
+		</div>
+	</div>
+
+{{ else }}
+	<!-- Places Overview -->
+	<div class="max-w-7xl mx-auto px-8 py-8">
+		<div class="bg-white px-6 py-6 rounded w-full">
+			<h1 class="text-3xl font-bold text-slate-800 mb-8">Orte</h1>
+
+			<!-- Available Letters Navigation -->
+			{{ if .model.AvailableLetters }}
+				<div class="mb-8">
+					<h2 class="text-lg font-semibold text-slate-700 mb-4">Nach Anfangsbuchstabe</h2>
+					<div class="flex flex-wrap gap-2">
+						{{ range $letter := .model.AvailableLetters }}
+							<span class="px-3 py-2 bg-slate-100 text-slate-700 rounded text-sm">
+								{{ $letter }}
+							</span>
+						{{ end }}
+					</div>
 				</div>
+			{{ end }}
 
-				<!-- Geographic Information from Geonames -->
-				{{ if ne $geonames nil }}
-					<div class="text-lg text-gray-800 mb-4">
-						<!-- Country and Administrative Info -->
-						{{ if ne $geonames.CountryName "" }}
-							<div class="mb-2">
-								{{ $geonames.CountryName }}
-								{{ if ne $geonames.AdminName1 "" }}
-									, {{ $geonames.AdminName1 }}
-								{{ end }}
-								{{ if and (ne $geonames.AdminName2 "") (ne $geonames.AdminName2 $geonames.AdminName1) }}
-									, {{ $geonames.AdminName2 }}
-								{{ end }}
-							</div>
-						{{ end }}
+			<!-- Places List -->
+			{{ if .model.Places }}
+				<div>
+					<h2 class="text-lg font-semibold text-slate-700 mb-4">
+						Alle Orte ({{ len .model.Places }})
+					</h2>
 
-						<!-- Coordinates -->
-						{{ if and (ne $geonames.Lat "") (ne $geonames.Lng "") }}
-							<div class="text-gray-600 text-base">
-								<i class="ri-map-pin-line"></i> {{ $geonames.Lat }}, {{ $geonames.Lng }}
-							</div>
-						{{ end }}
-
-						<!-- Population -->
-						{{ if gt $geonames.Population 0 }}
-							<div class="text-gray-600 text-base">
-								<i class="ri-group-line"></i> {{ $geonames.Population }} Einwohner
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						{{ range $placeID := .model.Sorted }}
+							{{ $place := index $.model.Places $placeID }}
+							<div class="border border-slate-200 rounded-lg hover:bg-slate-50">
+								<a href="/ort/{{ $place.ID }}" class="block p-4">
+									<h3 class="font-medium text-slate-800 mb-1">
+										{{ if $place.Names }}
+											{{ index $place.Names 0 }}
+										{{ else }}
+											{{ $place.ID }}
+										{{ end }}
+									</h3>
+									{{ if $place.Geo }}
+										<p class="text-sm text-slate-600">
+											<i class="ri-map-pin-line mr-1"></i>
+											{{ $place.Geo }}
+										</p>
+									{{ end }}
+								</a>
 							</div>
 						{{ end }}
 					</div>
-				{{ end }}
-			</div>
-
-			<!-- External link symbols on the right -->
-			<div class="flex gap-3 flex-shrink-0 items-center">
-				{{ if ne $geonames nil }}
-					<!-- Wikipedia link if available -->
-					{{ if ne $geonames.WikipediaURL "" }}
-						<a href="https://{{ $geonames.WikipediaURL }}" target="_blank" class="hover:opacity-80 transition-opacity" title="Wikipedia">
-							<img src="/assets/wikipedia.png" alt="Wikipedia" class="w-6 h-6">
-						</a>
-					{{ end }}
-
-					<!-- Geonames link -->
-					{{ if ne $place.Geo "" }}
-						<a href="{{ $place.Geo }}" target="_blank" class="hover:opacity-80 transition-opacity" title="Geonames">
-							<i class="ri-global-line text-2xl text-blue-600"></i>
-						</a>
-					{{ end }}
-				{{ end }}
-			</div>
-		</div>
-
-		<!-- Additional place details -->
-		{{ if ne $geonames nil }}
-			<div class="bg-gray-50 rounded-lg p-6">
-				<h3 class="text-lg font-semibold mb-4">Geografische Details</h3>
-
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{{ if ne $geonames.Timezone.TimeZoneId "" }}
-						<div>
-							<strong>Zeitzone:</strong> {{ $geonames.Timezone.TimeZoneId }}
-						</div>
-					{{ end }}
-
-					{{ if ne $geonames.FcodeName "" }}
-						<div>
-							<strong>Typ:</strong> {{ $geonames.FcodeName }}
-						</div>
-					{{ end }}
-
-					{{ if ne (len $geonames.AlternateNames) 0 }}
-						<div class="md:col-span-2">
-							<strong>Alternative Namen:</strong>
-							<div class="flex flex-wrap gap-2 mt-2">
-								{{ range $i, $altName := $geonames.AlternateNames }}
-									{{ if lt $i 10 }}
-										{{ if ne $altName.Name "" }}
-											<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm">
-												{{ $altName.Name }}
-												{{ if ne $altName.Lang "" }}
-													<span class="text-blue-600">({{ $altName.Lang }})</span>
-												{{ end }}
-											</span>
-										{{ end }}
-									{{ end }}
-								{{ end }}
-							</div>
-						</div>
-					{{ end }}
 				</div>
-			</div>
-		{{ end }}
-
-		<!-- Back Navigation -->
-		<div class="mt-8 pt-6 border-t border-gray-200">
-			<a href="javascript:history.back()" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors">
-				<i class="ri-arrow-left-line"></i>
-				Zur�ck
-			</a>
-		</div>
-	</div>
-{{ else }}
-	<div class="container mx-auto px-4 py-8">
-		<div class="text-center">
-			<h1 class="text-2xl font-bold text-gray-800 mb-4">Ort nicht gefunden</h1>
-			<p class="text-gray-600 mb-6">Der angeforderte Ort existiert nicht in unserer Datenbank.</p>
-			<a href="javascript:history.back()" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors">
-				<i class="ri-arrow-left-line"></i>
-				Zur�ck
-			</a>
+			{{ else }}
+				<p class="text-slate-500 italic">Keine Orte gefunden.</p>
+			{{ end }}
 		</div>
 	</div>
 {{ end }}
