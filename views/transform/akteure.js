@@ -6,20 +6,41 @@ import { ExecuteNextSettle } from "./helpers.js";
 export class AkteureScrollspy extends HTMLElement {
 	constructor() {
 		super();
-		this.scrollHandler = null;
 		this.scrollTimeout = null;
 		this.clickHandlers = [];
 		this.manualNavigation = false;
+		this.handleScroll = this.handleScroll.bind(this);
+	}
+
+	handleScroll() {
+		console.log("Scroll event fired!");
+		clearTimeout(this.scrollTimeout);
+		this.scrollTimeout = setTimeout(() => {
+			this.updateActiveLink();
+			this.updateSidebarScrollToTopButton();
+		}, 50);
 	}
 
 	connectedCallback() {
-		// Small delay to ensure DOM is fully rendered after HTMX swap
-		ExecuteNextSettle(() => {
+		console.log("AkteureScrollspy connected");
+		// Use a simple timeout to ensure DOM is settled after the component is connected.
+		// This is more reliable than the external settleQueue for popstate navigation.
+		setTimeout(() => {
 			this.initializeScrollspyAfterDelay();
+		}, 50);
+
+		// Handle page restoration from bfcache
+		window.addEventListener("pageshow", (event) => {
+			if (event.persisted) {
+				// Page was restored from bfcache, re-initialize
+				this.cleanup();
+				this.initializeScrollspy();
+			}
 		});
 	}
 
 	initializeScrollspyAfterDelay() {
+		console.log("initializeScrollspyAfterDelay running");
 		// Find sections and nav links
 		this.sections = document.querySelectorAll(".author-section");
 		this.navLinks = document.querySelectorAll(".scrollspy-link");
@@ -40,20 +61,13 @@ export class AkteureScrollspy extends HTMLElement {
 	}
 
 	disconnectedCallback() {
+		console.log("AkteureScrollspy disconnected");
 		this.cleanup();
 	}
 
 	initializeScrollspy() {
-		// Set up scroll handler
-		this.scrollHandler = () => {
-			clearTimeout(this.scrollTimeout);
-			this.scrollTimeout = setTimeout(() => {
-				this.updateActiveLink();
-				this.updateSidebarScrollToTopButton();
-			}, 50);
-		};
-
-		window.addEventListener("scroll", this.scrollHandler);
+		console.log("initializeScrollspy running");
+		window.addEventListener("scroll", this.handleScroll);
 
 		// Add smooth scroll on link click
 		this.navLinks.forEach((link) => {
@@ -86,8 +100,10 @@ export class AkteureScrollspy extends HTMLElement {
 			link.addEventListener("click", clickHandler);
 		});
 
-		// Initial active link update
-		this.updateActiveLink();
+		// Initial active link update - with small delay to ensure layout is settled
+		setTimeout(() => {
+			this.updateActiveLink();
+		}, 300);
 
 		// Initial scroll-to-top button update
 		this.updateSidebarScrollToTopButton();
@@ -365,11 +381,9 @@ export class AkteureScrollspy extends HTMLElement {
 	}
 
 	cleanup() {
+		console.log("Scrollspy cleanup running");
 		// Remove scroll listener
-		if (this.scrollHandler) {
-			window.removeEventListener("scroll", this.scrollHandler);
-			this.scrollHandler = null;
-		}
+		window.removeEventListener("scroll", this.handleScroll);
 
 		// Clear timeout
 		if (this.scrollTimeout) {
