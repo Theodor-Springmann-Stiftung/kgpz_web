@@ -1,0 +1,130 @@
+{{ $place := .place }}
+{{ if $place }}
+	{{ $geonames := GetGeonames $place.Geo }}
+
+	<div class="container mx-auto px-4 py-8">
+		<!-- Place Header -->
+		<div class="flex items-start justify-between gap-4 mb-6">
+			<div class="flex-1">
+				<!-- Large serif name with permalink -->
+				<div class="text-2xl font-serif font-bold mb-2 flex items-center gap-3">
+					<span>{{ index $place.Names 0 }}</span>
+					<a href="/ort/{{ $place.ID }}" class="text-gray-500 hover:text-blue-600 transition-colors no-underline" title="Permalink zu {{ index $place.Names 0 }}">
+						<i class="ri-link text-lg"></i>
+					</a>
+				</div>
+
+				<!-- Geographic Information from Geonames -->
+				{{ if ne $geonames nil }}
+					<div class="text-lg text-gray-800 mb-4">
+						<!-- Country and Administrative Info -->
+						{{ if ne $geonames.CountryName "" }}
+							<div class="mb-2">
+								{{ $geonames.CountryName }}
+								{{ if ne $geonames.AdminName1 "" }}
+									, {{ $geonames.AdminName1 }}
+								{{ end }}
+								{{ if and (ne $geonames.AdminName2 "") (ne $geonames.AdminName2 $geonames.AdminName1) }}
+									, {{ $geonames.AdminName2 }}
+								{{ end }}
+							</div>
+						{{ end }}
+
+						<!-- Coordinates -->
+						{{ if and (ne $geonames.Lat "") (ne $geonames.Lng "") }}
+							<div class="text-gray-600 text-base">
+								<i class="ri-map-pin-line"></i> {{ $geonames.Lat }}, {{ $geonames.Lng }}
+							</div>
+						{{ end }}
+
+						<!-- Population -->
+						{{ if gt $geonames.Population 0 }}
+							<div class="text-gray-600 text-base">
+								<i class="ri-group-line"></i> {{ $geonames.Population }} Einwohner
+							</div>
+						{{ end }}
+					</div>
+				{{ end }}
+			</div>
+
+			<!-- External link symbols on the right -->
+			<div class="flex gap-3 flex-shrink-0 items-center">
+				{{ if ne $geonames nil }}
+					<!-- Wikipedia link if available -->
+					{{ if ne $geonames.WikipediaURL "" }}
+						<a href="https://{{ $geonames.WikipediaURL }}" target="_blank" class="hover:opacity-80 transition-opacity" title="Wikipedia">
+							<img src="/assets/wikipedia.png" alt="Wikipedia" class="w-6 h-6">
+						</a>
+					{{ end }}
+
+					<!-- Geonames link -->
+					{{ if ne $place.Geo "" }}
+						<a href="{{ $place.Geo }}" target="_blank" class="hover:opacity-80 transition-opacity" title="Geonames">
+							<i class="ri-global-line text-2xl text-blue-600"></i>
+						</a>
+					{{ end }}
+				{{ end }}
+			</div>
+		</div>
+
+		<!-- Additional place details -->
+		{{ if ne $geonames nil }}
+			<div class="bg-gray-50 rounded-lg p-6">
+				<h3 class="text-lg font-semibold mb-4">Geografische Details</h3>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					{{ if ne $geonames.Timezone.TimeZoneId "" }}
+						<div>
+							<strong>Zeitzone:</strong> {{ $geonames.Timezone.TimeZoneId }}
+						</div>
+					{{ end }}
+
+					{{ if ne $geonames.FcodeName "" }}
+						<div>
+							<strong>Typ:</strong> {{ $geonames.FcodeName }}
+						</div>
+					{{ end }}
+
+					{{ if ne (len $geonames.AlternateNames) 0 }}
+						<div class="md:col-span-2">
+							<strong>Alternative Namen:</strong>
+							<div class="flex flex-wrap gap-2 mt-2">
+								{{ range $i, $altName := $geonames.AlternateNames }}
+									{{ if lt $i 10 }}
+										{{ if ne $altName.Name "" }}
+											<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm">
+												{{ $altName.Name }}
+												{{ if ne $altName.Lang "" }}
+													<span class="text-blue-600">({{ $altName.Lang }})</span>
+												{{ end }}
+											</span>
+										{{ end }}
+									{{ end }}
+								{{ end }}
+							</div>
+						</div>
+					{{ end }}
+				</div>
+			</div>
+		{{ end }}
+
+		<!-- Back Navigation -->
+		<div class="mt-8 pt-6 border-t border-gray-200">
+			<a href="javascript:history.back()" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors">
+				<i class="ri-arrow-left-line"></i>
+				Zurück
+			</a>
+		</div>
+	</div>
+{{ else }}
+	<div class="container mx-auto px-4 py-8">
+		<div class="text-center">
+			<h1 class="text-2xl font-bold text-gray-800 mb-4">Ort nicht gefunden</h1>
+			<p class="text-gray-600 mb-6">Der angeforderte Ort existiert nicht in unserer Datenbank.</p>
+			<a href="javascript:history.back()" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors">
+				<i class="ri-arrow-left-line"></i>
+				Zurück
+			</a>
+		</div>
+	</div>
+{{ end }}

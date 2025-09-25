@@ -9,6 +9,7 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/geonames"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/gnd"
 	searchprovider "github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/search"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
@@ -52,12 +53,13 @@ type KGPZ struct {
 	// So we need to prevent concurrent pulls and serializations
 	// This is what fsmu is for. IT IS NOT FOR SETTING Config, Repo. GND or Library.
 	// Those are only set once during initalization and construction.
-	fsmu    sync.Mutex
-	Config  *providers.ConfigProvider
-	Repo    *providers.GitProvider
-	GND     *gnd.GNDProvider
-	Library *xmlmodels.Library
-	Search  *searchprovider.SearchProvider
+	fsmu      sync.Mutex
+	Config    *providers.ConfigProvider
+	Repo      *providers.GitProvider
+	GND       *gnd.GNDProvider
+	Geonames  *geonames.GeonamesProvider
+	Library   *xmlmodels.Library
+	Search    *searchprovider.SearchProvider
 }
 
 func NewKGPZ(config *providers.ConfigProvider) (*KGPZ, error) {
@@ -116,6 +118,9 @@ func (k *KGPZ) Init() error {
 	if err := k.initGND(); err != nil {
 		logging.Error(err, "Error reading GND-Cache. Continuing.")
 	}
+	if err := k.initGeonames(); err != nil {
+		logging.Error(err, "Error reading Geonames-Cache. Continuing.")
+	}
 
 	if sp, err := searchprovider.NewSearchProvider(filepath.Join(k.Config.Config.BaseDIR, k.Config.SearchPath)); err != nil {
 		logging.Error(err, "Error initializing SearchProvider. Continuing without Search.")
@@ -139,6 +144,11 @@ func (k *KGPZ) Init() error {
 func (k *KGPZ) initGND() error {
 	k.GND = gnd.NewGNDProvider()
 	return k.GND.ReadCache(filepath.Join(k.Config.BaseDIR, k.Config.GNDPath))
+}
+
+func (k *KGPZ) initGeonames() error {
+	k.Geonames = geonames.NewGeonamesProvider()
+	return k.Geonames.ReadCache(filepath.Join(k.Config.BaseDIR, k.Config.GeoPath))
 }
 
 func (k *KGPZ) Routes(srv *fiber.App) error {
@@ -198,6 +208,7 @@ func (k *KGPZ) Funcs() map[string]interface{} {
 	e["GetIssue"] = k.Library.Issues.Item
 	e["GetPiece"] = k.Library.Pieces.Item
 	e["GetGND"] = k.GND.Person
+	e["GetGeonames"] = k.Geonames.Place
 
 	e["LookupPieces"] = k.Library.Pieces.ReverseLookup
 	e["LookupWorks"] = k.Library.Works.ReverseLookup
@@ -224,9 +235,18 @@ func (k *KGPZ) Enrich() error {
 	go func() {
 		k.fsmu.Lock()
 		defer k.fsmu.Unlock()
+
+		// Fetch GND data for agents
 		data := xmlmodels.AgentsIntoDataset(k.Library.Agents)
 		k.GND.FetchPersons(data)
 		k.GND.WriteCache(filepath.Join(k.Config.BaseDIR, k.Config.GNDPath))
+
+		// Fetch Geonames data for places
+		if k.Library.Places != nil {
+			placeData := xmlmodels.PlacesIntoDataset(k.Library.Places)
+			k.Geonames.FetchPlaces(placeData)
+			k.Geonames.WriteCache(filepath.Join(k.Config.BaseDIR, k.Config.GeoPath))
+		}
 	}()
 
 	return nil

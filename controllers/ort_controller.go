@@ -7,6 +7,13 @@ import (
 
 func GetPlace(kgpz *xmlmodels.Library) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		return c.Render("/ort/", nil)
+		placeID := c.Params("place")
+		place := kgpz.Places.Item(placeID)
+
+		if place == nil {
+			return c.SendStatus(fiber.StatusNotFound)
+		}
+
+		return c.Render("/ort/", fiber.Map{"place": place})
 	}
 }

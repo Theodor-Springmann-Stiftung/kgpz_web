@@ -1,0 +1,41 @@
+{{ $place := .place }}
+{{ if $place }}
+	<title>{{ index $place.Names 0 }} - KGPZ</title>
+	<meta name="description" content="Informationen zu {{ index $place.Names 0 }} in der K�nigsberger Gelehrten und Politischen Zeitung.">
+	<meta name="keywords" content="{{ index $place.Names 0 }}, Ort, KGPZ, K�nigsberg, Zeitung">
+
+	<!-- Open Graph tags for social media -->
+	<meta property="og:title" content="{{ index $place.Names 0 }} - KGPZ">
+	<meta property="og:description" content="Informationen zu {{ index $place.Names 0 }} in der K�nigsberger Gelehrten und Politischen Zeitung.">
+	<meta property="og:type" content="article">
+	<meta property="og:url" content="/ort/{{ $place.ID }}">
+
+	<!-- JSON-LD structured data -->
+	{{ $geonames := GetGeonames $place.Geo }}
+	{{ if ne $geonames nil }}
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "Place",
+			"name": "{{ index $place.Names 0 }}",
+			"description": "Historischer Ort erw�hnt in der K�nigsberger Gelehrten und Politischen Zeitung",
+			{{ if and (ne $geonames.Lat "") (ne $geonames.Lng "") }}
+			"geo": {
+				"@type": "GeoCoordinates",
+				"latitude": {{ $geonames.Lat }},
+				"longitude": {{ $geonames.Lng }}
+			},
+			{{ end }}
+			{{ if ne $geonames.CountryName "" }}
+			"addressCountry": "{{ $geonames.CountryName }}",
+			{{ end }}
+			{{ if ne $place.Geo "" }}
+			"sameAs": "{{ $place.Geo }}"
+			{{ end }}
+		}
+		</script>
+	{{ end }}
+{{ else }}
+	<title>Ort nicht gefunden - KGPZ</title>
+	<meta name="description" content="Der angeforderte Ort wurde nicht gefunden.">
+{{ end }}
