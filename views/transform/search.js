@@ -468,6 +468,11 @@ class SchnellauswahlButton extends HTMLElement {
             // Show the filter
             filterContainer.classList.remove("hidden");
             filterButton.classList.add("bg-slate-200");
+            // Change icon to arrow up when open
+            const filterIcon = this.querySelector('i');
+            if (filterIcon) {
+                filterIcon.className = "ri-arrow-up-line";
+            }
             this.isOpen = true;
 
             // Load content only if it doesn't exist - check for actual content
@@ -503,6 +508,11 @@ class SchnellauswahlButton extends HTMLElement {
 
         filterContainer.classList.add("hidden");
         filterButton.classList.remove("bg-slate-200");
+        // Change icon back to filter when closed
+        const filterIcon = this.querySelector('i');
+        if (filterIcon) {
+            filterIcon.className = "ri-filter-2-line";
+        }
         this.isOpen = false;
     }
 

@@ -1,6 +1,6 @@
-document.body.addEventListener("htmx:configRequest", function(r) {
-  let e = r.detail.elt;
-  e.id === "search" && e.value === "" && (r.detail.parameters = {}, r.detail.path = window.location.pathname + window.location.search);
+document.body.addEventListener("htmx:configRequest", function(a) {
+  let e = a.detail.elt;
+  e.id === "search" && e.value === "" && (a.detail.parameters = {}, a.detail.path = window.location.pathname + window.location.search);
 });
 class H extends HTMLElement {
   constructor() {
@@ -10,10 +10,10 @@ class H extends HTMLElement {
     this.setupEventListeners();
   }
   setupEventListeners() {
-    const e = this.querySelector("#person-search"), t = this.querySelector("#authors-only"), n = this.querySelector("#all-persons"), i = this.querySelector("#authors-only-list");
-    !e || !t || !n || !i || (e.addEventListener("input", (s) => {
-      const a = s.target.value.toLowerCase().trim();
-      this.filterPersons(a);
+    const e = this.querySelector("#person-search"), t = this.querySelector("#authors-only"), i = this.querySelector("#all-persons"), n = this.querySelector("#authors-only-list");
+    !e || !t || !i || !n || (e.addEventListener("input", (s) => {
+      const o = s.target.value.toLowerCase().trim();
+      this.filterPersons(o);
     }), t.addEventListener("change", () => {
       this.togglePersonsList();
       const s = e.value.toLowerCase().trim();
@@ -21,17 +21,17 @@ class H extends HTMLElement {
     }));
   }
   togglePersonsList() {
-    const e = this.querySelector("#authors-only"), t = this.querySelector("#all-persons"), n = this.querySelector("#authors-only-list");
-    !e || !t || !n || (e.checked ? (t.style.display = "none", n.style.display = "block") : (t.style.display = "block", n.style.display = "none"));
+    const e = this.querySelector("#authors-only"), t = this.querySelector("#all-persons"), i = this.querySelector("#authors-only-list");
+    !e || !t || !i || (e.checked ? (t.style.display = "none", i.style.display = "block") : (t.style.display = "block", i.style.display = "none"));
   }
   filterPersons(e) {
-    const t = this.querySelector("#authors-only"), n = t != null && t.checked ? this.querySelector("#authors-only-list") : this.querySelector("#all-persons");
-    if (!n)
+    const t = this.querySelector("#authors-only"), i = t != null && t.checked ? this.querySelector("#authors-only-list") : this.querySelector("#all-persons");
+    if (!i)
       return;
-    n.querySelectorAll(".person-item").forEach((s) => {
+    i.querySelectorAll(".person-item").forEach((s) => {
       var c, d;
-      const a = ((c = s.querySelector(".person-name")) == null ? void 0 : c.textContent) || "", o = ((d = s.querySelector(".person-life")) == null ? void 0 : d.textContent) || "";
-      !e || a.toLowerCase().includes(e) || o.toLowerCase().includes(e) ? s.style.display = "block" : s.style.display = "none";
+      const o = ((c = s.querySelector(".person-name")) == null ? void 0 : c.textContent) || "", r = ((d = s.querySelector(".person-life")) == null ? void 0 : d.textContent) || "";
+      !e || o.toLowerCase().includes(e) || r.toLowerCase().includes(e) ? s.style.display = "block" : s.style.display = "none";
     });
   }
 }
@@ -45,19 +45,19 @@ class B extends HTMLElement {
   }
   setupEventListeners() {
     const e = this.querySelector("#place-search"), t = this.querySelector("#all-places");
-    !e || !t || e.addEventListener("input", (n) => {
-      const i = n.target.value.toLowerCase().trim();
-      this.filterPlaces(i);
+    !e || !t || e.addEventListener("input", (i) => {
+      const n = i.target.value.toLowerCase().trim();
+      this.filterPlaces(n);
     });
   }
   filterPlaces(e) {
     const t = this.querySelector("#all-places");
     if (!t)
       return;
-    t.querySelectorAll(".place-item").forEach((i) => {
-      var o;
-      const s = ((o = i.querySelector(".place-name")) == null ? void 0 : o.textContent) || "";
-      !e || s.toLowerCase().includes(e) ? i.style.display = "block" : i.style.display = "none";
+    t.querySelectorAll(".place-item").forEach((n) => {
+      var r;
+      const s = ((r = n.querySelector(".place-name")) == null ? void 0 : r.textContent) || "";
+      !e || s.toLowerCase().includes(e) ? n.style.display = "block" : n.style.display = "none";
     });
   }
 }
@@ -79,79 +79,79 @@ class A extends HTMLElement {
       }
   }
   setupEventListeners() {
-    const e = this.querySelector("#year-select"), t = this.querySelector("#issue-number-select"), n = this.querySelector("#issue-date-select"), i = this.querySelector("#page-input"), s = this.querySelector("#page-jump-btn");
+    const e = this.querySelector("#year-select"), t = this.querySelector("#issue-number-select"), i = this.querySelector("#issue-date-select"), n = this.querySelector("#page-input"), s = this.querySelector("#page-jump-btn");
     if (!e)
       return;
     e.addEventListener("change", () => {
       this.updateIssueOptions(), this.updatePageInputState(), this.clearPageErrors();
     }), t && t.addEventListener("change", () => {
-      const o = e.value, l = t.value;
-      o && l && (window.location.href = `/${o}/${l}`);
-    }), n && n.addEventListener("change", () => {
-      const o = e.value, l = n.value;
-      o && l && (window.location.href = `/${o}/${l}`);
-    }), i && (i.addEventListener("input", () => {
+      const r = e.value, l = t.value;
+      r && l && (window.location.href = `/${r}/${l}`);
+    }), i && i.addEventListener("change", () => {
+      const r = e.value, l = i.value;
+      r && l && (window.location.href = `/${r}/${l}`);
+    }), n && (n.addEventListener("input", () => {
       this.updatePageJumpButton(), this.clearPageErrors();
-    }), i.addEventListener("keydown", (o) => {
-      o.key === "Enter" && (o.preventDefault(), this.handlePageJump());
+    }), n.addEventListener("keydown", (r) => {
+      r.key === "Enter" && (r.preventDefault(), this.handlePageJump());
     })), s && s.addEventListener("click", () => {
       this.handlePageJump();
     });
-    const a = this.querySelector("#page-jump-form");
-    a && a.addEventListener("submit", (o) => {
-      o.preventDefault(), this.handlePageJump();
+    const o = this.querySelector("#page-jump-form");
+    o && o.addEventListener("submit", (r) => {
+      r.preventDefault(), this.handlePageJump();
     }), this.updateIssueOptions(), this.updatePageInputState(), this.updatePageJumpButton();
   }
   updateIssueOptions() {
-    const e = this.querySelector("#year-select"), t = this.querySelector("#issue-number-select"), n = this.querySelector("#issue-date-select");
-    if (!e || !t || !n)
+    const e = this.querySelector("#year-select"), t = this.querySelector("#issue-number-select"), i = this.querySelector("#issue-date-select");
+    if (!e || !t || !i)
       return;
-    const i = e.value, s = this.issuesByYear[i] || [];
-    t.innerHTML = '<option value="">Nr.</option>', n.innerHTML = '<option value="">Datum</option>', s.forEach((o) => {
+    const n = e.value, s = this.issuesByYear[n] || [];
+    t.innerHTML = '<option value="">Nr.</option>', i.innerHTML = '<option value="">Datum</option>', s.forEach((r) => {
       const l = document.createElement("option");
-      l.value = o.number, l.textContent = o.number, t.appendChild(l);
+      l.value = r.number, l.textContent = r.number, t.appendChild(l);
       const c = document.createElement("option");
-      c.value = o.number, c.textContent = `${o.date} [${o.number}]`, n.appendChild(c);
+      c.value = r.number, c.textContent = `${r.date} [${r.number}]`, i.appendChild(c);
     });
-    const a = s.length > 0 && i;
-    t.disabled = !a, n.disabled = !a;
+    const o = s.length > 0 && n;
+    t.disabled = !o, i.disabled = !o;
   }
   async handlePageJump() {
-    const e = this.querySelector("#year-select"), t = this.querySelector("#page-input"), n = this.querySelector("#jump-errors");
+    const e = this.querySelector("#year-select"), t = this.querySelector("#page-input"), i = this.querySelector("#jump-errors");
     if (!e || !t)
       return;
-    const i = e.value, s = t.value;
-    if (!i || !s) {
+    const n = e.value, s = t.value;
+    if (!n || !s) {
       this.showError("Bitte Jahr und Seite auswählen.");
       return;
     }
     try {
-      const a = new FormData();
-      a.append("year", i), a.append("page", s);
-      const o = await fetch("/jump", {
+      const o = new FormData();
+      o.append("year", n), o.append("page", s);
+      const r = await fetch("/jump", {
         method: "POST",
-        body: a,
+        body: o,
         redirect: "manual"
-      }), l = o.headers.get("HX-Redirect");
+      }), l = r.headers.get("HX-Redirect");
       if (l) {
         window.location.href = l;
         return;
       }
-      if (o.status === 302 || o.status === 301) {
-        const c = o.headers.get("Location");
+      if (r.status === 302 || r.status === 301) {
+        const c = r.headers.get("Location");
         if (c) {
           window.location.href = c;
           return;
         }
       }
-      if (o.ok)
-        n && (n.innerHTML = "");
+      if (r.ok)
+        i && (i.innerHTML = "");
       else {
-        const c = await o.text();
-        n && (n.innerHTML = c);
+        const c = await r.text();
+        i && (i.innerHTML = c);
       }
-    } catch (a) {
-      console.error("Page jump failed:", a), this.showError("Fehler beim Suchen der Seite.");
+    } catch (o) {
+      console.error("Page jump failed:", o), this.showError("Fehler beim Suchen der Seite.");
     }
   }
   showError(e) {
@@ -166,15 +166,15 @@ class A extends HTMLElement {
     const e = this.querySelector("#year-select"), t = this.querySelector("#page-input");
     if (!e || !t)
       return;
-    const n = e.value;
-    t.disabled = !n, n || (t.value = "", this.updatePageJumpButton());
+    const i = e.value;
+    t.disabled = !i, i || (t.value = "", this.updatePageJumpButton());
   }
   updatePageJumpButton() {
-    const e = this.querySelector("#year-select"), t = this.querySelector("#page-input"), n = this.querySelector("#page-jump-btn");
-    if (!e || !t || !n)
+    const e = this.querySelector("#year-select"), t = this.querySelector("#page-input"), i = this.querySelector("#page-jump-btn");
+    if (!e || !t || !i)
       return;
-    const i = e.value, s = t.value && t.value.trim(), a = i && s;
-    n.disabled = !a;
+    const n = e.value, s = t.value && t.value.trim(), o = n && s;
+    i.disabled = !o;
   }
 }
 customElements.define("year-jump-filter", A);
@@ -208,27 +208,36 @@ class M extends HTMLElement {
     const e = document.getElementById("filter-container"), t = this.querySelector("button");
     if (!e || !t)
       return;
-    const n = e.querySelector("div.flex.justify-center");
-    e.classList.contains("hidden") ? (e.classList.remove("hidden"), t.classList.add("bg-slate-200"), this.isOpen = !0, n && n.querySelector("div, form, h3") || htmx.ajax("GET", "/filter", {
-      target: "#filter-container",
-      select: "#filter",
-      swap: "innerHTML"
-    }).then(() => {
-      console.log("HTMX request completed"), document.querySelector("#filter-container .flex.justify-center");
-    }).catch((s) => {
-      console.log("HTMX request failed:", s);
-    })) : this.hideFilter();
+    const i = e.querySelector("div.flex.justify-center");
+    if (e.classList.contains("hidden")) {
+      e.classList.remove("hidden"), t.classList.add("bg-slate-200");
+      const n = this.querySelector("i");
+      n && (n.className = "ri-arrow-up-line"), this.isOpen = !0, i && i.querySelector("div, form, h3") || htmx.ajax("GET", "/filter", {
+        target: "#filter-container",
+        select: "#filter",
+        swap: "innerHTML"
+      }).then(() => {
+        console.log("HTMX request completed"), document.querySelector("#filter-container .flex.justify-center");
+      }).catch((o) => {
+        console.log("HTMX request failed:", o);
+      });
+    } else
+      this.hideFilter();
   }
   hideFilter() {
     const e = document.getElementById("filter-container"), t = this.querySelector("button");
-    !e || !t || (e.classList.add("hidden"), t.classList.remove("bg-slate-200"), this.isOpen = !1);
+    if (!e || !t)
+      return;
+    e.classList.add("hidden"), t.classList.remove("bg-slate-200");
+    const i = this.querySelector("i");
+    i && (i.className = "ri-filter-2-line"), this.isOpen = !1;
   }
   handleSelectionEvent(e) {
     this.isOpen && this.hideFilter();
   }
   handleOutsideClick(e) {
-    const t = document.getElementById("filter-container"), n = this.querySelector("button");
-    this.isOpen && t && n && !t.contains(e.target) && !this.contains(e.target) && this.hideFilter();
+    const t = document.getElementById("filter-container"), i = this.querySelector("button");
+    this.isOpen && t && i && !t.contains(e.target) && !this.contains(e.target) && this.hideFilter();
   }
 }
 customElements.define("schnellauswahl-button", M);
@@ -271,17 +280,17 @@ class N extends HTMLElement {
   }
   setupEventListeners() {
     const e = this.querySelector("#menu-toggle"), t = this.querySelector("#menu-dropdown");
-    e && e.addEventListener("click", (n) => {
-      n.stopPropagation(), this.toggleMenu();
-    }), t && t.addEventListener("click", (n) => {
-      const i = n.target.closest("a[href]");
-      if (i) {
+    e && e.addEventListener("click", (i) => {
+      i.stopPropagation(), this.toggleMenu();
+    }), t && t.addEventListener("click", (i) => {
+      const n = i.target.closest("a[href]");
+      if (n) {
         const s = new CustomEvent("quickfilter:selection", {
           detail: {
             type: "navigation",
             source: "menu",
-            url: i.getAttribute("href"),
-            text: i.textContent.trim()
+            url: n.getAttribute("href"),
+            text: n.textContent.trim()
           },
           bubbles: !0
         });
@@ -310,10 +319,10 @@ class N extends HTMLElement {
 }
 customElements.define("navigation-menu", N);
 document.addEventListener("DOMContentLoaded", function() {
-  document.addEventListener("click", function(r) {
-    const e = r.target.closest('a[href^="/akteure/"], a[href^="/ort/"]'), t = document.getElementById("filter-container");
+  document.addEventListener("click", function(a) {
+    const e = a.target.closest('a[href^="/akteure/"], a[href^="/ort/"]'), t = document.getElementById("filter-container");
     if (e && t && t.contains(e)) {
-      const n = new CustomEvent("quickfilter:selection", {
+      const i = new CustomEvent("quickfilter:selection", {
         detail: {
           type: e.getAttribute("href").startsWith("/akteure/") ? "person" : "place",
           source: "quickfilter",
@@ -322,7 +331,7 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         bubbles: !0
       });
-      document.dispatchEvent(n);
+      document.dispatchEvent(i);
     }
   });
 });
@@ -330,13 +339,13 @@ const v = [];
 document.addEventListener("DOMContentLoaded", () => {
   S();
 });
-const O = function(r) {
-  typeof r == "function" && v.push(r);
+const O = function(a) {
+  typeof a == "function" && v.push(a);
 }, S = function() {
   for (; v.length > 0; ) {
-    const r = v.shift();
+    const a = v.shift();
     try {
-      r();
+      a();
     } catch (e) {
       console.error("Error executing settle queue function:", e);
     }
@@ -369,10 +378,10 @@ class V extends HTMLElement {
         this.updateActiveLink(), this.updateSidebarScrollToTopButton();
       }, 50);
     }, window.addEventListener("scroll", this.scrollHandler), this.navLinks.forEach((e) => {
-      const t = (n) => {
-        n.preventDefault();
-        const i = e.getAttribute("data-target"), s = document.getElementById(i);
-        s && (this.updateActiveLinkImmediate(i), this.manualNavigation = !0, s.scrollIntoView({
+      const t = (i) => {
+        i.preventDefault();
+        const n = e.getAttribute("data-target"), s = document.getElementById(n);
+        s && (this.updateActiveLinkImmediate(n), this.manualNavigation = !0, s.scrollIntoView({
           behavior: "instant",
           block: "start"
         }), setTimeout(() => {
@@ -386,15 +395,15 @@ class V extends HTMLElement {
     const e = document.getElementById("scrollspy-slider"), t = document.getElementById("scrollspy-nav");
     if (!e || !t || e.style.opacity === "0")
       return;
-    const n = t.getBoundingClientRect(), i = parseFloat(e.style.top), s = parseFloat(e.style.height), a = i + s, o = t.scrollTop, l = o + n.height;
-    if (a > l) {
-      const c = a - n.height + 20;
+    const i = t.getBoundingClientRect(), n = parseFloat(e.style.top), s = parseFloat(e.style.height), o = n + s, r = t.scrollTop, l = r + i.height;
+    if (o > l) {
+      const c = o - i.height + 20;
       t.scrollTo({
         top: c,
         behavior: "smooth"
       });
-    } else if (i < o) {
-      const c = i - 20;
+    } else if (n < r) {
+      const c = n - 20;
       t.scrollTo({
         top: Math.max(0, c),
         behavior: "smooth"
@@ -406,20 +415,20 @@ class V extends HTMLElement {
       return;
     const e = [];
     try {
-      this.sections.forEach((i) => {
-        if (!i || !i.getAttribute) return;
-        const s = i.getAttribute("id"), a = i.querySelector(".akteur-werke-section"), o = i.querySelector(".akteur-beitraege-section");
+      this.sections.forEach((n) => {
+        if (!n || !n.getAttribute) return;
+        const s = n.getAttribute("id"), o = n.querySelector(".akteur-werke-section"), r = n.querySelector(".akteur-beitraege-section");
         let l = !1;
-        if (a) {
-          const c = a.getBoundingClientRect(), d = c.top < window.innerHeight, u = c.bottom > 0;
-          d && u && (l = !0);
-        }
-        if (o && !l) {
+        if (o) {
           const c = o.getBoundingClientRect(), d = c.top < window.innerHeight, u = c.bottom > 0;
           d && u && (l = !0);
         }
-        if (!a && !o) {
-          const c = i.querySelector("div:first-child");
+        if (r && !l) {
+          const c = r.getBoundingClientRect(), d = c.top < window.innerHeight, u = c.bottom > 0;
+          d && u && (l = !0);
+        }
+        if (!o && !r) {
+          const c = n.querySelector("div:first-child");
           if (c) {
             const d = c.getBoundingClientRect(), u = d.top >= 0, g = d.bottom <= window.innerHeight;
             u && g && (l = !0);
@@ -430,39 +439,39 @@ class V extends HTMLElement {
     } catch {
       return;
     }
-    const t = [], n = document.getElementById("scrollspy-slider");
-    if (this.navLinks.forEach((i) => {
-      i.classList.remove("font-medium");
-      const s = i.getAttribute("data-target");
-      e.includes(s) && (i.classList.add("font-medium"), t.push(i));
-    }), t.length > 0 && n) {
-      const i = document.getElementById("scrollspy-nav"), s = i.getBoundingClientRect();
-      let a = 1 / 0, o = -1 / 0;
+    const t = [], i = document.getElementById("scrollspy-slider");
+    if (this.navLinks.forEach((n) => {
+      n.classList.remove("font-medium");
+      const s = n.getAttribute("data-target");
+      e.includes(s) && (n.classList.add("font-medium"), t.push(n));
+    }), t.length > 0 && i) {
+      const n = document.getElementById("scrollspy-nav"), s = n.getBoundingClientRect();
+      let o = 1 / 0, r = -1 / 0;
       t.forEach((c) => {
-        const d = c.getBoundingClientRect(), u = d.top - s.top + i.scrollTop, g = u + d.height;
-        a = Math.min(a, u), o = Math.max(o, g);
+        const d = c.getBoundingClientRect(), u = d.top - s.top + n.scrollTop, g = u + d.height;
+        o = Math.min(o, u), r = Math.max(r, g);
       });
-      let l = o - a;
-      n.style.top = `${a}px`, n.style.height = `${l}px`, n.style.opacity = "1", setTimeout(() => this.ensureMarkerVisibility(), 100);
-    } else n && (n.style.opacity = "0");
+      let l = r - o;
+      i.style.top = `${o}px`, i.style.height = `${l}px`, i.style.opacity = "1", setTimeout(() => this.ensureMarkerVisibility(), 100);
+    } else i && (i.style.opacity = "0");
     t.length > 0 && this.updateSidebarScroll(t);
   }
   updateActiveLinkImmediate(e) {
     if (!this.navLinks) return;
     const t = document.getElementById("scrollspy-slider");
     try {
-      this.navLinks.forEach((i) => {
-        i && i.classList && i.classList.remove("font-medium");
+      this.navLinks.forEach((n) => {
+        n && n.classList && n.classList.remove("font-medium");
       });
     } catch {
       return;
     }
-    const n = document.querySelector(`[data-target="${e}"]`);
-    if (n && (n.classList.add("font-medium"), t)) {
-      const i = document.getElementById("scrollspy-nav");
-      if (i) {
-        const s = i.getBoundingClientRect(), a = n.getBoundingClientRect(), o = a.top - s.top + i.scrollTop;
-        t.style.top = `${o}px`, t.style.height = `${a.height}px`, t.style.opacity = "1";
+    const i = document.querySelector(`[data-target="${e}"]`);
+    if (i && (i.classList.add("font-medium"), t)) {
+      const n = document.getElementById("scrollspy-nav");
+      if (n) {
+        const s = n.getBoundingClientRect(), o = i.getBoundingClientRect(), r = o.top - s.top + n.scrollTop;
+        t.style.top = `${r}px`, t.style.height = `${o.height}px`, t.style.opacity = "1";
       }
     }
   }
@@ -470,15 +479,15 @@ class V extends HTMLElement {
     if (this.manualNavigation) return;
     const t = document.getElementById("scrollspy-nav");
     if (!t) return;
-    const n = e[0], i = Math.max(
+    const i = e[0], n = Math.max(
       document.body.scrollHeight,
       document.body.offsetHeight,
       document.documentElement.clientHeight,
       document.documentElement.scrollHeight,
       document.documentElement.offsetHeight
-    ), s = window.innerHeight, a = i - s, o = a > 0 ? window.scrollY / a : 0, l = t.clientHeight, d = t.scrollHeight - l;
+    ), s = window.innerHeight, o = n - s, r = o > 0 ? window.scrollY / o : 0, l = t.clientHeight, d = t.scrollHeight - l;
     if (d > 0) {
-      const u = o * d, g = n.getBoundingClientRect(), p = t.getBoundingClientRect(), f = g.top - p.top + t.scrollTop, m = l / 2, q = f - m, y = 0.7, I = y * u + (1 - y) * q, w = Math.max(0, Math.min(d, I)), T = t.scrollTop;
+      const u = r * d, g = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = g.top - p.top + t.scrollTop, m = l / 2, q = f - m, y = 0.7, I = y * u + (1 - y) * q, w = Math.max(0, Math.min(d, I)), T = t.scrollTop;
       Math.abs(w - T) > 10 && t.scrollTo({
         top: w,
         behavior: "smooth"
@@ -488,12 +497,12 @@ class V extends HTMLElement {
   updateSidebarScrollToTopButton() {
     const e = document.getElementById("sidebar-scroll-to-top");
     if (!e) return;
-    const t = window.pageYOffset || document.documentElement.scrollTop, n = window.innerHeight;
-    t > n * 0.5 ? (e.classList.remove("opacity-0"), e.classList.add("opacity-100")) : (e.classList.remove("opacity-100"), e.classList.add("opacity-0"));
+    const t = window.pageYOffset || document.documentElement.scrollTop, i = window.innerHeight;
+    t > i * 0.5 ? (e.classList.remove("opacity-0"), e.classList.add("opacity-100")) : (e.classList.remove("opacity-100"), e.classList.add("opacity-0"));
   }
   cleanup() {
-    this.scrollHandler && (window.removeEventListener("scroll", this.scrollHandler), this.scrollHandler = null), this.scrollTimeout && (clearTimeout(this.scrollTimeout), this.scrollTimeout = null), this.clickHandlers && this.clickHandlers.length > 0 && this.clickHandlers.forEach(({ link: t, handler: n }) => {
-      t && n && t.removeEventListener("click", n);
+    this.scrollHandler && (window.removeEventListener("scroll", this.scrollHandler), this.scrollHandler = null), this.scrollTimeout && (clearTimeout(this.scrollTimeout), this.scrollTimeout = null), this.clickHandlers && this.clickHandlers.length > 0 && this.clickHandlers.forEach(({ link: t, handler: i }) => {
+      t && i && t.removeEventListener("click", i);
     });
     const e = document.getElementById("scrollspy-slider");
     e && (e.style.opacity = "0", e.style.height = "0"), this.sections = null, this.navLinks = null, this.clickHandlers = [], this.manualNavigation = !1;
@@ -508,8 +517,8 @@ class $ extends HTMLElement {
   detectSidebarWidth() {
     const e = document.querySelector('.lg\\:w-1\\/4, .lg\\:w-1\\/3, [class*="lg:w-1/"]');
     if (e) {
-      const i = e.getBoundingClientRect().width;
-      return console.log("Detected sidebar width:", i, "px"), `${i}px`;
+      const n = e.getBoundingClientRect().width;
+      return console.log("Detected sidebar width:", n, "px"), `${n}px`;
     }
     const t = window.innerWidth;
     return t < 1024 ? "0px" : t < 1280 ? `${Math.floor(t * 0.25)}px` : `${Math.floor(t * 0.2)}px`;
@@ -626,24 +635,24 @@ class $ extends HTMLElement {
       e.style.width = t, console.log("Updated sidebar width to:", t);
     }
   }
-  show(e, t, n, i = !1, s = 0, a = null, o = null, l = null) {
+  show(e, t, i, n = !1, s = 0, o = null, r = null, l = null) {
     const c = this.querySelector("#single-page-image"), d = this.querySelector("#page-number"), u = this.querySelector("#page-icon");
-    this.querySelector("#page-indicator"), c.src = e, c.alt = t, this.currentPageNumber = n, this.currentIsBeilage = i, this.currentPartNumber = a;
+    this.querySelector("#page-indicator"), c.src = e, c.alt = t, this.currentPageNumber = i, this.currentIsBeilage = n, this.currentPartNumber = o;
     let g;
     if (l)
       g = l;
     else {
-      const f = this.getIssueContext(n);
-      g = f ? `${f}, ${n}` : `${n}`;
+      const f = this.getIssueContext(i);
+      g = f ? `${f}, ${i}` : `${i}`;
     }
-    if (d.innerHTML = g, s && n === s) {
+    if (d.innerHTML = g, s && i === s) {
       d.style.position = "relative";
       const f = d.querySelector(".target-page-dot");
       f && f.remove();
       const m = document.createElement("span");
       m.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", m.title = "verlinkte Seite", d.appendChild(m);
     }
-    o ? o === "part-number" && a !== null ? u.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${a}. Teil</span>` : u.innerHTML = this.generateIconFromType(o) : u.innerHTML = this.generateFallbackIcon(n, i, a), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true");
+    r ? r === "part-number" && o !== null ? u.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${o}. Teil</span>` : u.innerHTML = this.generateIconFromType(r) : u.innerHTML = this.generateFallbackIcon(i, n, o), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true");
     const p = this.querySelector(".flex-1.overflow-auto");
     p && (p.scrollTop = 0), document.body.style.overflow = "hidden", document.dispatchEvent(
       new CustomEvent("singlepageviewer:opened", {
@@ -711,14 +720,14 @@ class $ extends HTMLElement {
   }
   // Update navigation button visibility based on available pages
   updateNavigationButtons() {
-    const e = this.querySelector("#prev-page-btn"), t = this.querySelector("#next-page-btn"), { prevPage: n, nextPage: i } = this.getAdjacentPages();
-    n !== null ? (e.disabled = !1, e.className = e.className.replace("opacity-50 cursor-not-allowed", ""), e.className = e.className.replace(
+    const e = this.querySelector("#prev-page-btn"), t = this.querySelector("#next-page-btn"), { prevPage: i, nextPage: n } = this.getAdjacentPages();
+    i !== null ? (e.disabled = !1, e.className = e.className.replace("opacity-50 cursor-not-allowed", ""), e.className = e.className.replace(
       "bg-gray-50 text-gray-400",
       "bg-gray-100 text-gray-700"
     )) : (e.disabled = !0, e.className.includes("opacity-50") || (e.className += " opacity-50 cursor-not-allowed"), e.className = e.className.replace(
       "bg-gray-100 text-gray-700",
       "bg-gray-50 text-gray-400"
-    )), i !== null ? (t.disabled = !1, t.className = t.className.replace("opacity-50 cursor-not-allowed", ""), t.className = t.className.replace(
+    )), n !== null ? (t.disabled = !1, t.className = t.className.replace("opacity-50 cursor-not-allowed", ""), t.className = t.className.replace(
       "bg-gray-50 text-gray-400",
       "bg-gray-100 text-gray-700"
     )) : (t.disabled = !0, t.className.includes("opacity-50") || (t.className += " opacity-50 cursor-not-allowed"), t.className = t.className.replace(
@@ -737,15 +746,15 @@ class $ extends HTMLElement {
       "for",
       this.currentIsBeilage ? "beilage" : "main"
     );
-    const n = t.map((o) => {
-      const l = o.getAttribute("data-page-container"), c = l ? parseInt(l) : null;
+    const i = t.map((r) => {
+      const l = r.getAttribute("data-page-container"), c = l ? parseInt(l) : null;
       return console.log("Container page:", l, "parsed:", c), c;
-    }).filter((o) => o !== null);
-    console.log("All pages found:", n), console.log("Current page:", this.currentPageNumber);
-    const i = n.indexOf(this.currentPageNumber);
-    console.log("Current index:", i);
-    let s = null, a = null;
-    return i > 0 && (s = n[i - 1]), i < n.length - 1 && (a = n[i + 1]), console.log("Adjacent pages - prev:", s, "next:", a), { prevPage: s, nextPage: a };
+    }).filter((r) => r !== null);
+    console.log("All pages found:", i), console.log("Current page:", this.currentPageNumber);
+    const n = i.indexOf(this.currentPageNumber);
+    console.log("Current index:", n);
+    let s = null, o = null;
+    return n > 0 && (s = i[n - 1]), n < i.length - 1 && (o = i[n + 1]), console.log("Adjacent pages - prev:", s, "next:", o), { prevPage: s, nextPage: o };
   }
   // Navigate to previous page
   goToPreviousPage() {
@@ -759,32 +768,32 @@ class $ extends HTMLElement {
   }
   // Navigate to a specific page
   navigateToPage(e) {
-    const t = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", n = document.querySelector(
+    const t = this.currentIsBeilage ? '.newspaper-page-container[data-beilage="true"]' : ".newspaper-page-container:not([data-beilage])", i = document.querySelector(
       `${t}[data-page-container="${e}"]`
     );
-    if (n) {
-      const i = n.querySelector(".newspaper-page-image, .piece-page-image");
-      if (i) {
+    if (i) {
+      const n = i.querySelector(".newspaper-page-image, .piece-page-image");
+      if (n) {
         let s = null;
         this.currentPartNumber !== null && (s = this.getPartNumberForPage(e));
-        let a = null, o = null;
-        a = n.getAttribute("data-page-icon-type"), n.querySelector(".part-number") && (a = "part-number");
-        const c = n.querySelector(".page-indicator");
+        let o = null, r = null;
+        o = i.getAttribute("data-page-icon-type"), i.querySelector(".part-number") && (o = "part-number");
+        const c = i.querySelector(".page-indicator");
         if (c) {
           const d = c.cloneNode(!0);
           d.querySelectorAll("i").forEach((p) => p.remove()), d.querySelectorAll(
             '[class*="target-page-dot"], .target-page-indicator'
-          ).forEach((p) => p.remove()), o = d.textContent.trim();
+          ).forEach((p) => p.remove()), r = d.textContent.trim();
         }
         this.show(
-          i.src,
-          i.alt,
+          n.src,
+          n.alt,
           e,
           this.currentIsBeilage,
           0,
           s,
-          a,
-          o
+          o,
+          r
         ), document.dispatchEvent(
           new CustomEvent("singlepageviewer:pagechanged", {
             detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
@@ -797,36 +806,36 @@ class $ extends HTMLElement {
   getPartNumberForPage(e) {
     const t = document.querySelector(`[data-page-container="${e}"]`);
     if (t) {
-      const n = t.querySelector(".part-number");
-      if (n) {
-        const i = n.textContent.match(/(\d+)\./);
-        if (i)
-          return parseInt(i[1]);
+      const i = t.querySelector(".part-number");
+      if (i) {
+        const n = i.textContent.match(/(\d+)\./);
+        if (n)
+          return parseInt(n[1]);
       }
     }
     return null;
   }
   // Legacy fallback icon generation (only used when extraction fails)
-  generateFallbackIcon(e, t, n) {
-    return n !== null ? `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${n}. Teil</span>` : `<i class="ri-file-text-line text-lg ${t ? "text-amber-600" : "text-black"}"></i>`;
+  generateFallbackIcon(e, t, i) {
+    return i !== null ? `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${i}. Teil</span>` : `<i class="ri-file-text-line text-lg ${t ? "text-amber-600" : "text-black"}"></i>`;
   }
   // Toggle sidebar visibility
   toggleSidebar() {
-    const e = this.querySelector("#sidebar-spacer"), t = this.querySelector("#sidebar-toggle-btn"), n = t.querySelector("i"), i = e.style.width, s = i === "0px" || i === "0";
-    if (console.log("Current state - isCollapsed:", s), console.log("Current width:", i), s) {
-      const a = this.detectSidebarWidth();
-      e.style.width = a, t.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-fold-line text-lg font-bold", t.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", a);
+    const e = this.querySelector("#sidebar-spacer"), t = this.querySelector("#sidebar-toggle-btn"), i = t.querySelector("i"), n = e.style.width, s = n === "0px" || n === "0";
+    if (console.log("Current state - isCollapsed:", s), console.log("Current width:", n), s) {
+      const o = this.detectSidebarWidth();
+      e.style.width = o, t.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-fold-line text-lg font-bold", t.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", o);
     } else
-      e.style.width = "0px", t.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", n.className = "ri-sidebar-unfold-line text-lg font-bold", t.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
+      e.style.width = "0px", t.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-unfold-line text-lg font-bold", t.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
     console.log("New width:", e.style.width);
   }
   // Extract issue context from document title, URL, or page container
   getIssueContext(e) {
-    const t = window.location.pathname, n = t.includes("/beitrag/");
-    if (n) {
-      const a = document.querySelector(`[data-page-container="${e}"]`);
-      if (a) {
-        const c = a.querySelector(".page-indicator");
+    const t = window.location.pathname, i = t.includes("/beitrag/");
+    if (i) {
+      const o = document.querySelector(`[data-page-container="${e}"]`);
+      if (o) {
+        const c = o.querySelector(".page-indicator");
         if (c) {
           const d = c.textContent.trim(), u = d.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
           if (u)
@@ -841,26 +850,26 @@ class $ extends HTMLElement {
         return `${l[1]} Nr. ${l[2]}`;
     } else
       return "";
-    const i = t.match(/\/(\d{4})\/(\d+)/);
-    if (i)
-      return n ? `${i[1]} Nr. ${i[2]}` : "";
+    const n = t.match(/\/(\d{4})\/(\d+)/);
+    if (n)
+      return i ? `${n[1]} Nr. ${n[2]}` : "";
     const s = document.querySelector(".page-indicator");
     if (s) {
-      const o = s.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
-      if (o)
-        return `${o[1]} Nr. ${o[2]}`;
+      const r = s.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
+      if (r)
+        return `${r[1]} Nr. ${r[2]}`;
     }
     return "KGPZ";
   }
 }
 customElements.define("single-page-viewer", $);
-document.body.addEventListener("htmx:beforeRequest", function(r) {
+document.body.addEventListener("htmx:beforeRequest", function(a) {
   const e = document.querySelector("single-page-viewer");
   e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.close());
 });
 window.addEventListener("beforeunload", function() {
-  const r = document.querySelector("single-page-viewer");
-  r && r.close();
+  const a = document.querySelector("single-page-viewer");
+  a && a.close();
 });
 class R extends HTMLElement {
   constructor() {
@@ -893,8 +902,8 @@ class R extends HTMLElement {
   handleScroll() {
     const e = this.querySelector("#scroll-to-top-btn");
     if (!e) return;
-    const t = window.pageYOffset || document.documentElement.scrollTop, n = window.innerHeight, i = t > n;
-    i && !this.isVisible ? (this.isVisible = !0, e.classList.remove("opacity-0", "pointer-events-none"), e.classList.add("opacity-100", "pointer-events-auto")) : !i && this.isVisible && (this.isVisible = !1, e.classList.remove("opacity-100", "pointer-events-auto"), e.classList.add("opacity-0", "pointer-events-none"));
+    const t = window.pageYOffset || document.documentElement.scrollTop, i = window.innerHeight, n = t > i;
+    n && !this.isVisible ? (this.isVisible = !0, e.classList.remove("opacity-0", "pointer-events-none"), e.classList.add("opacity-100", "pointer-events-auto")) : !n && this.isVisible && (this.isVisible = !1, e.classList.remove("opacity-100", "pointer-events-auto"), e.classList.add("opacity-0", "pointer-events-none"));
   }
   scrollToTop() {
     window.scrollTo({
@@ -917,20 +926,20 @@ class z extends HTMLElement {
   setupScrollspy() {
     const e = document.querySelectorAll(".newspaper-page-container[data-page-container]");
     e.length !== 0 && (e.forEach((t) => {
-      const n = t.getAttribute("data-page-container"), i = t.hasAttribute("data-beilage"), s = this.findInhaltsEntriesForPage(n, i);
-      s.length > 0 && this.pageContainers.set(n, {
+      const i = t.getAttribute("data-page-container"), n = t.hasAttribute("data-beilage"), s = this.findInhaltsEntriesForPage(i, n);
+      s.length > 0 && this.pageContainers.set(i, {
         container: t,
         entries: s,
         state: "short",
         // Default state
-        isBeilage: i
+        isBeilage: n
       });
     }), this.pageObserver = new IntersectionObserver((t) => {
-      t.forEach((n) => {
-        const i = n.target.getAttribute("data-page-container"), s = this.pageContainers.get(i);
+      t.forEach((i) => {
+        const n = i.target.getAttribute("data-page-container"), s = this.pageContainers.get(n);
         if (s) {
-          const o = n.isIntersecting && n.intersectionRatio >= 0.5 || this.singlePageViewerActive ? "full" : "short";
-          s.state !== o ? (s.state = o, this.updateEntriesState(s)) : o === "full" && n.isIntersecting && n.intersectionRatio >= 0.5 && this.scrollPageIntoInhaltsverzeichnis(s);
+          const r = i.isIntersecting && i.intersectionRatio >= 0.5 || this.singlePageViewerActive ? "full" : "short";
+          s.state !== r ? (s.state = r, this.updateEntriesState(s)) : r === "full" && i.isIntersecting && i.intersectionRatio >= 0.5 && this.scrollPageIntoInhaltsverzeichnis(s);
         }
       });
     }, {
@@ -944,36 +953,36 @@ class z extends HTMLElement {
     }));
   }
   findInhaltsEntriesForPage(e, t = !1) {
-    const n = t ? `[data-page-container="${e}"][data-beilage="true"]` : `[data-page-container="${e}"]:not([data-beilage])`, i = this.querySelector(n);
-    return i ? Array.from(i.querySelectorAll(".inhalts-entry")) : [];
+    const i = t ? `[data-page-container="${e}"][data-beilage="true"]` : `[data-page-container="${e}"]:not([data-beilage])`, n = this.querySelector(i);
+    return n ? Array.from(n.querySelectorAll(".inhalts-entry")) : [];
   }
   updateEntriesState(e) {
-    const { entries: t, state: n } = e;
-    n === "full" ? (t.forEach((i) => {
-      i.style.display = "";
-    }), this.highlightPageElements(e, !0)) : (t.forEach((i) => {
-      const s = i.hasAttribute("data-is-continuation");
-      i.style.display = s ? "none" : "";
+    const { entries: t, state: i } = e;
+    i === "full" ? (t.forEach((n) => {
+      n.style.display = "";
+    }), this.highlightPageElements(e, !0)) : (t.forEach((n) => {
+      const s = n.hasAttribute("data-is-continuation");
+      n.style.display = s ? "none" : "";
     }), this.highlightPageElements(e, !1));
   }
   highlightPageElements(e, t) {
-    var o;
-    const n = e.container.getAttribute("data-page-container"), i = this.querySelector(`[data-page-number="${n}"]`);
-    (o = i == null ? void 0 : i.closest(".page-entry")) == null || o.querySelector(".icon-container");
-    const s = i == null ? void 0 : i.closest(".page-entry");
+    var r;
+    const i = e.container.getAttribute("data-page-container"), n = this.querySelector(`[data-page-number="${i}"]`);
+    (r = n == null ? void 0 : n.closest(".page-entry")) == null || r.querySelector(".icon-container");
+    const s = n == null ? void 0 : n.closest(".page-entry");
     s && (t ? (s.classList.add("!border-l-red-500"), s.classList.remove("border-slate-300")) : (s.classList.remove("!border-l-red-500"), s.classList.add("border-slate-300")), t && this.scrollEntryIntoView(s));
-    const a = document.querySelector(`[data-page="${n}"].page-indicator`);
-    if (a) {
-      const l = a.querySelectorAll("i:not(.text-slate-400)");
-      t ? (a.classList.add("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.add("!text-red-600"))) : (a.classList.remove("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.remove("!text-red-600")));
+    const o = document.querySelector(`[data-page="${i}"].page-indicator`);
+    if (o) {
+      const l = o.querySelectorAll("i:not(.text-slate-400)");
+      t ? (o.classList.add("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.add("!text-red-600"))) : (o.classList.remove("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.remove("!text-red-600")));
     }
   }
   scrollEntryIntoView(e) {
     const t = document.querySelector(".overflow-y-auto");
     if (!t || !e)
       return;
-    const n = t.querySelectorAll(".page-entry"), i = n.length > 0 && n[0] === e, s = n.length > 0 && n[n.length - 1] === e;
-    if (i) {
+    const i = t.querySelectorAll(".page-entry"), n = i.length > 0 && i[0] === e, s = i.length > 0 && i[i.length - 1] === e;
+    if (n) {
       t.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -987,9 +996,9 @@ class z extends HTMLElement {
       });
       return;
     }
-    const a = t.getBoundingClientRect(), o = e.getBoundingClientRect();
-    if (!(o.top >= a.top && o.bottom <= a.bottom)) {
-      const c = t.scrollTop, d = o.top - a.top + c, u = a.height, g = o.height, p = d - (u - g) / 2;
+    const o = t.getBoundingClientRect(), r = e.getBoundingClientRect();
+    if (!(r.top >= o.top && r.bottom <= o.bottom)) {
+      const c = t.scrollTop, d = r.top - o.top + c, u = o.height, g = r.height, p = d - (u - g) / 2;
       t.scrollTo({
         top: Math.max(0, p),
         behavior: "smooth"
@@ -997,18 +1006,18 @@ class z extends HTMLElement {
     }
   }
   scrollPageIntoInhaltsverzeichnis(e) {
-    const t = e.container.getAttribute("data-page-container"), n = this.querySelector(`[data-page-number="${t}"]`), i = n == null ? void 0 : n.closest(".page-entry");
-    i && this.scrollEntryIntoView(i);
+    const t = e.container.getAttribute("data-page-container"), i = this.querySelector(`[data-page-number="${t}"]`), n = i == null ? void 0 : i.closest(".page-entry");
+    n && this.scrollEntryIntoView(n);
   }
   setupSinglePageViewerDetection() {
     document.addEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.checkSinglePageViewerState();
   }
   handleSinglePageViewer(e) {
     var t;
-    this.singlePageViewerActive, this.singlePageViewerActive = e.type === "singlepageviewer:opened" || e.type === "singlepageviewer:pagechanged" && this.singlePageViewerActive, (this.singlePageViewerActive || e.type === "singlepageviewer:pagechanged") && ((t = e.detail) != null && t.pageNumber) ? this.singlePageViewerCurrentPage = e.detail.pageNumber.toString() : e.type === "singlepageviewer:closed" && (this.singlePageViewerCurrentPage = null, this.singlePageViewerActive = !1), this.pageContainers.forEach((n) => {
-      const i = n.container.getAttribute("data-page-container");
+    this.singlePageViewerActive, this.singlePageViewerActive = e.type === "singlepageviewer:opened" || e.type === "singlepageviewer:pagechanged" && this.singlePageViewerActive, (this.singlePageViewerActive || e.type === "singlepageviewer:pagechanged") && ((t = e.detail) != null && t.pageNumber) ? this.singlePageViewerCurrentPage = e.detail.pageNumber.toString() : e.type === "singlepageviewer:closed" && (this.singlePageViewerCurrentPage = null, this.singlePageViewerActive = !1), this.pageContainers.forEach((i) => {
+      const n = i.container.getAttribute("data-page-container");
       let s;
-      this.singlePageViewerActive ? s = i === this.singlePageViewerCurrentPage ? "full" : "short" : s = this.isPageContainerVisible(n.container) ? "full" : "short", n.state !== s && (n.state = s, this.updateEntriesState(n));
+      this.singlePageViewerActive ? s = n === this.singlePageViewerCurrentPage ? "full" : "short" : s = this.isPageContainerVisible(i.container) ? "full" : "short", i.state !== s && (i.state = s, this.updateEntriesState(i));
     });
   }
   checkSinglePageViewerState() {
@@ -1016,8 +1025,8 @@ class z extends HTMLElement {
     this.singlePageViewerActive = e !== null;
   }
   isPageContainerVisible(e) {
-    const t = e.getBoundingClientRect(), n = window.innerHeight, i = Math.max(t.top, 0), s = Math.min(t.bottom, n), a = Math.max(0, s - i), o = t.height;
-    return a / o >= 0.5;
+    const t = e.getBoundingClientRect(), i = window.innerHeight, n = Math.max(t.top, 0), s = Math.min(t.bottom, i), o = Math.max(0, s - n), r = t.height;
+    return o / r >= 0.5;
   }
   cleanup() {
     this.pageObserver && (this.pageObserver.disconnect(), this.pageObserver = null), document.removeEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.pageContainers.clear();
@@ -1076,20 +1085,20 @@ customElements.define("error-modal", j);
 window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
-function D(r, e, t, n = null) {
-  let i = document.querySelector("single-page-viewer");
-  i || (i = document.createElement("single-page-viewer"), document.body.appendChild(i));
-  const s = r.closest('[data-beilage="true"]') !== null, a = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, o = r.closest(".newspaper-page-container, .piece-page-container");
+function D(a, e, t, i = null) {
+  let n = document.querySelector("single-page-viewer");
+  n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
+  const s = a.closest('[data-beilage="true"]') !== null, o = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, r = a.closest(".newspaper-page-container, .piece-page-container");
   let l = null, c = null;
-  if (o) {
-    l = o.getAttribute("data-page-icon-type"), o.querySelector(".part-number") && (l = "part-number");
-    const u = o.querySelector(".page-indicator");
+  if (r) {
+    l = r.getAttribute("data-page-icon-type"), r.querySelector(".part-number") && (l = "part-number");
+    const u = r.querySelector(".page-indicator");
     if (u) {
       const g = u.cloneNode(!0);
       g.querySelectorAll("i").forEach((m) => m.remove()), g.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((m) => m.remove()), c = g.textContent.trim();
     }
   }
-  i.show(r.src, r.alt, e, s, a, n, l, c);
+  n.show(a.src, a.alt, e, s, o, i, l, c);
 }
 function E() {
   document.getElementById("pageModal").classList.add("hidden");
@@ -1099,12 +1108,12 @@ function F() {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
       (t) => {
-        if (t.forEach((n) => {
-          const i = window.currentPageContainers.indexOf(n.target);
-          i !== -1 && (n.isIntersecting ? e.add(i) : e.delete(i));
+        if (t.forEach((i) => {
+          const n = window.currentPageContainers.indexOf(i.target);
+          n !== -1 && (i.isIntersecting ? e.add(n) : e.delete(n));
         }), e.size > 0) {
-          const i = Array.from(e).sort((s, a) => s - a)[0];
-          i !== window.currentActiveIndex && (window.currentActiveIndex = i, b());
+          const n = Array.from(e).sort((s, o) => s - o)[0];
+          n !== window.currentActiveIndex && (window.currentActiveIndex = n, b());
         }
       },
       {
@@ -1117,19 +1126,19 @@ function F() {
 }
 function K() {
   if (window.currentActiveIndex > 0) {
-    let r = -1;
+    let a = -1;
     const e = [];
-    window.currentPageContainers.forEach((n, i) => {
-      const s = n.getBoundingClientRect(), a = window.innerHeight, o = Math.max(s.top, 0), l = Math.min(s.bottom, a), c = Math.max(0, l - o), d = s.height;
-      c / d >= 0.3 && e.push(i);
+    window.currentPageContainers.forEach((i, n) => {
+      const s = i.getBoundingClientRect(), o = window.innerHeight, r = Math.max(s.top, 0), l = Math.min(s.bottom, o), c = Math.max(0, l - r), d = s.height;
+      c / d >= 0.3 && e.push(n);
     });
     const t = Math.min(...e);
-    for (let n = t - 1; n >= 0; n--)
-      if (!e.includes(n)) {
-        r = n;
+    for (let i = t - 1; i >= 0; i--)
+      if (!e.includes(i)) {
+        a = i;
         break;
       }
-    r === -1 && t > 0 && (r = t - 1), r >= 0 && (window.currentActiveIndex = r, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+    a === -1 && t > 0 && (a = t - 1), a >= 0 && (window.currentActiveIndex = a, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
       b();
@@ -1138,19 +1147,19 @@ function K() {
 }
 function Z() {
   if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
-    let r = -1;
+    let a = -1;
     const e = [];
-    window.currentPageContainers.forEach((n, i) => {
-      const s = n.getBoundingClientRect(), a = window.innerHeight, o = Math.max(s.top, 0), l = Math.min(s.bottom, a), c = Math.max(0, l - o), d = s.height;
-      c / d >= 0.3 && e.push(i);
+    window.currentPageContainers.forEach((i, n) => {
+      const s = i.getBoundingClientRect(), o = window.innerHeight, r = Math.max(s.top, 0), l = Math.min(s.bottom, o), c = Math.max(0, l - r), d = s.height;
+      c / d >= 0.3 && e.push(n);
     });
     const t = Math.max(...e);
-    for (let n = t + 1; n < window.currentPageContainers.length; n++)
-      if (!e.includes(n)) {
-        r = n;
+    for (let i = t + 1; i < window.currentPageContainers.length; i++)
+      if (!e.includes(i)) {
+        a = i;
         break;
       }
-    r === -1 && t < window.currentPageContainers.length - 1 && (r = t + 1), r >= 0 && r < window.currentPageContainers.length && (window.currentActiveIndex = r, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
+    a === -1 && t < window.currentPageContainers.length - 1 && (a = t + 1), a >= 0 && a < window.currentPageContainers.length && (window.currentActiveIndex = a, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
       b();
@@ -1178,12 +1187,12 @@ function W() {
   }
 }
 function P() {
-  const r = [];
+  const a = [];
   window.currentPageContainers.forEach((e, t) => {
-    const n = e.getBoundingClientRect(), i = window.innerHeight, s = Math.max(n.top, 0), a = Math.min(n.bottom, i), o = Math.max(0, a - s), l = n.height;
-    o / l >= 0.3 && r.push(t);
+    const i = e.getBoundingClientRect(), n = window.innerHeight, s = Math.max(i.top, 0), o = Math.min(i.bottom, n), r = Math.max(0, o - s), l = i.height;
+    r / l >= 0.3 && a.push(t);
   });
-  for (const e of r) {
+  for (const e of a) {
     const t = window.currentPageContainers[e];
     if (t && t.id && t.id.includes("beilage-"))
       return !0;
@@ -1191,40 +1200,40 @@ function P() {
   return !1;
 }
 function b() {
-  const r = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
-  if (r && (r.style.display = "flex", window.currentActiveIndex <= 0 ? (r.disabled = !0, r.classList.add("opacity-50", "cursor-not-allowed"), r.classList.remove("hover:bg-gray-200")) : (r.disabled = !1, r.classList.remove("opacity-50", "cursor-not-allowed"), r.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
-    const n = P(), i = t.querySelector("i");
-    n ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", i && (i.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", i && (i.className = "ri-attachment-line text-lg lg:text-xl"));
+  const a = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
+  if (a && (a.style.display = "flex", window.currentActiveIndex <= 0 ? (a.disabled = !0, a.classList.add("opacity-50", "cursor-not-allowed"), a.classList.remove("hover:bg-gray-200")) : (a.disabled = !1, a.classList.remove("opacity-50", "cursor-not-allowed"), a.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
+    const i = P(), n = t.querySelector("i");
+    i ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
 function J() {
-  const r = document.getElementById("shareLinkBtn");
+  const a = document.getElementById("shareLinkBtn");
   let e = "";
   if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
-    const i = window.currentPageContainers[window.currentActiveIndex].querySelector("[data-page]");
-    i && (e = `/${i.getAttribute("data-page")}`);
+    const n = window.currentPageContainers[window.currentActiveIndex].querySelector("[data-page]");
+    n && (e = `/${n.getAttribute("data-page")}`);
   }
   const t = window.location.origin + window.location.pathname + e;
   navigator.share ? navigator.share({
     title: document.title,
     url: t
-  }).catch((n) => {
-    x(t, r);
-  }) : x(t, r);
+  }).catch((i) => {
+    x(t, a);
+  }) : x(t, a);
 }
-function x(r, e) {
+function x(a, e) {
   if (navigator.clipboard)
-    navigator.clipboard.writeText(r).then(() => {
+    navigator.clipboard.writeText(a).then(() => {
       h(e, "Link kopiert!");
     }).catch((t) => {
       h(e, "Kopieren fehlgeschlagen");
     });
   else {
     const t = document.createElement("textarea");
-    t.value = r, document.body.appendChild(t), t.select();
+    t.value = a, document.body.appendChild(t), t.select();
     try {
-      const n = document.execCommand("copy");
-      h(e, n ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      const i = document.execCommand("copy");
+      h(e, i ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
       h(e, "Kopieren fehlgeschlagen");
     } finally {
@@ -1233,34 +1242,34 @@ function x(r, e) {
   }
 }
 function Y() {
-  const r = document.getElementById("citationBtn"), e = document.title || "KGPZ";
+  const a = document.getElementById("citationBtn"), e = document.title || "KGPZ";
   let t = window.location.origin + window.location.pathname;
   t.includes("#") && (t = t.split("#")[0]);
-  const n = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), i = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}. Digital verfügbar unter: ${t} (Zugriff: ${n}).`;
+  const i = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), n = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}. Digital verfügbar unter: ${t} (Zugriff: ${i}).`;
   if (navigator.clipboard)
-    navigator.clipboard.writeText(i).then(() => {
-      h(r, "Zitation kopiert!");
+    navigator.clipboard.writeText(n).then(() => {
+      h(a, "Zitation kopiert!");
     }).catch((s) => {
-      h(r, "Kopieren fehlgeschlagen");
+      h(a, "Kopieren fehlgeschlagen");
     });
   else {
     const s = document.createElement("textarea");
-    s.value = i, document.body.appendChild(s), s.select();
+    s.value = n, document.body.appendChild(s), s.select();
     try {
-      const a = document.execCommand("copy");
-      h(r, a ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      const o = document.execCommand("copy");
+      h(a, o ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      h(r, "Kopieren fehlgeschlagen");
+      h(a, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(s);
     }
   }
 }
-function h(r, e) {
+function h(a, e) {
   const t = document.querySelector(".simple-popup");
   t && t.remove();
-  const n = document.createElement("div");
-  n.className = "simple-popup", n.textContent = e, n.style.cssText = `
+  const i = document.createElement("div");
+  i.className = "simple-popup", i.textContent = e, i.style.cssText = `
 		position: fixed;
 		background: #374151;
 		color: white;
@@ -1274,42 +1283,42 @@ function h(r, e) {
 		transition: opacity 0.2s ease;
 		white-space: nowrap;
 	`;
-  const i = r.getBoundingClientRect(), s = window.innerHeight, a = window.innerWidth;
-  let o = i.left - 10, l = i.bottom + 8;
+  const n = a.getBoundingClientRect(), s = window.innerHeight, o = window.innerWidth;
+  let r = n.left - 10, l = n.bottom + 8;
   const c = 120, d = 32;
-  o + c > a && (o = i.right - c + 10), l + d > s && (l = i.top - d - 8), n.style.left = Math.max(5, o) + "px", n.style.top = Math.max(5, l) + "px", document.body.appendChild(n), setTimeout(() => {
-    n.style.opacity = "1";
+  r + c > o && (r = n.right - c + 10), l + d > s && (l = n.top - d - 8), i.style.left = Math.max(5, r) + "px", i.style.top = Math.max(5, l) + "px", document.body.appendChild(i), setTimeout(() => {
+    i.style.opacity = "1";
   }, 10), setTimeout(() => {
-    n.style.opacity = "0", setTimeout(() => {
-      n.parentNode && n.remove();
+    i.style.opacity = "0", setTimeout(() => {
+      i.parentNode && i.remove();
     }, 200);
   }, 2e3);
 }
-function G(r, e, t = !1) {
-  let n = "";
+function G(a, e, t = !1) {
+  let i = "";
   if (t)
-    n = window.location.origin + window.location.pathname + `#beilage-1-page-${r}`;
+    i = window.location.origin + window.location.pathname + `#beilage-1-page-${a}`;
   else {
     const s = window.location.pathname.split("/");
     if (s.length >= 3) {
-      const a = s[1], o = s[2];
-      n = `${window.location.origin}/${a}/${o}/${r}`;
+      const o = s[1], r = s[2];
+      i = `${window.location.origin}/${o}/${r}/${a}`;
     } else
-      n = window.location.origin + window.location.pathname + `/${r}`;
+      i = window.location.origin + window.location.pathname + `/${a}`;
   }
-  const i = n;
+  const n = i;
   if (navigator.clipboard)
-    navigator.clipboard.writeText(i).then(() => {
+    navigator.clipboard.writeText(n).then(() => {
       h(e, "Link kopiert!");
     }).catch((s) => {
       h(e, "Kopieren fehlgeschlagen");
     });
   else {
     const s = document.createElement("textarea");
-    s.value = i, document.body.appendChild(s), s.select();
+    s.value = n, document.body.appendChild(s), s.select();
     try {
-      const a = document.execCommand("copy");
-      h(e, a ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      const o = document.execCommand("copy");
+      h(e, o ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
       h(e, "Kopieren fehlgeschlagen");
     } finally {
@@ -1317,24 +1326,24 @@ function G(r, e, t = !1) {
     }
   }
 }
-function U(r, e) {
-  const t = document.title || "KGPZ", n = window.location.pathname.split("/");
-  let i;
-  if (n.length >= 3) {
-    const l = n[1], c = n[2];
-    i = `${window.location.origin}/${l}/${c}/${r}`;
+function U(a, e) {
+  const t = document.title || "KGPZ", i = window.location.pathname.split("/");
+  let n;
+  if (i.length >= 3) {
+    const l = i[1], c = i[2];
+    n = `${window.location.origin}/${l}/${c}/${a}`;
   } else
-    i = `${window.location.origin}${window.location.pathname}/${r}`;
-  const s = i, a = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), o = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${r}. Digital verfügbar unter: ${s} (Zugriff: ${a}).`;
+    n = `${window.location.origin}${window.location.pathname}/${a}`;
+  const s = n, o = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), r = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${a}. Digital verfügbar unter: ${s} (Zugriff: ${o}).`;
   if (navigator.clipboard)
-    navigator.clipboard.writeText(o).then(() => {
+    navigator.clipboard.writeText(r).then(() => {
       h(e, "Zitation kopiert!");
     }).catch((l) => {
       h(e, "Kopieren fehlgeschlagen");
     });
   else {
     const l = document.createElement("textarea");
-    l.value = o, document.body.appendChild(l), l.select();
+    l.value = r, document.body.appendChild(l), l.select();
     try {
       const c = document.execCommand("copy");
       h(e, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
@@ -1350,29 +1359,29 @@ function L() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
       b();
     }, 50);
-  }), document.addEventListener("keydown", function(r) {
-    r.key === "Escape" && E();
+  }), document.addEventListener("keydown", function(a) {
+    a.key === "Escape" && E();
   });
 }
 function k() {
-  const r = window.location.pathname;
+  const a = window.location.pathname;
   document.querySelectorAll(".citation-link[data-citation-url]").forEach((t) => {
-    const n = t.getAttribute("data-citation-url");
-    let i = !1;
-    if (n === r)
-      i = !0;
+    const i = t.getAttribute("data-citation-url");
+    let n = !1;
+    if (i === a)
+      n = !0;
     else {
-      const s = r.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/), a = n.match(/^\/(\d{4})\/(\d+)$/);
-      if (s && a) {
-        const [, o, l, c] = s, [, d, u] = a;
-        o === d && l === u && (i = !0);
+      const s = a.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/), o = i.match(/^\/(\d{4})\/(\d+)$/);
+      if (s && o) {
+        const [, r, l, c] = s, [, d, u] = o;
+        r === d && l === u && (n = !0);
       }
     }
-    i ? (t.classList.add("text-red-700", "pointer-events-none"), t.setAttribute("aria-current", "page")) : (t.classList.remove("text-red-700", "pointer-events-none"), t.removeAttribute("aria-current"));
+    n ? (t.classList.add("text-red-700", "pointer-events-none"), t.setAttribute("aria-current", "page")) : (t.classList.remove("text-red-700", "pointer-events-none"), t.removeAttribute("aria-current"));
   });
 }
 function C() {
-  const r = window.location.pathname, e = document.body;
+  const a = window.location.pathname, e = document.body;
   e.classList.remove(
     "page-akteure",
     "page-ausgabe",
@@ -1381,7 +1390,7 @@ function C() {
     "page-kategorie",
     "page-piece",
     "page-edition"
-  ), r.includes("/akteure/") || r.includes("/autoren") ? e.classList.add("page-akteure") : r.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : r.includes("/search") || r.includes("/suche") ? e.classList.add("page-search") : r.includes("/ort/") ? e.classList.add("page-ort") : r.includes("/kategorie/") ? e.classList.add("page-kategorie") : r.includes("/beitrag/") ? e.classList.add("page-piece") : r.includes("/edition") && e.classList.add("page-edition");
+  ), a.includes("/akteure/") || a.includes("/autoren") ? e.classList.add("page-akteure") : a.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : a.includes("/search") || a.includes("/suche") ? e.classList.add("page-search") : a.includes("/ort/") ? e.classList.add("page-ort") : a.includes("/kategorie/") ? e.classList.add("page-kategorie") : a.includes("/beitrag/") ? e.classList.add("page-piece") : a.includes("/edition") && e.classList.add("page-edition");
 }
 window.enlargePage = D;
 window.closeModal = E;
@@ -1395,7 +1404,7 @@ window.generatePageCitation = U;
 C();
 k();
 document.querySelector(".newspaper-page-container") && L();
-let X = function(r) {
+let X = function(a) {
   C(), k(), S(), setTimeout(() => {
     document.querySelector(".newspaper-page-container") && L();
   }, 50);
