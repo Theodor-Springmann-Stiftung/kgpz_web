@@ -38,7 +38,7 @@ const (
 	YEAR_OVERVIEW_URL     = "/jahrgang/:year"
 	PLACE_OVERVIEW_URL    = "/ort/:place?"
 	AGENTS_OVERVIEW_URL   = "/akteure/:letterorid"
-	CATEGORY_OVERVIEW_URL = "/kategorie/:category"
+	CATEGORY_OVERVIEW_URL = "/kategorie/:category?/:year?"
 
 	PIECE_URL     = "/beitrag/:id"
 	PIECE_PAGE_URL = "/beitrag/:id/:page"

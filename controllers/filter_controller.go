@@ -140,12 +140,80 @@ func GetQuickFilter(kgpz *xmlmodels.Library) fiber.Handler {
 			return strings.Compare(a.ID, b.ID)
 		})
 
+		// Get all categories with their first available year
+		categories := make([]CategorySummary, 0)
+		categoryYears := make(map[string][]int) // categoryID -> list of years
+
+		// First pass: collect all years for each category
+		for _, piece := range kgpz.Pieces.Array {
+			// Get years for this piece
+			pieceYears := make(map[int]bool)
+			for _, issueRef := range piece.IssueRefs {
+				if issueRef.When.Year > 0 {
+					pieceYears[issueRef.When.Year] = true
+				}
+			}
+
+			// Process CategoryRefs
+			for _, catRef := range piece.CategoryRefs {
+				if catRef.Ref != "" {
+					for year := range pieceYears {
+						categoryYears[catRef.Ref] = append(categoryYears[catRef.Ref], year)
+					}
+				}
+			}
+
+			// Process WorkRefs with categories (rezension)
+			for _, workRef := range piece.WorkRefs {
+				categoryID := workRef.Category
+				if categoryID == "" {
+					categoryID = "rezension" // Default category for WorkRefs
+				}
+				for year := range pieceYears {
+					categoryYears[categoryID] = append(categoryYears[categoryID], year)
+				}
+			}
+		}
+
+		// Build categories list with first year for each
+		kgpz.Categories.Lock()
+		for _, category := range kgpz.Categories.Array {
+			if yearsList, exists := categoryYears[category.ID]; exists && len(yearsList) > 0 {
+				// Find the earliest year for this category
+				slices.Sort(yearsList)
+				firstYear := yearsList[0]
+
+				// Get the primary name (first name in the list)
+				var name string
+				if len(category.Names) > 0 {
+					name = category.Names[0]
+				} else {
+					name = category.ID // fallback to ID if no names
+				}
+
+				categorySummary := CategorySummary{
+					ID:        category.ID,
+					Name:      name,
+					FirstYear: firstYear,
+				}
+
+				categories = append(categories, categorySummary)
+			}
+		}
+		kgpz.Categories.Unlock()
+
+		// Sort categories list by name
+		slices.SortFunc(categories, func(a, b CategorySummary) int {
+			return strings.Compare(a.Name, b.Name)
+		})
+
 		// Prepare data for the filter template
 		data := fiber.Map{
 			"AvailableYears":    availableYears,
 			"Persons":           persons,
 			"Authors":           authors,
 			"Places":            places,
+			"Categories":        categories,
 			"IssuesByYearJSON":  string(issuesByYearJSON),
 		}
 
@@ -166,6 +234,13 @@ type PlaceSummary struct {
 	ID   string
 	Name string
 	Geo  string
+}
+
+// CategorySummary represents a simplified category for the filter list
+type CategorySummary struct {
+	ID        string
+	Name      string
+	FirstYear int
 }
 
 // IssueSummary represents an issue for the Jahr/Ausgabe filter

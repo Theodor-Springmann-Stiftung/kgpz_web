@@ -2,7 +2,7 @@ document.body.addEventListener("htmx:configRequest", function(a) {
   let e = a.detail.elt;
   e.id === "search" && e.value === "" && (a.detail.parameters = {}, a.detail.path = window.location.pathname + window.location.search);
 });
-class H extends HTMLElement {
+class A extends HTMLElement {
   constructor() {
     super();
   }
@@ -35,34 +35,36 @@ class H extends HTMLElement {
     });
   }
 }
-customElements.define("person-jump-filter", H);
-class B extends HTMLElement {
-  constructor() {
-    super();
-  }
+customElements.define("person-jump-filter", A);
+class H extends HTMLElement {
   connectedCallback() {
-    this.setupEventListeners();
-  }
-  setupEventListeners() {
-    const e = this.querySelector("#place-search"), t = this.querySelector("#all-places");
-    !e || !t || e.addEventListener("input", (i) => {
-      const n = i.target.value.toLowerCase().trim();
-      this.filterPlaces(n);
-    });
-  }
-  filterPlaces(e) {
-    const t = this.querySelector("#all-places");
-    if (!t)
-      return;
-    t.querySelectorAll(".place-item").forEach((n) => {
-      var r;
-      const s = ((r = n.querySelector(".place-name")) == null ? void 0 : r.textContent) || "";
-      !e || s.toLowerCase().includes(e) ? n.style.display = "block" : n.style.display = "none";
+    const e = this.querySelector("#place-search");
+    e && e.addEventListener("input", (t) => {
+      const i = t.target.value.toLowerCase().trim();
+      this.querySelectorAll(".place-item").forEach((s) => {
+        var l;
+        const o = ((l = s.querySelector(".place-name")) == null ? void 0 : l.textContent) || "", r = !i || o.toLowerCase().includes(i);
+        s.style.display = r ? "block" : "none";
+      });
     });
   }
 }
-customElements.define("place-jump-filter", B);
-class A extends HTMLElement {
+customElements.define("place-jump-filter", H);
+class B extends HTMLElement {
+  connectedCallback() {
+    const e = this.querySelector("#category-search");
+    e && e.addEventListener("input", (t) => {
+      const i = t.target.value.toLowerCase().trim();
+      this.querySelectorAll(".category-item").forEach((s) => {
+        var l;
+        const o = ((l = s.querySelector(".category-name")) == null ? void 0 : l.textContent) || "", r = !i || o.toLowerCase().includes(i);
+        s.style.display = r ? "block" : "none";
+      });
+    });
+  }
+}
+customElements.define("category-jump-filter", B);
+class M extends HTMLElement {
   constructor() {
     super(), this.issuesByYear = {};
   }
@@ -177,8 +179,8 @@ class A extends HTMLElement {
     i.disabled = !o;
   }
 }
-customElements.define("year-jump-filter", A);
-class M extends HTMLElement {
+customElements.define("year-jump-filter", M);
+class N extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
   }
@@ -240,8 +242,8 @@ class M extends HTMLElement {
     this.isOpen && t && i && !t.contains(e.target) && !this.contains(e.target) && this.hideFilter();
   }
 }
-customElements.define("schnellauswahl-button", M);
-class N extends HTMLElement {
+customElements.define("schnellauswahl-button", N);
+class $ extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
   }
@@ -264,7 +266,7 @@ class N extends HTMLElement {
                         <div>Übersicht nach</div>
                         <div class="ml-2 flex flex-col gap-y-2 mt-2">
                             <a href="/">Jahrgängen</a>
-                            <a href="/akteure/a">Personen</a>
+                            <a href="/akteure/a">Personen &amp; Werke</a>
                             <a href="/kategorie/">Betragsarten</a>
                             <a href="/ort/">Orten</a>
                         </div>
@@ -317,7 +319,7 @@ class N extends HTMLElement {
     this.isOpen && !this.contains(e.target) && this.hideMenu();
   }
 }
-customElements.define("navigation-menu", N);
+customElements.define("navigation-menu", $);
 document.addEventListener("DOMContentLoaded", function() {
   document.addEventListener("click", function(a) {
     const e = a.target.closest('a[href^="/akteure/"], a[href^="/ort/"]'), t = document.getElementById("filter-container");
@@ -490,9 +492,9 @@ class O extends HTMLElement {
       document.documentElement.offsetHeight
     ), s = window.innerHeight, o = n - s, r = o > 0 ? window.scrollY / o : 0, l = t.clientHeight, d = t.scrollHeight - l;
     if (d > 0) {
-      const u = r * d, h = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = h.top - p.top + t.scrollTop, m = l / 2, I = f - m, v = 0.7, T = v * u + (1 - v) * I, y = Math.max(0, Math.min(d, T)), q = t.scrollTop;
-      Math.abs(y - q) > 10 && t.scrollTo({
-        top: y,
+      const u = r * d, h = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = h.top - p.top + t.scrollTop, m = l / 2, T = f - m, y = 0.7, I = y * u + (1 - y) * T, v = Math.max(0, Math.min(d, I)), q = t.scrollTop;
+      Math.abs(v - q) > 10 && t.scrollTo({
+        top: v,
         behavior: "smooth"
       });
     }
@@ -512,7 +514,7 @@ class O extends HTMLElement {
   }
 }
 customElements.define("akteure-scrollspy", O);
-class $ extends HTMLElement {
+class V extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.placeCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -564,8 +566,82 @@ class $ extends HTMLElement {
     this.countElement && (t === "" ? this.countElement.textContent = `Alle Orte (${this.originalCount})` : e === 0 ? this.countElement.textContent = `Keine Orte gefunden für "${t}"` : this.countElement.textContent = `${e} von ${this.originalCount} Orten`);
   }
 }
-customElements.define("places-filter", $);
-class V extends HTMLElement {
+customElements.define("places-filter", V);
+class R extends HTMLElement {
+  constructor() {
+    super(), this.searchInput = null, this.itemCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
+  }
+  connectedCallback() {
+    this.placeholderText = this.getAttribute("placeholder") || "Suchen...", this.itemSelector = this.getAttribute("item-selector") || "[data-filter-item]", this.searchAttributes = (this.getAttribute("search-attributes") || "data-filter-text").split(","), this.countSelector = this.getAttribute("count-selector") || "[data-filter-count]", this.itemType = this.getAttribute("item-type") || "Einträge", this.itemTypeSingular = this.getAttribute("item-type-singular") || "Eintrag", this.render(), this.setupEventListeners(), this.initializeItems();
+  }
+  disconnectedCallback() {
+    this.cleanupEventListeners(), this.debounceTimer && clearTimeout(this.debounceTimer);
+  }
+  render() {
+    this.innerHTML = `
+			<div class="mb-6">
+				<input
+					type="text"
+					id="generic-search"
+					placeholder="${this.placeholderText}"
+					autocomplete="off"
+					class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+				>
+			</div>
+		`;
+  }
+  setupEventListeners() {
+    this.searchInput = this.querySelector("#generic-search"), this.searchInput && this.searchInput.addEventListener("input", this.handleSearchInput.bind(this));
+  }
+  cleanupEventListeners() {
+    this.searchInput && this.searchInput.removeEventListener("input", this.handleSearchInput.bind(this));
+  }
+  initializeItems() {
+    this.itemCards = Array.from(document.querySelectorAll(this.itemSelector));
+    const e = this.closest(".filter-sidebar") || this.closest(".sidebar") || document;
+    this.countElement = e.querySelector(this.countSelector), console.log("GenericFilter initialized:", {
+      itemSelector: this.itemSelector,
+      itemsFound: this.itemCards.length,
+      countElement: this.countElement,
+      searchAttributes: this.searchAttributes
+    }), this.countElement && (this.originalCount = this.itemCards.length);
+  }
+  handleSearchInput(e) {
+    this.debounceTimer && clearTimeout(this.debounceTimer), this.debounceTimer = setTimeout(() => {
+      this.filterItems(e.target.value.trim());
+    }, 150);
+  }
+  filterItems(e) {
+    if (!this.itemCards.length) return;
+    const t = e.toLowerCase();
+    let i = 0;
+    this.itemCards.forEach((n) => {
+      var o;
+      let s = e === "";
+      if (!s) {
+        for (const r of this.searchAttributes)
+          if ((((o = n.getAttribute(r.trim())) == null ? void 0 : o.toLowerCase()) || "").includes(t)) {
+            s = !0;
+            break;
+          }
+      }
+      s ? (n.style.display = "", i++) : n.style.display = "none";
+    }), this.updateCountDisplay(i, e);
+  }
+  updateCountDisplay(e, t) {
+    if (this.countElement)
+      if (t === "")
+        this.countElement.textContent = `Alle ${this.itemType} (${this.originalCount})`;
+      else if (e === 0)
+        this.countElement.textContent = `Keine ${this.itemType} gefunden für "${t}"`;
+      else {
+        const i = e === 1 ? this.itemTypeSingular : this.itemType;
+        this.countElement.textContent = `${e} von ${this.originalCount} ${i}`;
+      }
+  }
+}
+customElements.define("generic-filter", R);
+class z extends HTMLElement {
   constructor() {
     super(), this.resizeObserver = null;
   }
@@ -918,7 +994,7 @@ class V extends HTMLElement {
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", V);
+customElements.define("single-page-viewer", z);
 document.body.addEventListener("htmx:beforeRequest", function(a) {
   const e = document.querySelector("single-page-viewer");
   e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.close());
@@ -927,7 +1003,7 @@ window.addEventListener("beforeunload", function() {
   const a = document.querySelector("single-page-viewer");
   a && a.close();
 });
-class R extends HTMLElement {
+class D extends HTMLElement {
   constructor() {
     super(), this.isVisible = !1, this.scrollHandler = null, this.htmxAfterSwapHandler = null;
   }
@@ -968,8 +1044,8 @@ class R extends HTMLElement {
     });
   }
 }
-customElements.define("scroll-to-top-button", R);
-class z extends HTMLElement {
+customElements.define("scroll-to-top-button", D);
+class j extends HTMLElement {
   constructor() {
     super(), this.pageObserver = null, this.pageContainers = /* @__PURE__ */ new Map(), this.singlePageViewerActive = !1, this.singlePageViewerCurrentPage = null, this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this);
   }
@@ -1088,8 +1164,8 @@ class z extends HTMLElement {
     this.pageObserver && (this.pageObserver.disconnect(), this.pageObserver = null), document.removeEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.pageContainers.clear();
   }
 }
-customElements.define("inhaltsverzeichnis-scrollspy", z);
-class j extends HTMLElement {
+customElements.define("inhaltsverzeichnis-scrollspy", j);
+class F extends HTMLElement {
   constructor() {
     super(), this.innerHTML = `
             <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm">
@@ -1137,11 +1213,11 @@ class j extends HTMLElement {
     window.showErrorModal = (e) => this.show(e), window.closeErrorModal = () => this.close();
   }
 }
-customElements.define("error-modal", j);
+customElements.define("error-modal", F);
 window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
-function D(a, e, t, i = null) {
+function K(a, e, t, i = null) {
   let n = document.querySelector("single-page-viewer");
   n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
   const s = a.closest('[data-beilage="true"]') !== null, o = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, r = a.closest(".newspaper-page-container, .piece-page-container");
@@ -1159,7 +1235,7 @@ function D(a, e, t, i = null) {
 function E() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function F() {
+function W() {
   if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, b(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
@@ -1180,7 +1256,7 @@ function F() {
     });
   }
 }
-function K() {
+function Z() {
   if (window.currentActiveIndex > 0) {
     let a = -1;
     const e = [];
@@ -1201,7 +1277,7 @@ function K() {
     }, 100));
   }
 }
-function Z() {
+function J() {
   if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
     let a = -1;
     const e = [];
@@ -1222,7 +1298,7 @@ function Z() {
     }, 100));
   }
 }
-function W() {
+function G() {
   if (C()) {
     const e = document.querySelector("#newspaper-content .newspaper-page-container");
     e && e.scrollIntoView({
@@ -1262,7 +1338,7 @@ function b() {
     i ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
-function J() {
+function Y() {
   const a = document.getElementById("shareLinkBtn");
   let e = "";
   if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
@@ -1297,7 +1373,7 @@ function x(a, e) {
     }
   }
 }
-function Y() {
+function U() {
   const a = document.getElementById("citationBtn"), e = document.title || "KGPZ";
   let t = window.location.origin + window.location.pathname;
   t.includes("#") && (t = t.split("#")[0]);
@@ -1350,7 +1426,7 @@ function g(a, e) {
     }, 200);
   }, 2e3);
 }
-function G(a, e, t = !1) {
+function X(a, e, t = !1) {
   let i = "";
   if (t)
     i = window.location.origin + window.location.pathname + `#beilage-1-page-${a}`;
@@ -1382,7 +1458,7 @@ function G(a, e, t = !1) {
     }
   }
 }
-function U(a, e) {
+function Q(a, e) {
   const t = document.title || "KGPZ", i = window.location.pathname.split("/");
   let n;
   if (i.length >= 3) {
@@ -1411,7 +1487,7 @@ function U(a, e) {
   }
 }
 function L() {
-  F(), window.addEventListener("scroll", function() {
+  W(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
       b();
     }, 50);
@@ -1448,21 +1524,21 @@ function k() {
     "page-edition"
   ), a.includes("/akteure/") || a.includes("/autoren") ? e.classList.add("page-akteure") : a.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : a.includes("/search") || a.includes("/suche") ? e.classList.add("page-search") : a.includes("/ort/") ? e.classList.add("page-ort") : a.includes("/kategorie/") ? e.classList.add("page-kategorie") : a.includes("/beitrag/") ? e.classList.add("page-piece") : a.includes("/edition") && e.classList.add("page-edition");
 }
-window.enlargePage = D;
+window.enlargePage = K;
 window.closeModal = E;
-window.scrollToPreviousPage = K;
-window.scrollToNextPage = Z;
-window.scrollToBeilage = W;
-window.shareCurrentPage = J;
-window.generateCitation = Y;
-window.copyPagePermalink = G;
-window.generatePageCitation = U;
+window.scrollToPreviousPage = Z;
+window.scrollToNextPage = J;
+window.scrollToBeilage = G;
+window.shareCurrentPage = Y;
+window.generateCitation = U;
+window.copyPagePermalink = X;
+window.generatePageCitation = Q;
 k();
 P();
 document.querySelector(".newspaper-page-container") && L();
-let X = function(a) {
+let _ = function(a) {
   k(), P(), S(), setTimeout(() => {
     document.querySelector(".newspaper-page-container") && L();
   }, 50);
 };
-document.body.addEventListener("htmx:afterSettle", X);
+document.body.addEventListener("htmx:afterSettle", _);

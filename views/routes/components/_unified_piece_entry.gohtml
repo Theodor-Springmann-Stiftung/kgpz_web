@@ -126,7 +126,7 @@
 			{{- $placeObj := GetPlace $placeRef.Ref -}}
 			{{- if gt (len $placeObj.Names) 0 -}}
 				{{- $placeName := index $placeObj.Names 0 -}}
-				{{- $placeTag = printf "%s <a href=\"/ort/%s\"><span class=\"place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap\">%s</span></a>" $placeTag $placeObj.ID $placeName -}}
+				{{- $placeTag = printf "%s <a href=\"/ort/%s\" class=\"ml-0\"><span class=\"place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap hover:bg-slate-300 hover:text-slate-800 transition-colors duration-150\">%s</span></a>" $placeTag $placeObj.ID $placeName -}}
 			{{- end -}}
 		{{- end -}}
 	{{- end -}}
@@ -134,7 +134,7 @@
 	{{- /* Author prefix for colon format (place view) */ -}}
 	{{- $colonPrefix := "" -}}
 	{{- if $useColonFormat -}}
-		{{- $colonPrefix = ": " -}}
+		{{- $colonPrefix = ":" -}}
 	{{- else -}}
 		{{- $colonPrefix = " mit " -}}
 	{{- end -}}
@@ -561,7 +561,7 @@
 					{{- end -}}
 					{{- if gt (len $authorElements) 0 -}}
 						{{- if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-						{{ if $title }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
+						{{ if and $title (not $categoryFlags.Uebersetzung) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 							<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 							class="work-title"
 							data-short-title="{{ $workTitle }}"
@@ -570,7 +570,7 @@
 						{{ end }}
 					{{- else -}}
 						{{- if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-						{{ if $title }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
+						{{ if and $title (not $categoryFlags.Uebersetzung) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 							<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 							class="work-title"
 							data-short-title="{{ $workTitle }}"
@@ -580,7 +580,7 @@
 					{{- end -}}{{ Safe $placeTag }}
 				{{- else -}}
 					{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-					{{ if $title }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
+					{{ if and $title (not $categoryFlags.Uebersetzung) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 						<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 						class="work-title"
 						data-short-title="{{ $workTitle }}"
@@ -590,7 +590,7 @@
 				{{- end -}}
 			{{- else -}}
 				{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-					{{ if $title }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
+					{{ if and $title (not $categoryFlags.Uebersetzung) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 						<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 						class="work-title"
 						data-short-title="{{ $workTitle }}"

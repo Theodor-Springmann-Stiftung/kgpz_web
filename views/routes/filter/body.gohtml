@@ -1,8 +1,8 @@
 <div class="flex flex-row justify-center gap-4 h-96" id="filter">
-	<div class="p-4 w-full max-w-md flex flex-col h-full">
+	<div class="p-4 w-full max-w-sm flex flex-col h-full">
 		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
 			<i class="ri-calendar-line text-slate-600"></i>
-				Auswahl nach Datum, Nummer od. Seite
+				Nach Datum, Nummer oder Seite
 		</h3>
 
 		<!-- Unified Year Jump Filter -->
@@ -54,11 +54,11 @@
 		</year-jump-filter>
 	</div>
 
-	<div class="p-4 w-full max-w-md flex flex-col h-full">
+	<div class="p-4 w-full max-w-sm flex flex-col h-full">
 		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center justify-between">
 			<div class="flex items-center gap-2">
 				<i class="ri-user-line text-slate-600"></i>
-				Auswahl nach Person
+				Nach Person
 			</div>
 			<div class="flex items-center gap-1">
 				<i class="ri-arrow-right-line"></i>
@@ -123,11 +123,11 @@
 		</person-jump-filter>
 	</div>
 
-	<div class="p-4 w-full max-w-md flex flex-col h-full">
+	<div class="p-4 w-full max-w-sm flex flex-col h-full">
 		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center justify-between">
 			<div class="flex items-center gap-2">
 				<i class="ri-map-pin-line text-slate-600"></i>
-				Auswahl nach Ort
+				Nach Ort
 			</div>
 			<div class="flex items-center gap-1">
 				<i class="ri-arrow-right-line"></i>
@@ -168,6 +168,50 @@
 
 			</div>
 		</place-jump-filter>
+	</div>
+
+	<div class="p-4 w-full max-w-sm flex flex-col h-full">
+		<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center justify-between">
+			<div class="flex items-center gap-2">
+				<i class="ri-price-tag-3-line text-slate-600"></i>
+				Nach Kategorie
+			</div>
+			<div class="flex items-center gap-1">
+				<i class="ri-arrow-right-line"></i>
+				<a href="/kategorie/" class="text-sm text-slate-600 hover:underline">Kategorien</a>
+			</div>
+		</h3>
+
+		<!-- Category Jump Filter -->
+		<category-jump-filter class="flex-1 flex flex-col min-h-0">
+			<div class="space-y-3 flex flex-col h-full">
+				<div class="flex items-center gap-2">
+					<label for="category-search" class="hidden text-sm text-slate-600 w-16">Filter</label>
+					<input
+						type="text"
+						id="category-search"
+						placeholder="Kategorie eingeben..."
+						autocomplete="off"
+						class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+					>
+				</div>
+
+				<div class="flex-1 min-h-0 overflow-y-auto border border-slate-300 rounded bg-white text-sm">
+					<!-- All Categories List -->
+					<div id="all-categories">
+						{{ range $category := .Categories }}
+							<div class="category-item odd:bg-slate-50 even:bg-white">
+								<a href="/kategorie/{{ $category.ID }}" class="block px-2 py-1 hover:bg-blue-50 border-b border-slate-100 last:border-b-0">
+									<span class="category-name font-medium text-slate-800">{{ $category.Name }}</span>
+									<span class="text-xs text-slate-400 ml-2">ab {{ $category.FirstYear }}</span>
+								</a>
+							</div>
+						{{ end }}
+					</div>
+				</div>
+
+			</div>
+		</category-jump-filter>
 	</div>
 </div>
 

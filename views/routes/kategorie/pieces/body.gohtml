@@ -1,0 +1,153 @@
+{{- /* Category pieces page body - matches single place view layout */ -}}
+<!-- Single Category/Year Detail View -->
+<div class="max-w-7xl mx-auto px-8 py-8">
+	{{- /* Year Navigation with Back Button - Outside main content box */ -}}
+	{{- if .model.AvailableYears -}}
+		<div class="mb-6 w-full">
+			<div class="bg-white px-8 py-6 rounded">
+				<div class="flex items-center justify-between gap-8">
+					{{- /* Back Navigation */ -}}
+					<div class="flex-shrink-0">
+						<a href="/kategorie/" class="inline-flex items-center hover:text-black text-gray-600 transition-colors text-xl no-underline font-bold">
+							<i class="ri-arrow-left-line mr-1 text-xl font-bold"></i>
+							Kategorien
+						</a>
+					</div>
+
+					{{- /* Year Navigation */ -}}
+					<div class="flex flex-row flex-wrap gap-x-6 gap-y-3 items-end leading-none justify-center flex-1">
+						{{- range $yearData := .model.AvailableYears -}}
+							{{- if eq $yearData.Year $.model.Year -}}
+								<!-- This is the active year -->
+								<span class="no-underline leading-none !m-0 !p-0 text-3xl font-bold text-red-600 pointer-events-none" aria-current="true">{{ $yearData.Year }}</span>
+							{{- else -}}
+								<!-- This is an inactive year -->
+								<a href="/kategorie/{{ $.model.Category.ID }}/{{ $yearData.Year }}" class="no-underline leading-none !m-0 !p-0 text-xl font-medium text-gray-700 hover:text-red-600 transition-colors" title="{{ $yearData.PieceCount }} {{ if eq $yearData.PieceCount 1 }}Beitrag{{ else }}Beiträge{{ end }}">{{ $yearData.Year }}</a>
+							{{- end -}}
+						{{- end -}}
+					</div>
+				</div>
+			</div>
+		</div>
+	{{- else -}}
+		{{- /* Fallback: Just back navigation if no years available */ -}}
+		<div class="mb-6">
+			<div class="bg-white px-8 py-6 rounded">
+				<a href="/kategorie/" class="inline-flex items-center hover:text-black text-gray-600 transition-colors text-xl no-underline font-bold">
+					<i class="ri-arrow-left-line mr-1 text-xl font-bold"></i>
+					Kategorien
+				</a>
+			</div>
+		</div>
+	{{- end -}}
+
+	<div class="bg-white px-6 py-6 rounded w-full lg:min-w-[800px] xl:min-w-[900px]">
+
+		{{- /* Category Header */ -}}
+		<div class="mb-8">
+			<div class="flex items-start justify-between gap-4">
+				<div class="flex-1">
+					<h1 class="text-3xl font-bold text-slate-800 mb-2">
+						{{ index .model.Category.Names 0 }}
+					</h1>
+
+					{{- /* Category description */ -}}
+					{{- if .model.CategoryReadable.AnnotationsHTML -}}
+						<div class="text-lg text-slate-700 mb-2">
+							{{- range $annotation := .model.CategoryReadable.AnnotationsHTML -}}
+								<div>{{ $annotation }}</div>
+							{{- end -}}
+						</div>
+					{{- end -}}
+
+					<p class="text-slate-600">
+						<span class="font-medium">{{ .model.PieceCount }}</span>
+						{{ if eq .model.PieceCount 1 }}Beitrag{{ else }}Beiträge{{ end }}
+						in der Kategorie „{{ index .model.Category.Names 0 }}" aus dem Jahr {{ .model.Year }}
+					</p>
+				</div>
+			</div>
+		</div>
+
+		{{- /* Pieces List */ -}}
+		<div>
+			<h2 class="text-xl font-semibold text-slate-800 mb-4">
+				<i class="ri-newspaper-line mr-2"></i><u class="decoration underline-offset-3">Beiträge</u> ({{ .model.PieceCount }})
+			</h2>
+
+			{{- if .model.Pieces -}}
+				<div class="space-y-6 max-w-[85ch]">
+					<div>
+						<h3 class="text-lg font-bold font-serif text-slate-800 mb-3">{{ .model.Year }}</h3>
+
+						<div class="space-y-1">
+							{{- /* Group pieces by title within the year */ -}}
+							{{- $groupedPieces := dict -}}
+							{{- range $_, $p := .model.Pieces -}}
+								{{- $groupKey := "" -}}
+								{{- if $p.Title -}}
+									{{- $groupKey = index $p.Title 0 -}}
+								{{- else if $p.Incipit -}}
+									{{- $groupKey = index $p.Incipit 0 -}}
+								{{- else -}}
+									{{- $groupKey = printf "untitled-%s" $p.ID -}}
+								{{- end -}}
+
+								{{- $existing := index $groupedPieces $groupKey -}}
+								{{- if $existing -}}
+									{{- $groupedPieces = merge $groupedPieces (dict $groupKey (append $existing $p)) -}}
+								{{- else -}}
+									{{- $groupedPieces = merge $groupedPieces (dict $groupKey (slice $p)) -}}
+								{{- end -}}
+							{{- end -}}
+
+							{{- range $groupKey, $groupedItems := $groupedPieces -}}
+								<div>
+									<div class="pb-1 text-lg indent-4">
+										{{- /* Use first piece for display text with colon format for places */ -}}
+										{{ template "_unified_piece_entry" (dict "Piece" (index $groupedItems 0) "CurrentActorID" "" "DisplayMode" "place" "ShowPlaceTags" false "UseColonFormat" true "ShowContinuation" false) }}
+
+										{{- /* Show all citations from all pieces in this group inline with commas */ -}}
+										{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}
+											{{- range $issueIndex, $issue := $groupItem.IssueRefs -}}
+												{{- /* Only show citations for the current year */ -}}
+												{{- if eq $issue.When.Year $.model.Year -}}
+													{{- if or (gt $groupIndex 0) (gt $issueIndex 0) }}, {{ end -}}
+													<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>
+												{{- end -}}
+											{{- end -}}
+										{{- end -}}
+
+										{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+										{{- $firstGroupItem := index $groupedItems 0 -}}
+										{{- if gt (len $firstGroupItem.IssueRefs) 1 -}}
+											{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
+											hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
+											hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+												<i class="ri-file-copy-2-line text-xs"></i>
+												<a href="{{ GetPieceURL $firstGroupItem.ID }}" class="">
+													Ganzer Beitrag
+												</a>
+											</div>
+										{{- end }}
+									</div>
+								</div>
+							{{- end -}}
+						</div>
+					</div>
+				</div>
+			{{- else -}}
+			<div class="bg-slate-50 rounded-lg p-8 text-center">
+				<div class="text-slate-500 mb-2">
+					<svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+					</svg>
+				</div>
+				<h3 class="text-lg font-medium text-slate-900 mb-2">Keine Beiträge gefunden</h3>
+				<p class="text-slate-600">
+					Für die Kategorie „{{ index .model.Category.Names 0 }}" wurden im Jahr {{ .model.Year }} keine Beiträge gefunden.
+				</p>
+			</div>
+		{{- end -}}
+	</div>
+</div>

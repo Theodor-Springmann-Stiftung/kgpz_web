@@ -2,6 +2,7 @@ import "./site.css";
 import "./search.js";
 import "./akteure.js";
 import "./places.js";
+import "./generic-filter.js";
 import { SinglePageViewer } from "./single-page-viewer.js";
 import { ScrollToTopButton } from "./scroll-to-top.js";
 import { InhaltsverzeichnisScrollspy } from "./inhaltsverzeichnis-scrollspy.js";

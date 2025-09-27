@@ -1,23 +1,40 @@
-<div class="max-w-7xl mx-auto px-8 py-8">
-	<div class="mb-10 2xl:mb-0">
-		{{ template "_header_with_toggle" .model }}
-
-		<!-- Alphabet Navigation -->
-		{{ template "_alphabet_nav" .model }}
-	</div>
-
-	<!-- Two Column Layout: Scrollspy + Content -->
+<div class="max-w-none mx-auto px-8">
+	<!-- Two Column Layout: Header+Scrollspy + Content -->
 	<div class="flex gap-8">
+		<!-- Left Column: Header + Scrollspy -->
 		{{ template "_scrollspy_layout" .model }}
 
+		<!-- Mobile Header (shown on smaller screens) -->
+		<div class="2xl:hidden mb-10 w-full">
+			{{ template "_header_with_toggle" .model }}
+		</div>
+
 		<!-- People List - Main Content -->
-		<div class="flex-1 space-y-6 bg-white">
+		<div class="flex-1 space-y-6 flex flex-col">
+			<!-- Alphabet Navigation -->
+			<div class="mb-6 w-full pt-4">
+				<div class="bg-white px-8 py-4 rounded">
+					<div class="mx-auto flex flex-row flex-wrap gap-x-6 gap-y-3 w-fit items-end leading-none justify-center">
+						{{ range $_, $l := .model.AvailableLetters }}
+							{{ if eq $l (Upper $.model.Search) }}
+								<!-- This is the active letter -->
+								<span class="no-underline leading-none !m-0 !p-0 text-3xl font-bold text-red-600 pointer-events-none" aria-current="true">{{ $l }}</span>
+							{{ else }}
+								<!-- This is an inactive letter -->
+								<a href="/akteure/{{ $l }}" class="no-underline leading-none !m-0 !p-0 text-xl font-medium text-gray-700 hover:text-red-600 transition-colors">{{ $l }}</a>
+							{{ end }}
+						{{ end }}
+					</div>
+				</div>
+			</div>
+			<dv class="flex-1 space-y-6 bg-white">
 			{{ range $_, $id := $.model.Sorted }}
 				{{ $a := index $.model.Agents $id }}
 				<div id="author-{{ $id }}" class="p-6 scroll-mt-8 author-section">
 					{{ template "_akteur" $a }}
 				</div>
 			{{ end }}
+			</div>
 		</div>
 	</div>
 </div>
