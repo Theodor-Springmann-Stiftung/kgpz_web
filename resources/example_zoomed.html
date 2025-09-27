@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Static SVG Map with Plotted Points</title>
+	<!-- Tailwind CSS via CDN -->
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="font-sans bg-gray-50 flex flex-col items-center p-8 text-gray-800">
+
+	<div class="text-center mb-8">
+		<h1 class="text-4xl font-bold">Map of European Places</h1>
+		<p class="text-gray-500 mt-2">A static projected SVG image with points layered on top.</p>
+	</div>
+
+	<!-- The viewport enforces the 5:7 aspect ratio and crops the content -->
+	<div
+		class="viewport relative w-full max-w-4xl aspect-[5/7] overflow-hidden rounded-xl shadow-2xl border border-gray-200 bg-teal-100">
+		<!-- The wrapper will be scaled and moved by JS, but will not be distorted -->
+		<div class="transform-wrapper absolute top-0 left-0 w-full h-auto origin-top-left">
+			<img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Europe_laea_location_map.svg"
+				alt="Projected map of Europe" class="block w-full h-auto">
+			<div id="points-container" class="absolute top-0 left-0 w-full h-full"></div>
+		</div>
+	</div>
+
+	<script>
+		const places = [
+			{"id": "altdorf", "name": "Altdorf b.Nürnberg", "lat": "49.3875", "lng": "11.3572"},
+			{"id": "altenburg", "name": "Altenburg", "lat": "50.98148", "lng": "12.43608"},
+			{"id": "altona", "name": "Altona", "lat": "53.57358", "lng": "9.84241"},
+			{"id": "altorf", "name": "Altorf", "lat": "48.52222", "lng": "7.52833"},
+			{"id": "amsterdam", "name": "Amsterdam", "lat": "52.37403", "lng": "4.88969"},
+			{"id": "ansbach", "name": "Ansbach", "lat": "49.3007", "lng": "10.5692"},
+			{"id": "augsburg", "name": "Augsburg", "lat": "48.36733", "lng": "10.89213"},
+			{"id": "aurich", "name": "Aurich", "lat": "53.47187", "lng": "7.47753"},
+			{"id": "bamberg", "name": "Bamberg", "lat": "49.89873", "lng": "10.90067"},
+			{"id": "basel", "name": "Basel", "lat": "47.55773", "lng": "7.59361"},
+			{"id": "bautzen", "name": "Bautzen/Budyšin", "lat": "51.18251", "lng": "14.4292"},
+			{"id": "bayreuth", "name": "Bayreuth", "lat": "49.9461", "lng": "11.57616"},
+			{"id": "berlin", "name": "Berlin", "lat": "52.52437", "lng": "13.41053"},
+			{"id": "bernburg", "name": "Bernburg", "lat": "51.79464", "lng": "11.7401"},
+			{"id": "bern", "name": "Bern", "lat": "46.94809", "lng": "7.44744"},
+			{"id": "brandenburg", "name": "Brandenburg an der Havel", "lat": "52.4189", "lng": "12.5228"},
+			{"id": "braunschweig", "name": "Braunschweig", "lat": "52.26471", "lng": "10.52333"},
+			{"id": "bremen", "name": "Bremen", "lat": "53.07582", "lng": "8.80717"},
+			{"id": "breslau", "name": "Wrocław", "lat": "51.1", "lng": "17.03333"},
+			{"id": "buetzow", "name": "Bützow", "lat": "53.8173", "lng": "11.9992"},
+			{"id": "celle", "name": "Celle", "lat": "52.61748", "lng": "10.08502"},
+			{"id": "chemnitz", "name": "Chemnitz", "lat": "50.83506", "lng": "12.92217"},
+			{"id": "coburg", "name": "Coburg", "lat": "50.25937", "lng": "10.96384"},
+			{"id": "danzig", "name": "Gdańsk", "lat": "54.35227", "lng": "18.64912"},
+			{"id": "den-haag", "name": "The Hague", "lat": "52.07667", "lng": "4.29861"},
+			{"id": "dresden", "name": "Kreisfreie Stadt Dresden", "lat": "51.0833", "lng": "13.7666"},
+			{"id": "eisenach", "name": "Eisenach", "lat": "50.97443", "lng": "10.33407"},
+			{"id": "eisleben", "name": "Eisleben, Lutherstadt", "lat": "51.5258", "lng": "11.5345"},
+			{"id": "erfurt", "name": "Erfurt", "lat": "50.97456", "lng": "11.02974"},
+			{"id": "erlangen", "name": "Erlangen", "lat": "49.5888", "lng": "11.00977"},
+			{"id": "flensburg", "name": "Flensburg", "lat": "54.78624", "lng": "9.43064"},
+			{"id": "frankfurt", "name": "Frankfurt am Main", "lat": "50.11035", "lng": "8.67185"},
+			{"id": "frankfurt-oder", "name": "Frankfurt (Oder)", "lat": "52.34714", "lng": "14.55062"},
+			{"id": "genf", "name": "Genève", "lat": "46.20576", "lng": "6.14161"},
+			{"id": "giessen", "name": "Gießen, Universitätsstadt", "lat": "50.58485", "lng": "8.67417"},
+			{"id": "glogau", "name": "Głogów", "lat": "51.66361", "lng": "16.0845"},
+			{"id": "goerlitz", "name": "Görlitz", "lat": "51.1503", "lng": "14.9829"},
+			{"id": "goettingen", "name": "Göttingen", "lat": "51.51297", "lng": "9.95353"},
+			{"id": "gotha", "name": "Gotha", "lat": "50.94823", "lng": "10.70193"},
+			{"id": "graz", "name": "Graz", "lat": "47.07493", "lng": "15.44089"},
+			{"id": "greifswald", "name": "Greifswald", "lat": "54.08809", "lng": "13.38756"},
+			{"id": "haarlem", "name": "Gemeente Haarlem", "lat": "52.38074", "lng": "4.644"},
+			{"id": "halberstadt", "name": "Halberstadt", "lat": "51.8883", "lng": "11.0572"},
+			{"id": "halle", "name": "Halle (Saale)", "lat": "51.48158", "lng": "11.97947"},
+			{"id": "hamburg", "name": "Hamburg", "lat": "53.55073", "lng": "9.99302"},
+			{"id": "hamm", "name": "Hamm", "lat": "51.68021", "lng": "7.81335"},
+			{"id": "hanau", "name": null, "lat": null, "lng": null},
+			{"id": "hannover", "name": "Hannover, Landeshauptstadt", "lat": "52.37362", "lng": "9.73711"},
+			{"id": "hasenpoth", "name": "Aizpute", "lat": "56.72108", "lng": "21.60156"},
+			{"id": "heilbronn", "name": "Heilbronn", "lat": "49.1423", "lng": "9.22343"},
+			{"id": "helmstedt", "name": "Helmstedt", "lat": "52.2279", "lng": "11.00985"},
+			{"id": "hildburghausen", "name": "Hildburghausen", "lat": "50.4265", "lng": "10.7259"},
+			{"id": "hof", "name": "Hof", "lat": "50.32093", "lng": "11.9172"},
+			{"id": "jena", "name": "Jena", "lat": "50.9326", "lng": "11.58678"},
+			{"id": "karlsruhe", "name": "Karlsruhe", "lat": "49.0083", "lng": "8.39786"},
+			{"id": "kassel", "name": "Kassel", "lat": "51.31661", "lng": "9.49116"},
+			{"id": "kgsb", "name": "Kaliningrad", "lat": "54.70649", "lng": "20.51095"},
+			{"id": "kiel", "name": "Kiel", "lat": "54.32133", "lng": "10.13489"},
+			{"id": "kleve", "name": "Kleve", "lat": "51.78655", "lng": "6.1375"},
+			{"id": "koeln", "name": "Köln", "lat": "50.93333", "lng": "6.95"},
+			{"id": "kopenhagen", "name": "Copenhagen", "lat": "55.67594", "lng": "12.56553"},
+			{"id": "langensalza", "name": "Bad Langensalza", "lat": "51.1111", "lng": "10.6542"},
+			{"id": "lausanne", "name": "Lausanne", "lat": "46.52178", "lng": "6.633"},
+			{"id": "leipzig", "name": "Leipzig", "lat": "51.33962", "lng": "12.37129"},
+			{"id": "lemgo", "name": "Lemgo", "lat": "52.02768", "lng": "8.9043"},
+			{"id": "liegnitz", "name": "Legnica", "lat": "51.20473", "lng": "16.15834"},
+			{"id": "lindau", "name": "Lindau", "lat": "47.54612", "lng": "9.68431"},
+			{"id": "london", "name": "London", "lat": "51.49227", "lng": "-0.30864"},
+			{"id": "luebeck", "name": "Lübeck, Hansestadt", "lat": "53.86893", "lng": "10.68729"},
+			{"id": "lyon", "name": "Lyon", "lat": "45.75889", "lng": "4.84139"},
+			{"id": "magdeburg", "name": "Magdeburg", "lat": "52.12773", "lng": "11.62916"},
+			{"id": "mannheim", "name": "Mannheim", "lat": "49.4891", "lng": "8.46694"},
+			{"id": "meiningen", "name": "Käärmetvaara", "lat": "65", "lng": "28.7"},
+			{"id": "memmingen", "name": "Memmingen", "lat": "47.98257", "lng": "10.17254"},
+			{"id": "minden", "name": "Minden", "lat": "52.28726", "lng": "8.92433"},
+			{"id": "mitau", "name": "Jelgava", "lat": "56.65", "lng": "23.71278"},
+			{"id": "muenchen", "name": "Kreisfreie Stadt München", "lat": "48.15389", "lng": "11.54806"},
+			{"id": "muenster", "name": "Münster", "lat": "51.95973", "lng": "7.63137"},
+			{"id": "neuchatel", "name": "Neuchâtel", "lat": "46.99179", "lng": "6.931"},
+			{"id": "nuernberg", "name": "Nürnberg", "lat": "49.45421", "lng": "11.07752"},
+			{"id": "odense", "name": "Odense Kommune", "lat": "55.3957", "lng": "10.37761"},
+			{"id": "oehringen", "name": "Öhringen", "lat": "49.20117", "lng": "9.50217"},
+			{"id": "paris", "name": "Paris", "lat": "48.8534", "lng": "2.3486"},
+			{"id": "potsdam", "name": "Potsdam", "lat": "52.39886", "lng": "13.06566"},
+			{"id": "prag", "name": "Prague", "lat": "50.08804", "lng": "14.42076"},
+			{"id": "pressburg", "name": "Bratislava", "lat": "48.14816", "lng": "17.10674"},
+			{"id": "preussisch-holland", "name": "Pasłęk", "lat": "54.0611", "lng": "19.6668"},
+			{"id": "quedlinburg", "name": "Quedlinburg", "lat": "51.79", "lng": "11.162"},
+			{"id": "regensburg", "name": "Regensburg", "lat": "49.01681", "lng": "12.09536"},
+			{"id": "riga", "name": "Rīga", "lat": "56.97778", "lng": "24.12167"},
+			{"id": "rinteln", "name": "Rinteln", "lat": "52.1733", "lng": "9.11953"},
+			{"id": "rostock", "name": "Rostock", "lat": "54.0887", "lng": "12.14049"},
+			{"id": "schleswig", "name": "Schleswig", "lat": "54.52021", "lng": "9.56829"},
+			{"id": "schwabach", "name": "Schwabach", "lat": "49.60826", "lng": "10.99811"},
+			{"id": "schwerin", "name": "Kreisfreie Stadt Schwerin", "lat": "53.63333", "lng": "11.41667"},
+			{"id": "sorau", "name": "Żary", "lat": "51.64205", "lng": "15.13727"},
+			{"id": "stendal", "name": "Stendal", "lat": "52.6052", "lng": "11.86043"},
+			{"id": "stettin", "name": "Szczecin", "lat": "53.42894", "lng": "14.55302"},
+			{"id": "stockholm", "name": "Stockholm", "lat": "59.32938", "lng": "18.06871"},
+			{"id": "stpetersburg", "name": "Sankt-Peterburg", "lat": "59.91667", "lng": "30.25"},
+			{"id": "stralsund", "name": "Stralsund, Hansestadt", "lat": "54.30242", "lng": "13.09284"},
+			{"id": "strassburg", "name": "Strasbourg", "lat": "48.58361", "lng": "7.74806"},
+			{"id": "stuttgart", "name": "Stuttgart", "lat": "48.78232", "lng": "9.17702"},
+			{"id": "tuebingen", "name": null, "lat": null, "lng": null},
+			{"id": "ulm", "name": "Ulm", "lat": "48.39841", "lng": "9.99155"},
+			{"id": "warschau", "name": "Warszawa", "lat": "52.2331", "lng": "21.0614"},
+			{"id": "weimar", "name": "Weimar", "lat": "50.98038", "lng": "11.3263"},
+			{"id": "wien", "name": "Wien", "lat": "48.2082", "lng": "16.37169"},
+			{"id": "wismar", "name": "Wismar, Hansestadt", "lat": "53.9", "lng": "11.46667"},
+			{"id": "wittenberg", "name": "Wittenberg, Lutherstadt", "lat": "51.87437", "lng": "12.60603"},
+			{"id": "wolfenbuettel", "name": "Wolfenbüttel", "lat": "52.1578", "lng": "10.5579"},
+			{"id": "zelle", "name": "Zelle", "lat": "51.15868", "lng": "4.77287"},
+			{"id": "zerbst", "name": "Zerbst", "lat": "51.9598", "lng": "12.093"},
+			{"id": "zittau", "name": "Zittau", "lat": "50.9078", "lng": "14.8011"},
+			{"id": "zuellichau", "name": "Sulechów", "lat": "52.08362", "lng": "15.62513"},
+			{"id": "zuerich", "name": "Bezirk Zürich", "lat": "47.3711", "lng": "8.54323"}
+		];
+
+		const MAP_EXTENT_METERS = {xmin: 2555000, ymin: 1350000, xmax: 7405000, ymax: 5500000};
+		const PROJECTION_CENTER = {lon: 10, lat: 52};
+
+		function convertLatLngToPercent(lat, lng) {
+			const R = 6371000;
+			const FE = 4321000;
+			const FN = 3210000;
+			const lon_0_rad = PROJECTION_CENTER.lon * Math.PI / 180;
+			const lat_0_rad = PROJECTION_CENTER.lat * Math.PI / 180;
+			const lon_rad = lng * Math.PI / 180;
+			const lat_rad = lat * Math.PI / 180;
+			const k_prime = Math.sqrt(2 / (1 + Math.sin(lat_0_rad) * Math.sin(lat_rad) + Math.cos(lat_0_rad) * Math.cos(lat_rad) * Math.cos(lon_rad - lon_0_rad)));
+			const x_proj = R * k_prime * Math.cos(lat_rad) * Math.sin(lon_rad - lon_0_rad);
+			const y_proj = R * k_prime * (Math.cos(lat_0_rad) * Math.sin(lat_rad) - Math.sin(lat_0_rad) * Math.cos(lat_rad) * Math.cos(lon_rad - lon_0_rad));
+			const finalX = x_proj + FE;
+			const finalY = y_proj + FN;
+			const mapWidthMeters = MAP_EXTENT_METERS.xmax - MAP_EXTENT_METERS.xmin;
+			const mapHeightMeters = MAP_EXTENT_METERS.ymax - MAP_EXTENT_METERS.ymin;
+			const xPercent = (finalX - MAP_EXTENT_METERS.xmin) / mapWidthMeters * 100;
+			const yPercent = (MAP_EXTENT_METERS.ymax - finalY) / mapHeightMeters * 100;
+			return {x: xPercent, y: yPercent};
+		}
+
+		const pointsContainer = document.getElementById('points-container');
+		const pointPositions = [];
+
+		places.forEach(place => {
+			if (place.id && place.lat && place.lng) {
+				const lat = parseFloat(place.lat);
+				const lng = parseFloat(place.lng);
+				const position = convertLatLngToPercent(lat, lng);
+				if (position.x >= 0 && position.x <= 100 && position.y >= 0 && position.y <= 100) {
+					pointPositions.push(position);
+					const point = document.createElement('div');
+					point.className = 'map-point absolute w-2 h-2 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2';
+					point.style.left = `${position.x}%`;
+					point.style.top = `${position.y}%`;
+					point.title = place.name;
+					point.dataset.location = place.id; // Add data-location attribute
+					pointsContainer.appendChild(point);
+				}
+			}
+		});
+
+		if (pointPositions.length > 0) {
+			let minX = 100, maxX = 0, minY = 100, maxY = 0;
+			pointPositions.forEach(pos => {
+				if (pos.x < minX) minX = pos.x;
+				if (pos.x > maxX) maxX = pos.x;
+				if (pos.y < minY) minY = pos.y;
+				if (pos.y > maxY) maxY = pos.y;
+			});
+
+			const width = maxX - minX;
+			const height = maxY - minY;
+			const paddingX = width * 0.05;
+			const paddingY = height * 0.05;
+
+			const paddedMinX = Math.max(0, minX - paddingX);
+			const paddedMaxX = Math.min(100, maxX + paddingX);
+			const paddedMinY = Math.max(0, minY - paddingY);
+			const paddedMaxY = Math.min(100, maxY + paddingY);
+
+			const newWidth = paddedMaxX - paddedMinX;
+			const newHeight = paddedMaxY - paddedMinY;
+
+			const targetAspectRatio = 5 / 7;
+			const pointsAspectRatio = newWidth / newHeight;
+
+			let finalViewBox = {x: paddedMinX, y: paddedMinY, width: newWidth, height: newHeight};
+
+			if (pointsAspectRatio > targetAspectRatio) {
+				const newTargetHeight = newWidth / targetAspectRatio;
+				finalViewBox.y = paddedMinY - (newTargetHeight - newHeight) / 2;
+				finalViewBox.height = newTargetHeight;
+			} else {
+				const newTargetWidth = newHeight * targetAspectRatio;
+				finalViewBox.x = paddedMinX - (newTargetWidth - newWidth) / 2;
+				finalViewBox.width = newTargetWidth;
+			}
+
+			const scale = 100 / finalViewBox.width;
+			const translateX = -finalViewBox.x;
+			const translateY = -finalViewBox.y;
+
+			const transformValue = `scale(${scale}) translate(${translateX}%, ${translateY}%)`;
+
+			const transformWrapper = document.querySelector('.transform-wrapper');
+			transformWrapper.style.transform = transformValue;
+		}
+	</script>
+</body>
+
+</html>
