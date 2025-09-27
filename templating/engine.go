@@ -497,7 +497,7 @@ func (e *Engine) Render(out io.Writer, path string, data interface{}, layout ...
 		l = lay
 	} else {
 		if layout[0] == "clear" {
-			lay, err := template.New("clear").Parse(CLEAR_LAYOUT)
+			lay, err := template.New("clear").Funcs(e.FuncMap).Parse(CLEAR_LAYOUT)
 			if err != nil {
 				return err
 			}

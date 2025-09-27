@@ -127,6 +127,7 @@ func GetQuickFilter(kgpz *xmlmodels.Library) fiber.Handler {
 				placeSummary := PlaceSummary{
 					ID:   place.ID,
 					Name: name,
+					Geo:  place.Geo,
 				}
 
 				places = append(places, placeSummary)
@@ -164,6 +165,7 @@ type PersonSummary struct {
 type PlaceSummary struct {
 	ID   string
 	Name string
+	Geo  string
 }
 
 // IssueSummary represents an issue for the Jahr/Ausgabe filter

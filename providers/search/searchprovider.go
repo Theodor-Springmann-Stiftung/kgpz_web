@@ -2,6 +2,7 @@ package searchprovider
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"sync"
 
@@ -160,4 +161,30 @@ func default_mapping() (*mapping.IndexMappingImpl, error) {
 
 	indexMapping.DefaultAnalyzer = "customNgramAnalyzer"
 	return indexMapping, nil
+}
+
+// ClearAllIndices closes and removes all search indices
+func (sp *SearchProvider) ClearAllIndices() error {
+	// Close all open indices
+	sp.indeces.Range(func(key, value interface{}) bool {
+		if index, ok := value.(bleve.Index); ok {
+			index.Close()
+		}
+		return true
+	})
+
+	// Clear the sync.Map
+	sp.indeces = sync.Map{}
+
+	// Remove all .bleve directories from disk
+	files, err := filepath.Glob(filepath.Join(sp.basepath, "*.bleve"))
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		os.RemoveAll(file)
+	}
+
+	return nil
 }

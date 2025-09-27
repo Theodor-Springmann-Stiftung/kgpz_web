@@ -11,7 +11,7 @@
 				<!-- Year Selection -->
 				<div class="flex items-center gap-2 mb-4">
 					<label for="year-select" class="text-sm text-slate-600 w-12 hidden">Jahr wählen...</label>
-					<select id="year-select" class="tabular-nums flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" style="max-height: 200px; overflow-y: auto;">
+					<select id="year-select" autocomplete="off" class="tabular-nums flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" style="max-height: 200px; overflow-y: auto;">
 						<option value="">Jahr wählen</option>
 						{{ range $year := .AvailableYears }}
 							<option value="{{ $year }}">{{ $year }}</option>
@@ -21,10 +21,10 @@
 
 				<!-- Ausgabe Selection - Two Selects -->
 				<div class="flex items-center gap-2">
-					<select id="issue-number-select" disabled class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed">
+					<select id="issue-number-select" disabled autocomplete="off" class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed">
 						<option value="">Nr.</option>
 					</select>
-					<select id="issue-date-select" disabled class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed">
+					<select id="issue-date-select" disabled autocomplete="off" class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed">
 						<option value="">Datum</option>
 					</select>
 				</div>
@@ -39,7 +39,7 @@
 				<!-- Page Input -->
 				<div class="flex items-center gap-2">
 					<label for="page-input" class="text-sm text-slate-600 w-12 hidden"> oder Seite eingeben...</label>
-					<input type="number" id="page-input" min="1" placeholder="Seite eingeben" disabled class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500">
+					<input type="number" id="page-input" min="1" placeholder="Seite eingeben" disabled autocomplete="off" class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500">
 				</div>
 
 				<!-- Page Jump Button -->
@@ -75,6 +75,7 @@
 						type="text"
 						id="person-search"
 						placeholder="Name oder Lebensdaten eingeben..."
+						autocomplete="off"
 						class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
 					>
 				</div>
@@ -143,6 +144,7 @@
 						type="text"
 						id="place-search"
 						placeholder="Ortsname eingeben..."
+						autocomplete="off"
 						class="flex-1 px-2 py-1 border border-slate-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
 					>
 				</div>
@@ -154,6 +156,10 @@
 							<div class="place-item odd:bg-slate-50 even:bg-white">
 								<a href="/ort/{{ $place.ID }}" class="block px-2 py-1 hover:bg-blue-50 border-b border-slate-100 last:border-b-0">
 									<span class="place-name font-medium text-slate-800">{{ $place.Name }}</span>
+									{{ $modernName := GetModernPlaceName $place.Geo $place.Name }}
+									{{ if ne $modernName "" }}
+										<span class="text-xs text-slate-400 ml-2">{{ $modernName }}</span>
+									{{ end }}
 								</a>
 							</div>
 						{{ end }}

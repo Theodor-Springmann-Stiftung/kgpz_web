@@ -1,0 +1,42 @@
+{{- /* Individual place card for overview grid */ -}}
+{{ $geonames := GetGeonames .Geo }}
+{{ $mainPlaceName := "" }}
+{{ if .Names }}
+	{{ $mainPlaceName = index .Names 0 }}
+{{ else }}
+	{{ $mainPlaceName = .ID }}
+{{ end }}
+{{ $modernName := GetModernPlaceName .Geo $mainPlaceName }}
+<div class="border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors h-20" data-place-name="{{ $mainPlaceName }}" data-modern-name="{{ $modernName }}">
+	<a href="/ort/{{ .ID }}" class="block p-4 h-full flex flex-col justify-between">
+		<div class="flex items-start justify-between gap-2">
+			<div class="flex-1">
+				<h3 class="font-medium text-slate-800 mb-1">
+					{{ if .Names }}
+						{{ index .Names 0 }}
+					{{ else }}
+						{{ .ID }}
+					{{ end }}
+				</h3>
+				<!-- Show geographic info if available (only if not Germany) -->
+				{{ if ne $geonames nil }}
+					{{ $mainPlaceName := "" }}
+					{{ if .Names }}
+						{{ $mainPlaceName = index .Names 0 }}
+					{{ end }}
+					{{ $fullInfo := GetFullPlaceInfo .Geo $mainPlaceName }}
+					{{ if ne $fullInfo "" }}
+						<p class="text-sm text-slate-600 mb-1">
+							<i class="ri-map-pin-line mr-1"></i>{{ $fullInfo }}
+						</p>
+					{{ end }}
+				{{ else if .Geo }}
+					<p class="text-sm text-slate-600">
+						<i class="ri-map-pin-line mr-1"></i>Geonames verfügbar
+					</p>
+				{{ end }}
+			</div>
+
+		</div>
+	</a>
+</div>

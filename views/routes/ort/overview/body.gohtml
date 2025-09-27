@@ -1,0 +1,27 @@
+<!-- Places Overview -->
+<div class="max-w-7xl mx-auto px-8 py-8">
+	<div class="bg-white px-6 py-6 rounded w-full">
+		<h1 class="text-3xl font-bold text-slate-800 mb-8">Orte</h1>
+
+		<!-- Places List -->
+		{{ if .model.Places }}
+			<div>
+				<!-- Search Filter -->
+				<places-filter></places-filter>
+
+				<h2 class="text-lg font-semibold text-slate-700 mb-4" data-places-count>
+					Alle Orte ({{ len .model.Places }})
+				</h2>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:min-w-[768px] xl:min-w-[1024px]">
+					{{ range $placeID := .model.Sorted }}
+						{{ $place := index $.model.Places $placeID }}
+						{{ template "_place_card" $place }}
+					{{ end }}
+				</div>
+			</div>
+		{{ else }}
+			<p class="text-slate-500 italic">Keine Orte gefunden.</p>
+		{{ end }}
+	</div>
+</div>

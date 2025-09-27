@@ -1,0 +1,36 @@
+{{ $place := .model.SelectedPlace.Place }}
+<title>{{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }} - KGPZ</title>
+<meta name="description" content="Informationen zu {{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }} in der Königsberger Gelehrten und Politischen Zeitung.">
+<meta name="keywords" content="{{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }}, Ort, KGPZ, Königsberg, Zeitung">
+
+<!-- Open Graph tags for social media -->
+<meta property="og:title" content="{{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }} - KGPZ">
+<meta property="og:description" content="Informationen zu {{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }} in der Königsberger Gelehrten und Politischen Zeitung.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="/ort/{{ $place.ID }}">
+
+<!-- JSON-LD structured data -->
+{{ $geonames := GetGeonames $place.Geo }}
+{{ if ne $geonames nil }}
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "Place",
+		"name": "{{ if $place.Names }}{{ index $place.Names 0 }}{{ else }}{{ $place.ID }}{{ end }}",
+		"description": "Historischer Ort erwähnt in der Königsberger Gelehrten und Politischen Zeitung"{{ if or (and (ne $geonames.Lat "") (ne $geonames.Lng "")) (ne $geonames.CountryName "") (ne $place.Geo "") }},{{ end }}
+		{{ if and (ne $geonames.Lat "") (ne $geonames.Lng "") }}
+		"geo": {
+			"@type": "GeoCoordinates",
+			"latitude": {{ $geonames.Lat }},
+			"longitude": {{ $geonames.Lng }}
+		}{{ if or (ne $geonames.CountryName "") (ne $place.Geo "") }},{{ end }}
+		{{ end }}
+		{{ if ne $geonames.CountryName "" }}
+		"addressCountry": "{{ $geonames.CountryName }}"{{ if ne $place.Geo "" }},{{ end }}
+		{{ end }}
+		{{ if ne $place.Geo "" }}
+		"sameAs": "{{ $place.Geo }}"
+		{{ end }}
+	}
+	</script>
+{{ end }}

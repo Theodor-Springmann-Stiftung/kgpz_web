@@ -1,0 +1,8 @@
+<!-- Single Place Detail View -->
+<div class="max-w-7xl mx-auto px-8 py-8">
+	<div class="bg-white px-6 py-6 rounded w-full lg:min-w-[800px] xl:min-w-[900px]">
+		{{ template "_back_navigation" . }}
+		{{ template "_place_header" .model.SelectedPlace }}
+		{{ template "_place_pieces" .model.SelectedPlace }}
+	</div>
+</div>

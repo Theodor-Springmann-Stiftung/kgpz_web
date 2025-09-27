@@ -33,8 +33,17 @@ func GetPlace(kgpz *xmlmodels.Library) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		return c.Render("/ort/", fiber.Map{
-			"model": places,
-		})
+		// Render different templates based on whether we're showing list or detail view
+		if places.SelectedPlace != nil {
+			// Individual place detail view
+			return c.Render("/ort/detail/", fiber.Map{
+				"model": places,
+			})
+		} else {
+			// Places overview/list view
+			return c.Render("/ort/overview/", fiber.Map{
+				"model": places,
+			})
+		}
 	}
 }

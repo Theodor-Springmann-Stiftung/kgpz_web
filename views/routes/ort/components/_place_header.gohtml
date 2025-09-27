@@ -1,0 +1,71 @@
+{{- /* Place header with name, geographic info, and external links */ -}}
+<!-- Place Header -->
+<div class="mb-8">
+	{{ $geonames := GetGeonames .Place.Geo }}
+
+	<!-- Name and external links - similar to akteure header -->
+	<div class="flex items-start justify-between gap-4">
+		<div class="flex-1">
+			<h1 class="text-3xl font-bold text-slate-800 mb-2">
+				{{ if .Place.Names }}
+					{{ index .Place.Names 0 }}
+				{{ else }}
+					{{ .Place.ID }}
+				{{ end }}
+			</h1>
+
+			<!-- Geographic Information from Geonames -->
+			{{ if ne $geonames nil }}
+				<div class="text-lg text-slate-700 mb-2">
+					<!-- Modern Country Info (only if not Germany) -->
+					{{ $mainPlaceName := "" }}
+					{{ if .Place.Names }}
+						{{ $mainPlaceName = index .Place.Names 0 }}
+					{{ end }}
+					{{ $fullInfo := GetFullPlaceInfo .Place.Geo $mainPlaceName }}
+					{{ if ne $fullInfo "" }}
+						<div class="mb-1">{{ $fullInfo }}</div>
+					{{ end }}
+
+					<!-- Coordinates -->
+					<div class="text-slate-600 text-base space-y-1">
+						{{ if and (ne $geonames.Lat "") (ne $geonames.Lng "") }}
+							<div>
+								<i class="ri-map-pin-line mr-1"></i><a href="https://www.openstreetmap.org/?mlat={{ $geonames.Lat }}&mlon={{ $geonames.Lng }}&zoom=12" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">{{ $geonames.Lat }}, {{ $geonames.Lng }}</a>
+							</div>
+						{{ end }}
+					</div>
+				</div>
+			{{ else }}
+				<!-- Fallback when no Geonames data -->
+				{{ if .Place.Geo }}
+					<p class="text-slate-600 mb-2">
+						<i class="ri-map-pin-line mr-1"></i>
+						<a href="{{ .Place.Geo }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">
+							Geonames
+						</a>
+					</p>
+				{{ end }}
+			{{ end }}
+		</div>
+
+		<!-- External link symbols on the right - similar to akteure -->
+		<div class="flex gap-3 flex-shrink-0 items-center">
+			{{ if ne $geonames nil }}
+				<!-- Wikipedia link if available -->
+				{{ if ne $geonames.WikipediaURL "" }}
+					<a href="https://{{ $geonames.WikipediaURL }}" target="_blank" class="hover:opacity-80 transition-opacity" title="Wikipedia">
+						<img src="/assets/wikipedia.png" alt="Wikipedia" class="w-6 h-6">
+					</a>
+				{{ end }}
+			{{ end }}
+
+			<!-- Geonames link -->
+			{{ if .Place.Geo }}
+				<a href="{{ .Place.Geo }}" target="_blank" class="hover:opacity-80 transition-opacity no-underline" title="Geonames">
+					<i class="ri-global-line text-xl text-blue-600"></i>
+				</a>
+			{{ end }}
+		</div>
+	</div>
+</div>

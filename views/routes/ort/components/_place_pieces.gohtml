@@ -1,0 +1,98 @@
+{{- /* Associated pieces section for place detail view */ -}}
+<!-- Associated Pieces -->
+<div>
+	<h2 class="text-xl font-semibold text-slate-800 mb-4">
+		<i class="ri-newspaper-line mr-2"></i><u class="decoration underline-offset-3">Verlinkte Beiträge</u> ({{ len .Pieces }})
+	</h2>
+
+	{{ if .Pieces }}
+		{{- /* Group pieces by year */ -}}
+		{{- $piecesByYear := dict -}}
+		{{- range $_, $p := .Pieces -}}
+			{{- range $issueRef := $p.IssueRefs -}}
+				{{- $year := printf "%d" $issueRef.When.Year -}}
+				{{- $existing := index $piecesByYear $year -}}
+				{{- if $existing -}}
+					{{- $piecesByYear = merge $piecesByYear (dict $year (append $existing $p)) -}}
+				{{- else -}}
+					{{- $piecesByYear = merge $piecesByYear (dict $year (slice $p)) -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+
+		{{- /* Get sorted years */ -}}
+		{{- $sortedYears := slice -}}
+		{{- range $year, $pieces := $piecesByYear -}}
+			{{- $sortedYears = append $sortedYears $year -}}
+		{{- end -}}
+		{{- $sortedYears = sortStrings $sortedYears -}}
+
+		<div class="space-y-6 max-w-[85ch]">
+			{{- range $year := $sortedYears -}}
+				{{- $yearPieces := index $piecesByYear $year -}}
+
+				<!-- Year Header -->
+				<div>
+					<h3 class="text-lg font-bold font-serif text-slate-800 mb-3">{{ $year }}</h3>
+
+					<div class="space-y-1">
+						{{- /* Group pieces by title within each year */ -}}
+						{{- $groupedPieces := dict -}}
+						{{- range $_, $p := $yearPieces -}}
+							{{- $groupKey := "" -}}
+							{{- if $p.Title -}}
+								{{- $groupKey = index $p.Title 0 -}}
+							{{- else if $p.Incipit -}}
+								{{- $groupKey = index $p.Incipit 0 -}}
+							{{- else -}}
+								{{- $groupKey = printf "untitled-%s" $p.ID -}}
+							{{- end -}}
+
+							{{- $existing := index $groupedPieces $groupKey -}}
+							{{- if $existing -}}
+								{{- $groupedPieces = merge $groupedPieces (dict $groupKey (append $existing $p)) -}}
+							{{- else -}}
+								{{- $groupedPieces = merge $groupedPieces (dict $groupKey (slice $p)) -}}
+							{{- end -}}
+						{{- end -}}
+
+						{{- range $groupKey, $groupedItems := $groupedPieces -}}
+							<div>
+								<div class="pb-1 text-lg indent-4">
+									{{- /* Use first piece for display text with colon format for places */ -}}
+									{{ template "_piece_summary_for_place" (dict "Piece" (index $groupedItems 0) "CurrentActorID" "") }}
+
+									{{- /* Show all citations from all pieces in this group inline with commas */ -}}
+									{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}
+										{{- range $issueIndex, $issue := $groupItem.IssueRefs -}}
+											{{- /* Only show citations for the current year */ -}}
+											{{- if eq (printf "%d" $issue.When.Year) $year -}}
+												{{- if or (gt $groupIndex 0) (gt $issueIndex 0) }}, {{ end -}}
+												<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>
+											{{- end -}}
+										{{- end -}}
+									{{- end -}}
+
+									{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+									{{- $firstGroupItem := index $groupedItems 0 -}}
+									{{- if gt (len $firstGroupItem.IssueRefs) 1 -}}
+										{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
+										hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
+										hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+											<i class="ri-file-copy-2-line text-xs"></i>
+											<a href="{{ GetPieceURL $firstGroupItem.ID }}" class="">
+												Ganzer Beitrag
+											</a>
+										</div>
+									{{- end }}
+								</div>
+							</div>
+						{{- end -}}
+					</div>
+				</div>
+			{{- end -}}
+		</div>
+	{{ else }}
+		<p class="text-slate-500 italic">Keine verlinkten Beiträge für diesen Ort gefunden.</p>
+	{{ end }}
+</div>
