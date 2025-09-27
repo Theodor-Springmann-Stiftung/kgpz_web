@@ -21,7 +21,19 @@
 			<div class="mb-2 break-inside-avoid max-w-[95ch]">
 				{{- if ne (len $w.Item.Citation.InnerXML ) 0 -}}
 					<div class="indent-6">
-						{{- Safe $w.Item.Citation.HTML -}}
+						{{- /* Check person's role in this work */ -}}
+						{{- $personRole := "" -}}
+						{{- range $workAgentRef := $w.Item.AgentRefs -}}
+							{{- if eq $workAgentRef.Ref $a.ID -}}
+								{{- if eq $workAgentRef.Category "übersetzer" -}}
+									{{- $personRole = "(Übers.) " -}}
+								{{- else if eq $workAgentRef.Category "herausgeber" -}}
+									{{- $personRole = "(Hrsg.) " -}}
+								{{- end -}}
+								{{- break -}}
+							{{- end -}}
+						{{- end -}}
+						{{- Safe $personRole -}}{{- Safe $w.Item.Citation.HTML -}}
 						{{- range $_, $url := $w.Item.URLs -}}
 							<span class="ml-1 whitespace-nowrap">
 								<a href="{{ $url.Address }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
@@ -70,18 +82,26 @@
 								{{- $categories = append $categories "Beitrag" -}}
 							{{- end -}}
 
-							{{- /* Get authors for this piece (excluding current person) */ -}}
+							{{- /* Get authors, translators, and editors for this piece (excluding current person) */ -}}
 							{{- $pieceAuthors := slice -}}
+							{{- $pieceTranslators := slice -}}
+							{{- $pieceEditors := slice -}}
 							{{- range $agentref := $p.Item.AgentRefs -}}
 								{{- if and (or (eq $agentref.Category "") (eq $agentref.Category "autor")) (ne $agentref.Ref $a.ID) -}}
 									{{- $pieceAuthors = append $pieceAuthors $agentref.Ref -}}
+								{{- else if and (eq $agentref.Category "übersetzer") (ne $agentref.Ref $a.ID) -}}
+									{{- $pieceTranslators = append $pieceTranslators $agentref.Ref -}}
+								{{- else if and (eq $agentref.Category "herausgeber") (ne $agentref.Ref $a.ID) -}}
+									{{- $pieceEditors = append $pieceEditors $agentref.Ref -}}
 								{{- end -}}
 							{{- end -}}
 							{{- $sortedAuthors := sortStrings $pieceAuthors -}}
+							{{- $sortedTranslators := sortStrings $pieceTranslators -}}
+							{{- $sortedEditors := sortStrings $pieceEditors -}}
 
-							{{- /* Create group key: categories + authors */ -}}
+							{{- /* Create group key: categories + authors + translators + editors */ -}}
 							{{- $sortedCategories := sortStrings $categories -}}
-							{{- $groupKey := printf "%s|%s" (joinWithUnd $sortedCategories) (joinWithUnd $sortedAuthors) -}}
+							{{- $groupKey := printf "%s|%s|%s|%s" (joinWithUnd $sortedCategories) (joinWithUnd $sortedAuthors) (joinWithUnd $sortedTranslators) (joinWithUnd $sortedEditors) -}}
 
 							{{- /* Add piece to group (check for duplicates by ID) */ -}}
 							{{- $existing := index $pieceGroups $groupKey -}}
@@ -104,10 +124,18 @@
 						{{- /* Display each group */ -}}
 						{{- range $groupKey, $groupPieces := $pieceGroups -}}
 							<div class="mb-1 text-gray-600">
-								{{- /* Extract categories and authors from group key */ -}}
+								{{- /* Extract categories, authors, translators, and editors from group key */ -}}
 								{{- $keyParts := split $groupKey "|" -}}
 								{{- $categoryName := index $keyParts 0 -}}
 								{{- $authorPart := index $keyParts 1 -}}
+								{{- $translatorPart := "" -}}
+								{{- if gt (len $keyParts) 2 -}}
+									{{- $translatorPart = index $keyParts 2 -}}
+								{{- end -}}
+								{{- $editorPart := "" -}}
+								{{- if gt (len $keyParts) 3 -}}
+									{{- $editorPart = index $keyParts 3 -}}
+								{{- end -}}
 
 								{{- /* Use plural if multiple pieces grouped together */ -}}
 								{{- $displayCategory := $categoryName -}}
@@ -130,7 +158,39 @@
 										{{- $displayCategory = "Beiträge" -}}
 									{{- end -}}
 								{{- end -}}
-								{{ $displayCategory }}{{- if ne $authorPart "" }} von {{ range $i, $authorID := (split $authorPart " und ") }}{{- if gt $i 0 }} und {{ end }}{{- $agent := GetAgent $authorID -}}{{- if and $agent (gt (len $agent.Names) 0) -}}<a href="/akteure/{{ $authorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{- end -}}{{ end }}{{- end }}:
+								{{ $displayCategory }}{{- if or (ne $authorPart "") (ne $translatorPart "") (ne $editorPart "") }} von {{ end }}
+								{{- /* Display authors */ -}}
+								{{- if ne $authorPart "" -}}
+									{{- range $i, $authorID := (split $authorPart " und ") -}}
+										{{- if gt $i 0 }} und {{ end }}
+										{{- $agent := GetAgent $authorID -}}
+										{{- if and $agent (gt (len $agent.Names) 0) -}}
+											<a href="/akteure/{{ $authorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>
+										{{- end -}}
+									{{- end -}}
+								{{- end -}}
+								{{- /* Display translators with (Übers.) suffix */ -}}
+								{{- if ne $translatorPart "" -}}
+									{{- if ne $authorPart "" }}, {{ end }}
+									{{- range $i, $translatorID := (split $translatorPart " und ") -}}
+										{{- if gt $i 0 }}, {{ end }}
+										{{- $agent := GetAgent $translatorID -}}
+										{{- if and $agent (gt (len $agent.Names) 0) -}}
+											<a href="/akteure/{{ $translatorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a> (Übers.)
+										{{- end -}}
+									{{- end -}}
+								{{- end -}}
+								{{- /* Display editors with (Hrsg.) suffix */ -}}
+								{{- if ne $editorPart "" -}}
+									{{- if or (ne $authorPart "") (ne $translatorPart "") }}, {{ end }}
+									{{- range $i, $editorID := (split $editorPart " und ") -}}
+										{{- if gt $i 0 }}, {{ end }}
+										{{- $agent := GetAgent $editorID -}}
+										{{- if and $agent (gt (len $agent.Names) 0) -}}
+											<a href="/akteure/{{ $editorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a> (Hrsg.)
+										{{- end -}}
+									{{- end -}}
+								{{- end -}}:
 								{{- /* Show citations separated by commas */ -}}
 								{{ " " }}{{- range $pieceIndex, $p := $groupPieces -}}
 									{{- range $issueIndex, $issue := $p.Item.IssueRefs -}}

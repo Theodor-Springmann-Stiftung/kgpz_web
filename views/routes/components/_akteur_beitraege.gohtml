@@ -35,7 +35,7 @@
 				<div class="break-inside-avoid pl-4">
 					<div class="pb-1 indent-4">
 						{{- /* Use first piece for display text */ -}}
-						{{ template "_piece_summary" (dict "Piece" (index $groupedItems 0).Item "CurrentActorID" $a.ID) }}
+						{{ template "_unified_piece_entry" (dict "Piece" (index $groupedItems 0).Item "CurrentActorID" $a.ID "DisplayMode" "akteure" "ShowPlaceTags" true "UseColonFormat" false "ShowContinuation" false) }}
 
 						{{- /* Show all citations from all pieces in this group inline with commas */ -}}
 						{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}

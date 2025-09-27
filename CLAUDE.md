@@ -126,13 +126,16 @@ views/
 │   │   ├── _akteur_header.gohtml   # Agent name, dates, professions, links
 │   │   ├── _akteur_werke.gohtml    # Works section with categorized pieces
 │   │   ├── _akteur_beitraege.gohtml # Contributions/pieces with grouping
-│   │   └── _piece_summary.gohtml   # Individual piece display logic
+│   │   └── _unified_piece_entry.gohtml # Universal piece display component
 │   ├── datenschutz/       # Privacy policy
 │   ├── edition/           # Edition pages
 │   ├── filter/            # Quickfilter system
 │   ├── kategorie/         # Category pages
 │   ├── kontakt/           # Contact pages
-│   ├── ort/               # Places pages
+│   ├── ort/               # Places pages with overview/detail split
+│   │   ├── overview/      # Places grid view (body.gohtml, head.gohtml)
+│   │   ├── detail/        # Individual place view (body.gohtml, head.gohtml)
+│   │   └── components/    # Place-specific components (_place_card, _place_header, _place_pieces, _back_navigation)
 │   ├── piece/             # Multi-issue piece pages
 │   │   └── components/    # Piece-specific components (_piece_inhaltsverzeichnis, _piece_sequential_layout)
 │   ├── search/            # Search pages
@@ -193,6 +196,7 @@ Each route has dedicated `head.gohtml` and `body.gohtml` files following Go temp
 - **`issue.js`**: Newspaper layout, page navigation, modal functions, citation generation
 - **`single-page-viewer.js`**: SinglePageViewer web component for image modal display
 - **`scroll-to-top.js`**: ScrollToTopButton web component for floating scroll button
+- **`places.js`**: PlacesFilter web component for real-time place search filtering
 
 **Build Process**:
 - **Source**: `transform/main.js` and `transform/site.css`
@@ -951,3 +955,271 @@ type GeonamesPlace struct {
 - Proper handling of empty alternate names arrays
 - Safe string manipulation with whitespace control
 - Consistent behavior across detail and overview templates
+
+## Unified Piece Entry System
+
+The application uses a centralized component for displaying newspaper pieces (Beiträge) consistently across all views, ensuring uniform citation formatting and category-dependent descriptions throughout the interface.
+
+### Core Component
+
+**Central Template** (`views/routes/components/_unified_piece_entry.gohtml`):
+- Universal component for piece display across all view contexts
+- Handles both `viewmodels.PieceByIssue` and `xmlmodels.Piece` data structures
+- Contains comprehensive category-specific descriptions (29+ categories)
+- Unified citation formatting and place tag generation
+- Supports different display modes for various page contexts
+
+### Data Structure Handling
+
+**Multi-Type Support**:
+```gohtml
+{{- /* Handle different piece types */ -}}
+{{- $piece := $pieceInput -}}
+{{- $isContinuation := false -}}
+{{- if eq $displayMode "issue" -}}
+  {{- $piece = $pieceInput.Piece -}}
+  {{- $isContinuation = $pieceInput.IsContinuation -}}
+{{- end -}}
+```
+
+**Display Mode Parameters**:
+- `issue` - For issue table of contents with continuation handling
+- `piece` - For multi-issue piece views
+- `place` - For place-associated pieces with colon format
+- `akteure` - For agent/author contribution lists
+
+### Category-Dependent Descriptions
+
+**Comprehensive Category Support**:
+- **Reviews**: "Rezension zu [work title]" with linked authors
+- **Obituaries**: "Nachruf auf [person name]" with agent category detection
+- **Advertisements**: "Anzeige" with multiple place support
+- **Letters**: "Brief" with sender/recipient information
+- **Announcements**: Category-specific formatting for each type
+- **Academic**: "Dissertation", "Disputation", "Programm" with institutional context
+
+**Special Category Handling**:
+```gohtml
+{{- range $agentref := $piece.AgentRefs -}}
+  {{- if eq $agentref.Category "nachruf" -}}
+    {{- $agent := GetAgent $agentref.Ref -}}
+    Nachruf auf <a href="/akteure/{{ $agentref.Ref }}">{{ index $agent.Names 0 }}</a>
+  {{- end -}}
+{{- end -}}
+```
+
+### Place Tag Integration
+
+**Clickable Place Links**:
+- Automatic place tag generation for all pieces
+- Links to place detail pages (`/ort/{id}`)
+- Multiple place support for advertisements and events
+- Conditional display based on piece category
+
+**Implementation**:
+```gohtml
+{{ if and (ne (len $piece.PlaceRefs) 0) $ShowPlaceTags }}
+  {{ range $index, $placeRef := $piece.PlaceRefs }}
+    {{ if gt $index 0 }}, {{ end }}
+    <a href="/ort/{{ $placeRef.Ref }}" class="place-tag">{{ $placeName }}</a>
+  {{ end }}
+{{ end }}
+```
+
+### Usage Across Views
+
+**Current Integration Points**:
+- **Issue View** (`_inhaltsverzeichnis.gohtml`): Table of contents with continuation handling
+- **Agent Views** (`_akteur_beitraege.gohtml`): Author contribution lists
+- **Place Views** (`_place_pieces.gohtml`): Place-associated pieces
+- **Piece Views** (`_piece_inhaltsverzeichnis.gohtml`): Multi-issue piece displays
+
+**Template Call Pattern**:
+```gohtml
+{{ template "_unified_piece_entry" (dict
+   "Piece" $piece
+   "DisplayMode" "issue"
+   "ShowPlaceTags" true
+   "UseColonFormat" false
+   "ShowContinuation" true
+) }}
+```
+
+### Parameters & Configuration
+
+**Required Parameters**:
+- `Piece` - The piece data structure (either type)
+- `DisplayMode` - Context for formatting ("issue", "piece", "place", "akteure")
+
+**Optional Parameters**:
+- `ShowPlaceTags` (bool) - Whether to display clickable place links
+- `UseColonFormat` (bool) - Use colon separator for place-specific formatting
+- `ShowContinuation` (bool) - Show continuation indicators for multi-part pieces
+- `CurrentActorID` (string) - Exclude current agent from author links in agent views
+
+### Category Formatting Rules
+
+**Natural Language Descriptions**:
+- Proper German grammar with gender-appropriate articles
+- Work titles in italics with proper author attribution
+- Place names as clickable tags when relevant
+- Agent references with appropriate relationship indicators
+
+**Title Fallback Logic**:
+1. Use piece title if available
+2. Fall back to incipit (opening words) if no title
+3. Generate category-specific description
+4. Handle special cases (reviews, obituaries, advertisements)
+
+### Maintenance & Extension
+
+**Adding New Categories**:
+1. Add new category case in the main conditional block
+2. Implement category-specific description logic
+3. Handle agent/place/work references as needed
+4. Test across all view contexts
+
+**Modifying Display Logic**:
+- Edit only `_unified_piece_entry.gohtml`
+- Changes automatically apply to all views
+- Test with different piece types and display modes
+- Verify place tag and agent link functionality
+
+### Error Handling
+
+**Template Safety**:
+- Null checks for all piece data fields
+- Safe handling of missing titles, authors, or places
+- Graceful fallback for unknown categories
+- Type-safe access to different piece structures
+
+**Data Validation**:
+- Proper handling of empty agent/place reference arrays
+- Safe string manipulation and concatenation
+- Conditional display based on data availability
+- Consistent behavior across different piece types
+
+## Agent Relationship System
+
+The application handles complex relationships between agents (persons/organizations) and both works and pieces (Beiträge), with specific formatting for different contributor roles.
+
+### Contributor Categories
+
+**Supported Agent Categories**:
+- **Empty/`"autor"`**: Primary authors (no special suffix)
+- **`"übersetzer"`**: Translators - displayed with "(Übers.)" suffix
+- **`"herausgeber"`**: Editors - displayed with "(Hrsg.)" suffix
+- **`"nachruf"`**: Obituary subjects - special handling for "Nachruf auf [person]"
+
+### Work Relationships (`_akteur_werke.gohtml`)
+
+**Role Qualification in Works Bibliography**:
+- Works display person's relationship to each work as a prefix
+- **Authors**: No prefix (default relationship)
+- **Translators**: `(Übers.) [Work Title]`
+- **Editors**: `(Hrsg.) [Work Title]`
+
+**Example Output**:
+```
+Werke
+(Übers.) Herrn Johann Ludwigs Bianconi Zehn Sendschreiben an Herrn Marchese Philippo Hercolani...
+Rezension: 1.2.1765/9, S. 33-34
+
+Die Aufklärung der Philosophie (Leipzig: Breitkopf 1766)
+Rezension: 1.5.1766/15, S. 45-48
+```
+
+**Implementation Details**:
+- Role detection via `$w.Item.AgentRefs` matching current person ID
+- Prefix added before existing `Citation.HTML` content
+- Break after finding person's role for performance
+- Maintains all existing formatting and external links
+
+### Piece Relationships (Unified System)
+
+**Multi-Role Contributor Display**:
+- Authors, translators, and editors can all contribute to single pieces
+- Consistent formatting across all view contexts
+- Proper comma separation and German conjunction handling
+
+**Display Patterns**:
+```
+Author1, Author2, Translator1 (Übers.), Editor1 (Hrsg.): [Piece Content]
+Schmidt (Übers.), Müller (Hrsg.): Rezension von: Goethe, Faust
+Translator1 (Übers.): Übersetzung aus: Voltaire, Candide
+```
+
+**Work Citation Enhancement**:
+- Work contributors shown with roles in piece citations
+- Example: `Rezension von: Giovanni Lodovico Bianconi, Dorothea Henriette Runckel (Übers.), Zehn Sendschreiben`
+- Maintains work author, translator, and editor relationships
+
+### Context-Sensitive Display
+
+**Agent Detail Pages** (`/akteure/{id}`):
+- **Works Section**: Shows person's role as prefix `(Übers.)` or `(Hrsg.)`
+- **Beiträge Section**: Groups pieces by title and contributors, shows other collaborators
+- **Current Agent Exclusion**: Hides current person from contributor lists in their own page
+
+**Issue Views** (`/year/issue`):
+- Full contributor display with all roles
+- Shows piece authors, translators, and editors in table of contents
+- Work citations include all work contributors with roles
+
+**Place Views** (`/ort/{id}`):
+- Colon format: `Author (Übers.): [Content]`
+- Regular format: `Author (Übers.), [Content]`
+- Place-specific formatting for associated pieces
+
+**Multi-Issue Piece Views** (`/beitrag/{id}`):
+- Consistent contributor display across issue boundaries
+- Maintains role information in sequential display
+- Work citations preserve contributor relationships
+
+### Technical Implementation
+
+**Variable Collections**:
+```gohtml
+{{- $authors := slice -}}
+{{- $translators := slice -}}
+{{- $editors := slice -}}
+{{- range $agentref := $piece.AgentRefs -}}
+  {{- if eq $agentref.Category "übersetzer" -}}
+    {{- $translators = append $translators (dict "ID" $agentref.Ref "Name" $agentName) -}}
+  {{- else if eq $agentref.Category "herausgeber" -}}
+    {{- $editors = append $editors (dict "ID" $agentref.Ref "Name" $agentName) -}}
+  {{- end -}}
+{{- end -}}
+```
+
+**Role Detection Logic**:
+```gohtml
+{{- range $workAgentRef := $work.AgentRefs -}}
+  {{- if eq $workAgentRef.Ref $currentPersonID -}}
+    {{- if eq $workAgentRef.Category "übersetzer" -}}
+      {{- $personRole = "(Übers.) " -}}
+    {{- else if eq $workAgentRef.Category "herausgeber" -}}
+      {{- $personRole = "(Hrsg.) " -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+```
+
+**Formatting Functions**:
+- `joinWithUnd` - German conjunction for multiple contributors
+- Current actor exclusion logic for agent detail pages
+- Comma separation with proper spacing for role suffixes
+
+### Error Handling
+
+**Relationship Safety**:
+- Graceful handling of missing agent references
+- Safe access to agent data via `GetAgent` function
+- Null checks for agent names and IDs
+- Fallback display for unknown or malformed relationships
+
+**Performance Considerations**:
+- Break statements after finding target relationships
+- Efficient grouping by contributor combinations
+- Minimal DOM manipulation for role prefixes
+- Cached agent lookups where possible
