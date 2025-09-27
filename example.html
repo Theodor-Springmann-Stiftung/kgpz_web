@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Static SVG Map with Plotted Points</title>
+	<style>
+		body {
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+			background-color: #f7fafc;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 2rem;
+			margin: 0;
+			color: #2d3748;
+		}
+
+		.header {
+			text-align: center;
+			margin-bottom: 2rem;
+		}
+
+		h1 {
+			font-size: 2.25rem;
+			font-weight: bold;
+		}
+
+		p {
+			color: #718096;
+			margin-top: 0.5rem;
+		}
+
+		/* 1. The main container needs a relative position */
+		.map-container {
+			position: relative;
+			/* This is the key for layering */
+			width: 100%;
+			max-width: 1000px;
+			border-radius: 0.75rem;
+			box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+			border: 1px solid #e2e8f0;
+			overflow: hidden;
+		}
+
+		.map-container img {
+			display: block;
+			/* Removes any bottom spacing */
+			width: 100%;
+			height: auto;
+		}
+
+		/* 2. The points container is layered directly on top */
+		.points-container {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+		}
+
+		/* 3. Each point is a small, absolutely positioned div */
+		.map-point {
+			position: absolute;
+			width: 8px;
+			height: 8px;
+			background-color: #ef4444;
+			border: 1px solid #b91c1c;
+			border-radius: 50%;
+			/* The transform ensures the dot is centered on its coordinates */
+			transform: translate(-50%, -50%);
+			box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="header">
+		<h1>Map of European Places</h1>
+		<p>A static projected SVG image with points layered on top.</p>
+	</div>
+
+	<div class="map-container">
+		<!-- The updated SVG map image -->
+		<img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Europe_laea_location_map.svg"
+			alt="Projected map of Europe">
+
+		<!-- This empty div will be populated with our points -->
+		<div id="points-container" class="points-container"></div>
+	</div>
+
+	<script>
+		const places = [
+			{"name": "Altdorf b.Nürnberg", "lat": "49.3875", "lng": "11.3572"},
+			{"name": "Altenburg", "lat": "50.98148", "lng": "12.43608"},
+			{"name": "Altona", "lat": "53.57358", "lng": "9.84241"},
+			{"name": "Altorf", "lat": "48.52222", "lng": "7.52833"},
+			{"name": "Amsterdam", "lat": "52.37403", "lng": "4.88969"},
+			{"name": "Ansbach", "lat": "49.3007", "lng": "10.5692"},
+			{"name": "Augsburg", "lat": "48.36733", "lng": "10.89213"},
+			{"name": "Aurich", "lat": "53.47187", "lng": "7.47753"},
+			{"name": "Bamberg", "lat": "49.89873", "lng": "10.90067"},
+			{"name": "Basel", "lat": "47.55773", "lng": "7.59361"},
+			{"name": "Bautzen/Budyšin", "lat": "51.18251", "lng": "14.4292"},
+			{"name": "Bayreuth", "lat": "49.9461", "lng": "11.57616"},
+			{"name": "Berlin", "lat": "52.52437", "lng": "13.41053"},
+			{"name": "Bernburg", "lat": "51.79464", "lng": "11.7401"},
+			{"name": "Bern", "lat": "46.94809", "lng": "7.44744"},
+			{"name": "Brandenburg an der Havel", "lat": "52.4189", "lng": "12.5228"},
+			{"name": "Braunschweig", "lat": "52.26471", "lng": "10.52333"},
+			{"name": "Bremen", "lat": "53.07582", "lng": "8.80717"},
+			{"name": "Wrocław", "lat": "51.1", "lng": "17.03333"},
+			{"name": "Bützow", "lat": "53.8173", "lng": "11.9992"},
+			{"name": "Celle", "lat": "52.61748", "lng": "10.08502"},
+			{"name": "Chemnitz", "lat": "50.83506", "lng": "12.92217"},
+			{"name": "Coburg", "lat": "50.25937", "lng": "10.96384"},
+			{"name": "Gdańsk", "lat": "54.35227", "lng": "18.64912"},
+			{"name": "The Hague", "lat": "52.07667", "lng": "4.29861"},
+			{"name": "Kreisfreie Stadt Dresden", "lat": "51.0833", "lng": "13.7666"},
+			{"name": "Eisenach", "lat": "50.97443", "lng": "10.33407"},
+			{"name": "Eisleben, Lutherstadt", "lat": "51.5258", "lng": "11.5345"},
+			{"name": "Erfurt", "lat": "50.97456", "lng": "11.02974"},
+			{"name": "Erlangen", "lat": "49.5888", "lng": "11.00977"},
+			{"name": "Flensburg", "lat": "54.78624", "lng": "9.43064"},
+			{"name": "Frankfurt am Main", "lat": "50.11035", "lng": "8.67185"},
+			{"name": "Frankfurt (Oder)", "lat": "52.34714", "lng": "14.55062"},
+			{"name": "Genève", "lat": "46.20576", "lng": "6.14161"},
+			{"name": "Gießen, Universitätsstadt", "lat": "50.58485", "lng": "8.67417"},
+			{"name": "Głogów", "lat": "51.66361", "lng": "16.0845"},
+			{"name": "Görlitz", "lat": "51.1503", "lng": "14.9829"},
+			{"name": "Göttingen", "lat": "51.51297", "lng": "9.95353"},
+			{"name": "Gotha", "lat": "50.94823", "lng": "10.70193"},
+			{"name": "Graz", "lat": "47.07493", "lng": "15.44089"},
+			{"name": "Greifswald", "lat": "54.08809", "lng": "13.38756"},
+			{"name": "Gemeente Haarlem", "lat": "52.38074", "lng": "4.644"},
+			{"name": "Halberstadt", "lat": "51.8883", "lng": "11.0572"},
+			{"name": "Halle (Saale)", "lat": "51.48158", "lng": "11.97947"},
+			{"name": "Hamburg", "lat": "53.55073", "lng": "9.99302"},
+			{"name": "Hamm", "lat": "51.68021", "lng": "7.81335"},
+			{"name": null, "lat": null, "lng": null},
+			{"name": "Hannover, Landeshauptstadt", "lat": "52.37362", "lng": "9.73711"},
+			{"name": "Aizpute", "lat": "56.72108", "lng": "21.60156"},
+			{"name": "Heilbronn", "lat": "49.1423", "lng": "9.22343"},
+			{"name": "Helmstedt", "lat": "52.2279", "lng": "11.00985"},
+			{"name": "Hildburghausen", "lat": "50.4265", "lng": "10.7259"},
+			{"name": "Hof", "lat": "50.32093", "lng": "11.9172"},
+			{"name": "Jena", "lat": "50.9326", "lng": "11.58678"},
+			{"name": "Karlsruhe", "lat": "49.0083", "lng": "8.39786"},
+			{"name": "Kassel", "lat": "51.31661", "lng": "9.49116"},
+			{"name": "Kaliningrad", "lat": "54.70649", "lng": "20.51095"},
+			{"name": "Kiel", "lat": "54.32133", "lng": "10.13489"},
+			{"name": "Kleve", "lat": "51.78655", "lng": "6.1375"},
+			{"name": "Köln", "lat": "50.93333", "lng": "6.95"},
+			{"name": "Copenhagen", "lat": "55.67594", "lng": "12.56553"},
+			{"name": "Bad Langensalza", "lat": "51.1111", "lng": "10.6542"},
+			{"name": "Lausanne", "lat": "46.52178", "lng": "6.633"},
+			{"name": "Leipzig", "lat": "51.33962", "lng": "12.37129"},
+			{"name": "Lemgo", "lat": "52.02768", "lng": "8.9043"},
+			{"name": "Legnica", "lat": "51.20473", "lng": "16.15834"},
+			{"name": "Lindau", "lat": "47.54612", "lng": "9.68431"},
+			{"name": "London", "lat": "51.49227", "lng": "-0.30864"},
+			{"name": "Lübeck, Hansestadt", "lat": "53.86893", "lng": "10.68729"},
+			{"name": "Lyon", "lat": "45.75889", "lng": "4.84139"},
+			{"name": "Magdeburg", "lat": "52.12773", "lng": "11.62916"},
+			{"name": "Mannheim", "lat": "49.4891", "lng": "8.46694"},
+			{"name": "Käärmetvaara", "lat": "65", "lng": "28.7"},
+			{"name": "Memmingen", "lat": "47.98257", "lng": "10.17254"},
+			{"name": "Minden", "lat": "52.28726", "lng": "8.92433"},
+			{"name": "Jelgava", "lat": "56.65", "lng": "23.71278"},
+			{"name": "Kreisfreie Stadt München", "lat": "48.15389", "lng": "11.54806"},
+			{"name": "Münster", "lat": "51.95973", "lng": "7.63137"},
+			{"name": "Neuchâtel", "lat": "46.99179", "lng": "6.931"},
+			{"name": "Nürnberg", "lat": "49.45421", "lng": "11.07752"},
+			{"name": "Odense Kommune", "lat": "55.3957", "lng": "10.37761"},
+			{"name": "Öhringen", "lat": "49.20117", "lng": "9.50217"},
+			{"name": "Paris", "lat": "48.8534", "lng": "2.3486"},
+			{"name": "Potsdam", "lat": "52.39886", "lng": "13.06566"},
+			{"name": "Prague", "lat": "50.08804", "lng": "14.42076"},
+			{"name": "Bratislava", "lat": "48.14816", "lng": "17.10674"},
+			{"name": "Pasłęk", "lat": "54.0611", "lng": "19.6668"},
+			{"name": "Quedlinburg", "lat": "51.79", "lng": "11.162"},
+			{"name": "Regensburg", "lat": "49.01681", "lng": "12.09536"},
+			{"name": "Rīga", "lat": "56.97778", "lng": "24.12167"},
+			{"name": "Rinteln", "lat": "52.1733", "lng": "9.11953"},
+			{"name": "Rostock", "lat": "54.0887", "lng": "12.14049"},
+			{"name": "Schleswig", "lat": "54.52021", "lng": "9.56829"},
+			{"name": "Schwabach", "lat": "49.60826", "lng": "10.99811"},
+			{"name": "Kreisfreie Stadt Schwerin", "lat": "53.63333", "lng": "11.41667"},
+			{"name": "Żary", "lat": "51.64205", "lng": "15.13727"},
+			{"name": "Stendal", "lat": "52.6052", "lng": "11.86043"},
+			{"name": "Szczecin", "lat": "53.42894", "lng": "14.55302"},
+			{"name": "Stockholm", "lat": "59.32938", "lng": "18.06871"},
+			{"name": "Sankt-Peterburg", "lat": "59.91667", "lng": "30.25"},
+			{"name": "Stralsund, Hansestadt", "lat": "54.30242", "lng": "13.09284"},
+			{"name": "Strasbourg", "lat": "48.58361", "lng": "7.74806"},
+			{"name": "Stuttgart", "lat": "48.78232", "lng": "9.17702"},
+			{"name": null, "lat": null, "lng": null},
+			{"name": "Ulm", "lat": "48.39841", "lng": "9.99155"},
+			{"name": "Warszawa", "lat": "52.2331", "lng": "21.0614"},
+			{"name": "Weimar", "lat": "50.98038", "lng": "11.3263"},
+			{"name": "Wien", "lat": "48.2082", "lng": "16.37169"},
+			{"name": "Wismar, Hansestadt", "lat": "53.9", "lng": "11.46667"},
+			{"name": "Wittenberg, Lutherstadt", "lat": "51.87437", "lng": "12.60603"},
+			{"name": "Wolfenbüttel", "lat": "52.1578", "lng": "10.5579"},
+			{"name": "Zelle", "lat": "51.15868", "lng": "4.77287"},
+			{"name": "Zerbst", "lat": "51.9598", "lng": "12.093"},
+			{"name": "Zittau", "lat": "50.9078", "lng": "14.8011"},
+			{"name": "Sulechów", "lat": "52.08362", "lng": "15.62513"},
+			{"name": "Bezirk Zürich", "lat": "47.3711", "lng": "8.54323"}
+		];
+
+		// The precise map extent in LAEA Europe (EPSG:3035) coordinates, in meters.
+		const MAP_EXTENT_METERS = {
+			xmin: 2555000,
+			ymin: 1350000,
+			xmax: 7405000,
+			ymax: 5500000
+		};
+
+		// Projection center data from the map's metadata.
+		const PROJECTION_CENTER = {
+			lon: 10, // 10° E
+			lat: 52  // 52° N
+		};
+
+		/**
+		 * Converts latitude/longitude to a {x, y} percentage object using the precise
+		 * LAEA Europe (EPSG:3035) projection formula and the map's exact extent.
+		 * @param {number} lat The latitude of the point.
+		 * @param {number} lng The longitude of the point.
+		 * @returns {{x: number, y: number}|null} The x and y coordinates as percentages, or null if invalid.
+		 */
+		function convertLatLngToPercent(lat, lng) {
+			// Official projection parameters for EPSG:3035
+			const R = 6371000;  // Earth radius approximation
+			const FE = 4321000; // False Easting
+			const FN = 3210000; // False Northing
+
+			// Convert projection center and point coordinates from degrees to radians
+			const lon_0_rad = PROJECTION_CENTER.lon * Math.PI / 180;
+			const lat_0_rad = PROJECTION_CENTER.lat * Math.PI / 180;
+			const lon_rad = lng * Math.PI / 180;
+			const lat_rad = lat * Math.PI / 180;
+
+			// Lambert Azimuthal Equal-Area projection formulas
+			const k_prime = Math.sqrt(2 / (1 + Math.sin(lat_0_rad) * Math.sin(lat_rad) + Math.cos(lat_0_rad) * Math.cos(lat_rad) * Math.cos(lon_rad - lon_0_rad)));
+
+			const x_proj = R * k_prime * Math.cos(lat_rad) * Math.sin(lon_rad - lon_0_rad);
+			const y_proj = R * k_prime * (Math.cos(lat_0_rad) * Math.sin(lat_rad) - Math.sin(lat_0_rad) * Math.cos(lat_rad) * Math.cos(lon_rad - lon_0_rad));
+
+			// Add false easting and northing to get the final projected coordinates in meters
+			const finalX = x_proj + FE;
+			const finalY = y_proj + FN;
+
+			// Now, convert the meter-based coordinates into a percentage of the map's extent
+			const mapWidthMeters = MAP_EXTENT_METERS.xmax - MAP_EXTENT_METERS.xmin;
+			const mapHeightMeters = MAP_EXTENT_METERS.ymax - MAP_EXTENT_METERS.ymin;
+
+			const xPercent = (finalX - MAP_EXTENT_METERS.xmin) / mapWidthMeters * 100;
+			// The Y-axis for CSS/SVG is inverted (0 is at the top), so we subtract from the max.
+			const yPercent = (MAP_EXTENT_METERS.ymax - finalY) / mapHeightMeters * 100;
+
+			return {x: xPercent, y: yPercent};
+		}
+
+		const pointsContainer = document.getElementById('points-container');
+
+		places.forEach(place => {
+			// Check for valid lat/lng and skip if null
+			if (place.lat && place.lng) {
+				const lat = parseFloat(place.lat);
+				const lng = parseFloat(place.lng);
+
+				// Convert the coordinates to percentages using the projection
+				const position = convertLatLngToPercent(lat, lng);
+
+				// Only draw points that are within the map's bounds
+				if (position.x >= 0 && position.x <= 100 && position.y >= 0 && position.y <= 100) {
+					const point = document.createElement('div');
+					point.className = 'map-point';
+					point.style.left = `${position.x}%`;
+					point.style.top = `${position.y}%`;
+					point.title = place.name; // Add a tooltip on hover
+
+					pointsContainer.appendChild(point);
+				}
+			}
+		});
+
+	</script>
+</body>
+
+</html>
