@@ -207,7 +207,8 @@
 				{{- end -}}
 				{{- range $index, $element := $authorElements -}}
 					{{- if gt $index 0 }}, {{ end }}{{ Safe $element }}
-				{{- end -}}{{ $colonPrefix }}Rezension von:
+				{{- end -}}
+				{{- if gt (len $authorElements) 0 -}}{{ $colonPrefix }}{{- end -}}Rezension von:
 			{{- else if not $useColonFormat -}}
 				{{ Safe $fortsPrefix }}
 				{{- $authorElements := slice -}}
@@ -228,7 +229,8 @@
 				{{- end -}}
 				{{- range $index, $element := $authorElements -}}
 					{{- if gt $index 0 }}, {{ end }}{{ Safe $element }}
-				{{- end -}},
+				{{- end -}}
+				{{- if gt (len $authorElements) 0 -}},{{- end -}}
 			{{- else -}}
 				{{ Safe $fortsPrefix }}Rezension von:
 			{{- end -}}
@@ -455,8 +457,7 @@
 			Redaktionelle Stellungnahme
 		{{ else }}
 			Anmerkung der Redaktion
-		{{ end }}
-		{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
+		{{ end }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Brief -}}
 		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Nachruf }}
@@ -535,7 +536,8 @@
 					{{- end -}}
 					{{- range $index, $element := $authorElements -}}
 						{{- if gt $index 0 }}, {{ end }}{{ Safe $element }}
-					{{- end -}}{{ $colonPrefix }}
+					{{- end -}}
+					{{- if gt (len $authorElements) 0 -}}{{ $colonPrefix }}{{- end -}}
 				{{- else if not $useColonFormat -}}
 					{{ Safe $fortsPrefix }}
 					{{- $authorElements := slice -}}
@@ -559,7 +561,7 @@
 					{{- end -}}
 					{{- if gt (len $authorElements) 0 -}}
 						{{- if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-						{{ if $title }}, {{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
+						{{ if $title }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 							<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 							class="work-title"
 							data-short-title="{{ $workTitle }}"
@@ -568,7 +570,7 @@
 						{{ end }}
 					{{- else -}}
 						{{- if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-						{{ if $title }}, {{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
+						{{ if $title }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 							<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 							class="work-title"
 							data-short-title="{{ $workTitle }}"
@@ -578,7 +580,7 @@
 					{{- end -}}{{ Safe $placeTag }}
 				{{- else -}}
 					{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-					{{ if $title }}, {{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
+					{{ if $title }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 						<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 						class="work-title"
 						data-short-title="{{ $workTitle }}"
@@ -588,7 +590,7 @@
 				{{- end -}}
 			{{- else -}}
 				{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-					{{ if $title }}, {{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ end }}{{ if $workAuthorName }}
+					{{ if $title }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 						<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 						class="work-title"
 						data-short-title="{{ $workTitle }}"
