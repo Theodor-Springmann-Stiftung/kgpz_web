@@ -396,7 +396,7 @@ export class PlacesMap extends HTMLElement {
 
 	render() {
 		this.innerHTML = `
-			<div class="map-container relative w-full aspect-[5/7] overflow-hidden rounded border border-slate-200 bg-slate-100">
+			<div class="map-container relative w-full aspect-[5/7] overflow-hidden bg-slate-100">
 				<div class="transform-wrapper absolute top-0 left-0 w-full h-auto origin-top-left">
 					<img src="/assets/Europe_laea_location_map.svg" alt="Map of Europe" class="block w-full h-auto">
 					<div class="points-container absolute top-0 left-0 w-full h-full"></div>
@@ -454,7 +454,7 @@ export class PlacesMap extends HTMLElement {
 					pointPositions.push(position);
 
 					const point = document.createElement('div');
-					point.className = 'map-point absolute w-1 h-1 bg-red-200 border border-red-300 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer';
+					point.className = 'map-point absolute w-1 h-1 bg-red-200 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30';
 					point.style.left = `${position.x}%`;
 					point.style.top = `${position.y}%`;
 					point.style.transformOrigin = 'center';
@@ -593,12 +593,12 @@ export class PlacesMap extends HTMLElement {
 
 	setPointActive(point) {
 		// Active state: larger, full color, full opacity, higher z-index
-		point.className = 'map-point absolute w-1.5 h-1.5 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:z-30';
+		point.className = 'map-point absolute w-1.5 h-1.5 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:bg-red-600 hover:z-30';
 	}
 
 	setPointInactive(point) {
-		// Inactive state: small light red dots, no opacity effects
-		point.className = 'map-point absolute w-1 h-1 bg-red-200 border border-red-300 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:z-30';
+		// Inactive state: small light red dots, no border
+		point.className = 'map-point absolute w-1 h-1 bg-red-200 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30';
 	}
 
 	showTooltip(event) {
@@ -615,11 +615,11 @@ export class PlacesMap extends HTMLElement {
 			this.tooltip.textContent = tooltipText;
 			this.updateTooltipPosition(event);
 
-			// Show tooltip after 1 second delay
+			// Show tooltip after 0.5 second delay
 			this.tooltipTimeout = setTimeout(() => {
 				this.tooltip.classList.remove('opacity-0');
 				this.tooltip.classList.add('opacity-100');
-			}, 1000);
+			}, 500);
 		}
 	}
 
@@ -715,11 +715,11 @@ export class PlacesMap extends HTMLElement {
 				this.tooltip.style.left = `${x}px`;
 				this.tooltip.style.top = `${y}px`;
 
-				// Show tooltip after 1 second delay
+				// Show tooltip after 0.5 second delay
 				this.tooltipTimeout = setTimeout(() => {
 					this.tooltip.classList.remove('opacity-0');
 					this.tooltip.classList.add('opacity-100');
-				}, 1000);
+				}, 500);
 			}
 		} else if (action === 'hide') {
 			// Clear any pending tooltip timeout

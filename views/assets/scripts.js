@@ -690,7 +690,7 @@ class K extends HTMLElement {
   }
   render() {
     this.innerHTML = `
-			<div class="map-container relative w-full aspect-[5/7] overflow-hidden rounded border border-slate-200 bg-slate-100">
+			<div class="map-container relative w-full aspect-[5/7] overflow-hidden bg-slate-100">
 				<div class="transform-wrapper absolute top-0 left-0 w-full h-auto origin-top-left">
 					<img src="/assets/Europe_laea_location_map.svg" alt="Map of Europe" class="block w-full h-auto">
 					<div class="points-container absolute top-0 left-0 w-full h-full"></div>
@@ -713,7 +713,7 @@ class K extends HTMLElement {
         if (l.x >= 0 && l.x <= 100 && l.y >= 0 && l.y <= 100) {
           n.push(l);
           const c = document.createElement("div");
-          c.className = "map-point absolute w-1 h-1 bg-red-200 border border-red-300 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer", c.style.left = `${l.x}%`, c.style.top = `${l.y}%`, c.style.transformOrigin = "center";
+          c.className = "map-point absolute w-1 h-1 bg-red-200 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30", c.style.left = `${l.x}%`, c.style.top = `${l.y}%`, c.style.transformOrigin = "center";
           const d = `${s.name}${s.toponymName && s.toponymName !== s.name ? ` (${s.toponymName})` : ""}`;
           c.dataset.placeId = s.id, c.dataset.tooltipText = d, c.addEventListener("mouseenter", (u) => this.showTooltip(u)), c.addEventListener("mouseleave", () => this.hideTooltip()), c.addEventListener("mousemove", (u) => this.updateTooltipPosition(u)), c.addEventListener("click", (u) => this.scrollToPlace(u)), this.pointsContainer.appendChild(c), this.mapPoints.set(s.id, c);
         }
@@ -764,16 +764,16 @@ class K extends HTMLElement {
     }, 50));
   }
   setPointActive(e) {
-    e.className = "map-point absolute w-1.5 h-1.5 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:z-30";
+    e.className = "map-point absolute w-1.5 h-1.5 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:bg-red-600 hover:z-30";
   }
   setPointInactive(e) {
-    e.className = "map-point absolute w-1 h-1 bg-red-200 border border-red-300 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:z-30";
+    e.className = "map-point absolute w-1 h-1 bg-red-200 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30";
   }
   showTooltip(e) {
     const i = e.target.dataset.tooltipText;
     this.tooltip && i && (this.tooltipTimeout && clearTimeout(this.tooltipTimeout), this.tooltip.textContent = i, this.updateTooltipPosition(e), this.tooltipTimeout = setTimeout(() => {
       this.tooltip.classList.remove("opacity-0"), this.tooltip.classList.add("opacity-100");
-    }, 1e3));
+    }, 500));
   }
   hideTooltip() {
     this.tooltipTimeout && (clearTimeout(this.tooltipTimeout), this.tooltipTimeout = null), this.tooltip && (this.tooltip.classList.remove("opacity-100"), this.tooltip.classList.add("opacity-0"));
@@ -814,7 +814,7 @@ class K extends HTMLElement {
           const o = n.getBoundingClientRect(), r = this.mapElement.getBoundingClientRect(), l = o.left - r.left + o.width / 2, c = o.top - r.top + o.height / 2;
           this.tooltip.style.left = `${l}px`, this.tooltip.style.top = `${c}px`, this.tooltipTimeout = setTimeout(() => {
             this.tooltip.classList.remove("opacity-0"), this.tooltip.classList.add("opacity-100");
-          }, 1e3);
+          }, 500);
         }
       } else i === "hide" && (this.tooltipTimeout && (clearTimeout(this.tooltipTimeout), this.tooltipTimeout = null), this.tooltip && (this.tooltip.classList.remove("opacity-100"), this.tooltip.classList.add("opacity-0")), n.classList.remove("w-2", "h-2"), n.className.includes("bg-red-500") ? n.classList.add("w-1.5", "h-1.5") : n.classList.add("w-1", "h-1"), n.style.zIndex = "");
   }
