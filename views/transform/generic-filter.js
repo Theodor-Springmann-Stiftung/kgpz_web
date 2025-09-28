@@ -37,15 +37,13 @@ export class GenericFilter extends HTMLElement {
 
 	render() {
 		this.innerHTML = `
-			<div class="mb-6">
-				<input
-					type="text"
-					id="generic-search"
-					placeholder="${this.placeholderText}"
-					autocomplete="off"
-					class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
-				>
-			</div>
+			<input
+				type="text"
+				id="generic-search"
+				placeholder="${this.placeholderText}"
+				autocomplete="off"
+				class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+			>
 		`;
 	}
 
@@ -79,6 +77,8 @@ export class GenericFilter extends HTMLElement {
 
 		if (this.countElement) {
 			this.originalCount = this.itemCards.length;
+			// Initially hide the count element since no search is active
+			this.countElement.style.display = 'none';
 		}
 	}
 
@@ -130,15 +130,19 @@ export class GenericFilter extends HTMLElement {
 		if (!this.countElement) return;
 
 		if (searchTerm === '') {
-			// Show original count when no search
-			this.countElement.textContent = `Alle ${this.itemType} (${this.originalCount})`;
-		} else if (visibleCount === 0) {
-			// Show no results message
-			this.countElement.textContent = `Keine ${this.itemType} gefunden für "${searchTerm}"`;
+			// Hide count when no search is active
+			this.countElement.style.display = 'none';
 		} else {
-			// Show filtered count
-			const itemTypeText = visibleCount === 1 ? this.itemTypeSingular : this.itemType;
-			this.countElement.textContent = `${visibleCount} von ${this.originalCount} ${itemTypeText}`;
+			// Show count element when searching
+			this.countElement.style.display = '';
+
+			if (visibleCount === 0) {
+				// Show zero for no results
+				this.countElement.textContent = '(0)';
+			} else {
+				// Show just the filtered count number in parentheses
+				this.countElement.textContent = `(${visibleCount})`;
+			}
 		}
 	}
 }

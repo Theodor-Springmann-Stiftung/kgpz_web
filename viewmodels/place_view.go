@@ -1,11 +1,13 @@
 package viewmodels
 
 import (
+	"encoding/json"
 	"maps"
 	"slices"
 	"strings"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/geonames"
 )
 
 // PlacesListView represents the data for the places overview
@@ -17,6 +19,16 @@ type PlacesListView struct {
 	Sorted           []string
 	SelectedPlace    *PlaceDetailView
 	TotalPiecesWithPlaces int
+	PlacesJSON       string
+}
+
+// MapPlace represents a place for the map component
+type MapPlace struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	ToponymName  string `json:"toponymName"`
+	Lat          string `json:"lat"`
+	Lng          string `json:"lng"`
 }
 
 // PlaceDetailView represents a specific place with its associated pieces
@@ -26,7 +38,7 @@ type PlaceDetailView struct {
 }
 
 // PlacesView returns places data for the overview page
-func PlacesView(placeID string, lib *xmlmodels.Library) *PlacesListView {
+func PlacesView(placeID string, lib *xmlmodels.Library, geonamesProvider *geonames.GeonamesProvider) *PlacesListView {
 	res := PlacesListView{
 		Search: placeID,
 		Places: make(map[string]xmlmodels.Place),
@@ -76,6 +88,9 @@ func PlacesView(placeID string, lib *xmlmodels.Library) *PlacesListView {
 	slices.Sort(res.Sorted)
 	res.TotalPiecesWithPlaces = totalPiecesWithPlaces
 
+	// Generate JSON data for map
+	res.PlacesJSON = generatePlacesJSON(res.Places, geonamesProvider)
+
 	return &res
 }
 
@@ -111,4 +126,65 @@ func GetPlaceDetail(place xmlmodels.Place, lib *xmlmodels.Library) *PlaceDetailV
 	})
 
 	return detail
+}
+
+// generatePlacesJSON creates JSON data for the map component
+func generatePlacesJSON(places map[string]xmlmodels.Place, geonamesProvider *geonames.GeonamesProvider) string {
+	if geonamesProvider == nil {
+		return "[]"
+	}
+
+	mapPlaces := make([]MapPlace, 0)
+
+	for _, place := range places {
+		if place.Geo == "" {
+			continue
+		}
+
+		// Get geonames data
+		geoPlace := geonamesProvider.Place(place.Geo)
+		if geoPlace == nil || geoPlace.Lat == "" || geoPlace.Lng == "" {
+			continue
+		}
+
+		// Get main place name
+		mainName := place.ID
+		if len(place.Names) > 0 {
+			mainName = place.Names[0]
+		}
+
+		// Get modern place name (toponym)
+		toponymName := ""
+		for _, altName := range geoPlace.AlternateNames {
+			if altName.Lang == "de" {
+				toponymName = altName.Name
+				break
+			}
+		}
+		if toponymName == "" {
+			toponymName = geoPlace.Name
+		}
+
+		mapPlace := MapPlace{
+			ID:          place.ID,
+			Name:        mainName,
+			ToponymName: toponymName,
+			Lat:         geoPlace.Lat,
+			Lng:         geoPlace.Lng,
+		}
+
+		mapPlaces = append(mapPlaces, mapPlace)
+	}
+
+	// Sort by name for consistent output
+	slices.SortFunc(mapPlaces, func(a, b MapPlace) int {
+		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
+	})
+
+	jsonData, err := json.Marshal(mapPlaces)
+	if err != nil {
+		return "[]"
+	}
+
+	return string(jsonData)
 }

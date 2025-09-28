@@ -1,7 +1,7 @@
 {{- /* Associated pieces section for place detail view */ -}}
 <!-- Associated Pieces -->
-<div>
-	<h2 class="text-xl font-semibold text-slate-800 mb-4">
+<div class="mt-2">
+	<h2 class="font-bold mb-4">
 		<i class="ri-newspaper-line mr-2"></i><u class="decoration underline-offset-3">Verlinkte Beiträge</u> ({{ len .Pieces }})
 	</h2>
 
@@ -27,13 +27,13 @@
 		{{- end -}}
 		{{- $sortedYears = sortStrings $sortedYears -}}
 
-		<div class="space-y-6 max-w-[85ch]">
+		<div class="columns-2 gap-6 hyphens-auto">
 			{{- range $year := $sortedYears -}}
 				{{- $yearPieces := index $piecesByYear $year -}}
 
 				<!-- Year Header -->
-				<div>
-					<h3 class="text-lg font-bold font-serif text-slate-800 mb-3">{{ $year }}</h3>
+				<div class="break-inside-avoid mb-6">
+					<h3 class="font-bold font-serif text-slate-800 mb-1">{{ $year }}</h3>
 
 					<div class="space-y-1">
 						{{- /* Group pieces by title within each year */ -}}
@@ -57,8 +57,8 @@
 						{{- end -}}
 
 						{{- range $groupKey, $groupedItems := $groupedPieces -}}
-							<div>
-								<div class="pb-1 text-lg indent-4">
+							<div class="break-inside-avoid">
+								<div class="pb-1 indent-4">
 									{{- /* Use first piece for display text with colon format for places */ -}}
 									{{ template "_unified_piece_entry" (dict "Piece" (index $groupedItems 0) "CurrentActorID" "" "DisplayMode" "place" "ShowPlaceTags" false "UseColonFormat" true "ShowContinuation" false) }}
 
@@ -78,7 +78,8 @@
 									{{- if gt (len $firstGroupItem.IssueRefs) 1 -}}
 										{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
 										hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
-										hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+										hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200
+										indent-0">
 											<i class="ri-file-copy-2-line text-xs"></i>
 											<a href="{{ GetPieceURL $firstGroupItem.ID }}" class="">
 												Ganzer Beitrag

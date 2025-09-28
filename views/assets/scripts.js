@@ -2,7 +2,7 @@ document.body.addEventListener("htmx:configRequest", function(a) {
   let e = a.detail.elt;
   e.id === "search" && e.value === "" && (a.detail.parameters = {}, a.detail.path = window.location.pathname + window.location.search);
 });
-class A extends HTMLElement {
+class N extends HTMLElement {
   constructor() {
     super();
   }
@@ -35,8 +35,8 @@ class A extends HTMLElement {
     });
   }
 }
-customElements.define("person-jump-filter", A);
-class H extends HTMLElement {
+customElements.define("person-jump-filter", N);
+class $ extends HTMLElement {
   connectedCallback() {
     const e = this.querySelector("#place-search");
     e && e.addEventListener("input", (t) => {
@@ -49,8 +49,8 @@ class H extends HTMLElement {
     });
   }
 }
-customElements.define("place-jump-filter", H);
-class B extends HTMLElement {
+customElements.define("place-jump-filter", $);
+class O extends HTMLElement {
   connectedCallback() {
     const e = this.querySelector("#category-search");
     e && e.addEventListener("input", (t) => {
@@ -63,8 +63,8 @@ class B extends HTMLElement {
     });
   }
 }
-customElements.define("category-jump-filter", B);
-class M extends HTMLElement {
+customElements.define("category-jump-filter", O);
+class R extends HTMLElement {
   constructor() {
     super(), this.issuesByYear = {};
   }
@@ -179,8 +179,8 @@ class M extends HTMLElement {
     i.disabled = !o;
   }
 }
-customElements.define("year-jump-filter", M);
-class N extends HTMLElement {
+customElements.define("year-jump-filter", R);
+class V extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
   }
@@ -242,8 +242,8 @@ class N extends HTMLElement {
     this.isOpen && t && i && !t.contains(e.target) && !this.contains(e.target) && this.hideFilter();
   }
 }
-customElements.define("schnellauswahl-button", N);
-class $ extends HTMLElement {
+customElements.define("schnellauswahl-button", V);
+class z extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
   }
@@ -319,7 +319,7 @@ class $ extends HTMLElement {
     this.isOpen && !this.contains(e.target) && this.hideMenu();
   }
 }
-customElements.define("navigation-menu", $);
+customElements.define("navigation-menu", z);
 document.addEventListener("DOMContentLoaded", function() {
   document.addEventListener("click", function(a) {
     const e = a.target.closest('a[href^="/akteure/"], a[href^="/ort/"]'), t = document.getElementById("filter-container");
@@ -337,13 +337,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 });
-const w = [];
+const T = [];
 document.addEventListener("DOMContentLoaded", () => {
-  S();
+  I();
 });
-const S = function() {
-  for (; w.length > 0; ) {
-    const a = w.shift();
+const I = function() {
+  for (; T.length > 0; ) {
+    const a = T.shift();
     try {
       a();
     } catch (e) {
@@ -351,7 +351,7 @@ const S = function() {
     }
   }
 };
-class O extends HTMLElement {
+class D extends HTMLElement {
   constructor() {
     super(), this.scrollTimeout = null, this.clickHandlers = [], this.manualNavigation = !1, this.handleScroll = this.handleScroll.bind(this);
   }
@@ -492,9 +492,9 @@ class O extends HTMLElement {
       document.documentElement.offsetHeight
     ), s = window.innerHeight, o = n - s, r = o > 0 ? window.scrollY / o : 0, l = t.clientHeight, d = t.scrollHeight - l;
     if (d > 0) {
-      const u = r * d, h = i.getBoundingClientRect(), p = t.getBoundingClientRect(), f = h.top - p.top + t.scrollTop, m = l / 2, T = f - m, y = 0.7, I = y * u + (1 - y) * T, v = Math.max(0, Math.min(d, I)), q = t.scrollTop;
-      Math.abs(v - q) > 10 && t.scrollTo({
-        top: v,
+      const u = r * d, h = i.getBoundingClientRect(), p = t.getBoundingClientRect(), g = h.top - p.top + t.scrollTop, m = l / 2, y = g - m, w = 0.7, v = w * u + (1 - w) * y, x = Math.max(0, Math.min(d, v)), E = t.scrollTop;
+      Math.abs(x - E) > 10 && t.scrollTo({
+        top: x,
         behavior: "smooth"
       });
     }
@@ -513,8 +513,8 @@ class O extends HTMLElement {
     e && (e.style.opacity = "0", e.style.height = "0"), this.sections = null, this.navLinks = null, this.clickHandlers = [], this.manualNavigation = !1;
   }
 }
-customElements.define("akteure-scrollspy", O);
-class V extends HTMLElement {
+customElements.define("akteure-scrollspy", D);
+class F extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.placeCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -566,15 +566,20 @@ class V extends HTMLElement {
     this.countElement && (t === "" ? this.countElement.textContent = `Alle Orte (${this.originalCount})` : e === 0 ? this.countElement.textContent = `Keine Orte gefunden für "${t}"` : this.countElement.textContent = `${e} von ${this.originalCount} Orten`);
   }
 }
-class R extends HTMLElement {
+class j extends HTMLElement {
   constructor() {
     super(), this.isExpanded = !1, this.isLoading = !1, this.hasLoaded = !1;
   }
   connectedCallback() {
-    this.setupAccordion(), this.setupEventListeners();
+    this.setupAccordion(), this.setupEventListeners(), this.updateBorders(), this.setupMapEventListeners(), this.setupHoverEvents();
   }
   disconnectedCallback() {
-    this.cleanupEventListeners();
+    this.cleanupEventListeners(), this.cleanupMapEventListeners();
+  }
+  cleanupMapEventListeners() {
+    document.removeEventListener("place-map-clicked", this.handleMapClick.bind(this));
+    const e = this.querySelector(".cursor-pointer");
+    e && (e.removeEventListener("mouseenter", this.handleHeadingHover.bind(this)), e.removeEventListener("mouseleave", this.handleHeadingLeave.bind(this)));
   }
   setupAccordion() {
     if (!this.querySelector(".accordion-chevron")) {
@@ -594,6 +599,39 @@ class R extends HTMLElement {
   cleanupEventListeners() {
     this.removeEventListener("click", this.handleClick.bind(this));
   }
+  setupMapEventListeners() {
+    document.addEventListener("place-map-clicked", this.handleMapClick.bind(this));
+  }
+  setupHoverEvents() {
+    const e = this.querySelector(".cursor-pointer");
+    e && (e.addEventListener("mouseenter", this.handleHeadingHover.bind(this)), e.addEventListener("mouseleave", this.handleHeadingLeave.bind(this)));
+  }
+  handleHeadingHover() {
+    const e = this.getAttribute("data-place-id");
+    if (e) {
+      const t = new CustomEvent("place-heading-hover", {
+        detail: { placeId: e, action: "show" },
+        bubbles: !0
+      });
+      document.dispatchEvent(t);
+    }
+  }
+  handleHeadingLeave() {
+    const e = this.getAttribute("data-place-id");
+    if (e) {
+      const t = new CustomEvent("place-heading-hover", {
+        detail: { placeId: e, action: "hide" },
+        bubbles: !0
+      });
+      document.dispatchEvent(t);
+    }
+  }
+  handleMapClick(e) {
+    const t = e.detail.placeId, i = this.getAttribute("data-place-id");
+    t === i && !this.isExpanded && setTimeout(() => {
+      this.expand();
+    }, 800);
+  }
   handleClick(e) {
     const t = this.querySelector("[data-content]");
     t && t.contains(e.target) || this.toggle();
@@ -603,12 +641,12 @@ class R extends HTMLElement {
   }
   expand() {
     if (this.isLoading) return;
-    this.isExpanded = !0, this.updateChevron();
+    this.isExpanded = !0, this.updateChevron(), this.updateBorders();
     const e = this.querySelector("[data-content]");
     e && (this.hasLoaded ? e.style.maxHeight = e.scrollHeight + "px" : this.loadContent());
   }
   collapse() {
-    this.isExpanded = !1, this.updateChevron();
+    this.isExpanded = !1, this.updateChevron(), this.updateBorders();
     const e = this.querySelector("[data-content]");
     e && (e.style.maxHeight = "0px");
   }
@@ -629,10 +667,165 @@ class R extends HTMLElement {
     const e = this.querySelector(".accordion-chevron");
     e && (this.isExpanded ? e.style.transform = "rotate(180deg)" : e.style.transform = "rotate(0deg)");
   }
+  updateBorders() {
+    this.isExpanded ? this.classList.add("border-b", "border-slate-100") : this.classList.add("border-b", "border-slate-100"), !this.nextElementSibling && this.classList.remove("border-b");
+  }
 }
-customElements.define("places-filter", V);
-customElements.define("place-accordion", R);
-class z extends HTMLElement {
+class K extends HTMLElement {
+  constructor() {
+    super(), this.places = [], this.mapElement = null, this.pointsContainer = null, this.intersectionObserver = null, this.mapPoints = /* @__PURE__ */ new Map(), this.tooltip = null, this.tooltipTimeout = null;
+  }
+  connectedCallback() {
+    this.parseData(), this.render(), this.initializeMap(), setTimeout(() => {
+      this.initializeScrollspy();
+    }, 200), this.setupHeadingHoverListener();
+  }
+  parseData() {
+    try {
+      const e = this.dataset.places;
+      e && (this.places = JSON.parse(e));
+    } catch (e) {
+      console.error("Failed to parse places data:", e), this.places = [];
+    }
+  }
+  render() {
+    this.innerHTML = `
+			<div class="map-container relative w-full aspect-[5/7] overflow-hidden rounded border border-slate-200 bg-slate-100">
+				<div class="transform-wrapper absolute top-0 left-0 w-full h-auto origin-top-left">
+					<img src="/assets/Europe_laea_location_map.svg" alt="Map of Europe" class="block w-full h-auto">
+					<div class="points-container absolute top-0 left-0 w-full h-full"></div>
+				</div>
+				<!-- Tooltip -->
+				<div class="map-tooltip absolute bg-slate-800 text-white text-sm px-2 py-1 rounded shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 z-30 whitespace-nowrap" style="transform: translate(-50%, -100%); margin-top: -8px;"></div>
+			</div>
+		`, this.mapElement = this.querySelector(".map-container"), this.pointsContainer = this.querySelector(".points-container"), this.tooltip = this.querySelector(".map-tooltip");
+  }
+  initializeMap() {
+    if (!this.places.length || !this.pointsContainer)
+      return;
+    const e = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, t = { lon: 10, lat: 52 }, i = (s, o) => {
+      const d = t.lon * Math.PI / 180, u = t.lat * Math.PI / 180, h = o * Math.PI / 180, p = s * Math.PI / 180, g = Math.sqrt(2 / (1 + Math.sin(u) * Math.sin(p) + Math.cos(u) * Math.cos(p) * Math.cos(h - d))), m = 6371e3 * g * Math.cos(p) * Math.sin(h - d), y = 6371e3 * g * (Math.cos(u) * Math.sin(p) - Math.sin(u) * Math.cos(p) * Math.cos(h - d)), w = m + 4321e3, v = y + 321e4, x = e.xmax - e.xmin, E = e.ymax - e.ymin, L = (w - e.xmin) / x * 100, C = (e.ymax - v) / E * 100;
+      return { x: L, y: C };
+    }, n = [];
+    this.places.forEach((s) => {
+      if (s.lat && s.lng) {
+        const o = parseFloat(s.lat), r = parseFloat(s.lng), l = i(o, r);
+        if (l.x >= 0 && l.x <= 100 && l.y >= 0 && l.y <= 100) {
+          n.push(l);
+          const c = document.createElement("div");
+          c.className = "map-point absolute w-1 h-1 bg-red-200 border border-red-300 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer", c.style.left = `${l.x}%`, c.style.top = `${l.y}%`, c.style.transformOrigin = "center";
+          const d = `${s.name}${s.toponymName && s.toponymName !== s.name ? ` (${s.toponymName})` : ""}`;
+          c.dataset.placeId = s.id, c.dataset.tooltipText = d, c.addEventListener("mouseenter", (u) => this.showTooltip(u)), c.addEventListener("mouseleave", () => this.hideTooltip()), c.addEventListener("mousemove", (u) => this.updateTooltipPosition(u)), c.addEventListener("click", (u) => this.scrollToPlace(u)), this.pointsContainer.appendChild(c), this.mapPoints.set(s.id, c);
+        }
+      }
+    }), n.length > 0 && this.autoZoomToPoints(n);
+  }
+  autoZoomToPoints(e) {
+    let t = 100, i = 0, n = 100, s = 0;
+    e.forEach((b) => {
+      b.x < t && (t = b.x), b.x > i && (i = b.x), b.y < n && (n = b.y), b.y > s && (s = b.y);
+    });
+    const o = i - t, r = s - n, l = o * 0.05, c = r * 0.05, d = Math.max(0, t - l), u = Math.min(100, i + l), h = Math.max(0, n - c), p = Math.min(100, s + c), g = u - d, m = p - h, y = 5 / 7, w = g / m;
+    let v = { x: d, y: h, width: g, height: m };
+    if (w > y) {
+      const b = g / y;
+      v.y = h - (b - m) / 2, v.height = b;
+    } else {
+      const b = m * y;
+      v.x = d - (b - g) / 2, v.width = b;
+    }
+    const x = 100 / v.width, E = -v.x, L = -v.y, C = `scale(${x}) translate(${E}%, ${L}%)`, P = this.querySelector(".transform-wrapper");
+    P && (P.style.transform = C);
+  }
+  initializeScrollspy() {
+    const e = document.querySelectorAll("place-accordion[data-place-id]");
+    e.length && (this.mapPoints.forEach((t) => {
+      this.setPointInactive(t);
+    }), this.intersectionObserver = new IntersectionObserver(
+      (t) => {
+        t.forEach((i) => {
+          const n = i.target.getAttribute("data-place-id"), s = this.mapPoints.get(n);
+          s && (i.isIntersecting ? this.setPointActive(s) : this.setPointInactive(s));
+        });
+      },
+      {
+        // Trigger when element enters viewport
+        threshold: 0.1,
+        // No root margin for precise detection
+        rootMargin: "0px"
+      }
+    ), e.forEach((t) => {
+      this.intersectionObserver.observe(t);
+    }), setTimeout(() => {
+      e.forEach((t) => {
+        const i = t.getBoundingClientRect(), n = i.top < window.innerHeight && i.bottom > 0, s = t.getAttribute("data-place-id"), o = this.mapPoints.get(s);
+        o && n && this.setPointActive(o);
+      });
+    }, 50));
+  }
+  setPointActive(e) {
+    e.className = "map-point absolute w-1.5 h-1.5 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:z-30";
+  }
+  setPointInactive(e) {
+    e.className = "map-point absolute w-1 h-1 bg-red-200 border border-red-300 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:z-30";
+  }
+  showTooltip(e) {
+    const i = e.target.dataset.tooltipText;
+    this.tooltip && i && (this.tooltipTimeout && clearTimeout(this.tooltipTimeout), this.tooltip.textContent = i, this.updateTooltipPosition(e), this.tooltipTimeout = setTimeout(() => {
+      this.tooltip.classList.remove("opacity-0"), this.tooltip.classList.add("opacity-100");
+    }, 1e3));
+  }
+  hideTooltip() {
+    this.tooltipTimeout && (clearTimeout(this.tooltipTimeout), this.tooltipTimeout = null), this.tooltip && (this.tooltip.classList.remove("opacity-100"), this.tooltip.classList.add("opacity-0"));
+  }
+  updateTooltipPosition(e) {
+    if (!this.tooltip) return;
+    const t = this.mapElement.getBoundingClientRect(), i = e.clientX - t.left, n = e.clientY - t.top;
+    this.tooltip.style.left = `${i}px`, this.tooltip.style.top = `${n}px`;
+  }
+  scrollToPlace(e) {
+    const t = e.target.dataset.placeId;
+    if (!t) return;
+    const i = new CustomEvent("place-map-clicked", {
+      detail: { placeId: t },
+      bubbles: !0
+    });
+    this.dispatchEvent(i);
+    const n = document.querySelector(`place-accordion[data-place-id="${t}"]`);
+    n && (n.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "nearest"
+    }), n.style.transition = "background-color 0.3s ease", n.style.backgroundColor = "rgb(248 250 252)", setTimeout(() => {
+      n.style.backgroundColor = "";
+    }, 1e3));
+  }
+  setupHeadingHoverListener() {
+    document.addEventListener("place-heading-hover", this.handleHeadingHoverEvent.bind(this));
+  }
+  handleHeadingHoverEvent(e) {
+    const { placeId: t, action: i } = e.detail, n = this.mapPoints.get(t);
+    if (n)
+      if (i === "show") {
+        n.classList.remove("w-1", "h-1", "w-1.5", "h-1.5"), n.classList.add("w-2", "h-2"), n.style.zIndex = "25";
+        const s = n.dataset.tooltipText;
+        if (this.tooltip && s) {
+          this.tooltipTimeout && clearTimeout(this.tooltipTimeout), this.tooltip.textContent = s;
+          const o = n.getBoundingClientRect(), r = this.mapElement.getBoundingClientRect(), l = o.left - r.left + o.width / 2, c = o.top - r.top + o.height / 2;
+          this.tooltip.style.left = `${l}px`, this.tooltip.style.top = `${c}px`, this.tooltipTimeout = setTimeout(() => {
+            this.tooltip.classList.remove("opacity-0"), this.tooltip.classList.add("opacity-100");
+          }, 1e3);
+        }
+      } else i === "hide" && (this.tooltipTimeout && (clearTimeout(this.tooltipTimeout), this.tooltipTimeout = null), this.tooltip && (this.tooltip.classList.remove("opacity-100"), this.tooltip.classList.add("opacity-0")), n.classList.remove("w-2", "h-2"), n.className.includes("bg-red-500") ? n.classList.add("w-1.5", "h-1.5") : n.classList.add("w-1", "h-1"), n.style.zIndex = "");
+  }
+  disconnectedCallback() {
+    this.intersectionObserver && (this.intersectionObserver.disconnect(), this.intersectionObserver = null), this.tooltipTimeout && (clearTimeout(this.tooltipTimeout), this.tooltipTimeout = null), document.removeEventListener("place-heading-hover", this.handleHeadingHoverEvent.bind(this));
+  }
+}
+customElements.define("places-filter", F);
+customElements.define("place-accordion", j);
+customElements.define("places-map", K);
+class W extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.itemCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -644,15 +837,13 @@ class z extends HTMLElement {
   }
   render() {
     this.innerHTML = `
-			<div class="mb-6">
-				<input
-					type="text"
-					id="generic-search"
-					placeholder="${this.placeholderText}"
-					autocomplete="off"
-					class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
-				>
-			</div>
+			<input
+				type="text"
+				id="generic-search"
+				placeholder="${this.placeholderText}"
+				autocomplete="off"
+				class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+			>
 		`;
   }
   setupEventListeners() {
@@ -669,7 +860,7 @@ class z extends HTMLElement {
       itemsFound: this.itemCards.length,
       countElement: this.countElement,
       searchAttributes: this.searchAttributes
-    }), this.countElement && (this.originalCount = this.itemCards.length);
+    }), this.countElement && (this.originalCount = this.itemCards.length, this.countElement.style.display = "none");
   }
   handleSearchInput(e) {
     this.debounceTimer && clearTimeout(this.debounceTimer), this.debounceTimer = setTimeout(() => {
@@ -694,19 +885,11 @@ class z extends HTMLElement {
     }), this.updateCountDisplay(i, e);
   }
   updateCountDisplay(e, t) {
-    if (this.countElement)
-      if (t === "")
-        this.countElement.textContent = `Alle ${this.itemType} (${this.originalCount})`;
-      else if (e === 0)
-        this.countElement.textContent = `Keine ${this.itemType} gefunden für "${t}"`;
-      else {
-        const i = e === 1 ? this.itemTypeSingular : this.itemType;
-        this.countElement.textContent = `${e} von ${this.originalCount} ${i}`;
-      }
+    this.countElement && (t === "" ? this.countElement.style.display = "none" : (this.countElement.style.display = "", e === 0 ? this.countElement.textContent = "(0)" : this.countElement.textContent = `(${e})`));
   }
 }
-customElements.define("generic-filter", z);
-class D extends HTMLElement {
+customElements.define("generic-filter", W);
+class Y extends HTMLElement {
   constructor() {
     super(), this.resizeObserver = null;
   }
@@ -839,13 +1022,13 @@ class D extends HTMLElement {
     if (l)
       h = l;
     else {
-      const f = this.getIssueContext(i);
-      h = f ? `${f}, ${i}` : `${i}`;
+      const g = this.getIssueContext(i);
+      h = g ? `${g}, ${i}` : `${i}`;
     }
     if (d.innerHTML = h, s && i === s) {
       d.style.position = "relative";
-      const f = d.querySelector(".target-page-dot");
-      f && f.remove();
+      const g = d.querySelector(".target-page-dot");
+      g && g.remove();
       const m = document.createElement("span");
       m.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", m.title = "verlinkte Seite", d.appendChild(m);
     }
@@ -1059,7 +1242,7 @@ class D extends HTMLElement {
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", D);
+customElements.define("single-page-viewer", Y);
 document.body.addEventListener("htmx:beforeRequest", function(a) {
   const e = document.querySelector("single-page-viewer");
   e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.close());
@@ -1068,7 +1251,7 @@ window.addEventListener("beforeunload", function() {
   const a = document.querySelector("single-page-viewer");
   a && a.close();
 });
-class j extends HTMLElement {
+class Z extends HTMLElement {
   constructor() {
     super(), this.isVisible = !1, this.scrollHandler = null, this.htmxAfterSwapHandler = null;
   }
@@ -1109,8 +1292,8 @@ class j extends HTMLElement {
     });
   }
 }
-customElements.define("scroll-to-top-button", j);
-class F extends HTMLElement {
+customElements.define("scroll-to-top-button", Z);
+class J extends HTMLElement {
   constructor() {
     super(), this.pageObserver = null, this.pageContainers = /* @__PURE__ */ new Map(), this.singlePageViewerActive = !1, this.singlePageViewerCurrentPage = null, this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this);
   }
@@ -1229,8 +1412,8 @@ class F extends HTMLElement {
     this.pageObserver && (this.pageObserver.disconnect(), this.pageObserver = null), document.removeEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.pageContainers.clear();
   }
 }
-customElements.define("inhaltsverzeichnis-scrollspy", F);
-class K extends HTMLElement {
+customElements.define("inhaltsverzeichnis-scrollspy", J);
+class X extends HTMLElement {
   constructor() {
     super(), this.innerHTML = `
             <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm">
@@ -1278,11 +1461,11 @@ class K extends HTMLElement {
     window.showErrorModal = (e) => this.show(e), window.closeErrorModal = () => this.close();
   }
 }
-customElements.define("error-modal", K);
+customElements.define("error-modal", X);
 window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
-function W(a, e, t, i = null) {
+function _(a, e, t, i = null) {
   let n = document.querySelector("single-page-viewer");
   n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
   const s = a.closest('[data-beilage="true"]') !== null, o = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, r = a.closest(".newspaper-page-container, .piece-page-container");
@@ -1297,11 +1480,11 @@ function W(a, e, t, i = null) {
   }
   n.show(a.src, a.alt, e, s, o, i, l, c);
 }
-function E() {
+function q() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function Z() {
-  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, b(), document.querySelector(".newspaper-page-container")) {
+function G() {
+  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, S(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
       (t) => {
@@ -1310,7 +1493,7 @@ function Z() {
           n !== -1 && (i.isIntersecting ? e.add(n) : e.delete(n));
         }), e.size > 0) {
           const n = Array.from(e).sort((s, o) => s - o)[0];
-          n !== window.currentActiveIndex && (window.currentActiveIndex = n, b());
+          n !== window.currentActiveIndex && (window.currentActiveIndex = n, S());
         }
       },
       {
@@ -1321,7 +1504,7 @@ function Z() {
     });
   }
 }
-function J() {
+function U() {
   if (window.currentActiveIndex > 0) {
     let a = -1;
     const e = [];
@@ -1338,11 +1521,11 @@ function J() {
     a === -1 && t > 0 && (a = t - 1), a >= 0 && (window.currentActiveIndex = a, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
-      b();
+      S();
     }, 100));
   }
 }
-function G() {
+function Q() {
   if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
     let a = -1;
     const e = [];
@@ -1359,12 +1542,12 @@ function G() {
     a === -1 && t < window.currentPageContainers.length - 1 && (a = t + 1), a >= 0 && a < window.currentPageContainers.length && (window.currentActiveIndex = a, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
-      b();
+      S();
     }, 100));
   }
 }
-function Y() {
-  if (C()) {
+function ee() {
+  if (H()) {
     const e = document.querySelector("#newspaper-content .newspaper-page-container");
     e && e.scrollIntoView({
       block: "start"
@@ -1383,7 +1566,7 @@ function Y() {
     }
   }
 }
-function C() {
+function H() {
   const a = [];
   window.currentPageContainers.forEach((e, t) => {
     const i = e.getBoundingClientRect(), n = window.innerHeight, s = Math.max(i.top, 0), o = Math.min(i.bottom, n), r = Math.max(0, o - s), l = i.height;
@@ -1396,14 +1579,14 @@ function C() {
   }
   return !1;
 }
-function b() {
+function S() {
   const a = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
   if (a && (a.style.display = "flex", window.currentActiveIndex <= 0 ? (a.disabled = !0, a.classList.add("opacity-50", "cursor-not-allowed"), a.classList.remove("hover:bg-gray-200")) : (a.disabled = !1, a.classList.remove("opacity-50", "cursor-not-allowed"), a.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
-    const i = C(), n = t.querySelector("i");
+    const i = H(), n = t.querySelector("i");
     i ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
-function U() {
+function te() {
   const a = document.getElementById("shareLinkBtn");
   let e = "";
   if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
@@ -1415,54 +1598,54 @@ function U() {
     title: document.title,
     url: t
   }).catch((i) => {
-    x(t, a);
-  }) : x(t, a);
+    k(t, a);
+  }) : k(t, a);
 }
-function x(a, e) {
+function k(a, e) {
   if (navigator.clipboard)
     navigator.clipboard.writeText(a).then(() => {
-      g(e, "Link kopiert!");
+      f(e, "Link kopiert!");
     }).catch((t) => {
-      g(e, "Kopieren fehlgeschlagen");
+      f(e, "Kopieren fehlgeschlagen");
     });
   else {
     const t = document.createElement("textarea");
     t.value = a, document.body.appendChild(t), t.select();
     try {
       const i = document.execCommand("copy");
-      g(e, i ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      f(e, i ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      g(e, "Kopieren fehlgeschlagen");
+      f(e, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(t);
     }
   }
 }
-function X() {
+function ie() {
   const a = document.getElementById("citationBtn"), e = document.title || "KGPZ";
   let t = window.location.origin + window.location.pathname;
   t.includes("#") && (t = t.split("#")[0]);
   const i = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), n = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}. Digital verfügbar unter: ${t} (Zugriff: ${i}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
-      g(a, "Zitation kopiert!");
+      f(a, "Zitation kopiert!");
     }).catch((s) => {
-      g(a, "Kopieren fehlgeschlagen");
+      f(a, "Kopieren fehlgeschlagen");
     });
   else {
     const s = document.createElement("textarea");
     s.value = n, document.body.appendChild(s), s.select();
     try {
       const o = document.execCommand("copy");
-      g(a, o ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      f(a, o ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      g(a, "Kopieren fehlgeschlagen");
+      f(a, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(s);
     }
   }
 }
-function g(a, e) {
+function f(a, e) {
   const t = document.querySelector(".simple-popup");
   t && t.remove();
   const i = document.createElement("div");
@@ -1491,7 +1674,7 @@ function g(a, e) {
     }, 200);
   }, 2e3);
 }
-function Q(a, e, t = !1) {
+function ne(a, e, t = !1) {
   let i = "";
   if (t)
     i = window.location.origin + window.location.pathname + `#beilage-1-page-${a}`;
@@ -1506,24 +1689,24 @@ function Q(a, e, t = !1) {
   const n = i;
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
-      g(e, "Link kopiert!");
+      f(e, "Link kopiert!");
     }).catch((s) => {
-      g(e, "Kopieren fehlgeschlagen");
+      f(e, "Kopieren fehlgeschlagen");
     });
   else {
     const s = document.createElement("textarea");
     s.value = n, document.body.appendChild(s), s.select();
     try {
       const o = document.execCommand("copy");
-      g(e, o ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      f(e, o ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      g(e, "Kopieren fehlgeschlagen");
+      f(e, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(s);
     }
   }
 }
-function _(a, e) {
+function se(a, e) {
   const t = document.title || "KGPZ", i = window.location.pathname.split("/");
   let n;
   if (i.length >= 3) {
@@ -1534,33 +1717,33 @@ function _(a, e) {
   const s = n, o = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), r = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${a}. Digital verfügbar unter: ${s} (Zugriff: ${o}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(r).then(() => {
-      g(e, "Zitation kopiert!");
+      f(e, "Zitation kopiert!");
     }).catch((l) => {
-      g(e, "Kopieren fehlgeschlagen");
+      f(e, "Kopieren fehlgeschlagen");
     });
   else {
     const l = document.createElement("textarea");
     l.value = r, document.body.appendChild(l), l.select();
     try {
       const c = document.execCommand("copy");
-      g(e, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      f(e, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      g(e, "Kopieren fehlgeschlagen");
+      f(e, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(l);
     }
   }
 }
-function L() {
-  Z(), window.addEventListener("scroll", function() {
+function M() {
+  G(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
-      b();
+      S();
     }, 50);
   }), document.addEventListener("keydown", function(a) {
-    a.key === "Escape" && E();
+    a.key === "Escape" && q();
   });
 }
-function k() {
+function A() {
   const a = window.location.pathname;
   document.querySelectorAll(".citation-link[data-citation-url]").forEach((t) => {
     const i = t.getAttribute("data-citation-url");
@@ -1577,7 +1760,7 @@ function k() {
     n ? (t.classList.add("text-red-700", "pointer-events-none"), t.setAttribute("aria-current", "page")) : (t.classList.remove("text-red-700", "pointer-events-none"), t.removeAttribute("aria-current"));
   });
 }
-function P() {
+function B() {
   const a = window.location.pathname, e = document.body;
   e.classList.remove(
     "page-akteure",
@@ -1589,21 +1772,21 @@ function P() {
     "page-edition"
   ), a.includes("/akteure/") || a.includes("/autoren") ? e.classList.add("page-akteure") : a.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : a.includes("/search") || a.includes("/suche") ? e.classList.add("page-search") : a.includes("/ort/") ? e.classList.add("page-ort") : a.includes("/kategorie/") ? e.classList.add("page-kategorie") : a.includes("/beitrag/") ? e.classList.add("page-piece") : a.includes("/edition") && e.classList.add("page-edition");
 }
-window.enlargePage = W;
-window.closeModal = E;
-window.scrollToPreviousPage = J;
-window.scrollToNextPage = G;
-window.scrollToBeilage = Y;
-window.shareCurrentPage = U;
-window.generateCitation = X;
-window.copyPagePermalink = Q;
-window.generatePageCitation = _;
-P();
-k();
-document.querySelector(".newspaper-page-container") && L();
-let ee = function(a) {
-  P(), k(), S(), setTimeout(() => {
-    document.querySelector(".newspaper-page-container") && L();
+window.enlargePage = _;
+window.closeModal = q;
+window.scrollToPreviousPage = U;
+window.scrollToNextPage = Q;
+window.scrollToBeilage = ee;
+window.shareCurrentPage = te;
+window.generateCitation = ie;
+window.copyPagePermalink = ne;
+window.generatePageCitation = se;
+B();
+A();
+document.querySelector(".newspaper-page-container") && M();
+let oe = function(a) {
+  B(), A(), I(), setTimeout(() => {
+    document.querySelector(".newspaper-page-container") && M();
   }, 50);
 };
-document.body.addEventListener("htmx:afterSettle", ee);
+document.body.addEventListener("htmx:afterSettle", oe);

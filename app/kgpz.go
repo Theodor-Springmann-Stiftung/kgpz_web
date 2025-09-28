@@ -161,8 +161,8 @@ func (k *KGPZ) Routes(srv *fiber.App) error {
 
 	srv.Get(SEARCH_URL, controllers.GetSearch(k.Library, k.Search))
 	srv.Get(FILTER_URL, controllers.GetQuickFilter(k.Library))
-	srv.Get("/ort/fragment/:place", controllers.GetPlaceFragment(k.Library))
-	srv.Get(PLACE_OVERVIEW_URL, controllers.GetPlace(k.Library))
+	srv.Get("/ort/fragment/:place", controllers.GetPlaceFragment(k.Library, k.Geonames))
+	srv.Get(PLACE_OVERVIEW_URL, controllers.GetPlace(k.Library, k.Geonames))
 	srv.Get(CATEGORY_OVERVIEW_URL, controllers.GetCategory(k.Library))
 	srv.Get(AGENTS_OVERVIEW_URL, controllers.GetAgents(k.Library))
 	srv.Get(PIECE_PAGE_URL, controllers.GetPieceWithPage(k.Library))
