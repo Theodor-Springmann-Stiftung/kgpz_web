@@ -542,6 +542,42 @@ class NavigationMenu extends HTMLElement {
 		this.isOpen = false;
 	}
 
+	static get observedAttributes() {
+		return ['git-commit', 'git-date', 'git-url'];
+	}
+
+	get gitCommit() {
+		return this.getAttribute('git-commit');
+	}
+
+	get gitDate() {
+		return this.getAttribute('git-date');
+	}
+
+	get gitUrl() {
+		return this.getAttribute('git-url');
+	}
+
+	formatCommitInfo() {
+		if (!this.gitCommit) {
+			return 'Keine Commit-Info';
+		}
+
+		const shortCommit = this.gitCommit.substring(0, 7);
+
+		if (this.gitDate) {
+			const date = new Date(this.gitDate);
+			const formattedDate = date.toLocaleDateString('de-DE', {
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric'
+			});
+			return `${shortCommit} (${formattedDate})`;
+		}
+
+		return shortCommit;
+	}
+
 	connectedCallback() {
 		this.createMenu();
 		this.setupEventListeners();
@@ -570,10 +606,18 @@ class NavigationMenu extends HTMLElement {
                             <a href="/ort/">Orten</a>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-y-2 mt-2">
-                        <a href="/edition/">Geschichte & Edition der KGPZ</a>
-                        <a href="/zitation/">Zitation</a>
-                        <a href="/kontakt/">Kontakt</a>
+                    <div class="border-t border-slate-300 pt-2 mt-2">
+                        <div class="flex flex-col gap-y-2">
+                            <a href="/edition/">Geschichte & Edition der KGPZ</a>
+                            <a href="/zitation/">Zitation</a>
+                            <a href="/kontakt/">Kontakt</a>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-200 text-xs text-slate-600">
+                            <a href="${this.gitUrl || 'https://github.com/Theodor-Springmann-Stiftung/KGPZ.git'}" target="_blank" class="flex items-center gap-1 hover:text-slate-800">
+                                <i class="ri-git-branch-line"></i>
+                                <span>${this.formatCommitInfo()}</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

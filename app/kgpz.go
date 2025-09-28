@@ -48,6 +48,9 @@ const (
 	ADDITIONS_URL = "/:year/:issue/beilage/:page?"
 )
 
+// GitUpdateCallback is called when git data changes
+type GitUpdateCallback func(commit string, date string, url string)
+
 type KGPZ struct {
 	// INFO: We need to prevent concurrent reads and writes to the fs here since
 	// - Git is accessing the FS
@@ -62,6 +65,9 @@ type KGPZ struct {
 	Geonames  *geonames.GeonamesProvider
 	Library   *xmlmodels.Library
 	Search    *searchprovider.SearchProvider
+
+	// Callback for when git data is updated
+	gitUpdateCallback GitUpdateCallback
 }
 
 func NewKGPZ(config *providers.ConfigProvider) (*KGPZ, error) {
@@ -590,6 +596,11 @@ func (k *KGPZ) GetWebHookSecret() string {
 	return k.Config.WebHookSecret
 }
 
+// SetGitUpdateCallback sets the callback function to be called when git data is updated
+func (k *KGPZ) SetGitUpdateCallback(callback GitUpdateCallback) {
+	k.gitUpdateCallback = callback
+}
+
 func (k *KGPZ) Pull() {
 	if k.Repo == nil {
 		return
@@ -606,6 +617,15 @@ func (k *KGPZ) Pull() {
 		logging.ObjDebug(&k.Repo, "Remote changed. Reparsing")
 		k.Serialize()
 		k.EnrichAndRebuildIndex()
+
+		// Notify about git data update
+		if k.gitUpdateCallback != nil {
+			k.gitUpdateCallback(
+				k.Repo.Commit,
+				k.Repo.Date.Format("2006-01-02T15:04:05Z07:00"),
+				k.Config.Config.GitURL,
+			)
+		}
 	}
 }
 

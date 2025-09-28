@@ -55,6 +55,11 @@ func Init(cfg *providers.ConfigProvider) (*App, error) {
 	engine := Engine(kgpz, cfg)
 	server := server.Create(cfg, engine)
 
+	// Set up callback to update engine globals when git data changes
+	kgpz.SetGitUpdateCallback(func(commit, date, url string) {
+		engine.UpdateGitGlobals(commit, date, url)
+	})
+
 	server.AddPre(engine)
 	server.AddPre(kgpz)
 	server.AddMux(kgpz)
@@ -152,6 +157,15 @@ func Engine(kgpz *app.KGPZ, c *providers.ConfigProvider) *templating.Engine {
 	e := templating.NewEngine(&views.LayoutFS, &views.RoutesFS)
 	e.AddFuncs(kgpz.Funcs())
 	timestamp := time.Now().Unix()
-	e.Globals(fiber.Map{"isDev": c.Config.Debug, "name": "KGPZ", "lang": "de", "timestamp": timestamp})
+
+	// Add git commit information to global data
+	globals := fiber.Map{"isDev": c.Config.Debug, "name": "KGPZ", "lang": "de", "timestamp": timestamp}
+	if kgpz.Repo != nil {
+		globals["gitCommit"] = kgpz.Repo.Commit
+		globals["gitDate"] = kgpz.Repo.Date.Format("2006-01-02T15:04:05Z07:00")
+		globals["gitURL"] = c.Config.GitURL
+	}
+
+	e.Globals(globals)
 	return e
 }

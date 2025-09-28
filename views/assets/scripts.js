@@ -180,7 +180,7 @@ class V extends HTMLElement {
   }
 }
 customElements.define("year-jump-filter", V);
-class z extends HTMLElement {
+class D extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
   }
@@ -242,10 +242,36 @@ class z extends HTMLElement {
     this.isOpen && t && i && !t.contains(e.target) && !this.contains(e.target) && this.hideFilter();
   }
 }
-customElements.define("schnellauswahl-button", z);
-class D extends HTMLElement {
+customElements.define("schnellauswahl-button", D);
+class z extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
+  }
+  static get observedAttributes() {
+    return ["git-commit", "git-date", "git-url"];
+  }
+  get gitCommit() {
+    return this.getAttribute("git-commit");
+  }
+  get gitDate() {
+    return this.getAttribute("git-date");
+  }
+  get gitUrl() {
+    return this.getAttribute("git-url");
+  }
+  formatCommitInfo() {
+    if (!this.gitCommit)
+      return "Keine Commit-Info";
+    const e = this.gitCommit.substring(0, 7);
+    if (this.gitDate) {
+      const i = new Date(this.gitDate).toLocaleDateString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+      return `${e} (${i})`;
+    }
+    return e;
   }
   connectedCallback() {
     this.createMenu(), this.setupEventListeners();
@@ -271,10 +297,18 @@ class D extends HTMLElement {
                             <a href="/ort/">Orten</a>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-y-2 mt-2">
-                        <a href="/edition/">Geschichte & Edition der KGPZ</a>
-                        <a href="/zitation/">Zitation</a>
-                        <a href="/kontakt/">Kontakt</a>
+                    <div class="border-t border-slate-300 pt-2 mt-2">
+                        <div class="flex flex-col gap-y-2">
+                            <a href="/edition/">Geschichte & Edition der KGPZ</a>
+                            <a href="/zitation/">Zitation</a>
+                            <a href="/kontakt/">Kontakt</a>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-200 text-xs text-slate-600">
+                            <a href="${this.gitUrl || "https://github.com/Theodor-Springmann-Stiftung/KGPZ.git"}" target="_blank" class="flex items-center gap-1 hover:text-slate-800">
+                                <i class="ri-git-branch-line"></i>
+                                <span>${this.formatCommitInfo()}</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -319,7 +353,7 @@ class D extends HTMLElement {
     this.isOpen && !this.contains(e.target) && this.hideMenu();
   }
 }
-customElements.define("navigation-menu", D);
+customElements.define("navigation-menu", z);
 document.addEventListener("DOMContentLoaded", function() {
   document.addEventListener("click", function(a) {
     const e = a.target.closest('a[href^="/akteure/"], a[href^="/ort/"]'), t = document.getElementById("filter-container");
@@ -668,7 +702,7 @@ class _ extends HTMLElement {
     this.isExpanded ? this.classList.add("border-b", "border-slate-100") : this.classList.add("border-b", "border-slate-100"), !this.nextElementSibling && this.classList.remove("border-b");
   }
 }
-class W extends HTMLElement {
+class K extends HTMLElement {
   constructor() {
     super(), this.places = [], this.mapElement = null, this.pointsContainer = null, this.intersectionObserver = null, this.mapPoints = /* @__PURE__ */ new Map(), this.tooltip = null, this.showTimeout = null, this.hideTimeout = null, this.isTooltipVisible = !1, this.currentHoveredPlaceId = "", this.boundHandleHeadingHoverEvent = this.handleHeadingHoverEvent.bind(this);
   }
@@ -709,8 +743,8 @@ class W extends HTMLElement {
     const e = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, t = { lon: 10, lat: 52 }, i = (s, o) => {
       const h = t.lon * Math.PI / 180, d = t.lat * Math.PI / 180, u = o * Math.PI / 180, p = s * Math.PI / 180, m = Math.sqrt(
         2 / (1 + Math.sin(d) * Math.sin(p) + Math.cos(d) * Math.cos(p) * Math.cos(u - h))
-      ), g = 6371e3 * m * Math.cos(p) * Math.sin(u - h), w = 6371e3 * m * (Math.cos(d) * Math.sin(p) - Math.sin(d) * Math.cos(p) * Math.cos(u - h)), x = g + 4321e3, f = w + 321e4, v = e.xmax - e.xmin, E = e.ymax - e.ymin, S = (x - e.xmin) / v * 100, L = (e.ymax - f) / E * 100;
-      return { x: S, y: L };
+      ), g = 6371e3 * m * Math.cos(p) * Math.sin(u - h), w = 6371e3 * m * (Math.cos(d) * Math.sin(p) - Math.sin(d) * Math.cos(p) * Math.cos(u - h)), x = g + 4321e3, f = w + 321e4, v = e.xmax - e.xmin, E = e.ymax - e.ymin, S = (x - e.xmin) / v * 100, C = (e.ymax - f) / E * 100;
+      return { x: S, y: C };
     }, n = [];
     this.places.forEach((s) => {
       if (s.lat && s.lng) {
@@ -740,7 +774,7 @@ class W extends HTMLElement {
       const y = w * x;
       v.x = d - (y - g) / 2, v.width = y;
     }
-    const E = 100 / v.width, S = -v.x, L = -v.y, T = `scale(${E}) translate(${S}%, ${L}%)`, P = this.querySelector(".transform-wrapper");
+    const E = 100 / v.width, S = -v.x, C = -v.y, T = `scale(${E}) translate(${S}%, ${C}%)`, P = this.querySelector(".transform-wrapper");
     P && (P.style.transform = T);
   }
   initializeScrollspy() {
@@ -833,7 +867,7 @@ class W extends HTMLElement {
     this.intersectionObserver && (this.intersectionObserver.disconnect(), this.intersectionObserver = null), this.clearTimeouts(), document.removeEventListener("place-heading-hover", this.boundHandleHeadingHoverEvent), window.removeEventListener("scroll", this.boundHandleScroll), document.removeEventListener("scroll", this.boundHandleScroll);
   }
 }
-class K extends HTMLElement {
+class W extends HTMLElement {
   constructor() {
     super(), this.place = null, this.mapElement = null, this.pointsContainer = null, this.tooltip = null;
   }
@@ -872,7 +906,7 @@ class K extends HTMLElement {
     const e = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, t = { lon: 10, lat: 52 }, i = (r, l) => {
       const u = t.lon * Math.PI / 180, p = t.lat * Math.PI / 180, m = l * Math.PI / 180, g = r * Math.PI / 180, w = Math.sqrt(
         2 / (1 + Math.sin(p) * Math.sin(g) + Math.cos(p) * Math.cos(g) * Math.cos(m - u))
-      ), x = 6371e3 * w * Math.cos(g) * Math.sin(m - u), f = 6371e3 * w * (Math.cos(p) * Math.sin(g) - Math.sin(p) * Math.cos(g) * Math.cos(m - u)), v = x + 4321e3, E = f + 321e4, S = e.xmax - e.xmin, L = e.ymax - e.ymin, T = (v - e.xmin) / S * 100, P = (e.ymax - E) / L * 100;
+      ), x = 6371e3 * w * Math.cos(g) * Math.sin(m - u), f = 6371e3 * w * (Math.cos(p) * Math.sin(g) - Math.sin(p) * Math.cos(g) * Math.cos(m - u)), v = x + 4321e3, E = f + 321e4, S = e.xmax - e.xmin, C = e.ymax - e.ymin, T = (v - e.xmin) / S * 100, P = (e.ymax - E) / C * 100;
       return { x: T, y: P };
     }, n = parseFloat(this.place.lat), s = parseFloat(this.place.lng), o = i(n, s);
     if (o.x >= 0 && o.x <= 100 && o.y >= 0 && o.y <= 100) {
@@ -921,8 +955,8 @@ class K extends HTMLElement {
 }
 customElements.define("places-filter", j);
 customElements.define("place-accordion", _);
-customElements.define("places-map", W);
-customElements.define("places-map-single", K);
+customElements.define("places-map", K);
+customElements.define("places-map-single", W);
 class Y extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.itemCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
@@ -1582,7 +1616,7 @@ function M() {
   document.getElementById("pageModal").classList.add("hidden");
 }
 function Q() {
-  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, C(), document.querySelector(".newspaper-page-container")) {
+  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, L(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
       (t) => {
@@ -1591,7 +1625,7 @@ function Q() {
           n !== -1 && (i.isIntersecting ? e.add(n) : e.delete(n));
         }), e.size > 0) {
           const n = Array.from(e).sort((s, o) => s - o)[0];
-          n !== window.currentActiveIndex && (window.currentActiveIndex = n, C());
+          n !== window.currentActiveIndex && (window.currentActiveIndex = n, L());
         }
       },
       {
@@ -1619,7 +1653,7 @@ function ee() {
     a === -1 && t > 0 && (a = t - 1), a >= 0 && (window.currentActiveIndex = a, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
-      C();
+      L();
     }, 100));
   }
 }
@@ -1640,7 +1674,7 @@ function te() {
     a === -1 && t < window.currentPageContainers.length - 1 && (a = t + 1), a >= 0 && a < window.currentPageContainers.length && (window.currentActiveIndex = a, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
-      C();
+      L();
     }, 100));
   }
 }
@@ -1677,7 +1711,7 @@ function q() {
   }
   return !1;
 }
-function C() {
+function L() {
   const a = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
   if (a && (a.style.display = "flex", window.currentActiveIndex <= 0 ? (a.disabled = !0, a.classList.add("opacity-50", "cursor-not-allowed"), a.classList.remove("hover:bg-gray-200")) : (a.disabled = !1, a.classList.remove("opacity-50", "cursor-not-allowed"), a.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
     const i = q(), n = t.querySelector("i");
@@ -1835,7 +1869,7 @@ function re(a, e) {
 function A() {
   Q(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
-      C();
+      L();
     }, 50);
   }), document.addEventListener("keydown", function(a) {
     a.key === "Escape" && M();

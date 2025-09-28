@@ -195,7 +195,9 @@ func (p *GNDProvider) FetchPersons(persons []GNDData) {
 }
 
 func (p *GNDProvider) fetchPerson(ID, GND string) {
-	SPLITURL := strings.Split(GND, "/")
+	// Remove trailing slash if present
+	cleanURL := strings.TrimSuffix(GND, "/")
+	SPLITURL := strings.Split(cleanURL, "/")
 	if len(SPLITURL) < 2 {
 		logging.Error(nil, "Error parsing GND ID from: "+GND)
 		return

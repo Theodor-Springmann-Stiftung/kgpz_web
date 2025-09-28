@@ -126,7 +126,7 @@
 			{{- $placeObj := GetPlace $placeRef.Ref -}}
 			{{- if gt (len $placeObj.Names) 0 -}}
 				{{- $placeName := index $placeObj.Names 0 -}}
-				{{- $placeTag = printf "%s <a href=\"/ort/%s\" class=\"ml-0\"><span class=\"place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap hover:bg-slate-300 hover:text-slate-800 transition-colors duration-150\">%s</span></a>" $placeTag $placeObj.ID $placeName -}}
+				{{- $placeTag = printf "%s <a href=\"/ort/%s\" class=\"ml-0\"><span class=\"place-tag inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-md whitespace-nowrap hover:bg-slate-300 hover:text-slate-800 transition-colors duration-150 !indent-0\">%s</span></a>" $placeTag $placeObj.ID $placeName -}}
 			{{- end -}}
 		{{- end -}}
 	{{- end -}}

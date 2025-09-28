@@ -425,6 +425,18 @@ func (e *Engine) Globals(data fiber.Map) {
 	}
 }
 
+// UpdateGitGlobals updates the git-related global data
+func (e *Engine) UpdateGitGlobals(commit, date, url string) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.GlobalData == nil {
+		e.GlobalData = make(fiber.Map)
+	}
+	e.GlobalData["gitCommit"] = commit
+	e.GlobalData["gitDate"] = date
+	e.GlobalData["gitURL"] = url
+}
+
 func (e *Engine) Load() error {
 	wg := sync.WaitGroup{}
 	wg.Add(2)

@@ -196,7 +196,9 @@ func (p *GeonamesProvider) FetchPlaces(places []GeonamesData) {
 }
 
 func (p *GeonamesProvider) fetchPlace(ID, GeonamesURL string) {
-	SPLITURL := strings.Split(GeonamesURL, "/")
+	// Remove trailing slash if present
+	cleanURL := strings.TrimSuffix(GeonamesURL, "/")
+	SPLITURL := strings.Split(cleanURL, "/")
 	if len(SPLITURL) < 2 {
 		logging.Error(nil, "Error parsing Geonames ID from: "+GeonamesURL)
 		return
