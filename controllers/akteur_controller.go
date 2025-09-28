@@ -38,9 +38,11 @@ func GetAgents(kgpz *xmlmodels.Library) fiber.Handler {
 
 			// Build available letters list (same logic as AgentsView)
 			av := make(map[string]bool)
+			kgpz.Agents.Lock()
 			for _, agent := range kgpz.Agents.Array {
 				av[strings.ToUpper(agent.ID[:1])] = true
 			}
+			kgpz.Agents.Unlock()
 			availableLetters := make([]string, 0, len(av))
 			for letter := range av {
 				availableLetters = append(availableLetters, letter)

@@ -188,15 +188,7 @@ func (k *KGPZ) Routes(srv *fiber.App) error {
 	srv.Get(CITATION_URL, controllers.Get(CITATION_URL))
 
 	if k.Config.WebHookSecret != "" && k.Config.WebHookEndpoint != "" {
-		handler, rc := controllers.PostWebhook(k.Config.WebHookSecret)
-		srv.Post(k.Config.WebHookEndpoint, handler)
-		go func() {
-			for signal := range rc {
-				if signal {
-					k.Pull()
-				}
-			}
-		}()
+		srv.Post(k.Config.WebHookEndpoint, controllers.PostWebhook(k))
 	}
 
 	return nil
@@ -592,6 +584,10 @@ func (k *KGPZ) Serialize() error {
 
 func (k *KGPZ) IsDebug() bool {
 	return k.Config.Debug
+}
+
+func (k *KGPZ) GetWebHookSecret() string {
+	return k.Config.WebHookSecret
 }
 
 func (k *KGPZ) Pull() {

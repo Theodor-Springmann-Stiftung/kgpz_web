@@ -72,6 +72,12 @@ func (c *ConfigProvider) Validate() error {
 	if strings.TrimSpace(c.Config.BaseDIR) == "" {
 		return fmt.Errorf("Base directory path not set")
 	}
+
+	// Validate webhook configuration: if endpoint is set, secret must also be set
+	if strings.TrimSpace(c.Config.WebHookEndpoint) != "" && strings.TrimSpace(c.Config.WebHookSecret) == "" {
+		return fmt.Errorf("WebHookSecret must be configured when WebHookEndpoint is set")
+	}
+
 	return nil
 }
 

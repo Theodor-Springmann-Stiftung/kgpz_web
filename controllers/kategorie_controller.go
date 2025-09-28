@@ -69,6 +69,7 @@ func GetCategory(kgpz *xmlmodels.Library) fiber.Handler {
 func findFirstYearForCategory(categoryID string, kgpz *xmlmodels.Library) int {
 	categoryYears := make([]int, 0)
 
+	kgpz.Pieces.Lock()
 	for _, piece := range kgpz.Pieces.Array {
 		matchesCategory := false
 
@@ -100,6 +101,7 @@ func findFirstYearForCategory(categoryID string, kgpz *xmlmodels.Library) int {
 			}
 		}
 	}
+	kgpz.Pieces.Unlock()
 
 	if len(categoryYears) == 0 {
 		return 0 // No pieces found for this category

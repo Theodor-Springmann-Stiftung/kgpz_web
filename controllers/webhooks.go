@@ -11,11 +11,10 @@ import (
 
 const SIGNATURE_PREFIX = "sha256="
 
-func PostWebhook(secret string) (fiber.Handler, chan bool) {
-	devchan := make(chan bool)
+func PostWebhook(kgpz WebhookInterface) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		body := c.Body()
-		if !verifySignature256([]byte(secret), body, c.Get("X-Hub-Signature-256")) {
+		if !verifySignature256([]byte(kgpz.GetWebHookSecret()), body, c.Get("X-Hub-Signature-256")) {
 			return c.SendStatus(fiber.StatusUnauthorized)
 		}
 
@@ -23,13 +22,17 @@ func PostWebhook(secret string) (fiber.Handler, chan bool) {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
 
-		go func() {
-			devchan <- true
-		}()
+		// Respond with 200 immediately, then process asynchronously
+		go kgpz.Pull()
 
-		c.SendStatus(fiber.StatusOK)
-		return nil
-	}, devchan
+		return c.SendStatus(fiber.StatusOK)
+	}
+}
+
+// KGPZInterface defines the interface needed by the webhook
+type WebhookInterface interface {
+	GetWebHookSecret() string
+	Pull()
 }
 
 func sign256(secret, body []byte) []byte {
