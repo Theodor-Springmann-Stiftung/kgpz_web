@@ -40,23 +40,23 @@ export class PlacesFilter extends HTMLElement {
 	}
 
 	setupEventListeners() {
-		this.searchInput = this.querySelector('#places-search');
+		this.searchInput = this.querySelector("#places-search");
 		if (this.searchInput) {
-			this.searchInput.addEventListener('input', this.handleSearchInput.bind(this));
+			this.searchInput.addEventListener("input", this.handleSearchInput.bind(this));
 		}
 	}
 
 	cleanupEventListeners() {
 		if (this.searchInput) {
-			this.searchInput.removeEventListener('input', this.handleSearchInput.bind(this));
+			this.searchInput.removeEventListener("input", this.handleSearchInput.bind(this));
 		}
 	}
 
 	initializePlaceCards() {
 		// Find all place cards and the count element
-		const container = this.closest('.bg-white') || document;
-		this.placeCards = Array.from(container.querySelectorAll('[data-place-name]'));
-		this.countElement = container.querySelector('[data-places-count]');
+		const container = this.closest(".bg-white") || document;
+		this.placeCards = Array.from(container.querySelectorAll("[data-place-name]"));
+		this.countElement = container.querySelector("[data-places-count]");
 
 		if (this.countElement) {
 			this.originalCount = this.placeCards.length;
@@ -81,20 +81,21 @@ export class PlacesFilter extends HTMLElement {
 		const normalizedSearch = searchTerm.toLowerCase();
 		let visibleCount = 0;
 
-		this.placeCards.forEach(card => {
-			const placeName = card.getAttribute('data-place-name')?.toLowerCase() || '';
-			const modernName = card.getAttribute('data-modern-name')?.toLowerCase() || '';
+		this.placeCards.forEach((card) => {
+			const placeName = card.getAttribute("data-place-name")?.toLowerCase() || "";
+			const modernName = card.getAttribute("data-modern-name")?.toLowerCase() || "";
 
 			// Check if search term matches either the place name or modern name
-			const isMatch = searchTerm === '' ||
+			const isMatch =
+				searchTerm === "" ||
 				placeName.includes(normalizedSearch) ||
 				modernName.includes(normalizedSearch);
 
 			if (isMatch) {
-				card.style.display = '';
+				card.style.display = "";
 				visibleCount++;
 			} else {
-				card.style.display = 'none';
+				card.style.display = "none";
 			}
 		});
 
@@ -105,7 +106,7 @@ export class PlacesFilter extends HTMLElement {
 	updateCountDisplay(visibleCount, searchTerm) {
 		if (!this.countElement) return;
 
-		if (searchTerm === '') {
+		if (searchTerm === "") {
 			// Show original count when no search
 			this.countElement.textContent = `Alle Orte (${this.originalCount})`;
 		} else if (visibleCount === 0) {
@@ -128,6 +129,12 @@ export class PlaceAccordion extends HTMLElement {
 		this.isExpanded = false;
 		this.isLoading = false;
 		this.hasLoaded = false;
+
+		// Bind event handlers to maintain consistent references
+		this.boundHandleClick = this.handleClick.bind(this);
+		this.boundHandleMapClick = this.handleMapClick.bind(this);
+		this.boundHandleHeadingHover = this.handleHeadingHover.bind(this);
+		this.boundHandleHeadingLeave = this.handleHeadingLeave.bind(this);
 	}
 
 	connectedCallback() {
@@ -145,18 +152,19 @@ export class PlaceAccordion extends HTMLElement {
 
 	cleanupMapEventListeners() {
 		// Clean up map event listeners
-		document.removeEventListener('place-map-clicked', this.handleMapClick.bind(this));
+		document.removeEventListener("place-map-clicked", this.boundHandleMapClick);
 
 		// Clean up hover event listeners
-		this.removeEventListener('mouseenter', this.handleHeadingHover.bind(this));
-		this.removeEventListener('mouseleave', this.handleHeadingLeave.bind(this));
+		this.removeEventListener("mouseenter", this.boundHandleHeadingHover);
+		this.removeEventListener("mouseleave", this.boundHandleHeadingLeave);
 	}
 
 	setupAccordion() {
 		// Add chevron icon if not already present
-		if (!this.querySelector('.accordion-chevron')) {
-			const chevron = document.createElement('i');
-			chevron.className = 'ri-chevron-down-line accordion-chevron transition-transform duration-200 text-slate-400';
+		if (!this.querySelector(".accordion-chevron")) {
+			const chevron = document.createElement("i");
+			chevron.className =
+				"ri-chevron-down-line accordion-chevron transition-transform duration-200 text-slate-400";
 
 			// Find the badge and insert chevron before it
 			const badge = this.querySelector('[class*="bg-slate-100"]');
@@ -166,19 +174,20 @@ export class PlaceAccordion extends HTMLElement {
 		}
 
 		// Create content container if not exists
-		if (!this.querySelector('[data-content]')) {
-			const placeId = this.getAttribute('data-place-id');
-			const contentContainer = document.createElement('div');
-			contentContainer.setAttribute('data-content', '');
-			contentContainer.className = 'accordion-content overflow-hidden transition-all duration-300 max-h-0';
+		if (!this.querySelector("[data-content]")) {
+			const placeId = this.getAttribute("data-place-id");
+			const contentContainer = document.createElement("div");
+			contentContainer.setAttribute("data-content", "");
+			contentContainer.className =
+				"accordion-content overflow-hidden transition-all duration-300 max-h-0";
 
 			// Add HTMX attributes to override body defaults
-			contentContainer.setAttribute('hx-get', `/ort/fragment/${placeId}`);
-			contentContainer.setAttribute('hx-trigger', 'load-content');
-			contentContainer.setAttribute('hx-swap', 'innerHTML');
-			contentContainer.setAttribute('hx-target', 'this');
-			contentContainer.setAttribute('hx-select', '.place-fragment-content');
-			contentContainer.setAttribute('hx-boost', 'false'); // Override body's hx-boost="true"
+			contentContainer.setAttribute("hx-get", `/ort/fragment/${placeId}`);
+			contentContainer.setAttribute("hx-trigger", "load-content");
+			contentContainer.setAttribute("hx-swap", "innerHTML");
+			contentContainer.setAttribute("hx-target", "this");
+			contentContainer.setAttribute("hx-select", ".place-fragment-content");
+			contentContainer.setAttribute("hx-boost", "false"); // Override body's hx-boost="true"
 
 			this.appendChild(contentContainer);
 		}
@@ -186,43 +195,43 @@ export class PlaceAccordion extends HTMLElement {
 
 	setupEventListeners() {
 		// Add click listener to the entire component
-		this.addEventListener('click', this.handleClick.bind(this));
+		this.addEventListener("click", this.boundHandleClick);
 	}
 
 	cleanupEventListeners() {
-		this.removeEventListener('click', this.handleClick.bind(this));
+		this.removeEventListener("click", this.boundHandleClick);
 	}
 
 	setupMapEventListeners() {
 		// Listen for map click events
-		document.addEventListener('place-map-clicked', this.handleMapClick.bind(this));
+		document.addEventListener("place-map-clicked", this.boundHandleMapClick);
 	}
 
 	setupHoverEvents() {
 		// Add hover listeners to the entire accordion element (including expanded content)
-		this.addEventListener('mouseenter', this.handleHeadingHover.bind(this));
-		this.addEventListener('mouseleave', this.handleHeadingLeave.bind(this));
+		this.addEventListener("mouseenter", this.boundHandleHeadingHover);
+		this.addEventListener("mouseleave", this.boundHandleHeadingLeave);
 	}
 
 	handleHeadingHover() {
-		const placeId = this.getAttribute('data-place-id');
+		const placeId = this.getAttribute("data-place-id");
 		if (placeId) {
 			// Emit event to show tooltip on map
-			const showTooltipEvent = new CustomEvent('place-heading-hover', {
-				detail: { placeId, action: 'show' },
-				bubbles: true
+			const showTooltipEvent = new CustomEvent("place-heading-hover", {
+				detail: { placeId, action: "show" },
+				bubbles: true,
 			});
 			document.dispatchEvent(showTooltipEvent);
 		}
 	}
 
 	handleHeadingLeave() {
-		const placeId = this.getAttribute('data-place-id');
+		const placeId = this.getAttribute("data-place-id");
 		if (placeId) {
 			// Emit event to hide tooltip on map
-			const hideTooltipEvent = new CustomEvent('place-heading-hover', {
-				detail: { placeId, action: 'hide' },
-				bubbles: true
+			const hideTooltipEvent = new CustomEvent("place-heading-hover", {
+				detail: { placeId, action: "hide" },
+				bubbles: true,
 			});
 			document.dispatchEvent(hideTooltipEvent);
 		}
@@ -230,7 +239,7 @@ export class PlaceAccordion extends HTMLElement {
 
 	handleMapClick(event) {
 		const clickedPlaceId = event.detail.placeId;
-		const myPlaceId = this.getAttribute('data-place-id');
+		const myPlaceId = this.getAttribute("data-place-id");
 
 		// If this accordion matches the clicked place, expand it
 		if (clickedPlaceId === myPlaceId && !this.isExpanded) {
@@ -243,7 +252,7 @@ export class PlaceAccordion extends HTMLElement {
 
 	handleClick(event) {
 		// Only handle clicks on the place name area, not on expanded content
-		const contentContainer = this.querySelector('[data-content]');
+		const contentContainer = this.querySelector("[data-content]");
 		if (contentContainer && contentContainer.contains(event.target)) {
 			return; // Don't toggle if clicking inside expanded content
 		}
@@ -266,7 +275,7 @@ export class PlaceAccordion extends HTMLElement {
 		this.updateChevron();
 		this.updateBorders();
 
-		const contentContainer = this.querySelector('[data-content]');
+		const contentContainer = this.querySelector("[data-content]");
 		if (!contentContainer) return;
 
 		// Load content if not already loaded
@@ -274,7 +283,7 @@ export class PlaceAccordion extends HTMLElement {
 			this.loadContent();
 		} else {
 			// Just show existing content
-			contentContainer.style.maxHeight = contentContainer.scrollHeight + 'px';
+			contentContainer.style.maxHeight = contentContainer.scrollHeight + "px";
 		}
 	}
 
@@ -283,19 +292,19 @@ export class PlaceAccordion extends HTMLElement {
 		this.updateChevron();
 		this.updateBorders();
 
-		const contentContainer = this.querySelector('[data-content]');
+		const contentContainer = this.querySelector("[data-content]");
 		if (contentContainer) {
-			contentContainer.style.maxHeight = '0px';
+			contentContainer.style.maxHeight = "0px";
 		}
 	}
 
 	loadContent() {
 		this.isLoading = true;
-		const contentContainer = this.querySelector('[data-content]');
+		const contentContainer = this.querySelector("[data-content]");
 
 		// Show loading state
 		contentContainer.innerHTML = '<div class="p-4 text-center text-slate-500">Lädt...</div>';
-		contentContainer.style.maxHeight = contentContainer.scrollHeight + 'px';
+		contentContainer.style.maxHeight = contentContainer.scrollHeight + "px";
 
 		// Set up event listeners for HTMX events
 		const handleAfterRequest = () => {
@@ -303,31 +312,32 @@ export class PlaceAccordion extends HTMLElement {
 			this.isLoading = false;
 			// Adjust height after content loads
 			setTimeout(() => {
-				contentContainer.style.maxHeight = contentContainer.scrollHeight + 'px';
+				contentContainer.style.maxHeight = contentContainer.scrollHeight + "px";
 			}, 10);
-			contentContainer.removeEventListener('htmx:afterRequest', handleAfterRequest);
+			contentContainer.removeEventListener("htmx:afterRequest", handleAfterRequest);
 		};
 
 		const handleResponseError = () => {
 			this.isLoading = false;
-			contentContainer.innerHTML = '<div class="p-4 text-center text-red-500">Fehler beim Laden</div>';
-			contentContainer.removeEventListener('htmx:responseError', handleResponseError);
+			contentContainer.innerHTML =
+				'<div class="p-4 text-center text-red-500">Fehler beim Laden</div>';
+			contentContainer.removeEventListener("htmx:responseError", handleResponseError);
 		};
 
-		contentContainer.addEventListener('htmx:afterRequest', handleAfterRequest);
-		contentContainer.addEventListener('htmx:responseError', handleResponseError);
+		contentContainer.addEventListener("htmx:afterRequest", handleAfterRequest);
+		contentContainer.addEventListener("htmx:responseError", handleResponseError);
 
 		// Trigger the HTMX request
-		htmx.trigger(contentContainer, 'load-content');
+		htmx.trigger(contentContainer, "load-content");
 	}
 
 	updateChevron() {
-		const chevron = this.querySelector('.accordion-chevron');
+		const chevron = this.querySelector(".accordion-chevron");
 		if (chevron) {
 			if (this.isExpanded) {
-				chevron.style.transform = 'rotate(180deg)';
+				chevron.style.transform = "rotate(180deg)";
 			} else {
-				chevron.style.transform = 'rotate(0deg)';
+				chevron.style.transform = "rotate(0deg)";
 			}
 		}
 	}
@@ -335,16 +345,16 @@ export class PlaceAccordion extends HTMLElement {
 	updateBorders() {
 		if (this.isExpanded) {
 			// When expanded: remove border from header, add border to whole component
-			this.classList.add('border-b', 'border-slate-100');
+			this.classList.add("border-b", "border-slate-100");
 		} else {
 			// When collapsed: add border to component (for separation between items)
-			this.classList.add('border-b', 'border-slate-100');
+			this.classList.add("border-b", "border-slate-100");
 		}
 
 		// Remove border from last item if it's the last child
 		const isLastChild = !this.nextElementSibling;
 		if (isLastChild) {
-			this.classList.remove('border-b');
+			this.classList.remove("border-b");
 		}
 	}
 }
@@ -362,7 +372,17 @@ export class PlacesMap extends HTMLElement {
 		this.intersectionObserver = null;
 		this.mapPoints = new Map(); // Map of placeId -> point element
 		this.tooltip = null;
-		this.tooltipTimeout = null;
+
+		// New tooltip system properties
+		this.showTimeout = null;
+		this.hideTimeout = null;
+		this.isTooltipVisible = false;
+
+		// Simple place ID tracking
+		this.currentHoveredPlaceId = "";
+
+		// Bind event handlers to maintain consistent references
+		this.boundHandleHeadingHoverEvent = this.handleHeadingHoverEvent.bind(this);
 	}
 
 	connectedCallback() {
@@ -383,7 +403,7 @@ export class PlacesMap extends HTMLElement {
 				this.places = JSON.parse(placesData);
 			}
 		} catch (error) {
-			console.error('Failed to parse places data:', error);
+			console.error("Failed to parse places data:", error);
 			this.places = [];
 		}
 	}
@@ -392,17 +412,23 @@ export class PlacesMap extends HTMLElement {
 		this.innerHTML = `
 			<div class="map-container relative w-full aspect-[5/7] overflow-hidden bg-slate-100">
 				<div class="transform-wrapper absolute top-0 left-0 w-full h-auto origin-top-left">
-					<img src="/assets/Europe_laea_location_map.svg" alt="Map of Europe" class="block w-full h-auto">
+					<img src="/assets/Europe.svg" alt="Map of Europe" class="block w-full h-auto">
 					<div class="points-container absolute top-0 left-0 w-full h-full"></div>
+				</div>
+				<div class="absolute bottom-0 right-0 h-auto text-[0.6rem] bg-white px-0.5 bg-opacity-[0.5] border">
+					<i class="ri-creative-commons-line"></i>
+					<a href="https://commons.wikimedia.org/wiki/File:Europe_laea_topography.svg" target="_blank" class="">
+						 Wikimedia Commons
+					</a>
 				</div>
 				<!-- Tooltip -->
 				<div class="map-tooltip absolute bg-slate-800 text-white text-sm px-2 py-1 rounded shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 z-30 whitespace-nowrap" style="transform: translate(-50%, -100%); margin-top: -8px;"></div>
 			</div>
 		`;
 
-		this.mapElement = this.querySelector('.map-container');
-		this.pointsContainer = this.querySelector('.points-container');
-		this.tooltip = this.querySelector('.map-tooltip');
+		this.mapElement = this.querySelector(".map-container");
+		this.pointsContainer = this.querySelector(".points-container");
+		this.tooltip = this.querySelector(".map-tooltip");
 	}
 
 	initializeMap() {
@@ -410,34 +436,43 @@ export class PlacesMap extends HTMLElement {
 			return;
 		}
 
-		// Map extent constants (same as example)
+		// Map extent constants
 		const MAP_EXTENT_METERS = { xmin: 2555000, ymin: 1350000, xmax: 7405000, ymax: 5500000 };
 		const PROJECTION_CENTER = { lon: 10, lat: 52 };
 
-		// Convert lat/lng to percent position
+		// Convert lat/lng to % calculation
 		const convertLatLngToPercent = (lat, lng) => {
 			const R = 6371000;
 			const FE = 4321000;
 			const FN = 3210000;
-			const lon_0_rad = PROJECTION_CENTER.lon * Math.PI / 180;
-			const lat_0_rad = PROJECTION_CENTER.lat * Math.PI / 180;
-			const lon_rad = lng * Math.PI / 180;
-			const lat_rad = lat * Math.PI / 180;
-			const k_prime = Math.sqrt(2 / (1 + Math.sin(lat_0_rad) * Math.sin(lat_rad) + Math.cos(lat_0_rad) * Math.cos(lat_rad) * Math.cos(lon_rad - lon_0_rad)));
+			const lon_0_rad = (PROJECTION_CENTER.lon * Math.PI) / 180;
+			const lat_0_rad = (PROJECTION_CENTER.lat * Math.PI) / 180;
+			const lon_rad = (lng * Math.PI) / 180;
+			const lat_rad = (lat * Math.PI) / 180;
+			const k_prime = Math.sqrt(
+				2 /
+					(1 +
+						Math.sin(lat_0_rad) * Math.sin(lat_rad) +
+						Math.cos(lat_0_rad) * Math.cos(lat_rad) * Math.cos(lon_rad - lon_0_rad)),
+			);
 			const x_proj = R * k_prime * Math.cos(lat_rad) * Math.sin(lon_rad - lon_0_rad);
-			const y_proj = R * k_prime * (Math.cos(lat_0_rad) * Math.sin(lat_rad) - Math.sin(lat_0_rad) * Math.cos(lat_rad) * Math.cos(lon_rad - lon_0_rad));
+			const y_proj =
+				R *
+				k_prime *
+				(Math.cos(lat_0_rad) * Math.sin(lat_rad) -
+					Math.sin(lat_0_rad) * Math.cos(lat_rad) * Math.cos(lon_rad - lon_0_rad));
 			const finalX = x_proj + FE;
 			const finalY = y_proj + FN;
 			const mapWidthMeters = MAP_EXTENT_METERS.xmax - MAP_EXTENT_METERS.xmin;
 			const mapHeightMeters = MAP_EXTENT_METERS.ymax - MAP_EXTENT_METERS.ymin;
-			const xPercent = (finalX - MAP_EXTENT_METERS.xmin) / mapWidthMeters * 100;
-			const yPercent = (MAP_EXTENT_METERS.ymax - finalY) / mapHeightMeters * 100;
+			const xPercent = ((finalX - MAP_EXTENT_METERS.xmin) / mapWidthMeters) * 100;
+			const yPercent = ((MAP_EXTENT_METERS.ymax - finalY) / mapHeightMeters) * 100;
 			return { x: xPercent, y: yPercent };
 		};
 
 		// Create points and track positions
 		const pointPositions = [];
-		this.places.forEach(place => {
+		this.places.forEach((place) => {
 			if (place.lat && place.lng) {
 				const lat = parseFloat(place.lat);
 				const lng = parseFloat(place.lng);
@@ -447,20 +482,20 @@ export class PlacesMap extends HTMLElement {
 				if (position.x >= 0 && position.x <= 100 && position.y >= 0 && position.y <= 100) {
 					pointPositions.push(position);
 
-					const point = document.createElement('div');
-					point.className = 'map-point absolute w-1 h-1 bg-red-200 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30';
+					const point = document.createElement("div");
+					point.className = "map-point hidden";
 					point.style.left = `${position.x}%`;
 					point.style.top = `${position.y}%`;
-					point.style.transformOrigin = 'center';
-					const tooltipText = `${place.name}${place.toponymName && place.toponymName !== place.name ? ` (${place.toponymName})` : ''}`;
+					point.style.transformOrigin = "center";
+					const tooltipText = `${place.name}${place.toponymName && place.toponymName !== place.name ? ` (${place.toponymName})` : ""}`;
 					point.dataset.placeId = place.id;
 					point.dataset.tooltipText = tooltipText;
 
 					// Add hover and click event listeners
-					point.addEventListener('mouseenter', (e) => this.showTooltip(e));
-					point.addEventListener('mouseleave', () => this.hideTooltip());
-					point.addEventListener('mousemove', (e) => this.updateTooltipPosition(e));
-					point.addEventListener('click', (e) => this.scrollToPlace(e));
+					point.addEventListener("mouseenter", (e) => this.showTooltip(e));
+					point.addEventListener("mouseleave", () => this.hideTooltip());
+					point.addEventListener("mousemove", (e) => this.updateTooltipPosition(e));
+					point.addEventListener("click", (e) => this.scrollToPlace(e));
 
 					this.pointsContainer.appendChild(point);
 
@@ -470,27 +505,31 @@ export class PlacesMap extends HTMLElement {
 			}
 		});
 
-		// Auto-zoom to fit all points
+		// Auto-zoom
 		if (pointPositions.length > 0) {
 			this.autoZoomToPoints(pointPositions);
 		}
 	}
 
+	// Calculate bounding box of all points for the auto-zoom
 	autoZoomToPoints(pointPositions) {
-		// Calculate bounding box of all points
-		let minX = 100, maxX = 0, minY = 100, maxY = 0;
-		pointPositions.forEach(pos => {
+		let minX = 100,
+			maxX = 0,
+			minY = 100,
+			maxY = 0;
+		pointPositions.forEach((pos) => {
 			if (pos.x < minX) minX = pos.x;
 			if (pos.x > maxX) maxX = pos.x;
 			if (pos.y < minY) minY = pos.y;
 			if (pos.y > maxY) maxY = pos.y;
 		});
 
-		// Add 5% padding
+		// 5% padding
+		const PADDING = 0.06;
 		const width = maxX - minX;
 		const height = maxY - minY;
-		const paddingX = width * 0.05;
-		const paddingY = height * 0.05;
+		const paddingX = width * PADDING;
+		const paddingY = height * PADDING;
 
 		const paddedMinX = Math.max(0, minX - paddingX);
 		const paddedMaxX = Math.min(100, maxX + paddingX);
@@ -501,17 +540,17 @@ export class PlacesMap extends HTMLElement {
 		const newHeight = paddedMaxY - paddedMinY;
 
 		// Maintain 5:7 aspect ratio
-		const targetAspectRatio = 5 / 7;
+		const ASPECT_RATIO = 5 / 7;
 		const pointsAspectRatio = newWidth / newHeight;
 
 		let finalViewBox = { x: paddedMinX, y: paddedMinY, width: newWidth, height: newHeight };
 
-		if (pointsAspectRatio > targetAspectRatio) {
-			const newTargetHeight = newWidth / targetAspectRatio;
+		if (pointsAspectRatio > ASPECT_RATIO) {
+			const newTargetHeight = newWidth / ASPECT_RATIO;
 			finalViewBox.y = paddedMinY - (newTargetHeight - newHeight) / 2;
 			finalViewBox.height = newTargetHeight;
 		} else {
-			const newTargetWidth = newHeight * targetAspectRatio;
+			const newTargetWidth = newHeight * ASPECT_RATIO;
 			finalViewBox.x = paddedMinX - (newTargetWidth - newWidth) / 2;
 			finalViewBox.width = newTargetWidth;
 		}
@@ -522,7 +561,7 @@ export class PlacesMap extends HTMLElement {
 		const translateY = -finalViewBox.y;
 
 		const transformValue = `scale(${scale}) translate(${translateX}%, ${translateY}%)`;
-		const transformWrapper = this.querySelector('.transform-wrapper');
+		const transformWrapper = this.querySelector(".transform-wrapper");
 		if (transformWrapper) {
 			transformWrapper.style.transform = transformValue;
 		}
@@ -530,19 +569,19 @@ export class PlacesMap extends HTMLElement {
 
 	initializeScrollspy() {
 		// Find all place containers in the places list
-		const placeContainers = document.querySelectorAll('place-accordion[data-place-id]');
+		const placeContainers = document.querySelectorAll("place-accordion[data-place-id]");
 		if (!placeContainers.length) return;
 
 		// First, ensure all points start in inactive state
-		this.mapPoints.forEach(point => {
+		this.mapPoints.forEach((point) => {
 			this.setPointInactive(point);
 		});
 
 		// Create intersection observer
 		this.intersectionObserver = new IntersectionObserver(
 			(entries) => {
-				entries.forEach(entry => {
-					const placeId = entry.target.getAttribute('data-place-id');
+				entries.forEach((entry) => {
+					const placeId = entry.target.getAttribute("data-place-id");
 					const mapPoint = this.mapPoints.get(placeId);
 
 					if (mapPoint) {
@@ -560,22 +599,22 @@ export class PlacesMap extends HTMLElement {
 				// Trigger when element enters viewport
 				threshold: 0.1,
 				// No root margin for precise detection
-				rootMargin: '0px'
-			}
+				rootMargin: "0px",
+			},
 		);
 
 		// Observe all place containers
-		placeContainers.forEach(container => {
+		placeContainers.forEach((container) => {
 			this.intersectionObserver.observe(container);
 		});
 
 		// Force an immediate check by triggering a scroll event
 		setTimeout(() => {
 			// Manually trigger intersection calculation
-			placeContainers.forEach(container => {
+			placeContainers.forEach((container) => {
 				const rect = container.getBoundingClientRect();
 				const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-				const placeId = container.getAttribute('data-place-id');
+				const placeId = container.getAttribute("data-place-id");
 				const mapPoint = this.mapPoints.get(placeId);
 
 				if (mapPoint && isVisible) {
@@ -587,47 +626,50 @@ export class PlacesMap extends HTMLElement {
 
 	setPointActive(point) {
 		// Active state: larger, full color, full opacity, higher z-index
-		point.className = 'map-point absolute w-1.5 h-1.5 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:bg-red-600 hover:z-30';
+		point.className =
+			"map-point absolute w-1.5 h-1.5 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:bg-red-600 hover:z-30";
 	}
 
 	setPointInactive(point) {
 		// Inactive state: small light red dots, no border
-		point.className = 'map-point absolute w-1 h-1 bg-red-200 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30';
+		point.className =
+			"map-point absolute w-[0.18rem] h-[0.18rem] bg-white opacity-[0.7]  rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30 hover:opacity-[1.0]";
 	}
 
 	showTooltip(event) {
 		const point = event.target;
 		const tooltipText = point.dataset.tooltipText;
+		const placeId = point.dataset.placeId;
+
+		// Don't show NEW tooltip if scrolling blocked (behavior 4)
+		if (this.isNewPopupBlocked(placeId)) {
+			return;
+		}
 
 		if (this.tooltip && tooltipText) {
-			// Clear any existing timeout
-			if (this.tooltipTimeout) {
-				clearTimeout(this.tooltipTimeout);
-			}
-
-			// Set tooltip position immediately but keep it invisible
+			// Set tooltip content and position
 			this.tooltip.textContent = tooltipText;
 			this.updateTooltipPosition(event);
 
-			// Show tooltip after 0.5 second delay
-			this.tooltipTimeout = setTimeout(() => {
-				this.tooltip.classList.remove('opacity-0');
-				this.tooltip.classList.add('opacity-100');
-			}, 500);
+			// Show immediately for map points (behavior 1)
+			this.clearTimeouts();
+			this.tooltip.classList.remove("opacity-0");
+			this.tooltip.classList.add("opacity-100");
+			this.isTooltipVisible = true;
 		}
 	}
 
 	hideTooltip() {
-		// Clear any pending tooltip timeout
-		if (this.tooltipTimeout) {
-			clearTimeout(this.tooltipTimeout);
-			this.tooltipTimeout = null;
-		}
-
-		if (this.tooltip) {
-			this.tooltip.classList.remove('opacity-100');
-			this.tooltip.classList.add('opacity-0');
-		}
+		// Hide after 150ms delay (behavior 3)
+		// NOTE: This is NOT blocked during scroll - existing popup should close when mouse leaves
+		this.clearTimeouts();
+		this.hideTimeout = setTimeout(() => {
+			if (this.tooltip) {
+				this.tooltip.classList.remove("opacity-100");
+				this.tooltip.classList.add("opacity-0");
+				this.isTooltipVisible = false;
+			}
+		}, 150);
 	}
 
 	updateTooltipPosition(event) {
@@ -647,9 +689,9 @@ export class PlacesMap extends HTMLElement {
 		if (!placeId) return;
 
 		// Emit custom event for place selection
-		const placeSelectedEvent = new CustomEvent('place-map-clicked', {
+		const placeSelectedEvent = new CustomEvent("place-map-clicked", {
 			detail: { placeId },
-			bubbles: true
+			bubbles: true,
 		});
 		this.dispatchEvent(placeSelectedEvent);
 
@@ -658,23 +700,78 @@ export class PlacesMap extends HTMLElement {
 		if (placeContainer) {
 			// Smooth scroll to the place container
 			placeContainer.scrollIntoView({
-				behavior: 'smooth',
-				block: 'center',
-				inline: 'nearest'
+				behavior: "smooth",
+				block: "center",
+				inline: "nearest",
 			});
 
 			// Optional: Add a brief highlight effect
-			placeContainer.style.transition = 'background-color 0.3s ease';
-			placeContainer.style.backgroundColor = 'rgb(248 250 252)';
+			placeContainer.style.transition = "background-color 0.3s ease";
+			placeContainer.style.backgroundColor = "rgb(248 250 252)";
 			setTimeout(() => {
-				placeContainer.style.backgroundColor = '';
+				placeContainer.style.backgroundColor = "";
 			}, 1000);
 		}
 	}
 
 	setupHeadingHoverListener() {
 		// Listen for heading hover events from place accordions
-		document.addEventListener('place-heading-hover', this.handleHeadingHoverEvent.bind(this));
+		document.addEventListener("place-heading-hover", this.boundHandleHeadingHoverEvent);
+	}
+
+	clearTimeouts() {
+		if (this.showTimeout) {
+			clearTimeout(this.showTimeout);
+			this.showTimeout = null;
+		}
+		if (this.hideTimeout) {
+			clearTimeout(this.hideTimeout);
+			this.hideTimeout = null;
+		}
+		if (this.scrollBlockTimeout) {
+			clearTimeout(this.scrollBlockTimeout);
+			this.scrollBlockTimeout = null;
+		}
+	}
+
+	checkMousePositionAfterScroll() {
+		// Check if mouse is currently over a place title
+		if (this.currentHoveredPlaceId) {
+			// Simulate a heading hover event to show the tooltip
+			const showEvent = new CustomEvent("place-heading-hover", {
+				detail: { placeId: this.currentHoveredPlaceId, action: "show" },
+				bubbles: true,
+			});
+			document.dispatchEvent(showEvent);
+		}
+	}
+
+	checkExistingPopupAfterScroll() {
+		// Check if mouse is still over the tile that had the popup before scroll
+		if (this.currentHoveredPlaceId !== this.placeIdBeforeScroll) {
+			// Mouse is no longer over the original tile - hide the popup
+			if (this.tooltip && this.isTooltipVisible) {
+				this.tooltip.classList.remove("opacity-100");
+				this.tooltip.classList.add("opacity-0");
+				this.isTooltipVisible = false;
+			}
+		}
+		// If mouse is still over the same tile, keep the popup open
+	}
+
+	isScrollBlocked() {
+		// Block NEW popups during and 300ms after scrolling (behavior 4)
+		const isInScrollPeriod = Date.now() - this.lastScrollTime < 300;
+		return isInScrollPeriod;
+	}
+
+	isNewPopupBlocked(placeId) {
+		// Block new popups, but allow existing popup to stay
+		const isInScrollPeriod = Date.now() - this.lastScrollTime < 300;
+		if (!isInScrollPeriod) return false;
+
+		// Allow if this is the same popup that was visible before scroll
+		return placeId !== this.placeIdBeforeScroll;
 	}
 
 	handleHeadingHoverEvent(event) {
@@ -683,65 +780,78 @@ export class PlacesMap extends HTMLElement {
 
 		if (!mapPoint) return;
 
-		if (action === 'show') {
-			// Give the point a subtle highlight by making it larger immediately
-			mapPoint.classList.remove('w-1', 'h-1', 'w-1.5', 'h-1.5');
-			mapPoint.classList.add('w-2', 'h-2');
-			mapPoint.style.zIndex = '25';
+		if (action === "show") {
+			// Track the currently hovered place ID
+			this.currentHoveredPlaceId = placeId;
 
-			// Show tooltip for the corresponding map point after delay
+			// Give the point a subtle highlight by making it larger immediately
+			mapPoint.classList.remove("w-1", "h-1", "w-1.5", "h-1.5");
+			mapPoint.classList.add("w-2", "h-2");
+			mapPoint.style.zIndex = "25";
+
+			// Don't show NEW tooltip if scrolling blocked (behavior 4)
+			if (this.isNewPopupBlocked(placeId)) {
+				return;
+			}
+
 			const tooltipText = mapPoint.dataset.tooltipText;
 			if (this.tooltip && tooltipText) {
-				// Clear any existing timeout
-				if (this.tooltipTimeout) {
-					clearTimeout(this.tooltipTimeout);
-				}
-
-				// Set tooltip position immediately but keep it invisible
+				// Set tooltip content and position
 				this.tooltip.textContent = tooltipText;
 
 				// Position tooltip at the map point location
 				const pointRect = mapPoint.getBoundingClientRect();
 				const mapRect = this.mapElement.getBoundingClientRect();
-				const x = pointRect.left - mapRect.left + (pointRect.width / 2);
-				const y = pointRect.top - mapRect.top + (pointRect.height / 2);
+				const x = pointRect.left - mapRect.left + pointRect.width / 2;
+				const y = pointRect.top - mapRect.top + pointRect.height / 2;
 
 				this.tooltip.style.left = `${x}px`;
 				this.tooltip.style.top = `${y}px`;
 
-				// Show tooltip after 0.5 second delay
-				this.tooltipTimeout = setTimeout(() => {
-					this.tooltip.classList.remove('opacity-0');
-					this.tooltip.classList.add('opacity-100');
-				}, 500);
-			}
-		} else if (action === 'hide') {
-			// Clear any pending tooltip timeout
-			if (this.tooltipTimeout) {
-				clearTimeout(this.tooltipTimeout);
-				this.tooltipTimeout = null;
-			}
+				// Clear any existing timeouts
+				this.clearTimeouts();
 
-			// Hide tooltip
-			if (this.tooltip) {
-				this.tooltip.classList.remove('opacity-100');
-				this.tooltip.classList.add('opacity-0');
+				if (this.isTooltipVisible) {
+					// Behavior 2b: Popup was visible -- instant popup
+					this.tooltip.classList.remove("opacity-0");
+					this.tooltip.classList.add("opacity-100");
+				} else {
+					// Behavior 2a: No popup was visible -- Popup after 150ms
+					this.showTimeout = setTimeout(() => {
+						this.tooltip.classList.remove("opacity-0");
+						this.tooltip.classList.add("opacity-100");
+						this.isTooltipVisible = true;
+					}, 150);
+				}
 			}
+		} else if (action === "hide") {
+			// Clear the currently hovered place ID
+			this.currentHoveredPlaceId = "";
+
+			// Behavior 3: Leave tile or map point -- close after 150ms delay
+			// NOTE: This is NOT blocked during scroll - existing popup should close when mouse leaves
+			this.clearTimeouts();
+			this.hideTimeout = setTimeout(() => {
+				if (this.tooltip) {
+					this.tooltip.classList.remove("opacity-100");
+					this.tooltip.classList.add("opacity-0");
+					this.isTooltipVisible = false;
+				}
+			}, 150);
 
 			// Remove point highlight - restore original size based on current state
-			mapPoint.classList.remove('w-2', 'h-2');
+			mapPoint.classList.remove("w-2", "h-2");
 			// Check if this point is currently active or inactive
-			if (mapPoint.className.includes('bg-red-500')) {
+			if (mapPoint.className.includes("bg-red-500")) {
 				// Active point
-				mapPoint.classList.add('w-1.5', 'h-1.5');
+				mapPoint.classList.add("w-1.5", "h-1.5");
 			} else {
 				// Inactive point
-				mapPoint.classList.add('w-1', 'h-1');
+				mapPoint.classList.add("w-1", "h-1");
 			}
-			mapPoint.style.zIndex = ''; // Reset to default
+			mapPoint.style.zIndex = ""; // Reset to default
 		}
 	}
-
 
 	disconnectedCallback() {
 		// Clean up intersection observer
@@ -750,18 +860,19 @@ export class PlacesMap extends HTMLElement {
 			this.intersectionObserver = null;
 		}
 
-		// Clean up tooltip timeout
-		if (this.tooltipTimeout) {
-			clearTimeout(this.tooltipTimeout);
-			this.tooltipTimeout = null;
-		}
+		// Clean up new tooltip timeouts
+		this.clearTimeouts();
 
 		// Clean up heading hover listener
-		document.removeEventListener('place-heading-hover', this.handleHeadingHoverEvent.bind(this));
+		document.removeEventListener("place-heading-hover", this.boundHandleHeadingHoverEvent);
+
+		// Clean up scroll listeners
+		window.removeEventListener("scroll", this.boundHandleScroll);
+		document.removeEventListener("scroll", this.boundHandleScroll);
 	}
 }
 
 // Register the custom elements
-customElements.define('places-filter', PlacesFilter);
-customElements.define('place-accordion', PlaceAccordion);
-customElements.define('places-map', PlacesMap);
+customElements.define("places-filter", PlacesFilter);
+customElements.define("place-accordion", PlaceAccordion);
+customElements.define("places-map", PlacesMap);

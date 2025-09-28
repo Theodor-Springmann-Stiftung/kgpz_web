@@ -2,7 +2,7 @@ document.body.addEventListener("htmx:configRequest", function(a) {
   let e = a.detail.elt;
   e.id === "search" && e.value === "" && (a.detail.parameters = {}, a.detail.path = window.location.pathname + window.location.search);
 });
-class N extends HTMLElement {
+class $ extends HTMLElement {
   constructor() {
     super();
   }
@@ -35,8 +35,8 @@ class N extends HTMLElement {
     });
   }
 }
-customElements.define("person-jump-filter", N);
-class $ extends HTMLElement {
+customElements.define("person-jump-filter", $);
+class O extends HTMLElement {
   connectedCallback() {
     const e = this.querySelector("#place-search");
     e && e.addEventListener("input", (t) => {
@@ -49,8 +49,8 @@ class $ extends HTMLElement {
     });
   }
 }
-customElements.define("place-jump-filter", $);
-class O extends HTMLElement {
+customElements.define("place-jump-filter", O);
+class V extends HTMLElement {
   connectedCallback() {
     const e = this.querySelector("#category-search");
     e && e.addEventListener("input", (t) => {
@@ -63,7 +63,7 @@ class O extends HTMLElement {
     });
   }
 }
-customElements.define("category-jump-filter", O);
+customElements.define("category-jump-filter", V);
 class R extends HTMLElement {
   constructor() {
     super(), this.issuesByYear = {};
@@ -180,7 +180,7 @@ class R extends HTMLElement {
   }
 }
 customElements.define("year-jump-filter", R);
-class V extends HTMLElement {
+class z extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
   }
@@ -242,8 +242,8 @@ class V extends HTMLElement {
     this.isOpen && t && i && !t.contains(e.target) && !this.contains(e.target) && this.hideFilter();
   }
 }
-customElements.define("schnellauswahl-button", V);
-class z extends HTMLElement {
+customElements.define("schnellauswahl-button", z);
+class D extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
   }
@@ -319,7 +319,7 @@ class z extends HTMLElement {
     this.isOpen && !this.contains(e.target) && this.hideMenu();
   }
 }
-customElements.define("navigation-menu", z);
+customElements.define("navigation-menu", D);
 document.addEventListener("DOMContentLoaded", function() {
   document.addEventListener("click", function(a) {
     const e = a.target.closest('a[href^="/akteure/"], a[href^="/ort/"]'), t = document.getElementById("filter-container");
@@ -337,13 +337,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 });
-const T = [];
+const k = [];
 document.addEventListener("DOMContentLoaded", () => {
   I();
 });
 const I = function() {
-  for (; T.length > 0; ) {
-    const a = T.shift();
+  for (; k.length > 0; ) {
+    const a = k.shift();
     try {
       a();
     } catch (e) {
@@ -492,9 +492,9 @@ class F extends HTMLElement {
       document.documentElement.offsetHeight
     ), s = window.innerHeight, o = n - s, r = o > 0 ? window.scrollY / o : 0, l = t.clientHeight, d = t.scrollHeight - l;
     if (d > 0) {
-      const u = r * d, h = i.getBoundingClientRect(), p = t.getBoundingClientRect(), g = h.top - p.top + t.scrollTop, m = l / 2, y = g - m, w = 0.7, v = w * u + (1 - w) * y, x = Math.max(0, Math.min(d, v)), E = t.scrollTop;
-      Math.abs(x - E) > 10 && t.scrollTo({
-        top: x,
+      const u = r * d, h = i.getBoundingClientRect(), p = t.getBoundingClientRect(), b = h.top - p.top + t.scrollTop, g = l / 2, y = b - g, w = 0.7, x = w * u + (1 - w) * y, v = Math.max(0, Math.min(d, x)), E = t.scrollTop;
+      Math.abs(v - E) > 10 && t.scrollTo({
+        top: v,
         behavior: "smooth"
       });
     }
@@ -514,7 +514,7 @@ class F extends HTMLElement {
   }
 }
 customElements.define("akteure-scrollspy", F);
-class D extends HTMLElement {
+class j extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.placeCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -566,9 +566,9 @@ class D extends HTMLElement {
     this.countElement && (t === "" ? this.countElement.textContent = `Alle Orte (${this.originalCount})` : e === 0 ? this.countElement.textContent = `Keine Orte gefunden für "${t}"` : this.countElement.textContent = `${e} von ${this.originalCount} Orten`);
   }
 }
-class j extends HTMLElement {
+class K extends HTMLElement {
   constructor() {
-    super(), this.isExpanded = !1, this.isLoading = !1, this.hasLoaded = !1;
+    super(), this.isExpanded = !1, this.isLoading = !1, this.hasLoaded = !1, this.boundHandleClick = this.handleClick.bind(this), this.boundHandleMapClick = this.handleMapClick.bind(this), this.boundHandleHeadingHover = this.handleHeadingHover.bind(this), this.boundHandleHeadingLeave = this.handleHeadingLeave.bind(this);
   }
   connectedCallback() {
     this.setupAccordion(), this.setupEventListeners(), this.updateBorders(), this.setupMapEventListeners(), this.setupHoverEvents();
@@ -577,7 +577,7 @@ class j extends HTMLElement {
     this.cleanupEventListeners(), this.cleanupMapEventListeners();
   }
   cleanupMapEventListeners() {
-    document.removeEventListener("place-map-clicked", this.handleMapClick.bind(this)), this.removeEventListener("mouseenter", this.handleHeadingHover.bind(this)), this.removeEventListener("mouseleave", this.handleHeadingLeave.bind(this));
+    document.removeEventListener("place-map-clicked", this.boundHandleMapClick), this.removeEventListener("mouseenter", this.boundHandleHeadingHover), this.removeEventListener("mouseleave", this.boundHandleHeadingLeave);
   }
   setupAccordion() {
     if (!this.querySelector(".accordion-chevron")) {
@@ -592,16 +592,16 @@ class j extends HTMLElement {
     }
   }
   setupEventListeners() {
-    this.addEventListener("click", this.handleClick.bind(this));
+    this.addEventListener("click", this.boundHandleClick);
   }
   cleanupEventListeners() {
-    this.removeEventListener("click", this.handleClick.bind(this));
+    this.removeEventListener("click", this.boundHandleClick);
   }
   setupMapEventListeners() {
-    document.addEventListener("place-map-clicked", this.handleMapClick.bind(this));
+    document.addEventListener("place-map-clicked", this.boundHandleMapClick);
   }
   setupHoverEvents() {
-    this.addEventListener("mouseenter", this.handleHeadingHover.bind(this)), this.addEventListener("mouseleave", this.handleHeadingLeave.bind(this));
+    this.addEventListener("mouseenter", this.boundHandleHeadingHover), this.addEventListener("mouseleave", this.boundHandleHeadingLeave);
   }
   handleHeadingHover() {
     const e = this.getAttribute("data-place-id");
@@ -668,9 +668,9 @@ class j extends HTMLElement {
     this.isExpanded ? this.classList.add("border-b", "border-slate-100") : this.classList.add("border-b", "border-slate-100"), !this.nextElementSibling && this.classList.remove("border-b");
   }
 }
-class K extends HTMLElement {
+class W extends HTMLElement {
   constructor() {
-    super(), this.places = [], this.mapElement = null, this.pointsContainer = null, this.intersectionObserver = null, this.mapPoints = /* @__PURE__ */ new Map(), this.tooltip = null, this.tooltipTimeout = null;
+    super(), this.places = [], this.mapElement = null, this.pointsContainer = null, this.intersectionObserver = null, this.mapPoints = /* @__PURE__ */ new Map(), this.tooltip = null, this.showTimeout = null, this.hideTimeout = null, this.isTooltipVisible = !1, this.currentHoveredPlaceId = "", this.boundHandleHeadingHoverEvent = this.handleHeadingHoverEvent.bind(this);
   }
   connectedCallback() {
     this.parseData(), this.render(), this.initializeMap(), setTimeout(() => {
@@ -689,8 +689,14 @@ class K extends HTMLElement {
     this.innerHTML = `
 			<div class="map-container relative w-full aspect-[5/7] overflow-hidden bg-slate-100">
 				<div class="transform-wrapper absolute top-0 left-0 w-full h-auto origin-top-left">
-					<img src="/assets/Europe_laea_location_map.svg" alt="Map of Europe" class="block w-full h-auto">
+					<img src="/assets/Europe.svg" alt="Map of Europe" class="block w-full h-auto">
 					<div class="points-container absolute top-0 left-0 w-full h-full"></div>
+				</div>
+				<div class="absolute bottom-0 right-0 h-auto text-[0.6rem] bg-white px-0.5 bg-opacity-[0.5] border">
+					<i class="ri-creative-commons-line"></i>
+					<a href="https://commons.wikimedia.org/wiki/File:Europe_laea_topography.svg" target="_blank" class="">
+						 Wikimedia Commons
+					</a>
 				</div>
 				<!-- Tooltip -->
 				<div class="map-tooltip absolute bg-slate-800 text-white text-sm px-2 py-1 rounded shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 z-30 whitespace-nowrap" style="transform: translate(-50%, -100%); margin-top: -8px;"></div>
@@ -701,7 +707,9 @@ class K extends HTMLElement {
     if (!this.places.length || !this.pointsContainer)
       return;
     const e = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, t = { lon: 10, lat: 52 }, i = (s, o) => {
-      const d = t.lon * Math.PI / 180, u = t.lat * Math.PI / 180, h = o * Math.PI / 180, p = s * Math.PI / 180, g = Math.sqrt(2 / (1 + Math.sin(u) * Math.sin(p) + Math.cos(u) * Math.cos(p) * Math.cos(h - d))), m = 6371e3 * g * Math.cos(p) * Math.sin(h - d), y = 6371e3 * g * (Math.cos(u) * Math.sin(p) - Math.sin(u) * Math.cos(p) * Math.cos(h - d)), w = m + 4321e3, v = y + 321e4, x = e.xmax - e.xmin, E = e.ymax - e.ymin, L = (w - e.xmin) / x * 100, C = (e.ymax - v) / E * 100;
+      const d = t.lon * Math.PI / 180, u = t.lat * Math.PI / 180, h = o * Math.PI / 180, p = s * Math.PI / 180, b = Math.sqrt(
+        2 / (1 + Math.sin(u) * Math.sin(p) + Math.cos(u) * Math.cos(p) * Math.cos(h - d))
+      ), g = 6371e3 * b * Math.cos(p) * Math.sin(h - d), y = 6371e3 * b * (Math.cos(u) * Math.sin(p) - Math.sin(u) * Math.cos(p) * Math.cos(h - d)), w = g + 4321e3, x = y + 321e4, v = e.xmax - e.xmin, E = e.ymax - e.ymin, L = (w - e.xmin) / v * 100, C = (e.ymax - x) / E * 100;
       return { x: L, y: C };
     }, n = [];
     this.places.forEach((s) => {
@@ -710,29 +718,30 @@ class K extends HTMLElement {
         if (l.x >= 0 && l.x <= 100 && l.y >= 0 && l.y <= 100) {
           n.push(l);
           const c = document.createElement("div");
-          c.className = "map-point absolute w-1 h-1 bg-red-200 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30", c.style.left = `${l.x}%`, c.style.top = `${l.y}%`, c.style.transformOrigin = "center";
+          c.className = "map-point hidden", c.style.left = `${l.x}%`, c.style.top = `${l.y}%`, c.style.transformOrigin = "center";
           const d = `${s.name}${s.toponymName && s.toponymName !== s.name ? ` (${s.toponymName})` : ""}`;
           c.dataset.placeId = s.id, c.dataset.tooltipText = d, c.addEventListener("mouseenter", (u) => this.showTooltip(u)), c.addEventListener("mouseleave", () => this.hideTooltip()), c.addEventListener("mousemove", (u) => this.updateTooltipPosition(u)), c.addEventListener("click", (u) => this.scrollToPlace(u)), this.pointsContainer.appendChild(c), this.mapPoints.set(s.id, c);
         }
       }
     }), n.length > 0 && this.autoZoomToPoints(n);
   }
+  // Calculate bounding box of all points for the auto-zoom
   autoZoomToPoints(e) {
     let t = 100, i = 0, n = 100, s = 0;
-    e.forEach((b) => {
-      b.x < t && (t = b.x), b.x > i && (i = b.x), b.y < n && (n = b.y), b.y > s && (s = b.y);
+    e.forEach((f) => {
+      f.x < t && (t = f.x), f.x > i && (i = f.x), f.y < n && (n = f.y), f.y > s && (s = f.y);
     });
-    const o = i - t, r = s - n, l = o * 0.05, c = r * 0.05, d = Math.max(0, t - l), u = Math.min(100, i + l), h = Math.max(0, n - c), p = Math.min(100, s + c), g = u - d, m = p - h, y = 5 / 7, w = g / m;
-    let v = { x: d, y: h, width: g, height: m };
-    if (w > y) {
-      const b = g / y;
-      v.y = h - (b - m) / 2, v.height = b;
+    const o = 0.06, r = i - t, l = s - n, c = r * o, d = l * o, u = Math.max(0, t - c), h = Math.min(100, i + c), p = Math.max(0, n - d), b = Math.min(100, s + d), g = h - u, y = b - p, w = 5 / 7, x = g / y;
+    let v = { x: u, y: p, width: g, height: y };
+    if (x > w) {
+      const f = g / w;
+      v.y = p - (f - y) / 2, v.height = f;
     } else {
-      const b = m * y;
-      v.x = d - (b - g) / 2, v.width = b;
+      const f = y * w;
+      v.x = u - (f - g) / 2, v.width = f;
     }
-    const x = 100 / v.width, E = -v.x, L = -v.y, C = `scale(${x}) translate(${E}%, ${L}%)`, P = this.querySelector(".transform-wrapper");
-    P && (P.style.transform = C);
+    const E = 100 / v.width, L = -v.x, C = -v.y, N = `scale(${E}) translate(${L}%, ${C}%)`, P = this.querySelector(".transform-wrapper");
+    P && (P.style.transform = N);
   }
   initializeScrollspy() {
     const e = document.querySelectorAll("place-accordion[data-place-id]");
@@ -764,16 +773,16 @@ class K extends HTMLElement {
     e.className = "map-point absolute w-1.5 h-1.5 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:bg-red-600 hover:z-30";
   }
   setPointInactive(e) {
-    e.className = "map-point absolute w-1 h-1 bg-red-200 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30";
+    e.className = "map-point absolute w-[0.18rem] h-[0.18rem] bg-white opacity-[0.7]  rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30 hover:opacity-[1.0]";
   }
   showTooltip(e) {
-    const i = e.target.dataset.tooltipText;
-    this.tooltip && i && (this.tooltipTimeout && clearTimeout(this.tooltipTimeout), this.tooltip.textContent = i, this.updateTooltipPosition(e), this.tooltipTimeout = setTimeout(() => {
-      this.tooltip.classList.remove("opacity-0"), this.tooltip.classList.add("opacity-100");
-    }, 500));
+    const t = e.target, i = t.dataset.tooltipText, n = t.dataset.placeId;
+    this.isNewPopupBlocked(n) || this.tooltip && i && (this.tooltip.textContent = i, this.updateTooltipPosition(e), this.clearTimeouts(), this.tooltip.classList.remove("opacity-0"), this.tooltip.classList.add("opacity-100"), this.isTooltipVisible = !0);
   }
   hideTooltip() {
-    this.tooltipTimeout && (clearTimeout(this.tooltipTimeout), this.tooltipTimeout = null), this.tooltip && (this.tooltip.classList.remove("opacity-100"), this.tooltip.classList.add("opacity-0"));
+    this.clearTimeouts(), this.hideTimeout = setTimeout(() => {
+      this.tooltip && (this.tooltip.classList.remove("opacity-100"), this.tooltip.classList.add("opacity-0"), this.isTooltipVisible = !1);
+    }, 150);
   }
   updateTooltipPosition(e) {
     if (!this.tooltip) return;
@@ -798,31 +807,55 @@ class K extends HTMLElement {
     }, 1e3));
   }
   setupHeadingHoverListener() {
-    document.addEventListener("place-heading-hover", this.handleHeadingHoverEvent.bind(this));
+    document.addEventListener("place-heading-hover", this.boundHandleHeadingHoverEvent);
+  }
+  clearTimeouts() {
+    this.showTimeout && (clearTimeout(this.showTimeout), this.showTimeout = null), this.hideTimeout && (clearTimeout(this.hideTimeout), this.hideTimeout = null), this.scrollBlockTimeout && (clearTimeout(this.scrollBlockTimeout), this.scrollBlockTimeout = null);
+  }
+  checkMousePositionAfterScroll() {
+    if (this.currentHoveredPlaceId) {
+      const e = new CustomEvent("place-heading-hover", {
+        detail: { placeId: this.currentHoveredPlaceId, action: "show" },
+        bubbles: !0
+      });
+      document.dispatchEvent(e);
+    }
+  }
+  checkExistingPopupAfterScroll() {
+    this.currentHoveredPlaceId !== this.placeIdBeforeScroll && this.tooltip && this.isTooltipVisible && (this.tooltip.classList.remove("opacity-100"), this.tooltip.classList.add("opacity-0"), this.isTooltipVisible = !1);
+  }
+  isScrollBlocked() {
+    return Date.now() - this.lastScrollTime < 300;
+  }
+  isNewPopupBlocked(e) {
+    return Date.now() - this.lastScrollTime < 300 ? e !== this.placeIdBeforeScroll : !1;
   }
   handleHeadingHoverEvent(e) {
     const { placeId: t, action: i } = e.detail, n = this.mapPoints.get(t);
     if (n)
       if (i === "show") {
-        n.classList.remove("w-1", "h-1", "w-1.5", "h-1.5"), n.classList.add("w-2", "h-2"), n.style.zIndex = "25";
+        if (this.currentHoveredPlaceId = t, n.classList.remove("w-1", "h-1", "w-1.5", "h-1.5"), n.classList.add("w-2", "h-2"), n.style.zIndex = "25", this.isNewPopupBlocked(t))
+          return;
         const s = n.dataset.tooltipText;
         if (this.tooltip && s) {
-          this.tooltipTimeout && clearTimeout(this.tooltipTimeout), this.tooltip.textContent = s;
+          this.tooltip.textContent = s;
           const o = n.getBoundingClientRect(), r = this.mapElement.getBoundingClientRect(), l = o.left - r.left + o.width / 2, c = o.top - r.top + o.height / 2;
-          this.tooltip.style.left = `${l}px`, this.tooltip.style.top = `${c}px`, this.tooltipTimeout = setTimeout(() => {
-            this.tooltip.classList.remove("opacity-0"), this.tooltip.classList.add("opacity-100");
-          }, 500);
+          this.tooltip.style.left = `${l}px`, this.tooltip.style.top = `${c}px`, this.clearTimeouts(), this.isTooltipVisible ? (this.tooltip.classList.remove("opacity-0"), this.tooltip.classList.add("opacity-100")) : this.showTimeout = setTimeout(() => {
+            this.tooltip.classList.remove("opacity-0"), this.tooltip.classList.add("opacity-100"), this.isTooltipVisible = !0;
+          }, 150);
         }
-      } else i === "hide" && (this.tooltipTimeout && (clearTimeout(this.tooltipTimeout), this.tooltipTimeout = null), this.tooltip && (this.tooltip.classList.remove("opacity-100"), this.tooltip.classList.add("opacity-0")), n.classList.remove("w-2", "h-2"), n.className.includes("bg-red-500") ? n.classList.add("w-1.5", "h-1.5") : n.classList.add("w-1", "h-1"), n.style.zIndex = "");
+      } else i === "hide" && (this.currentHoveredPlaceId = "", this.clearTimeouts(), this.hideTimeout = setTimeout(() => {
+        this.tooltip && (this.tooltip.classList.remove("opacity-100"), this.tooltip.classList.add("opacity-0"), this.isTooltipVisible = !1);
+      }, 150), n.classList.remove("w-2", "h-2"), n.className.includes("bg-red-500") ? n.classList.add("w-1.5", "h-1.5") : n.classList.add("w-1", "h-1"), n.style.zIndex = "");
   }
   disconnectedCallback() {
-    this.intersectionObserver && (this.intersectionObserver.disconnect(), this.intersectionObserver = null), this.tooltipTimeout && (clearTimeout(this.tooltipTimeout), this.tooltipTimeout = null), document.removeEventListener("place-heading-hover", this.handleHeadingHoverEvent.bind(this));
+    this.intersectionObserver && (this.intersectionObserver.disconnect(), this.intersectionObserver = null), this.clearTimeouts(), document.removeEventListener("place-heading-hover", this.boundHandleHeadingHoverEvent), window.removeEventListener("scroll", this.boundHandleScroll), document.removeEventListener("scroll", this.boundHandleScroll);
   }
 }
-customElements.define("places-filter", D);
-customElements.define("place-accordion", j);
-customElements.define("places-map", K);
-class W extends HTMLElement {
+customElements.define("places-filter", j);
+customElements.define("place-accordion", K);
+customElements.define("places-map", W);
+class Y extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.itemCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -885,8 +918,8 @@ class W extends HTMLElement {
     this.countElement && (t === "" ? this.countElement.style.display = "none" : (this.countElement.style.display = "", e === 0 ? this.countElement.textContent = "(0)" : this.countElement.textContent = `(${e})`));
   }
 }
-customElements.define("generic-filter", W);
-class Y extends HTMLElement {
+customElements.define("generic-filter", Y);
+class Z extends HTMLElement {
   constructor() {
     super(), this.resizeObserver = null;
   }
@@ -1019,15 +1052,15 @@ class Y extends HTMLElement {
     if (l)
       h = l;
     else {
-      const g = this.getIssueContext(i);
-      h = g ? `${g}, ${i}` : `${i}`;
+      const b = this.getIssueContext(i);
+      h = b ? `${b}, ${i}` : `${i}`;
     }
     if (d.innerHTML = h, s && i === s) {
       d.style.position = "relative";
-      const g = d.querySelector(".target-page-dot");
-      g && g.remove();
-      const m = document.createElement("span");
-      m.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", m.title = "verlinkte Seite", d.appendChild(m);
+      const b = d.querySelector(".target-page-dot");
+      b && b.remove();
+      const g = document.createElement("span");
+      g.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", g.title = "verlinkte Seite", d.appendChild(g);
     }
     r ? r === "part-number" && o !== null ? u.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${o}. Teil</span>` : u.innerHTML = this.generateIconFromType(r) : u.innerHTML = this.generateFallbackIcon(i, n, o), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true");
     const p = this.querySelector(".flex-1.overflow-auto");
@@ -1239,7 +1272,7 @@ class Y extends HTMLElement {
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", Y);
+customElements.define("single-page-viewer", Z);
 document.body.addEventListener("htmx:beforeRequest", function(a) {
   const e = document.querySelector("single-page-viewer");
   e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.close());
@@ -1248,7 +1281,7 @@ window.addEventListener("beforeunload", function() {
   const a = document.querySelector("single-page-viewer");
   a && a.close();
 });
-class Z extends HTMLElement {
+class J extends HTMLElement {
   constructor() {
     super(), this.isVisible = !1, this.scrollHandler = null, this.htmxAfterSwapHandler = null;
   }
@@ -1289,8 +1322,8 @@ class Z extends HTMLElement {
     });
   }
 }
-customElements.define("scroll-to-top-button", Z);
-class J extends HTMLElement {
+customElements.define("scroll-to-top-button", J);
+class X extends HTMLElement {
   constructor() {
     super(), this.pageObserver = null, this.pageContainers = /* @__PURE__ */ new Map(), this.singlePageViewerActive = !1, this.singlePageViewerCurrentPage = null, this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this);
   }
@@ -1409,8 +1442,8 @@ class J extends HTMLElement {
     this.pageObserver && (this.pageObserver.disconnect(), this.pageObserver = null), document.removeEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.pageContainers.clear();
   }
 }
-customElements.define("inhaltsverzeichnis-scrollspy", J);
-class X extends HTMLElement {
+customElements.define("inhaltsverzeichnis-scrollspy", X);
+class _ extends HTMLElement {
   constructor() {
     super(), this.innerHTML = `
             <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm">
@@ -1458,11 +1491,11 @@ class X extends HTMLElement {
     window.showErrorModal = (e) => this.show(e), window.closeErrorModal = () => this.close();
   }
 }
-customElements.define("error-modal", X);
+customElements.define("error-modal", _);
 window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
-function _(a, e, t, i = null) {
+function G(a, e, t, i = null) {
   let n = document.querySelector("single-page-viewer");
   n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
   const s = a.closest('[data-beilage="true"]') !== null, o = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, r = a.closest(".newspaper-page-container, .piece-page-container");
@@ -1472,15 +1505,15 @@ function _(a, e, t, i = null) {
     const u = r.querySelector(".page-indicator");
     if (u) {
       const h = u.cloneNode(!0);
-      h.querySelectorAll("i").forEach((m) => m.remove()), h.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((m) => m.remove()), c = h.textContent.trim();
+      h.querySelectorAll("i").forEach((g) => g.remove()), h.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((g) => g.remove()), c = h.textContent.trim();
     }
   }
   n.show(a.src, a.alt, e, s, o, i, l, c);
 }
-function q() {
+function H() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function G() {
+function U() {
   if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, S(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
@@ -1501,7 +1534,7 @@ function G() {
     });
   }
 }
-function U() {
+function Q() {
   if (window.currentActiveIndex > 0) {
     let a = -1;
     const e = [];
@@ -1522,7 +1555,7 @@ function U() {
     }, 100));
   }
 }
-function Q() {
+function ee() {
   if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
     let a = -1;
     const e = [];
@@ -1543,8 +1576,8 @@ function Q() {
     }, 100));
   }
 }
-function ee() {
-  if (H()) {
+function te() {
+  if (q()) {
     const e = document.querySelector("#newspaper-content .newspaper-page-container");
     e && e.scrollIntoView({
       block: "start"
@@ -1563,7 +1596,7 @@ function ee() {
     }
   }
 }
-function H() {
+function q() {
   const a = [];
   window.currentPageContainers.forEach((e, t) => {
     const i = e.getBoundingClientRect(), n = window.innerHeight, s = Math.max(i.top, 0), o = Math.min(i.bottom, n), r = Math.max(0, o - s), l = i.height;
@@ -1579,11 +1612,11 @@ function H() {
 function S() {
   const a = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
   if (a && (a.style.display = "flex", window.currentActiveIndex <= 0 ? (a.disabled = !0, a.classList.add("opacity-50", "cursor-not-allowed"), a.classList.remove("hover:bg-gray-200")) : (a.disabled = !1, a.classList.remove("opacity-50", "cursor-not-allowed"), a.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
-    const i = H(), n = t.querySelector("i");
+    const i = q(), n = t.querySelector("i");
     i ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
-function te() {
+function ie() {
   const a = document.getElementById("shareLinkBtn");
   let e = "";
   if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
@@ -1595,54 +1628,54 @@ function te() {
     title: document.title,
     url: t
   }).catch((i) => {
-    k(t, a);
-  }) : k(t, a);
+    T(t, a);
+  }) : T(t, a);
 }
-function k(a, e) {
+function T(a, e) {
   if (navigator.clipboard)
     navigator.clipboard.writeText(a).then(() => {
-      f(e, "Link kopiert!");
+      m(e, "Link kopiert!");
     }).catch((t) => {
-      f(e, "Kopieren fehlgeschlagen");
+      m(e, "Kopieren fehlgeschlagen");
     });
   else {
     const t = document.createElement("textarea");
     t.value = a, document.body.appendChild(t), t.select();
     try {
       const i = document.execCommand("copy");
-      f(e, i ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      m(e, i ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      f(e, "Kopieren fehlgeschlagen");
+      m(e, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(t);
     }
   }
 }
-function ie() {
+function ne() {
   const a = document.getElementById("citationBtn"), e = document.title || "KGPZ";
   let t = window.location.origin + window.location.pathname;
   t.includes("#") && (t = t.split("#")[0]);
   const i = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), n = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}. Digital verfügbar unter: ${t} (Zugriff: ${i}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
-      f(a, "Zitation kopiert!");
+      m(a, "Zitation kopiert!");
     }).catch((s) => {
-      f(a, "Kopieren fehlgeschlagen");
+      m(a, "Kopieren fehlgeschlagen");
     });
   else {
     const s = document.createElement("textarea");
     s.value = n, document.body.appendChild(s), s.select();
     try {
       const o = document.execCommand("copy");
-      f(a, o ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      m(a, o ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      f(a, "Kopieren fehlgeschlagen");
+      m(a, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(s);
     }
   }
 }
-function f(a, e) {
+function m(a, e) {
   const t = document.querySelector(".simple-popup");
   t && t.remove();
   const i = document.createElement("div");
@@ -1671,7 +1704,7 @@ function f(a, e) {
     }, 200);
   }, 2e3);
 }
-function ne(a, e, t = !1) {
+function se(a, e, t = !1) {
   let i = "";
   if (t)
     i = window.location.origin + window.location.pathname + `#beilage-1-page-${a}`;
@@ -1686,24 +1719,24 @@ function ne(a, e, t = !1) {
   const n = i;
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
-      f(e, "Link kopiert!");
+      m(e, "Link kopiert!");
     }).catch((s) => {
-      f(e, "Kopieren fehlgeschlagen");
+      m(e, "Kopieren fehlgeschlagen");
     });
   else {
     const s = document.createElement("textarea");
     s.value = n, document.body.appendChild(s), s.select();
     try {
       const o = document.execCommand("copy");
-      f(e, o ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      m(e, o ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      f(e, "Kopieren fehlgeschlagen");
+      m(e, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(s);
     }
   }
 }
-function se(a, e) {
+function oe(a, e) {
   const t = document.title || "KGPZ", i = window.location.pathname.split("/");
   let n;
   if (i.length >= 3) {
@@ -1714,30 +1747,30 @@ function se(a, e) {
   const s = n, o = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), r = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${a}. Digital verfügbar unter: ${s} (Zugriff: ${o}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(r).then(() => {
-      f(e, "Zitation kopiert!");
+      m(e, "Zitation kopiert!");
     }).catch((l) => {
-      f(e, "Kopieren fehlgeschlagen");
+      m(e, "Kopieren fehlgeschlagen");
     });
   else {
     const l = document.createElement("textarea");
     l.value = r, document.body.appendChild(l), l.select();
     try {
       const c = document.execCommand("copy");
-      f(e, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      m(e, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      f(e, "Kopieren fehlgeschlagen");
+      m(e, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(l);
     }
   }
 }
 function M() {
-  G(), window.addEventListener("scroll", function() {
+  U(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
       S();
     }, 50);
   }), document.addEventListener("keydown", function(a) {
-    a.key === "Escape" && q();
+    a.key === "Escape" && H();
   });
 }
 function A() {
@@ -1769,21 +1802,21 @@ function B() {
     "page-edition"
   ), a.includes("/akteure/") || a.includes("/autoren") ? e.classList.add("page-akteure") : a.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : a.includes("/search") || a.includes("/suche") ? e.classList.add("page-search") : a.includes("/ort/") ? e.classList.add("page-ort") : a.includes("/kategorie/") ? e.classList.add("page-kategorie") : a.includes("/beitrag/") ? e.classList.add("page-piece") : a.includes("/edition") && e.classList.add("page-edition");
 }
-window.enlargePage = _;
-window.closeModal = q;
-window.scrollToPreviousPage = U;
-window.scrollToNextPage = Q;
-window.scrollToBeilage = ee;
-window.shareCurrentPage = te;
-window.generateCitation = ie;
-window.copyPagePermalink = ne;
-window.generatePageCitation = se;
+window.enlargePage = G;
+window.closeModal = H;
+window.scrollToPreviousPage = Q;
+window.scrollToNextPage = ee;
+window.scrollToBeilage = te;
+window.shareCurrentPage = ie;
+window.generateCitation = ne;
+window.copyPagePermalink = se;
+window.generatePageCitation = oe;
 B();
 A();
 document.querySelector(".newspaper-page-container") && M();
-let oe = function(a) {
+let re = function(a) {
   B(), A(), I(), setTimeout(() => {
     document.querySelector(".newspaper-page-container") && M();
   }, 50);
 };
-document.body.addEventListener("htmx:afterSettle", oe);
+document.body.addEventListener("htmx:afterSettle", re);
