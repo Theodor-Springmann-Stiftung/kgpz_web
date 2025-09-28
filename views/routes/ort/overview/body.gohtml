@@ -20,12 +20,17 @@
 						<div class="block p-4 hover:bg-slate-50 transition-colors duration-200 cursor-pointer">
 							<div class="flex items-start justify-between gap-2">
 								<div class="flex-1 min-w-0">
-									<h3 class="font-bold text-slate-800 mb-1 truncate">
-										{{ if $place.Names }}
-											{{ index $place.Names 0 }}
-										{{ else }}
-											{{ $place.ID }}
-										{{ end }}
+									<h3 class="font-bold text-slate-800 mb-1 truncate flex items-center gap-2">
+										<span class="truncate">
+											{{ if $place.Names }}
+												{{ index $place.Names 0 }}
+											{{ else }}
+												{{ $place.ID }}
+											{{ end }}
+										</span>
+										<a href="/ort/{{ $place.ID }}" class="flex-shrink-0 text-slate-400 hover:text-slate-600 transition-colors no-underline" title="Permalink" onclick="event.stopPropagation()">
+											<i class="ri-link text-sm"></i>
+										</a>
 									</h3>
 									{{ if ne $geonames nil }}
 										{{ $fullInfo := GetFullPlaceInfo $place.Geo $mainPlaceName }}

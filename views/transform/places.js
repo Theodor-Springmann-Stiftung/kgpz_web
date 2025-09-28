@@ -148,11 +148,8 @@ export class PlaceAccordion extends HTMLElement {
 		document.removeEventListener('place-map-clicked', this.handleMapClick.bind(this));
 
 		// Clean up hover event listeners
-		const headerDiv = this.querySelector('.cursor-pointer');
-		if (headerDiv) {
-			headerDiv.removeEventListener('mouseenter', this.handleHeadingHover.bind(this));
-			headerDiv.removeEventListener('mouseleave', this.handleHeadingLeave.bind(this));
-		}
+		this.removeEventListener('mouseenter', this.handleHeadingHover.bind(this));
+		this.removeEventListener('mouseleave', this.handleHeadingLeave.bind(this));
 	}
 
 	setupAccordion() {
@@ -202,12 +199,9 @@ export class PlaceAccordion extends HTMLElement {
 	}
 
 	setupHoverEvents() {
-		// Find the clickable header div within this accordion
-		const headerDiv = this.querySelector('.cursor-pointer');
-		if (headerDiv) {
-			headerDiv.addEventListener('mouseenter', this.handleHeadingHover.bind(this));
-			headerDiv.addEventListener('mouseleave', this.handleHeadingLeave.bind(this));
-		}
+		// Add hover listeners to the entire accordion element (including expanded content)
+		this.addEventListener('mouseenter', this.handleHeadingHover.bind(this));
+		this.addEventListener('mouseleave', this.handleHeadingLeave.bind(this));
 	}
 
 	handleHeadingHover() {

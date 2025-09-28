@@ -351,7 +351,7 @@ const I = function() {
     }
   }
 };
-class D extends HTMLElement {
+class F extends HTMLElement {
   constructor() {
     super(), this.scrollTimeout = null, this.clickHandlers = [], this.manualNavigation = !1, this.handleScroll = this.handleScroll.bind(this);
   }
@@ -513,8 +513,8 @@ class D extends HTMLElement {
     e && (e.style.opacity = "0", e.style.height = "0"), this.sections = null, this.navLinks = null, this.clickHandlers = [], this.manualNavigation = !1;
   }
 }
-customElements.define("akteure-scrollspy", D);
-class F extends HTMLElement {
+customElements.define("akteure-scrollspy", F);
+class D extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.placeCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -577,9 +577,7 @@ class j extends HTMLElement {
     this.cleanupEventListeners(), this.cleanupMapEventListeners();
   }
   cleanupMapEventListeners() {
-    document.removeEventListener("place-map-clicked", this.handleMapClick.bind(this));
-    const e = this.querySelector(".cursor-pointer");
-    e && (e.removeEventListener("mouseenter", this.handleHeadingHover.bind(this)), e.removeEventListener("mouseleave", this.handleHeadingLeave.bind(this)));
+    document.removeEventListener("place-map-clicked", this.handleMapClick.bind(this)), this.removeEventListener("mouseenter", this.handleHeadingHover.bind(this)), this.removeEventListener("mouseleave", this.handleHeadingLeave.bind(this));
   }
   setupAccordion() {
     if (!this.querySelector(".accordion-chevron")) {
@@ -603,8 +601,7 @@ class j extends HTMLElement {
     document.addEventListener("place-map-clicked", this.handleMapClick.bind(this));
   }
   setupHoverEvents() {
-    const e = this.querySelector(".cursor-pointer");
-    e && (e.addEventListener("mouseenter", this.handleHeadingHover.bind(this)), e.addEventListener("mouseleave", this.handleHeadingLeave.bind(this)));
+    this.addEventListener("mouseenter", this.handleHeadingHover.bind(this)), this.addEventListener("mouseleave", this.handleHeadingLeave.bind(this));
   }
   handleHeadingHover() {
     const e = this.getAttribute("data-place-id");
@@ -822,7 +819,7 @@ class K extends HTMLElement {
     this.intersectionObserver && (this.intersectionObserver.disconnect(), this.intersectionObserver = null), this.tooltipTimeout && (clearTimeout(this.tooltipTimeout), this.tooltipTimeout = null), document.removeEventListener("place-heading-hover", this.handleHeadingHoverEvent.bind(this));
   }
 }
-customElements.define("places-filter", F);
+customElements.define("places-filter", D);
 customElements.define("place-accordion", j);
 customElements.define("places-map", K);
 class W extends HTMLElement {
