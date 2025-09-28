@@ -613,13 +613,15 @@ export class PlacesMap extends HTMLElement {
 	setPointActive(point) {
 		// Active state: larger, full color, full opacity, higher z-index
 		point.className =
-			"map-point absolute w-1.5 h-1.5 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:bg-red-600 hover:z-30";
+			"map-point absolute w-1.5 h-1.5 bg-red-500 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:bg-red-600 hover:z-30";
+		point.style.border = "0.5px solid #b91c1c";
 	}
 
 	setPointInactive(point) {
 		// Inactive state: small light red dots, no border
 		point.className =
 			"map-point absolute w-[0.18rem] h-[0.18rem] bg-white opacity-[0.7]  rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30 hover:opacity-[1.0]";
+		point.style.border = "";
 	}
 
 	showTooltip(event) {
@@ -919,7 +921,8 @@ export class PlacesMapSingle extends HTMLElement {
 			point.style.transformOrigin = "center";
 
 			// Single highlighted point - moderately sized for zoomed view
-			point.className = "absolute w-2 h-2 bg-red-500 border border-red-700 rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 z-20";
+			point.className = "absolute w-2 h-2 bg-red-500 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 z-20";
+			point.style.border = "0.5px solid #b91c1c";
 
 			const tooltipText = `${this.place.name}${this.place.toponymName && this.place.toponymName !== this.place.name ? ` (${this.place.toponymName})` : ""}`;
 			point.dataset.tooltipText = tooltipText;
