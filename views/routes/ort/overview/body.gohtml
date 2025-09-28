@@ -1,13 +1,53 @@
 {{- /* Places overview page body */ -}}
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-	{{- /* Main content */ -}}
+	{{- /* Main content - Places list */ -}}
 	<div class="lg:col-span-3">
-		{{- /* Places grid */ -}}
+		{{- /* Places list */ -}}
 		{{ if .model.Places }}
-			<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
+			<div class="bg-white border border-slate-200 rounded-lg mt-6">
 				{{ range $placeID := .model.Sorted }}
 					{{ $place := index $.model.Places $placeID }}
-					{{ template "_place_card" $place }}
+					{{ $pieceCount := index $.model.PlacePieceCounts $placeID }}
+					{{ $geonames := GetGeonames $place.Geo }}
+					{{ $mainPlaceName := "" }}
+					{{ if $place.Names }}
+						{{ $mainPlaceName = index $place.Names 0 }}
+					{{ else }}
+						{{ $mainPlaceName = $place.ID }}
+					{{ end }}
+					{{ $modernName := GetModernPlaceName $place.Geo $mainPlaceName }}
+					<place-accordion class="border-b border-slate-100 last:border-b-0" data-place-id="{{ $place.ID }}" data-place-name="{{ $mainPlaceName }}" data-modern-name="{{ $modernName }}">
+						<div class="block p-4 hover:bg-slate-50 transition-colors duration-200 cursor-pointer">
+							<div class="flex items-start justify-between gap-2">
+								<div class="flex-1 min-w-0">
+									<h3 class="font-medium text-slate-800 mb-1 truncate">
+										{{ if $place.Names }}
+											{{ index $place.Names 0 }}
+										{{ else }}
+											{{ $place.ID }}
+										{{ end }}
+									</h3>
+									{{ if ne $geonames nil }}
+										{{ $fullInfo := GetFullPlaceInfo $place.Geo $mainPlaceName }}
+										{{ if ne $fullInfo "" }}
+											<p class="text-sm text-slate-600 mb-1 truncate">
+												<i class="ri-map-pin-line mr-1"></i>{{ $fullInfo }}
+											</p>
+										{{ end }}
+									{{ else if $place.Geo }}
+										<p class="text-sm text-slate-600 truncate">
+											<i class="ri-map-pin-line mr-1"></i>Geonames verfügbar
+										</p>
+									{{ end }}
+								</div>
+								<div class="flex-shrink-0 flex items-center gap-2">
+									<span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded">
+										{{ $pieceCount }}
+									</span>
+								</div>
+							</div>
+						</div>
+					</place-accordion>
 				{{ end }}
 			</div>
 		{{ else }}

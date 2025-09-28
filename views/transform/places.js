@@ -118,5 +118,158 @@ export class PlacesFilter extends HTMLElement {
 	}
 }
 
-// Register the custom element
+/**
+ * Place Accordion Web Component
+ * Individual accordion for each place with expand/collapse functionality
+ */
+export class PlaceAccordion extends HTMLElement {
+	constructor() {
+		super();
+		this.isExpanded = false;
+		this.isLoading = false;
+		this.hasLoaded = false;
+	}
+
+	connectedCallback() {
+		this.setupAccordion();
+		this.setupEventListeners();
+	}
+
+	disconnectedCallback() {
+		this.cleanupEventListeners();
+	}
+
+	setupAccordion() {
+		// Add chevron icon if not already present
+		if (!this.querySelector('.accordion-chevron')) {
+			const chevron = document.createElement('i');
+			chevron.className = 'ri-chevron-down-line accordion-chevron transition-transform duration-200 text-slate-400';
+
+			// Find the badge and insert chevron before it
+			const badge = this.querySelector('[class*="bg-slate-100"]');
+			if (badge) {
+				badge.parentNode.insertBefore(chevron, badge);
+			}
+		}
+
+		// Create content container if not exists
+		if (!this.querySelector('[data-content]')) {
+			const placeId = this.getAttribute('data-place-id');
+			const contentContainer = document.createElement('div');
+			contentContainer.setAttribute('data-content', '');
+			contentContainer.className = 'accordion-content overflow-hidden transition-all duration-300 max-h-0';
+
+			// Add HTMX attributes to override body defaults
+			contentContainer.setAttribute('hx-get', `/ort/fragment/${placeId}`);
+			contentContainer.setAttribute('hx-trigger', 'load-content');
+			contentContainer.setAttribute('hx-swap', 'innerHTML');
+			contentContainer.setAttribute('hx-target', 'this');
+			contentContainer.setAttribute('hx-select', '.place-fragment-content');
+			contentContainer.setAttribute('hx-boost', 'false'); // Override body's hx-boost="true"
+
+			this.appendChild(contentContainer);
+		}
+	}
+
+	setupEventListeners() {
+		// Add click listener to the entire component
+		this.addEventListener('click', this.handleClick.bind(this));
+	}
+
+	cleanupEventListeners() {
+		this.removeEventListener('click', this.handleClick.bind(this));
+	}
+
+	handleClick(event) {
+		// Only handle clicks on the place name area, not on expanded content
+		const contentContainer = this.querySelector('[data-content]');
+		if (contentContainer && contentContainer.contains(event.target)) {
+			return; // Don't toggle if clicking inside expanded content
+		}
+
+		this.toggle();
+	}
+
+	toggle() {
+		if (this.isExpanded) {
+			this.collapse();
+		} else {
+			this.expand();
+		}
+	}
+
+	expand() {
+		if (this.isLoading) return;
+
+		this.isExpanded = true;
+		this.updateChevron();
+
+		const contentContainer = this.querySelector('[data-content]');
+		if (!contentContainer) return;
+
+		// Load content if not already loaded
+		if (!this.hasLoaded) {
+			this.loadContent();
+		} else {
+			// Just show existing content
+			contentContainer.style.maxHeight = contentContainer.scrollHeight + 'px';
+		}
+	}
+
+	collapse() {
+		this.isExpanded = false;
+		this.updateChevron();
+
+		const contentContainer = this.querySelector('[data-content]');
+		if (contentContainer) {
+			contentContainer.style.maxHeight = '0px';
+		}
+	}
+
+	loadContent() {
+		this.isLoading = true;
+		const contentContainer = this.querySelector('[data-content]');
+
+		// Show loading state
+		contentContainer.innerHTML = '<div class="p-4 text-center text-slate-500">Lädt...</div>';
+		contentContainer.style.maxHeight = contentContainer.scrollHeight + 'px';
+
+		// Set up event listeners for HTMX events
+		const handleAfterRequest = () => {
+			this.hasLoaded = true;
+			this.isLoading = false;
+			// Adjust height after content loads
+			setTimeout(() => {
+				contentContainer.style.maxHeight = contentContainer.scrollHeight + 'px';
+			}, 10);
+			contentContainer.removeEventListener('htmx:afterRequest', handleAfterRequest);
+		};
+
+		const handleResponseError = () => {
+			this.isLoading = false;
+			contentContainer.innerHTML = '<div class="p-4 text-center text-red-500">Fehler beim Laden</div>';
+			contentContainer.removeEventListener('htmx:responseError', handleResponseError);
+		};
+
+		contentContainer.addEventListener('htmx:afterRequest', handleAfterRequest);
+		contentContainer.addEventListener('htmx:responseError', handleResponseError);
+
+		// Trigger the HTMX request
+		htmx.trigger(contentContainer, 'load-content');
+	}
+
+	updateChevron() {
+		const chevron = this.querySelector('.accordion-chevron');
+		if (chevron) {
+			if (this.isExpanded) {
+				chevron.style.transform = 'rotate(180deg)';
+			} else {
+				chevron.style.transform = 'rotate(0deg)';
+			}
+		}
+	}
+}
+
+// Register the custom elements
 customElements.define('places-filter', PlacesFilter);
+customElements.define('place-accordion', PlaceAccordion);

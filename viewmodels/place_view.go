@@ -13,6 +13,7 @@ type PlacesListView struct {
 	Search           string
 	AvailableLetters []string
 	Places           map[string]xmlmodels.Place
+	PlacePieceCounts map[string]int
 	Sorted           []string
 	SelectedPlace    *PlaceDetailView
 	TotalPiecesWithPlaces int
@@ -26,17 +27,23 @@ type PlaceDetailView struct {
 
 // PlacesView returns places data for the overview page
 func PlacesView(placeID string, lib *xmlmodels.Library) *PlacesListView {
-	res := PlacesListView{Search: placeID, Places: make(map[string]xmlmodels.Place)}
+	res := PlacesListView{
+		Search: placeID,
+		Places: make(map[string]xmlmodels.Place),
+		PlacePieceCounts: make(map[string]int),
+	}
 	av := make(map[string]bool)
 
 	// Get all places that are referenced in pieces and count total pieces with places
 	referencedPlaces := make(map[string]bool)
+	placePieceCounts := make(map[string]int)
 	totalPiecesWithPlaces := 0
 
 	for _, piece := range lib.Pieces.Array {
 		hasPlace := false
 		for _, placeRef := range piece.PlaceRefs {
 			referencedPlaces[placeRef.Ref] = true
+			placePieceCounts[placeRef.Ref]++
 			hasPlace = true
 		}
 		if hasPlace {
@@ -53,6 +60,9 @@ func PlacesView(placeID string, lib *xmlmodels.Library) *PlacesListView {
 			res.Places[place.ID] = place
 		}
 	}
+
+	// Set the piece counts
+	res.PlacePieceCounts = placePieceCounts
 
 	// If a specific place is requested, get its details
 	if placeID != "" && len(placeID) > 1 {

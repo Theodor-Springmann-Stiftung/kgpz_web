@@ -47,3 +47,36 @@ func GetPlace(kgpz *xmlmodels.Library) fiber.Handler {
 		}
 	}
 }
+
+func GetPlaceFragment(kgpz *xmlmodels.Library) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		placeID := c.Params("place", DEFAULT_PLACE)
+		placeID = strings.ToLower(placeID)
+
+		// Get places data using view model
+		places := viewmodels.PlacesView(placeID, kgpz)
+
+		// If no places found at all, return 404
+		if len(places.Places) == 0 {
+			logging.Error(nil, "No places found")
+			return c.SendStatus(fiber.StatusNotFound)
+		}
+
+		// If a specific place was requested but not found, return 404
+		if placeID != "" && len(placeID) > 1 && places.SelectedPlace == nil {
+			logging.Error(nil, "Place not found: "+placeID)
+			return c.SendStatus(fiber.StatusNotFound)
+		}
+
+		// Only render fragment if we have a selected place
+		if places.SelectedPlace != nil {
+			// Fragment view - no layout wrapper
+			return c.Render("/ort/fragment/", fiber.Map{
+				"model": places,
+			}, "clear")
+		}
+
+		// If no specific place selected, return 404
+		return c.SendStatus(fiber.StatusNotFound)
+	}
+}

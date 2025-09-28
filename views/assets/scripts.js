@@ -566,8 +566,73 @@ class V extends HTMLElement {
     this.countElement && (t === "" ? this.countElement.textContent = `Alle Orte (${this.originalCount})` : e === 0 ? this.countElement.textContent = `Keine Orte gefunden für "${t}"` : this.countElement.textContent = `${e} von ${this.originalCount} Orten`);
   }
 }
-customElements.define("places-filter", V);
 class R extends HTMLElement {
+  constructor() {
+    super(), this.isExpanded = !1, this.isLoading = !1, this.hasLoaded = !1;
+  }
+  connectedCallback() {
+    this.setupAccordion(), this.setupEventListeners();
+  }
+  disconnectedCallback() {
+    this.cleanupEventListeners();
+  }
+  setupAccordion() {
+    if (!this.querySelector(".accordion-chevron")) {
+      const e = document.createElement("i");
+      e.className = "ri-chevron-down-line accordion-chevron transition-transform duration-200 text-slate-400";
+      const t = this.querySelector('[class*="bg-slate-100"]');
+      t && t.parentNode.insertBefore(e, t);
+    }
+    if (!this.querySelector("[data-content]")) {
+      const e = this.getAttribute("data-place-id"), t = document.createElement("div");
+      t.setAttribute("data-content", ""), t.className = "accordion-content overflow-hidden transition-all duration-300 max-h-0", t.setAttribute("hx-get", `/ort/fragment/${e}`), t.setAttribute("hx-trigger", "load-content"), t.setAttribute("hx-swap", "innerHTML"), t.setAttribute("hx-target", "this"), t.setAttribute("hx-select", ".place-fragment-content"), t.setAttribute("hx-boost", "false"), this.appendChild(t);
+    }
+  }
+  setupEventListeners() {
+    this.addEventListener("click", this.handleClick.bind(this));
+  }
+  cleanupEventListeners() {
+    this.removeEventListener("click", this.handleClick.bind(this));
+  }
+  handleClick(e) {
+    const t = this.querySelector("[data-content]");
+    t && t.contains(e.target) || this.toggle();
+  }
+  toggle() {
+    this.isExpanded ? this.collapse() : this.expand();
+  }
+  expand() {
+    if (this.isLoading) return;
+    this.isExpanded = !0, this.updateChevron();
+    const e = this.querySelector("[data-content]");
+    e && (this.hasLoaded ? e.style.maxHeight = e.scrollHeight + "px" : this.loadContent());
+  }
+  collapse() {
+    this.isExpanded = !1, this.updateChevron();
+    const e = this.querySelector("[data-content]");
+    e && (e.style.maxHeight = "0px");
+  }
+  loadContent() {
+    this.isLoading = !0;
+    const e = this.querySelector("[data-content]");
+    e.innerHTML = '<div class="p-4 text-center text-slate-500">Lädt...</div>', e.style.maxHeight = e.scrollHeight + "px";
+    const t = () => {
+      this.hasLoaded = !0, this.isLoading = !1, setTimeout(() => {
+        e.style.maxHeight = e.scrollHeight + "px";
+      }, 10), e.removeEventListener("htmx:afterRequest", t);
+    }, i = () => {
+      this.isLoading = !1, e.innerHTML = '<div class="p-4 text-center text-red-500">Fehler beim Laden</div>', e.removeEventListener("htmx:responseError", i);
+    };
+    e.addEventListener("htmx:afterRequest", t), e.addEventListener("htmx:responseError", i), htmx.trigger(e, "load-content");
+  }
+  updateChevron() {
+    const e = this.querySelector(".accordion-chevron");
+    e && (this.isExpanded ? e.style.transform = "rotate(180deg)" : e.style.transform = "rotate(0deg)");
+  }
+}
+customElements.define("places-filter", V);
+customElements.define("place-accordion", R);
+class z extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.itemCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -640,8 +705,8 @@ class R extends HTMLElement {
       }
   }
 }
-customElements.define("generic-filter", R);
-class z extends HTMLElement {
+customElements.define("generic-filter", z);
+class D extends HTMLElement {
   constructor() {
     super(), this.resizeObserver = null;
   }
@@ -994,7 +1059,7 @@ class z extends HTMLElement {
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", z);
+customElements.define("single-page-viewer", D);
 document.body.addEventListener("htmx:beforeRequest", function(a) {
   const e = document.querySelector("single-page-viewer");
   e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.close());
@@ -1003,7 +1068,7 @@ window.addEventListener("beforeunload", function() {
   const a = document.querySelector("single-page-viewer");
   a && a.close();
 });
-class D extends HTMLElement {
+class j extends HTMLElement {
   constructor() {
     super(), this.isVisible = !1, this.scrollHandler = null, this.htmxAfterSwapHandler = null;
   }
@@ -1044,8 +1109,8 @@ class D extends HTMLElement {
     });
   }
 }
-customElements.define("scroll-to-top-button", D);
-class j extends HTMLElement {
+customElements.define("scroll-to-top-button", j);
+class F extends HTMLElement {
   constructor() {
     super(), this.pageObserver = null, this.pageContainers = /* @__PURE__ */ new Map(), this.singlePageViewerActive = !1, this.singlePageViewerCurrentPage = null, this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this);
   }
@@ -1164,8 +1229,8 @@ class j extends HTMLElement {
     this.pageObserver && (this.pageObserver.disconnect(), this.pageObserver = null), document.removeEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.pageContainers.clear();
   }
 }
-customElements.define("inhaltsverzeichnis-scrollspy", j);
-class F extends HTMLElement {
+customElements.define("inhaltsverzeichnis-scrollspy", F);
+class K extends HTMLElement {
   constructor() {
     super(), this.innerHTML = `
             <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm">
@@ -1213,11 +1278,11 @@ class F extends HTMLElement {
     window.showErrorModal = (e) => this.show(e), window.closeErrorModal = () => this.close();
   }
 }
-customElements.define("error-modal", F);
+customElements.define("error-modal", K);
 window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
-function K(a, e, t, i = null) {
+function W(a, e, t, i = null) {
   let n = document.querySelector("single-page-viewer");
   n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
   const s = a.closest('[data-beilage="true"]') !== null, o = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, r = a.closest(".newspaper-page-container, .piece-page-container");
@@ -1235,7 +1300,7 @@ function K(a, e, t, i = null) {
 function E() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function W() {
+function Z() {
   if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, b(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
@@ -1256,7 +1321,7 @@ function W() {
     });
   }
 }
-function Z() {
+function J() {
   if (window.currentActiveIndex > 0) {
     let a = -1;
     const e = [];
@@ -1277,7 +1342,7 @@ function Z() {
     }, 100));
   }
 }
-function J() {
+function G() {
   if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
     let a = -1;
     const e = [];
@@ -1298,7 +1363,7 @@ function J() {
     }, 100));
   }
 }
-function G() {
+function Y() {
   if (C()) {
     const e = document.querySelector("#newspaper-content .newspaper-page-container");
     e && e.scrollIntoView({
@@ -1338,7 +1403,7 @@ function b() {
     i ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
-function Y() {
+function U() {
   const a = document.getElementById("shareLinkBtn");
   let e = "";
   if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
@@ -1373,7 +1438,7 @@ function x(a, e) {
     }
   }
 }
-function U() {
+function X() {
   const a = document.getElementById("citationBtn"), e = document.title || "KGPZ";
   let t = window.location.origin + window.location.pathname;
   t.includes("#") && (t = t.split("#")[0]);
@@ -1426,7 +1491,7 @@ function g(a, e) {
     }, 200);
   }, 2e3);
 }
-function X(a, e, t = !1) {
+function Q(a, e, t = !1) {
   let i = "";
   if (t)
     i = window.location.origin + window.location.pathname + `#beilage-1-page-${a}`;
@@ -1458,7 +1523,7 @@ function X(a, e, t = !1) {
     }
   }
 }
-function Q(a, e) {
+function _(a, e) {
   const t = document.title || "KGPZ", i = window.location.pathname.split("/");
   let n;
   if (i.length >= 3) {
@@ -1487,7 +1552,7 @@ function Q(a, e) {
   }
 }
 function L() {
-  W(), window.addEventListener("scroll", function() {
+  Z(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
       b();
     }, 50);
@@ -1495,7 +1560,7 @@ function L() {
     a.key === "Escape" && E();
   });
 }
-function P() {
+function k() {
   const a = window.location.pathname;
   document.querySelectorAll(".citation-link[data-citation-url]").forEach((t) => {
     const i = t.getAttribute("data-citation-url");
@@ -1512,7 +1577,7 @@ function P() {
     n ? (t.classList.add("text-red-700", "pointer-events-none"), t.setAttribute("aria-current", "page")) : (t.classList.remove("text-red-700", "pointer-events-none"), t.removeAttribute("aria-current"));
   });
 }
-function k() {
+function P() {
   const a = window.location.pathname, e = document.body;
   e.classList.remove(
     "page-akteure",
@@ -1524,21 +1589,21 @@ function k() {
     "page-edition"
   ), a.includes("/akteure/") || a.includes("/autoren") ? e.classList.add("page-akteure") : a.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : a.includes("/search") || a.includes("/suche") ? e.classList.add("page-search") : a.includes("/ort/") ? e.classList.add("page-ort") : a.includes("/kategorie/") ? e.classList.add("page-kategorie") : a.includes("/beitrag/") ? e.classList.add("page-piece") : a.includes("/edition") && e.classList.add("page-edition");
 }
-window.enlargePage = K;
+window.enlargePage = W;
 window.closeModal = E;
-window.scrollToPreviousPage = Z;
-window.scrollToNextPage = J;
-window.scrollToBeilage = G;
-window.shareCurrentPage = Y;
-window.generateCitation = U;
-window.copyPagePermalink = X;
-window.generatePageCitation = Q;
-k();
+window.scrollToPreviousPage = J;
+window.scrollToNextPage = G;
+window.scrollToBeilage = Y;
+window.shareCurrentPage = U;
+window.generateCitation = X;
+window.copyPagePermalink = Q;
+window.generatePageCitation = _;
 P();
+k();
 document.querySelector(".newspaper-page-container") && L();
-let _ = function(a) {
-  k(), P(), S(), setTimeout(() => {
+let ee = function(a) {
+  P(), k(), S(), setTimeout(() => {
     document.querySelector(".newspaper-page-container") && L();
   }, 50);
 };
-document.body.addEventListener("htmx:afterSettle", _);
+document.body.addEventListener("htmx:afterSettle", ee);

@@ -1,0 +1,179 @@
+{{- /*
+    Place Details Fragment
+    Used for HTMX requests to load place details into expandable content
+    Contains place header information and associated pieces
+*/ -}}
+
+{{- /* Place Header Information */ -}}
+<div class="mb-6">
+	{{ $geonames := GetGeonames .place.Place.Geo }}
+
+	{{- /* Name and external links */ -}}
+	<div class="flex items-start justify-between gap-4 mb-4">
+		<div class="flex-1">
+			<h2 class="text-xl font-bold text-slate-800 mb-2">
+				{{ if .place.Place.Names }}
+					{{ index .place.Place.Names 0 }}
+				{{ else }}
+					{{ .place.Place.ID }}
+				{{ end }}
+			</h2>
+
+			{{- /* Geographic Information from Geonames */ -}}
+			{{ if ne $geonames nil }}
+				<div class="text-sm text-slate-700 mb-2">
+					{{- /* Modern Country Info (only if not Germany) */ -}}
+					{{ $mainPlaceName := "" }}
+					{{ if .place.Place.Names }}
+						{{ $mainPlaceName = index .place.Place.Names 0 }}
+					{{ end }}
+					{{ $fullInfo := GetFullPlaceInfo .place.Place.Geo $mainPlaceName }}
+					{{ if ne $fullInfo "" }}
+						<div class="mb-1">{{ $fullInfo }}</div>
+					{{ end }}
+
+					{{- /* Coordinates */ -}}
+					<div class="text-slate-600 text-sm space-y-1">
+						{{ if and (ne $geonames.Lat "") (ne $geonames.Lng "") }}
+							<div>
+								<i class="ri-map-pin-line mr-1"></i><a href="https://www.openstreetmap.org/?mlat={{ $geonames.Lat }}&mlon={{ $geonames.Lng }}&zoom=12" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">{{ $geonames.Lat }}, {{ $geonames.Lng }}</a>
+							</div>
+						{{ end }}
+					</div>
+				</div>
+			{{ else }}
+				{{- /* Fallback when no Geonames data */ -}}
+				{{ if .place.Place.Geo }}
+					<p class="text-slate-600 mb-2 text-sm">
+						<i class="ri-map-pin-line mr-1"></i>
+						<a href="{{ .place.Place.Geo }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 underline">
+							Geonames
+						</a>
+					</p>
+				{{ end }}
+			{{ end }}
+		</div>
+
+		{{- /* External link symbols on the right */ -}}
+		<div class="flex gap-2 flex-shrink-0 items-center">
+			{{ if ne $geonames nil }}
+				{{- /* Wikipedia link if available */ -}}
+				{{ if ne $geonames.WikipediaURL "" }}
+					<a href="https://{{ $geonames.WikipediaURL }}" target="_blank" class="hover:opacity-80 transition-opacity" title="Wikipedia">
+						<img src="/assets/wikipedia.png" alt="Wikipedia" class="w-5 h-5">
+					</a>
+				{{ end }}
+			{{ end }}
+
+			{{- /* Geonames link */ -}}
+			{{ if .place.Place.Geo }}
+				<a href="{{ .place.Place.Geo }}" target="_blank" class="hover:opacity-80 transition-opacity no-underline" title="Geonames">
+					<i class="ri-global-line text-lg text-blue-600"></i>
+				</a>
+			{{ end }}
+
+			{{- /* OpenStreetMap link */ -}}
+			{{ if and (ne $geonames nil) (ne $geonames.Lat "") (ne $geonames.Lng "") }}
+				<a href="https://www.openstreetmap.org/?mlat={{ $geonames.Lat }}&mlon={{ $geonames.Lng }}&zoom=12" target="_blank" class="hover:opacity-80 transition-opacity" title="OpenStreetMap">
+					<i class="ri-map-2-line text-lg text-green-600"></i>
+				</a>
+			{{ end }}
+		</div>
+	</div>
+</div>
+
+{{- /* Associated Pieces */ -}}
+<div>
+	<h3 class="text-lg font-semibold text-slate-800 mb-3">
+		<i class="ri-newspaper-line mr-2"></i>Verlinkte Beiträge ({{ len .place.Pieces }})
+	</h3>
+
+	{{ if .place.Pieces }}
+		{{- /* Group pieces by year */ -}}
+		{{- $piecesByYear := dict -}}
+		{{- range $_, $p := .place.Pieces -}}
+			{{- range $issueRef := $p.IssueRefs -}}
+				{{- $year := printf "%d" $issueRef.When.Year -}}
+				{{- $existing := index $piecesByYear $year -}}
+				{{- if $existing -}}
+					{{- $piecesByYear = merge $piecesByYear (dict $year (append $existing $p)) -}}
+				{{- else -}}
+					{{- $piecesByYear = merge $piecesByYear (dict $year (slice $p)) -}}
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
+
+		{{- /* Get sorted years */ -}}
+		{{- $sortedYears := slice -}}
+		{{- range $year, $pieces := $piecesByYear -}}
+			{{- $sortedYears = append $sortedYears $year -}}
+		{{- end -}}
+		{{- $sortedYears = sortStrings $sortedYears -}}
+
+		<div class="space-y-4 max-w-[85ch]">
+			{{- range $year := $sortedYears -}}
+				{{- $yearPieces := index $piecesByYear $year -}}
+
+				{{- /* Year Header */ -}}
+				<div>
+					<h4 class="text-base font-bold font-serif text-slate-800 mb-2">{{ $year }}</h4>
+
+					<div class="space-y-1 text-sm">
+						{{- /* Group pieces by title within each year */ -}}
+						{{- $groupedPieces := dict -}}
+						{{- range $_, $p := $yearPieces -}}
+							{{- $groupKey := "" -}}
+							{{- if $p.Title -}}
+								{{- $groupKey = index $p.Title 0 -}}
+							{{- else if $p.Incipit -}}
+								{{- $groupKey = index $p.Incipit 0 -}}
+							{{- else -}}
+								{{- $groupKey = printf "untitled-%s" $p.ID -}}
+							{{- end -}}
+
+							{{- $existing := index $groupedPieces $groupKey -}}
+							{{- if $existing -}}
+								{{- $groupedPieces = merge $groupedPieces (dict $groupKey (append $existing $p)) -}}
+							{{- else -}}
+								{{- $groupedPieces = merge $groupedPieces (dict $groupKey (slice $p)) -}}
+							{{- end -}}
+						{{- end -}}
+
+						{{- range $groupKey, $groupedItems := $groupedPieces -}}
+							<div class="pb-1 leading-relaxed">
+								{{- /* Use first piece for display text with colon format for places */ -}}
+								{{ template "_unified_piece_entry" (dict "Piece" (index $groupedItems 0) "CurrentActorID" "" "DisplayMode" "place" "ShowPlaceTags" false "UseColonFormat" true "ShowContinuation" false) }}
+
+								{{- /* Show all citations from all pieces in this group inline with commas */ -}}
+								{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}
+									{{- range $issueIndex, $issue := $groupItem.IssueRefs -}}
+										{{- /* Only show citations for the current year */ -}}
+										{{- if eq (printf "%d" $issue.When.Year) $year -}}
+											{{- if or (gt $groupIndex 0) (gt $issueIndex 0) }}, {{ end -}}
+											<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>
+										{{- end -}}
+									{{- end -}}
+								{{- end -}}
+
+								{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+								{{- $firstGroupItem := index $groupedItems 0 -}}
+								{{- if gt (len $firstGroupItem.IssueRefs) 1 -}}
+									{{ " " }}<span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
+									hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
+									hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+										<i class="ri-file-copy-2-line text-xs"></i>
+										<a href="{{ GetPieceURL $firstGroupItem.ID }}">
+											Ganzer Beitrag
+										</a>
+									</span>
+								{{- end }}
+							</div>
+						{{- end -}}
+					</div>
+				</div>
+			{{- end -}}
+		</div>
+	{{ else }}
+		<p class="text-slate-500 italic text-sm">Keine verlinkten Beiträge für diesen Ort gefunden.</p>
+	{{ end }}
+</div>

@@ -1,0 +1,79 @@
+{{- /*
+    Expandable Place Entry Template
+    This is used as a JavaScript template string in the ExpandablePlacesList component
+    Variables: place, geonames, mainPlaceName, modernName, fullInfo, pieceCount
+*/ -}}
+
+<div class="border border-slate-200 rounded-lg hover:border-slate-300 transition-colors duration-200"
+     data-place-name="${mainPlaceName}"
+     data-modern-name="${modernName}"
+     data-place-id="${place.ID}">
+
+  {{- /* Collapsed State - Always Visible */ -}}
+  <div class="p-4 cursor-pointer select-none"
+       data-toggle="collapse"
+       data-target="place-${place.ID}-content"
+       role="button"
+       tabindex="0"
+       aria-expanded="false"
+       aria-controls="place-${place.ID}-content">
+
+    <div class="flex items-center justify-between">
+      <div class="flex-1">
+        <div class="flex items-center gap-3">
+          {{- /* Expand/Collapse Icon */ -}}
+          <div class="transition-transform duration-200" data-expand-icon>
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+
+          {{- /* Place Name as clickable link */ -}}
+          <div>
+            <a href="/ort/${place.ID}"
+               class="text-lg font-medium text-slate-800 hover:text-slate-900 hover:underline"
+               onclick="event.stopPropagation()">
+              ${mainPlaceName}
+            </a>
+
+            {{- /* Geographic info if available */ -}}
+            \${fullInfo ? \`
+              <p class="text-sm text-slate-600 mt-1">
+                <i class="ri-map-pin-line mr-1"></i>\${fullInfo}
+              </p>
+            \` : ''}
+          </div>
+        </div>
+      </div>
+
+      {{- /* Piece count badge */ -}}
+      <div class="flex items-center gap-2 text-sm text-slate-500">
+        <span>\${pieceCount} Beiträge</span>
+      </div>
+    </div>
+  </div>
+
+  {{- /* Expandable Content Area */ -}}
+  <div id="place-${place.ID}-content"
+       class="overflow-hidden transition-all duration-300 ease-in-out max-h-0"
+       data-content-area
+       aria-hidden="true">
+
+    <div class="border-t border-slate-200 p-4 bg-slate-50">
+      {{- /* Loading state */ -}}
+      <div class="flex items-center justify-center py-8" data-loading-state>
+        <div class="flex items-center gap-2 text-slate-500">
+          <div class="animate-spin">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          </div>
+          <span>Lade Beiträge...</span>
+        </div>
+      </div>
+
+      {{- /* Content will be loaded here via HTMX */ -}}
+      <div data-place-details></div>
+    </div>
+  </div>
+</div>
