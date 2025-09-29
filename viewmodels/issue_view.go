@@ -41,14 +41,16 @@ type IndividualPiecesByPage struct {
 }
 
 type IssuePage struct {
-	PageNumber int
-	ImagePath  string
-	Available  bool
-	GridColumn int    // 1 or 2 for left/right positioning
-	GridRow    int    // Row number in grid
-	HasHeader  bool   // Whether this page has a double-spread header
-	HeaderText string // Text for double-spread header
-	PageIcon   string // Icon type: "first", "last", "even", "odd"
+	PageNumber  int
+	ImagePath   string // Full-quality image path (prefers WebP over JPEG)
+	PreviewPath string // Compressed WebP path for layout views
+	JpegPath    string // JPEG path for download button
+	Available   bool
+	GridColumn  int    // 1 or 2 for left/right positioning
+	GridRow     int    // Row number in grid
+	HasHeader   bool   // Whether this page has a double-spread header
+	HeaderText  string // Text for double-spread header
+	PageIcon    string // Icon type: "first", "last", "even", "odd"
 }
 
 type IssueImages struct {
@@ -58,13 +60,15 @@ type IssueImages struct {
 }
 
 type ImageFile struct {
-	Year      int
-	Issue     int
-	Page      int
-	IsBeilage bool
-	BeilageNo int
-	Filename  string
-	Path      string
+	Year        int
+	Issue       int
+	Page        int
+	IsBeilage   bool
+	BeilageNo   int
+	Filename    string
+	Path        string        // Primary path (prefers WebP over JPEG)
+	PreviewPath string        // Path to compressed WebP version for layout views
+	JpegPath    string        // Path to JPEG version (for download button)
 }
 
 type ImageRegistry struct {
@@ -518,16 +522,30 @@ func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
 
 		if foundFile != nil {
 			images.HasImages = true
+			// Use preview path if available, otherwise fallback to original
+			previewPath := foundFile.PreviewPath
+			if previewPath == "" {
+				previewPath = foundFile.Path
+			}
+			// Use JPEG path if available, otherwise fallback to primary
+			jpegPath := foundFile.JpegPath
+			if jpegPath == "" {
+				jpegPath = foundFile.Path
+			}
 			images.MainPages = append(images.MainPages, IssuePage{
-				PageNumber: page,
-				ImagePath:  foundFile.Path,
-				Available:  true,
+				PageNumber:  page,
+				ImagePath:   foundFile.Path,
+				PreviewPath: previewPath,
+				JpegPath:    jpegPath,
+				Available:   true,
 			})
 		} else {
 			images.MainPages = append(images.MainPages, IssuePage{
-				PageNumber: page,
-				ImagePath:  "",
-				Available:  false,
+				PageNumber:  page,
+				ImagePath:   "",
+				PreviewPath: "",
+				JpegPath:    "",
+				Available:   false,
 			})
 		}
 	}
@@ -539,10 +557,22 @@ func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
 		// Add ALL beilage files found for this issue
 		for _, file := range beilageFiles {
 			images.HasImages = true
+			// Use preview path if available, otherwise fallback to original
+			previewPath := file.PreviewPath
+			if previewPath == "" {
+				previewPath = file.Path
+			}
+			// Use JPEG path if available, otherwise fallback to primary
+			jpegPath := file.JpegPath
+			if jpegPath == "" {
+				jpegPath = file.Path
+			}
 			beilagePages = append(beilagePages, IssuePage{
-				PageNumber: file.Page,
-				ImagePath:  file.Path,
-				Available:  true,
+				PageNumber:  file.Page,
+				ImagePath:   file.Path,
+				PreviewPath: previewPath,
+				JpegPath:    jpegPath,
+				Available:   true,
 			})
 		}
 
@@ -573,7 +603,10 @@ func initImageRegistry() error {
 		ByYearPage:  make(map[string]ImageFile),
 	}
 
-	return filepath.Walk("pictures", func(path string, info os.FileInfo, err error) error {
+	// Temporary map to collect all files by their base name (year-issue-page)
+	tempFiles := make(map[string]*ImageFile)
+
+	err := filepath.Walk("pictures", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -583,14 +616,22 @@ func initImageRegistry() error {
 		}
 
 		filename := info.Name()
+		filenamelower := strings.ToLower(filename)
 
-		// Skip non-jpg files
-		if !strings.HasSuffix(strings.ToLower(filename), ".jpg") {
-			return nil
+		// Only process .jpg and .webp files (but skip preview files)
+		var nameWithoutExt string
+		var isWebP bool
+
+		if strings.HasSuffix(filenamelower, ".jpg") {
+			nameWithoutExt = strings.TrimSuffix(filename, ".jpg")
+			isWebP = false
+		} else if strings.HasSuffix(filenamelower, ".webp") && !strings.HasSuffix(filenamelower, "-preview.webp") {
+			nameWithoutExt = strings.TrimSuffix(filename, ".webp")
+			isWebP = true
+		} else {
+			return nil // Skip non-image files and preview files
 		}
 
-		// Remove .jpg extension and split by -
-		nameWithoutExt := strings.TrimSuffix(filename, ".jpg")
 		parts := strings.Split(nameWithoutExt, "-")
 
 		// Need at least 3 parts: year-issue-page
@@ -624,26 +665,87 @@ func initImageRegistry() error {
 			return nil
 		}
 
-		imageFile := ImageFile{
-			Year:      year,
-			Issue:     issue,
-			Page:      page,
-			IsBeilage: isBeilage,
-			BeilageNo: 1, // Default beilage number
-			Filename:  filename,
-			Path:      fmt.Sprintf("/static/pictures/%s", path[9:]), // Remove "pictures/" prefix
+		// Create unique key for this image (handles both regular and beilage)
+		var uniqueKey string
+		if isBeilage {
+			uniqueKey = fmt.Sprintf("%d-%db-%d", year, issue, page)
+		} else {
+			uniqueKey = fmt.Sprintf("%d-%d-%d", year, issue, page)
 		}
 
-		imageRegistry.Files = append(imageRegistry.Files, imageFile)
+		// Get or create the ImageFile entry
+		imageFile, exists := tempFiles[uniqueKey]
+		if !exists {
+			imageFile = &ImageFile{
+				Year:      year,
+				Issue:     issue,
+				Page:      page,
+				IsBeilage: isBeilage,
+				BeilageNo: 1, // Default beilage number
+			}
+			tempFiles[uniqueKey] = imageFile
+		}
 
-		yearIssueKey := fmt.Sprintf("%d-%d", year, issue)
-		imageRegistry.ByYearIssue[yearIssueKey] = append(imageRegistry.ByYearIssue[yearIssueKey], imageFile)
-
-		if !isBeilage {
-			yearPageKey := fmt.Sprintf("%d-%d", year, page)
-			imageRegistry.ByYearPage[yearPageKey] = imageFile
+		// Set paths based on file type
+		currentPath := fmt.Sprintf("/static/pictures/%s", path[9:]) // Remove "pictures/" prefix
+		if isWebP {
+			// WebP is the primary path for single page viewer
+			imageFile.Path = currentPath
+			imageFile.Filename = filename
+		} else {
+			// JPEG is the fallback path for download
+			imageFile.JpegPath = currentPath
+			// If no WebP path is set yet, use JPEG as primary
+			if imageFile.Path == "" {
+				imageFile.Path = currentPath
+				imageFile.Filename = filename
+			}
 		}
 
 		return nil
 	})
+
+	if err != nil {
+		return err
+	}
+
+	// Second pass: set PreviewPath for each ImageFile by checking for preview files
+	for _, imageFile := range tempFiles {
+		// Extract the base name from the filename to preserve original format
+		baseNameWithExt := imageFile.Filename
+		var baseName string
+
+		// Remove extension to get base name
+		if strings.HasSuffix(strings.ToLower(baseNameWithExt), ".webp") {
+			baseName = strings.TrimSuffix(baseNameWithExt, ".webp")
+		} else if strings.HasSuffix(strings.ToLower(baseNameWithExt), ".jpg") {
+			baseName = strings.TrimSuffix(baseNameWithExt, ".jpg")
+		} else {
+			baseName = baseNameWithExt
+		}
+
+		// Generate preview filename using the original base name format
+		previewFilename := baseName + "-preview.webp"
+
+		// Check if preview file exists
+		previewFullPath := filepath.Join("pictures", fmt.Sprintf("%d", imageFile.Year), previewFilename)
+		if _, err := os.Stat(previewFullPath); err == nil {
+			imageFile.PreviewPath = fmt.Sprintf("/static/pictures/%d/%s", imageFile.Year, previewFilename)
+		}
+	}
+
+	// Convert temp map to final registry structures
+	for _, imageFile := range tempFiles {
+		imageRegistry.Files = append(imageRegistry.Files, *imageFile)
+
+		yearIssueKey := fmt.Sprintf("%d-%d", imageFile.Year, imageFile.Issue)
+		imageRegistry.ByYearIssue[yearIssueKey] = append(imageRegistry.ByYearIssue[yearIssueKey], *imageFile)
+
+		if !imageFile.IsBeilage {
+			yearPageKey := fmt.Sprintf("%d-%d", imageFile.Year, imageFile.Page)
+			imageRegistry.ByYearPage[yearPageKey] = *imageFile
+		}
+	}
+
+	return nil
 }

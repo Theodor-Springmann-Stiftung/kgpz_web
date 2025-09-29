@@ -36,12 +36,17 @@
 						<!-- Page image -->
 						<div class="single-page bg-white p-4 rounded border border-slate-200 hover:border-slate-300 transition-colors duration-200">
 							{{ if $page.Available }}
-								<img src="{{ $page.ImagePath }}"
-									 alt="Seite {{ $page.PageNumber }} ({{ $issueContext }})"
-									 class="piece-page-image newspaper-page-image cursor-zoom-in rounded-sm hover:scale-[1.02] transition-transform duration-200 w-full"
-									 onclick="enlargePage(this, {{ $page.PageNumber }}, false, {{ $pageEntry.PartNumber }})"
-									 data-page="{{ $page.PageNumber }}"
-									 loading="lazy" />
+								<picture>
+									{{- if ne $page.PreviewPath "" -}}
+										<source srcset="{{ $page.PreviewPath }}" type="image/webp">
+									{{- end -}}
+									<img src="{{ if ne $page.PreviewPath "" }}{{ $page.PreviewPath }}{{ else }}{{ $page.ImagePath }}{{ end }}"
+										 alt="Seite {{ $page.PageNumber }} ({{ $issueContext }})"
+										 class="piece-page-image newspaper-page-image cursor-zoom-in rounded-sm hover:scale-[1.02] transition-transform duration-200 w-full"
+										 onclick="enlargePage(this, {{ $page.PageNumber }}, false, {{ $pageEntry.PartNumber }})"
+										 data-page="{{ $page.PageNumber }}"
+										 data-full-image="{{ $page.ImagePath }}" />
+								</picture>
 							{{ else }}
 								<div class="bg-slate-100 border border-slate-200 rounded p-8 text-center">
 									<i class="ri-image-line text-4xl text-slate-400 mb-2 block"></i>

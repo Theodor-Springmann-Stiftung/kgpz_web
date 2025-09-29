@@ -1,6 +1,7 @@
 package server
 
 import (
+	"strings"
 	"sync"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cache"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/storage/memory/v2"
@@ -138,6 +140,18 @@ func (s *Server) Start() {
 	}
 
 	srv.Use(recover.New())
+
+	// Add compression middleware for HTML responses (non-static routes)
+	srv.Use(compress.New(compress.Config{
+		Level: compress.LevelBestSpeed, // Fast compression for HTML responses
+		Next: func(c *fiber.Ctx) bool {
+			// Only compress for routes that don't start with static prefixes
+			path := c.Path()
+			return strings.HasPrefix(path, "/assets") ||
+				strings.HasPrefix(path, "/static/pictures/") ||
+				strings.HasPrefix(path, "/img/")
+		},
+	}))
 
 	// INFO: No caching middleware in debug mode to avoid cache issues during development
 	// We cant do it with cach busting the files via ?v=XXX, since we also cache the templates.

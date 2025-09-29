@@ -603,7 +603,7 @@ class W extends HTMLElement {
       document.documentElement.offsetHeight
     ), s = window.innerHeight, o = n - s, r = o > 0 ? window.scrollY / o : 0, l = t.clientHeight, u = t.scrollHeight - l;
     if (u > 0) {
-      const d = r * u, h = i.getBoundingClientRect(), g = t.getBoundingClientRect(), p = h.top - g.top + t.scrollTop, m = l / 2, f = p - m, w = 0.7, b = w * d + (1 - w) * f, x = Math.max(0, Math.min(u, b)), E = t.scrollTop;
+      const d = r * u, h = i.getBoundingClientRect(), g = t.getBoundingClientRect(), p = h.top - g.top + t.scrollTop, f = l / 2, m = p - f, w = 0.7, b = w * d + (1 - w) * m, x = Math.max(0, Math.min(u, b)), E = t.scrollTop;
       Math.abs(x - E) > 10 && t.scrollTo({
         top: x,
         behavior: "smooth"
@@ -813,10 +813,10 @@ class Y extends HTMLElement {
     const s = document.createElementNS("http://www.w3.org/2000/svg", "stop");
     s.setAttribute("offset", "100%"), s.setAttribute("stop-color", "#e53e3e"), i.appendChild(n), i.appendChild(s), t.appendChild(i), e.appendChild(t), this.pointsContainer.appendChild(e);
     const o = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, r = { lon: 10, lat: 52 }, l = (u, d) => {
-      const m = r.lon * Math.PI / 180, f = r.lat * Math.PI / 180, w = d * Math.PI / 180, b = u * Math.PI / 180, x = Math.sqrt(
-        2 / (1 + Math.sin(f) * Math.sin(b) + Math.cos(f) * Math.cos(b) * Math.cos(w - m))
-      ), E = 6371e3 * x * Math.cos(b) * Math.sin(w - m), S = 6371e3 * x * (Math.cos(f) * Math.sin(b) - Math.sin(f) * Math.cos(b) * Math.cos(w - m)), C = E + 4321e3, k = S + 321e4, L = o.xmax - o.xmin, v = o.ymax - o.ymin, R = (C - o.xmin) / L * 100, $ = (o.ymax - k) / v * 100;
-      return { x: R, y: $ };
+      const f = r.lon * Math.PI / 180, m = r.lat * Math.PI / 180, w = d * Math.PI / 180, b = u * Math.PI / 180, x = Math.sqrt(
+        2 / (1 + Math.sin(m) * Math.sin(b) + Math.cos(m) * Math.cos(b) * Math.cos(w - f))
+      ), E = 6371e3 * x * Math.cos(b) * Math.sin(w - f), S = 6371e3 * x * (Math.cos(m) * Math.sin(b) - Math.sin(m) * Math.cos(b) * Math.cos(w - f)), C = E + 4321e3, k = S + 321e4, L = o.xmax - o.xmin, v = o.ymax - o.ymin, $ = (C - o.xmin) / L * 100, R = (o.ymax - k) / v * 100;
+      return { x: $, y: R };
     }, c = [];
     this.places.forEach((u) => {
       if (u.lat && u.lng) {
@@ -829,8 +829,8 @@ class Y extends HTMLElement {
           }), p.addEventListener("mouseleave", () => {
             p.getAttribute("fill") === "#f87171" && (p.setAttribute("r", "0.4"), p.setAttribute("fill", "white"), p.setAttribute("opacity", "0.7"));
           });
-          const m = `${u.name}${u.toponymName && u.toponymName !== u.name ? ` (${u.toponymName})` : ""}`;
-          p.dataset.placeId = u.id, p.dataset.tooltipText = m, p.addEventListener("mouseenter", (f) => this.showTooltip(f)), p.addEventListener("mouseleave", () => this.hideTooltip()), p.addEventListener("mousemove", (f) => this.updateTooltipPosition(f)), p.addEventListener("click", (f) => this.scrollToPlace(f)), e.appendChild(p), this.mapPoints.set(u.id, p);
+          const f = `${u.name}${u.toponymName && u.toponymName !== u.name ? ` (${u.toponymName})` : ""}`;
+          p.dataset.placeId = u.id, p.dataset.tooltipText = f, p.addEventListener("mouseenter", (m) => this.showTooltip(m)), p.addEventListener("mouseleave", () => this.hideTooltip()), p.addEventListener("mousemove", (m) => this.updateTooltipPosition(m)), p.addEventListener("click", (m) => this.scrollToPlace(m)), e.appendChild(p), this.mapPoints.set(u.id, p);
         }
       }
     }), c.length > 0 && this.autoZoomToPoints(c);
@@ -841,14 +841,14 @@ class Y extends HTMLElement {
     e.forEach((v) => {
       v.x < t && (t = v.x), v.x > i && (i = v.x), v.y < n && (n = v.y), v.y > s && (s = v.y);
     });
-    const o = 0.06, r = i - t, l = s - n, c = r * o, u = l * o, d = Math.max(0, t - c), h = Math.min(100, i + c), g = Math.max(0, n - u), p = Math.min(100, s + u), m = h - d, f = p - g, w = 5 / 7, b = m / f;
-    let x = { x: d, y: g, width: m, height: f };
+    const o = 0.06, r = i - t, l = s - n, c = r * o, u = l * o, d = Math.max(0, t - c), h = Math.min(100, i + c), g = Math.max(0, n - u), p = Math.min(100, s + u), f = h - d, m = p - g, w = 5 / 7, b = f / m;
+    let x = { x: d, y: g, width: f, height: m };
     if (b > w) {
-      const v = m / w;
-      x.y = g - (v - f) / 2, x.height = v;
+      const v = f / w;
+      x.y = g - (v - m) / 2, x.height = v;
     } else {
-      const v = f * w;
-      x.x = d - (v - m) / 2, x.width = v;
+      const v = m * w;
+      x.x = d - (v - f) / 2, x.width = v;
     }
     const E = 100 / x.width, S = -x.x, C = -x.y, k = `scale(${E}) translate(${S}%, ${C}%)`, L = this.querySelector(".transform-wrapper");
     L && (L.style.transform = k);
@@ -990,9 +990,9 @@ class Z extends HTMLElement {
     if (!this.place || !this.place.lat || !this.place.lng || !this.pointsContainer)
       return;
     const e = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, t = { lon: 10, lat: 52 }, i = (r, l) => {
-      const h = t.lon * Math.PI / 180, g = t.lat * Math.PI / 180, p = l * Math.PI / 180, m = r * Math.PI / 180, f = Math.sqrt(
-        2 / (1 + Math.sin(g) * Math.sin(m) + Math.cos(g) * Math.cos(m) * Math.cos(p - h))
-      ), w = 6371e3 * f * Math.cos(m) * Math.sin(p - h), b = 6371e3 * f * (Math.cos(g) * Math.sin(m) - Math.sin(g) * Math.cos(m) * Math.cos(p - h)), x = w + 4321e3, E = b + 321e4, S = e.xmax - e.xmin, C = e.ymax - e.ymin, k = (x - e.xmin) / S * 100, L = (e.ymax - E) / C * 100;
+      const h = t.lon * Math.PI / 180, g = t.lat * Math.PI / 180, p = l * Math.PI / 180, f = r * Math.PI / 180, m = Math.sqrt(
+        2 / (1 + Math.sin(g) * Math.sin(f) + Math.cos(g) * Math.cos(f) * Math.cos(p - h))
+      ), w = 6371e3 * m * Math.cos(f) * Math.sin(p - h), b = 6371e3 * m * (Math.cos(g) * Math.sin(f) - Math.sin(g) * Math.cos(f) * Math.cos(p - h)), x = w + 4321e3, E = b + 321e4, S = e.xmax - e.xmin, C = e.ymax - e.ymin, k = (x - e.xmin) / S * 100, L = (e.ymax - E) / C * 100;
       return { x: k, y: L };
     }, n = parseFloat(this.place.lat), s = parseFloat(this.place.lng), o = i(n, s);
     if (o.x >= 0 && o.x <= 100 && o.y >= 0 && o.y <= 100) {
@@ -1031,8 +1031,8 @@ class Z extends HTMLElement {
       const b = (h - d.height) / 2;
       d.y = Math.max(0, d.y - b), d.height = Math.min(h, 100 - d.y);
     }
-    const g = 100 / d.width, p = -d.x, m = -d.y, f = `scale(${g}) translate(${p}%, ${m}%)`, w = this.querySelector(".transform-wrapper");
-    w && (w.style.transform = f);
+    const g = 100 / d.width, p = -d.x, f = -d.y, m = `scale(${g}) translate(${p}%, ${f}%)`, w = this.querySelector(".transform-wrapper");
+    w && (w.style.transform = m);
   }
   showTooltip(e) {
     const i = e.target.dataset.tooltipText;
@@ -1117,7 +1117,7 @@ class X extends HTMLElement {
 customElements.define("generic-filter", X);
 class J extends HTMLElement {
   constructor() {
-    super(), this.resizeObserver = null;
+    super(), this.resizeObserver = null, this.hasStartedPreloading = !1;
   }
   // Dynamically detect sidebar width in pixels
   detectSidebarWidth() {
@@ -1255,8 +1255,8 @@ class J extends HTMLElement {
       u.style.position = "relative";
       const p = u.querySelector(".target-page-dot");
       p && p.remove();
-      const m = document.createElement("span");
-      m.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", m.title = "verlinkte Seite", u.appendChild(m);
+      const f = document.createElement("span");
+      f.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", f.title = "verlinkte Seite", u.appendChild(f);
     }
     r ? r === "part-number" && o !== null ? d.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${o}. Teil</span>` : d.innerHTML = this.generateIconFromType(r) : d.innerHTML = this.generateFallbackIcon(i, n, o), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true");
     const g = this.querySelector(".flex-1.overflow-auto");
@@ -1264,7 +1264,7 @@ class J extends HTMLElement {
       new CustomEvent("singlepageviewer:opened", {
         detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
       })
-    );
+    ), this.startImagePreloading();
   }
   close() {
     this.style.display = "none", this.removeAttribute("active"), document.body.style.overflow = "", document.dispatchEvent(
@@ -1466,6 +1466,52 @@ class J extends HTMLElement {
         return `${r[1]} Nr. ${r[2]}`;
     }
     return "KGPZ";
+  }
+  // Start preloading all high-quality images in the background
+  startImagePreloading() {
+    if (this.hasStartedPreloading)
+      return;
+    this.hasStartedPreloading = !0;
+    const e = this.collectAllImageUrls();
+    if (e.length === 0) {
+      console.log("No images to preload");
+      return;
+    }
+    console.log(`Starting background preload of ${e.length} high-quality images`), setTimeout(() => {
+      this.preloadImages(e);
+    }, 500);
+  }
+  // Collect all high-quality image URLs from the current page
+  collectAllImageUrls() {
+    const e = [];
+    return document.querySelectorAll(".newspaper-page-image, .piece-page-image").forEach((i) => {
+      const n = i.getAttribute("data-full-image");
+      n && !e.includes(n) && e.push(n);
+    }), e;
+  }
+  // Preload images with throttling to avoid overwhelming the browser
+  preloadImages(e) {
+    let i = 0, n = 0;
+    const s = /* @__PURE__ */ new Set(), o = () => {
+      for (; n < 3 && i < e.length; ) {
+        const r = e[i];
+        i++, !s.has(r) && (n++, this.preloadSingleImage(r).then(() => {
+          s.add(r), console.log(`Preloaded: ${r} (${s.size}/${e.length})`);
+        }).catch((l) => {
+          console.warn(`Failed to preload: ${r}`, l);
+        }).finally(() => {
+          n--, i < e.length || n > 0 ? setTimeout(o, 100) : console.log(`Preloading complete: ${s.size}/${e.length} images loaded`);
+        }));
+      }
+    };
+    o();
+  }
+  // Preload a single image
+  preloadSingleImage(e) {
+    return new Promise((t, i) => {
+      const n = new Image();
+      n.onload = () => t(n), n.onerror = () => i(new Error(`Failed to load ${e}`)), n.src = e;
+    });
   }
 }
 customElements.define("single-page-viewer", J);
@@ -1710,13 +1756,14 @@ function te(a, e, t, i = null) {
   let l = null, c = null;
   if (r) {
     l = r.getAttribute("data-page-icon-type"), r.querySelector(".part-number") && (l = "part-number");
-    const d = r.querySelector(".page-indicator");
-    if (d) {
-      const h = d.cloneNode(!0);
-      h.querySelectorAll("i").forEach((m) => m.remove()), h.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((m) => m.remove()), c = h.textContent.trim();
+    const h = r.querySelector(".page-indicator");
+    if (h) {
+      const g = h.cloneNode(!0);
+      g.querySelectorAll("i").forEach((m) => m.remove()), g.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((m) => m.remove()), c = g.textContent.trim();
     }
   }
-  n.show(a.src, a.alt, e, s, o, i, l, c);
+  const u = a.getAttribute("data-full-image") || a.src;
+  n.show(u, a.alt, e, s, o, i, l, c);
 }
 function H() {
   document.getElementById("pageModal").classList.add("hidden");
@@ -1981,7 +2028,7 @@ function q() {
     a.key === "Escape" && H();
   });
 }
-function B() {
+function N() {
   const a = window.location.pathname, e = document.querySelector("main .grid.grid-cols-1.lg\\:grid-cols-3") !== null, t = document.querySelector("main h3 u") !== null;
   if (a.includes("/search") || a.includes("/suche") || e || t) {
     document.querySelectorAll(".citation-link[data-citation-url]").forEach((o) => {
@@ -2004,7 +2051,7 @@ function B() {
     r ? (s.classList.add("text-red-700", "pointer-events-none"), s.setAttribute("aria-current", "page")) : (s.classList.remove("text-red-700", "pointer-events-none"), s.removeAttribute("aria-current"));
   });
 }
-function N() {
+function B() {
   const a = window.location.pathname, e = document.body;
   e.classList.remove(
     "page-akteure",
@@ -2025,11 +2072,11 @@ window.shareCurrentPage = re;
 window.generateCitation = ae;
 window.copyPagePermalink = le;
 window.generatePageCitation = ce;
-N();
 B();
+N();
 document.querySelector(".newspaper-page-container") && q();
 let de = function(a) {
-  N(), B(), I(), setTimeout(() => {
+  B(), N(), I(), setTimeout(() => {
     document.querySelector(".newspaper-page-container") && q();
   }, 50);
 };

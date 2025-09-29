@@ -53,8 +53,11 @@ export function enlargePage(imgElement, pageNumber, isFromSpread, partNumber = n
 		}
 	}
 
+	// Use full-quality image if available, otherwise use current src
+	const fullImageSrc = imgElement.getAttribute('data-full-image') || imgElement.src;
+
 	// Show the page in the viewer with extracted data
-	viewer.show(imgElement.src, imgElement.alt, pageNumber, isBeilage, targetPage, partNumber, extractedIconType, extractedHeading);
+	viewer.show(fullImageSrc, imgElement.alt, pageNumber, isBeilage, targetPage, partNumber, extractedIconType, extractedHeading);
 }
 
 export function closeModal() {

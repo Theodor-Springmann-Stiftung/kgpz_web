@@ -8,6 +8,7 @@ export class SinglePageViewer extends HTMLElement {
 		super();
 		// No shadow DOM - use regular DOM to allow Tailwind CSS
 		this.resizeObserver = null;
+		this.hasStartedPreloading = false;
 	}
 
 	// Dynamically detect sidebar width in pixels
@@ -260,6 +261,9 @@ export class SinglePageViewer extends HTMLElement {
 				detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage },
 			}),
 		);
+
+		// Start preloading all high-quality images in the background
+		this.startImagePreloading();
 	}
 
 	close() {
@@ -673,6 +677,105 @@ export class SinglePageViewer extends HTMLElement {
 
 		// Ultimate fallback
 		return "KGPZ";
+	}
+
+	// Start preloading all high-quality images in the background
+	startImagePreloading() {
+		// Only preload once per session
+		if (this.hasStartedPreloading) {
+			return;
+		}
+		this.hasStartedPreloading = true;
+
+		// Collect all high-quality image URLs from the current page
+		const imageUrls = this.collectAllImageUrls();
+
+		if (imageUrls.length === 0) {
+			console.log("No images to preload");
+			return;
+		}
+
+		console.log(`Starting background preload of ${imageUrls.length} high-quality images`);
+
+		// Start preloading with a slight delay to not interfere with the current image load
+		setTimeout(() => {
+			this.preloadImages(imageUrls);
+		}, 500);
+	}
+
+	// Collect all high-quality image URLs from the current page
+	collectAllImageUrls() {
+		const imageUrls = [];
+
+		// Find all newspaper page images (both main pages and beilage)
+		const pageImages = document.querySelectorAll('.newspaper-page-image, .piece-page-image');
+
+		pageImages.forEach(img => {
+			// Get the high-quality image URL from data-full-image attribute
+			const fullImageUrl = img.getAttribute('data-full-image');
+			if (fullImageUrl && !imageUrls.includes(fullImageUrl)) {
+				imageUrls.push(fullImageUrl);
+			}
+		});
+
+		return imageUrls;
+	}
+
+	// Preload images with throttling to avoid overwhelming the browser
+	preloadImages(imageUrls) {
+		const CONCURRENT_LOADS = 3; // Maximum concurrent image loads
+		const DELAY_BETWEEN_BATCHES = 1000; // 1 second between batches
+
+		let currentIndex = 0;
+		let activeLoads = 0;
+		const preloadedImages = new Set();
+
+		const loadNextBatch = () => {
+			while (activeLoads < CONCURRENT_LOADS && currentIndex < imageUrls.length) {
+				const imageUrl = imageUrls[currentIndex];
+				currentIndex++;
+
+				// Skip if already preloaded
+				if (preloadedImages.has(imageUrl)) {
+					continue;
+				}
+
+				activeLoads++;
+				this.preloadSingleImage(imageUrl)
+					.then(() => {
+						preloadedImages.add(imageUrl);
+						console.log(`Preloaded: ${imageUrl} (${preloadedImages.size}/${imageUrls.length})`);
+					})
+					.catch((error) => {
+						console.warn(`Failed to preload: ${imageUrl}`, error);
+					})
+					.finally(() => {
+						activeLoads--;
+						// Continue loading if more images remain
+						if (currentIndex < imageUrls.length || activeLoads > 0) {
+							setTimeout(loadNextBatch, 100);
+						} else {
+							console.log(`Preloading complete: ${preloadedImages.size}/${imageUrls.length} images loaded`);
+						}
+					});
+			}
+		};
+
+		// Start the first batch
+		loadNextBatch();
+	}
+
+	// Preload a single image
+	preloadSingleImage(imageUrl) {
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+
+			img.onload = () => resolve(img);
+			img.onerror = () => reject(new Error(`Failed to load ${imageUrl}`));
+
+			// Set src to start loading
+			img.src = imageUrl;
+		});
 	}
 }
 

@@ -14,6 +14,7 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/templatefunctions"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/views"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/etag"
 )
 
@@ -408,8 +409,9 @@ func (e *Engine) funcs() error {
 }
 
 func (e Engine) Pre(srv *fiber.App) error {
-	srv.Use(ASSETS_URL_PREFIX, etag.New())
-	srv.Use(ASSETS_URL_PREFIX, helpers.StaticHandler(&views.StaticFS))
+	srv.Use(ASSETS_URL_PREFIX, compress.New(compress.Config{
+		Level: compress.LevelBestSpeed,
+	}), etag.New(), helpers.StaticHandler(&views.StaticFS))
 	return nil
 }
 

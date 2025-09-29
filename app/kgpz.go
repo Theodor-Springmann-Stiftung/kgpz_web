@@ -16,6 +16,7 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/etag"
 )
 
@@ -89,8 +90,9 @@ func (k *KGPZ) Pre(srv *fiber.App) error {
 	// Check if folder exists and if yes, serve image files from it
 	if _, err := os.Stat(k.Config.Config.ImgPath); err == nil {
 		fs := os.DirFS(k.Config.Config.ImgPath)
-		srv.Use(IMG_PREFIX, etag.New())
-		srv.Use(IMG_PREFIX, helpers.StaticHandler(&fs))
+		srv.Use(IMG_PREFIX, compress.New(compress.Config{
+			Level: compress.LevelBestSpeed,
+		}), etag.New(), helpers.StaticHandler(&fs))
 	} else {
 		logging.Info("Image folder not found. Skipping image serving.")
 	}
@@ -98,8 +100,9 @@ func (k *KGPZ) Pre(srv *fiber.App) error {
 	// Serve newspaper pictures from pictures directory
 	if _, err := os.Stat("pictures"); err == nil {
 		picturesFS := os.DirFS("pictures")
-		srv.Use(PICTURES_PREFIX, etag.New())
-		srv.Use(PICTURES_PREFIX, helpers.StaticHandler(&picturesFS))
+		srv.Use(PICTURES_PREFIX, compress.New(compress.Config{
+			Level: compress.LevelBestSpeed,
+		}), etag.New(), helpers.StaticHandler(&picturesFS))
 		logging.Info("Serving newspaper pictures from pictures/ directory.")
 	} else {
 		logging.Info("Pictures folder not found. Skipping picture serving.")

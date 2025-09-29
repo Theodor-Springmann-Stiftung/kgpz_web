@@ -11,7 +11,9 @@ type PiecePageEntry struct {
 	PageNumber     int
 	IssueYear      int
 	IssueNumber    int
-	ImagePath      string
+	ImagePath      string // Full-quality image path (prefers WebP over JPEG)
+	PreviewPath    string // Compressed WebP path for layout views
+	JpegPath       string // JPEG path for download button
 	IsContinuation bool
 	IssueContext   string // "1764 Nr. 37" for display
 	Available      bool
@@ -96,8 +98,8 @@ func NewPieceView(piece xmlmodels.Piece, lib *xmlmodels.Library) (*PieceVM, erro
 				PartNumber:     partIndex + 1,              // Part number (1-based)
 			}
 
-			// Get actual image path from registry
-			pageEntry.ImagePath = getImagePathFromRegistryWithBeilage(issueRef.When.Year, issueRef.Nr, pageNum, issueRef.Beilage > 0)
+			// Get actual image path, preview path, and JPEG path from registry
+			pageEntry.ImagePath, pageEntry.PreviewPath, pageEntry.JpegPath = getImagePathsFromRegistryWithBeilage(issueRef.When.Year, issueRef.Nr, pageNum, issueRef.Beilage > 0)
 
 			pvm.AllPages = append(pvm.AllPages, pageEntry)
 		}
@@ -140,10 +142,12 @@ func (pvm *PieceVM) loadImages() error {
 	for i, pageEntry := range pvm.AllPages {
 		// Create IssuePage for template compatibility
 		issuePage := IssuePage{
-			PageNumber: pageEntry.PageNumber,
-			ImagePath:  pageEntry.ImagePath,
-			Available:  true,     // Assume available for now
-			PageIcon:   "single", // Simplified icon for piece view
+			PageNumber:  pageEntry.PageNumber,
+			ImagePath:   pageEntry.ImagePath,
+			PreviewPath: pageEntry.PreviewPath,
+			JpegPath:    pageEntry.JpegPath,
+			Available:   true,     // Assume available for now
+			PageIcon:    "single", // Simplified icon for piece view
 		}
 
 		// Check if image actually exists using the registry
@@ -231,7 +235,56 @@ func getImagePathFromRegistry(year, page int) string {
 	return fmt.Sprintf("/static/pictures/%d/seite_%d.jpg", year, page)
 }
 
+// getImagePathsFromRegistryWithBeilage gets image paths: primary (WebP preferred), preview (compressed), and JPEG, handling both regular and Beilage pages
+func getImagePathsFromRegistryWithBeilage(year, issue, page int, isBeilage bool) (string, string, string) {
+	// Initialize registry if needed
+	if err := initImageRegistry(); err != nil {
+		return "", "", ""
+	}
+
+	// For regular pages, use the year-page lookup
+	if !isBeilage {
+		key := fmt.Sprintf("%d-%d", year, page)
+		if imageFile, exists := imageRegistry.ByYearPage[key]; exists {
+			previewPath := imageFile.PreviewPath
+			if previewPath == "" {
+				previewPath = imageFile.Path // Fallback to original if no preview
+			}
+			jpegPath := imageFile.JpegPath
+			if jpegPath == "" {
+				jpegPath = imageFile.Path // Fallback to primary if no separate JPEG
+			}
+			return imageFile.Path, previewPath, jpegPath
+		}
+		// Fallback for regular pages
+		fallbackPath := fmt.Sprintf("/static/pictures/%d/seite_%d.jpg", year, page)
+		return fallbackPath, fallbackPath, fallbackPath
+	}
+
+	// For Beilage pages, search through all files for this year-issue
+	yearIssueKey := fmt.Sprintf("%d-%d", year, issue)
+	if issueFiles, exists := imageRegistry.ByYearIssue[yearIssueKey]; exists {
+		for _, file := range issueFiles {
+			if file.IsBeilage && file.Page == page {
+				previewPath := file.PreviewPath
+				if previewPath == "" {
+					previewPath = file.Path // Fallback to original if no preview
+				}
+				jpegPath := file.JpegPath
+				if jpegPath == "" {
+					jpegPath = file.Path // Fallback to primary if no separate JPEG
+				}
+				return file.Path, previewPath, jpegPath
+			}
+		}
+	}
+
+	// No file found
+	return "", "", ""
+}
+
 // getImagePathFromRegistryWithBeilage gets the actual image path, handling both regular and Beilage pages
+// Kept for backward compatibility
 func getImagePathFromRegistryWithBeilage(year, issue, page int, isBeilage bool) string {
 	// Initialize registry if needed
 	if err := initImageRegistry(); err != nil {

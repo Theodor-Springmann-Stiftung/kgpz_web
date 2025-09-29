@@ -155,7 +155,17 @@
 			{{ end }}
 		</div>
 		<div class="single-page bg-white p-4 rounded border {{ $borderColor }} {{ $hoverColor }} transition-colors duration-200">
-			<img src="{{ $page.ImagePath }}" alt="{{ if $isBeilage }}Beilage 1, {{ end }}Seite {{ $page.PageNumber }}" class="newspaper-page-image cursor-zoom-in rounded-sm hover:scale-[1.02] transition-transform duration-200" onclick="enlargePage(this, {{ $page.PageNumber }}, false)" data-page="{{ $page.PageNumber }}" loading="lazy" />
+			<picture>
+				{{- if ne $page.PreviewPath "" -}}
+					<source srcset="{{ $page.PreviewPath }}" type="image/webp">
+				{{- end -}}
+				<img src="{{ if ne $page.PreviewPath "" }}{{ $page.PreviewPath }}{{ else }}{{ $page.ImagePath }}{{ end }}"
+					 alt="{{ if $isBeilage }}Beilage 1, {{ end }}Seite {{ $page.PageNumber }}"
+					 class="newspaper-page-image cursor-zoom-in rounded-sm hover:scale-[1.02] transition-transform duration-200"
+					 onclick="enlargePage(this, {{ $page.PageNumber }}, false)"
+					 data-page="{{ $page.PageNumber }}"
+					 data-full-image="{{ $page.ImagePath }}" />
+			</picture>
 		</div>
 	</div>
 {{ end }}
