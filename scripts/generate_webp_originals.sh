@@ -2,6 +2,7 @@
 
 # Script to generate high-quality WebP versions of original JPEG files
 # These will be used for the single page viewer (enlarged view)
+# Overwrites existing WebP files for fresh conversion
 # Usage: ./scripts/generate_webp_originals.sh
 
 # Colors for output
@@ -56,10 +57,9 @@ process_file() {
     name_no_ext="${filename%.*}"
     webp_file="$dir/${name_no_ext}.webp"
 
-    # Skip if WebP original already exists and is newer than source
-    if [ -f "$webp_file" ] && [ "$webp_file" -nt "$jpg_file" ]; then
-        echo -e "${YELLOW}Skipping $jpg_file (WebP exists and is newer)${NC}"
-        return 0
+    # Check if WebP original already exists
+    if [ -f "$webp_file" ]; then
+        echo -e "${YELLOW}Overriding existing WebP: $webp_file${NC}"
     fi
 
     # Convert to high-quality WebP

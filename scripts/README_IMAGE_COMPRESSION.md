@@ -30,7 +30,8 @@ pictures/
 
 ### Performance Benefits
 - **60-80% smaller file sizes** for layout browsing
-- **Faster page loads** with compressed images
+- **Additional 75% size reduction** from 50% resize for preview images
+- **Faster page loads** with compressed and resized images
 - **Full quality** maintained for detailed viewing
 - **Progressive enhancement** with WebP support detection
 
@@ -47,12 +48,14 @@ Run the provided script to convert all existing images:
 For individual files:
 
 ```bash
-cwebp -q 75 -m 6 pictures/1771-42-166.jpg -o pictures/1771-42-166-preview.webp
+# The script automatically calculates 50% dimensions
+cwebp -q 75 -m 6 -resize 1200 800 pictures/1771-42-166.jpg -o pictures/1771-42-166-preview.webp
 ```
 
 ### Quality Settings
 - **Quality**: 75% (good balance for text-heavy images)
 - **Compression**: Level 6 (maximum compression)
+- **Resize**: 50% (reduces file size by ~75% additionally)
 - **Format**: WebP (excellent text preservation)
 
 ## Browser Support
@@ -72,11 +75,11 @@ cwebp -q 75 -m 6 pictures/1771-42-166.jpg -o pictures/1771-42-166-preview.webp
 
 Typical compression results for newspaper images:
 
-| Image Type | Original JPEG | WebP Preview | Savings |
-|------------|---------------|--------------|---------|
-| Text page  | 800 KB        | 320 KB       | 60%     |
-| Mixed page | 1.2 MB        | 480 KB       | 60%     |
-| Image page | 1.5 MB        | 750 KB       | 50%     |
+| Image Type | Original JPEG | WebP Preview (50% + compression) | Total Savings |
+|------------|---------------|----------------------------------|---------------|
+| Text page  | 800 KB        | 80 KB                           | 90%           |
+| Mixed page | 1.2 MB        | 120 KB                          | 90%           |
+| Image page | 1.5 MB        | 190 KB                          | 87%           |
 
 ## Development Notes
 

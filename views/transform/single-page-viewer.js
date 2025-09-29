@@ -527,9 +527,12 @@ export class SinglePageViewer extends HTMLElement {
 					extractedHeading = indicatorClone.textContent.trim();
 				}
 
+				// Use full-quality image for single page viewer (not the preview src)
+				const fullImageSrc = imgElement.getAttribute('data-full-image') || imgElement.src;
+
 				// Update the current view with the new page
 				this.show(
-					imgElement.src,
+					fullImageSrc,
 					imgElement.alt,
 					pageNumber,
 					this.currentIsBeilage,

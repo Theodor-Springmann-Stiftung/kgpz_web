@@ -546,8 +546,8 @@ class W extends HTMLElement {
         if (!o && !r) {
           const c = n.querySelector("div:first-child");
           if (c) {
-            const u = c.getBoundingClientRect(), d = u.top >= 0, h = u.bottom <= window.innerHeight;
-            d && h && (l = !0);
+            const u = c.getBoundingClientRect(), d = u.top >= 0, p = u.bottom <= window.innerHeight;
+            d && p && (l = !0);
           }
         }
         l && e.push(s);
@@ -564,8 +564,8 @@ class W extends HTMLElement {
       const n = document.getElementById("scrollspy-nav"), s = n.getBoundingClientRect();
       let o = 1 / 0, r = -1 / 0;
       t.forEach((c) => {
-        const u = c.getBoundingClientRect(), d = u.top - s.top + n.scrollTop, h = d + u.height;
-        o = Math.min(o, d), r = Math.max(r, h);
+        const u = c.getBoundingClientRect(), d = u.top - s.top + n.scrollTop, p = d + u.height;
+        o = Math.min(o, d), r = Math.max(r, p);
       });
       let l = r - o;
       i.style.top = `${o}px`, i.style.height = `${l}px`, i.style.opacity = "1", setTimeout(() => this.ensureMarkerVisibility(), 100);
@@ -603,7 +603,7 @@ class W extends HTMLElement {
       document.documentElement.offsetHeight
     ), s = window.innerHeight, o = n - s, r = o > 0 ? window.scrollY / o : 0, l = t.clientHeight, u = t.scrollHeight - l;
     if (u > 0) {
-      const d = r * u, h = i.getBoundingClientRect(), g = t.getBoundingClientRect(), p = h.top - g.top + t.scrollTop, f = l / 2, m = p - f, w = 0.7, b = w * d + (1 - w) * m, x = Math.max(0, Math.min(u, b)), E = t.scrollTop;
+      const d = r * u, p = i.getBoundingClientRect(), g = t.getBoundingClientRect(), h = p.top - g.top + t.scrollTop, f = l / 2, m = h - f, w = 0.7, b = w * d + (1 - w) * m, x = Math.max(0, Math.min(u, b)), E = t.scrollTop;
       Math.abs(x - E) > 10 && t.scrollTo({
         top: x,
         behavior: "smooth"
@@ -820,17 +820,17 @@ class Y extends HTMLElement {
     }, c = [];
     this.places.forEach((u) => {
       if (u.lat && u.lng) {
-        const d = parseFloat(u.lat), h = parseFloat(u.lng), g = l(d, h);
+        const d = parseFloat(u.lat), p = parseFloat(u.lng), g = l(d, p);
         if (g.x >= 0 && g.x <= 100 && g.y >= 0 && g.y <= 100) {
           c.push(g);
-          const p = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-          p.setAttribute("cx", g.x.toString()), p.setAttribute("cy", g.y.toString()), p.setAttribute("r", "0.4"), p.setAttribute("fill", "white"), p.setAttribute("opacity", "0.7"), p.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))"), p.style.cursor = "pointer", p.style.pointerEvents = "all", p.style.transition = "r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease", p.addEventListener("mouseenter", () => {
-            p.getAttribute("fill") === "white" && (p.setAttribute("r", "0.6"), p.setAttribute("fill", "#f87171"), p.setAttribute("opacity", "1"));
-          }), p.addEventListener("mouseleave", () => {
-            p.getAttribute("fill") === "#f87171" && (p.setAttribute("r", "0.4"), p.setAttribute("fill", "white"), p.setAttribute("opacity", "0.7"));
+          const h = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          h.setAttribute("cx", g.x.toString()), h.setAttribute("cy", g.y.toString()), h.setAttribute("r", "0.4"), h.setAttribute("fill", "white"), h.setAttribute("opacity", "0.7"), h.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))"), h.style.cursor = "pointer", h.style.pointerEvents = "all", h.style.transition = "r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease", h.addEventListener("mouseenter", () => {
+            h.getAttribute("fill") === "white" && (h.setAttribute("r", "0.6"), h.setAttribute("fill", "#f87171"), h.setAttribute("opacity", "1"));
+          }), h.addEventListener("mouseleave", () => {
+            h.getAttribute("fill") === "#f87171" && (h.setAttribute("r", "0.4"), h.setAttribute("fill", "white"), h.setAttribute("opacity", "0.7"));
           });
           const f = `${u.name}${u.toponymName && u.toponymName !== u.name ? ` (${u.toponymName})` : ""}`;
-          p.dataset.placeId = u.id, p.dataset.tooltipText = f, p.addEventListener("mouseenter", (m) => this.showTooltip(m)), p.addEventListener("mouseleave", () => this.hideTooltip()), p.addEventListener("mousemove", (m) => this.updateTooltipPosition(m)), p.addEventListener("click", (m) => this.scrollToPlace(m)), e.appendChild(p), this.mapPoints.set(u.id, p);
+          h.dataset.placeId = u.id, h.dataset.tooltipText = f, h.addEventListener("mouseenter", (m) => this.showTooltip(m)), h.addEventListener("mouseleave", () => this.hideTooltip()), h.addEventListener("mousemove", (m) => this.updateTooltipPosition(m)), h.addEventListener("click", (m) => this.scrollToPlace(m)), e.appendChild(h), this.mapPoints.set(u.id, h);
         }
       }
     }), c.length > 0 && this.autoZoomToPoints(c);
@@ -841,7 +841,7 @@ class Y extends HTMLElement {
     e.forEach((v) => {
       v.x < t && (t = v.x), v.x > i && (i = v.x), v.y < n && (n = v.y), v.y > s && (s = v.y);
     });
-    const o = 0.06, r = i - t, l = s - n, c = r * o, u = l * o, d = Math.max(0, t - c), h = Math.min(100, i + c), g = Math.max(0, n - u), p = Math.min(100, s + u), f = h - d, m = p - g, w = 5 / 7, b = f / m;
+    const o = 0.06, r = i - t, l = s - n, c = r * o, u = l * o, d = Math.max(0, t - c), p = Math.min(100, i + c), g = Math.max(0, n - u), h = Math.min(100, s + u), f = p - d, m = h - g, w = 5 / 7, b = f / m;
     let x = { x: d, y: g, width: f, height: m };
     if (b > w) {
       const v = f / w;
@@ -990,9 +990,9 @@ class Z extends HTMLElement {
     if (!this.place || !this.place.lat || !this.place.lng || !this.pointsContainer)
       return;
     const e = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, t = { lon: 10, lat: 52 }, i = (r, l) => {
-      const h = t.lon * Math.PI / 180, g = t.lat * Math.PI / 180, p = l * Math.PI / 180, f = r * Math.PI / 180, m = Math.sqrt(
-        2 / (1 + Math.sin(g) * Math.sin(f) + Math.cos(g) * Math.cos(f) * Math.cos(p - h))
-      ), w = 6371e3 * m * Math.cos(f) * Math.sin(p - h), b = 6371e3 * m * (Math.cos(g) * Math.sin(f) - Math.sin(g) * Math.cos(f) * Math.cos(p - h)), x = w + 4321e3, E = b + 321e4, S = e.xmax - e.xmin, C = e.ymax - e.ymin, k = (x - e.xmin) / S * 100, L = (e.ymax - E) / C * 100;
+      const p = t.lon * Math.PI / 180, g = t.lat * Math.PI / 180, h = l * Math.PI / 180, f = r * Math.PI / 180, m = Math.sqrt(
+        2 / (1 + Math.sin(g) * Math.sin(f) + Math.cos(g) * Math.cos(f) * Math.cos(h - p))
+      ), w = 6371e3 * m * Math.cos(f) * Math.sin(h - p), b = 6371e3 * m * (Math.cos(g) * Math.sin(f) - Math.sin(g) * Math.cos(f) * Math.cos(h - p)), x = w + 4321e3, E = b + 321e4, S = e.xmax - e.xmin, C = e.ymax - e.ymin, k = (x - e.xmin) / S * 100, L = (e.ymax - E) / C * 100;
       return { x: k, y: L };
     }, n = parseFloat(this.place.lat), s = parseFloat(this.place.lng), o = i(n, s);
     if (o.x >= 0 && o.x <= 100 && o.y >= 0 && o.y <= 100) {
@@ -1004,10 +1004,10 @@ class Z extends HTMLElement {
       u.setAttribute("offset", "0%"), u.setAttribute("stop-color", "#f56565");
       const d = document.createElementNS("http://www.w3.org/2000/svg", "stop");
       d.setAttribute("offset", "100%"), d.setAttribute("stop-color", "#e53e3e"), c.appendChild(u), c.appendChild(d), l.appendChild(c), r.appendChild(l), this.pointsContainer.appendChild(r);
-      const h = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      h.setAttribute("cx", o.x.toString()), h.setAttribute("cy", o.y.toString()), h.setAttribute("r", "0.8"), h.setAttribute("fill", "#dc2626"), h.setAttribute("stroke", "#b91c1c"), h.setAttribute("stroke-width", "0.05"), h.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))"), h.style.cursor = "pointer", h.style.pointerEvents = "all", h.style.transition = "r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease";
+      const p = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      p.setAttribute("cx", o.x.toString()), p.setAttribute("cy", o.y.toString()), p.setAttribute("r", "0.8"), p.setAttribute("fill", "#dc2626"), p.setAttribute("stroke", "#b91c1c"), p.setAttribute("stroke-width", "0.05"), p.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))"), p.style.cursor = "pointer", p.style.pointerEvents = "all", p.style.transition = "r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease";
       const g = `${this.place.name}${this.place.toponymName && this.place.toponymName !== this.place.name ? ` (${this.place.toponymName})` : ""}`;
-      h.dataset.tooltipText = g, h.addEventListener("mouseenter", (p) => this.showTooltip(p)), h.addEventListener("mouseleave", () => this.hideTooltip()), h.addEventListener("mousemove", (p) => this.updateTooltipPosition(p)), r.appendChild(h), this.autoZoomToPoint(o);
+      p.dataset.tooltipText = g, p.addEventListener("mouseenter", (h) => this.showTooltip(h)), p.addEventListener("mouseleave", () => this.hideTooltip()), p.addEventListener("mousemove", (h) => this.updateTooltipPosition(h)), r.appendChild(p), this.autoZoomToPoint(o);
     }
   }
   autoZoomToPoint(e) {
@@ -1022,16 +1022,16 @@ class Z extends HTMLElement {
       d.x = i - (b - r) / 2, d.width = b;
     }
     d.x < 0 && (d.width += d.x, d.x = 0), d.y < 0 && (d.height += d.y, d.y = 0), d.x + d.width > 100 && (d.width = 100 - d.x), d.y + d.height > 100 && (d.height = 100 - d.y);
-    const h = 30;
-    if (d.width < h) {
-      const b = (h - d.width) / 2;
-      d.x = Math.max(0, d.x - b), d.width = Math.min(h, 100 - d.x);
+    const p = 30;
+    if (d.width < p) {
+      const b = (p - d.width) / 2;
+      d.x = Math.max(0, d.x - b), d.width = Math.min(p, 100 - d.x);
     }
-    if (d.height < h) {
-      const b = (h - d.height) / 2;
-      d.y = Math.max(0, d.y - b), d.height = Math.min(h, 100 - d.y);
+    if (d.height < p) {
+      const b = (p - d.height) / 2;
+      d.y = Math.max(0, d.y - b), d.height = Math.min(p, 100 - d.y);
     }
-    const g = 100 / d.width, p = -d.x, f = -d.y, m = `scale(${g}) translate(${p}%, ${f}%)`, w = this.querySelector(".transform-wrapper");
+    const g = 100 / d.width, h = -d.x, f = -d.y, m = `scale(${g}) translate(${h}%, ${f}%)`, w = this.querySelector(".transform-wrapper");
     w && (w.style.transform = m);
   }
   showTooltip(e) {
@@ -1244,17 +1244,17 @@ class J extends HTMLElement {
   show(e, t, i, n = !1, s = 0, o = null, r = null, l = null) {
     const c = this.querySelector("#single-page-image"), u = this.querySelector("#page-number"), d = this.querySelector("#page-icon");
     this.querySelector("#page-indicator"), c.src = e, c.alt = t, this.currentPageNumber = i, this.currentIsBeilage = n, this.currentPartNumber = o;
-    let h;
+    let p;
     if (l)
-      h = l;
+      p = l;
     else {
-      const p = this.getIssueContext(i);
-      h = p ? `${p}, ${i}` : `${i}`;
+      const h = this.getIssueContext(i);
+      p = h ? `${h}, ${i}` : `${i}`;
     }
-    if (u.innerHTML = h, s && i === s) {
+    if (u.innerHTML = p, s && i === s) {
       u.style.position = "relative";
-      const p = u.querySelector(".target-page-dot");
-      p && p.remove();
+      const h = u.querySelector(".target-page-dot");
+      h && h.remove();
       const f = document.createElement("span");
       f.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", f.title = "verlinkte Seite", u.appendChild(f);
     }
@@ -1386,13 +1386,14 @@ class J extends HTMLElement {
         o = i.getAttribute("data-page-icon-type"), i.querySelector(".part-number") && (o = "part-number");
         const c = i.querySelector(".page-indicator");
         if (c) {
-          const u = c.cloneNode(!0);
-          u.querySelectorAll("i").forEach((g) => g.remove()), u.querySelectorAll(
+          const d = c.cloneNode(!0);
+          d.querySelectorAll("i").forEach((h) => h.remove()), d.querySelectorAll(
             '[class*="target-page-dot"], .target-page-indicator'
-          ).forEach((g) => g.remove()), r = u.textContent.trim();
+          ).forEach((h) => h.remove()), r = d.textContent.trim();
         }
+        const u = n.getAttribute("data-full-image") || n.src;
         this.show(
-          n.src,
+          u,
           n.alt,
           e,
           this.currentIsBeilage,
@@ -1446,9 +1447,9 @@ class J extends HTMLElement {
           const u = c.textContent.trim(), d = u.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
           if (d)
             return d[1];
-          const h = u.match(/(\d{4})\s+Nr\.\s+(\d+)/);
-          if (h)
-            return `${h[1]} Nr. ${h[2]}`;
+          const p = u.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+          if (p)
+            return `${p[1]} Nr. ${p[2]}`;
         }
       }
       const l = document.title.match(/(\d{4}).*Nr\.\s*(\d+)/);
@@ -1662,7 +1663,7 @@ class Q extends HTMLElement {
     }
     const o = t.getBoundingClientRect(), r = e.getBoundingClientRect();
     if (!(r.top >= o.top && r.bottom <= o.bottom)) {
-      const c = t.scrollTop, u = r.top - o.top + c, d = o.height, h = r.height, g = u - (d - h) / 2;
+      const c = t.scrollTop, u = r.top - o.top + c, d = o.height, p = r.height, g = u - (d - p) / 2;
       t.scrollTo({
         top: Math.max(0, g),
         behavior: "smooth"
@@ -1756,9 +1757,9 @@ function te(a, e, t, i = null) {
   let l = null, c = null;
   if (r) {
     l = r.getAttribute("data-page-icon-type"), r.querySelector(".part-number") && (l = "part-number");
-    const h = r.querySelector(".page-indicator");
-    if (h) {
-      const g = h.cloneNode(!0);
+    const p = r.querySelector(".page-indicator");
+    if (p) {
+      const g = p.cloneNode(!0);
       g.querySelectorAll("i").forEach((m) => m.remove()), g.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((m) => m.remove()), c = g.textContent.trim();
     }
   }
@@ -2044,8 +2045,8 @@ function N() {
     else {
       const l = a.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/), c = o.match(/^\/(\d{4})\/(\d+)$/);
       if (l && c) {
-        const [, u, d, h] = l, [, g, p] = c;
-        u === g && d === p && (r = !0);
+        const [, u, d, p] = l, [, g, h] = c;
+        u === g && d === h && (r = !0);
       }
     }
     r ? (s.classList.add("text-red-700", "pointer-events-none"), s.setAttribute("aria-current", "page")) : (s.classList.remove("text-red-700", "pointer-events-none"), s.removeAttribute("aria-current"));
