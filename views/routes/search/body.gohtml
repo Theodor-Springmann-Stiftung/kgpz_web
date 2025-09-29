@@ -7,7 +7,7 @@
 		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
 			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
 				<i class="ri-user-line"></i>
-				Personen
+				<u class="decoration underline-offset-3">Personen</u>
 				{{ if $model.Agents.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded">{{ len $model.Agents.Items }}</span>{{ end }}
 			</h3>
 			{{ if $model.Agents.Items }}
@@ -47,7 +47,7 @@
 		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
 			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
 				<i class="ri-map-pin-line"></i>
-				Orte
+				<u class="decoration underline-offset-3">Orte</u>
 				{{ if $model.Places.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded">{{ len $model.Places.Items }}</span>{{ end }}
 			</h3>
 			{{ if $model.Places.Items }}
@@ -69,7 +69,7 @@
 		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
 			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
 				<i class="ri-bookmark-line"></i>
-				Kategorien
+				<u class="decoration underline-offset-3">Kategorien</u>
 				{{ if $model.Categories.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded">{{ len $model.Categories.Items }}</span>{{ end }}
 			</h3>
 			{{ if $model.Categories.Items }}
@@ -91,7 +91,7 @@
 		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
 			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
 				<i class="ri-calendar-line"></i>
-				Ausgaben
+				<u class="decoration underline-offset-3">Ausgaben</u>
 				{{ if $model.Issues.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded">{{ len $model.Issues.Items }}</span>{{ end }}
 			</h3>
 			{{ if $model.Issues.Items }}

@@ -21,9 +21,27 @@ import {
 	initializeNewspaperLayout,
 } from "./issue.js";
 
+
 // Update citation links to highlight current page references
 function updateCitationLinks() {
 	const currentPath = window.location.pathname;
+
+	// Don't disable citation links on search pages - they should all remain clickable
+	// Check both URL path and if search results are currently displayed in DOM
+	const hasSearchResults = document.querySelector('main .grid.grid-cols-1.lg\\:grid-cols-3') !== null; // Search results layout
+	const hasSearchHeaders = document.querySelector('main h3 u') !== null; // Underlined section headers (Werke, Beiträge, etc.)
+	const isSearchPage = currentPath.includes('/search') || currentPath.includes('/suche') || hasSearchResults || hasSearchHeaders;
+
+	if (isSearchPage) {
+		const citationLinks = document.querySelectorAll(".citation-link[data-citation-url]");
+		citationLinks.forEach((link) => {
+			// Reset to default styling on search pages
+			link.classList.remove("text-red-700", "pointer-events-none");
+			link.removeAttribute("aria-current");
+		});
+		return;
+	}
+
 	const citationLinks = document.querySelectorAll(".citation-link[data-citation-url]");
 
 	citationLinks.forEach((link) => {
@@ -127,6 +145,7 @@ let htmxAfterSwapHandler = function (event) {
 
 	// Update citation links after navigation
 	updateCitationLinks();
+
 
 	// Execute all queued functions
 	ExecuteSettleQueue();

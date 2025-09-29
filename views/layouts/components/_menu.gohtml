@@ -2,18 +2,7 @@
 	<!-- Schnellfilter Button -->
 	<schnellauswahl-button></schnellauswahl-button>
 
-	<div class="w-6/12">
-		<input
-			type="search"
-			name="q"
-			id="search"
-			placeholder="Suche"
-			class="px-2.5 py-1.5 border w-full bg-white"
-			hx-get="/suche/?noCache=true"
-			hx-trigger="input changed delay:200ms, keyup[key=='Enter']"
-			hx-select="main"
-			hx-target="main" />
-	</div>
+	<search-bar class="w-6/12"></search-bar>
 
 	<navigation-menu
 		{{ if .gitCommit }}git-commit="{{ .gitCommit }}"{{ end }}

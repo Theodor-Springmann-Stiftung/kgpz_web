@@ -42,7 +42,7 @@ const (
 )
 
 var (
-	MonthNameShort = []string{"Jan", "Feb", "März", "Apr", "Mai", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"}
+	MonthNameShort = []string{"Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sept.", "Okt.", "Nov.", "Dez."}
 	MonthName      = []string{"Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"}
 )
 

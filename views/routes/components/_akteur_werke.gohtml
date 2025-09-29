@@ -21,7 +21,52 @@
 			<div class="mb-2 break-inside-avoid max-w-[95ch]">
 				{{- if ne (len $w.Item.Citation.InnerXML ) 0 -}}
 					<div class="indent-6">
-						{{- /* Check person's role in this work */ -}}
+						{{- /* Get other associated persons for this work */ -}}
+						{{- $otherAuthors := slice -}}
+						{{- $otherTranslators := slice -}}
+						{{- $otherEditors := slice -}}
+						{{- range $workAgentRef := $w.Item.AgentRefs -}}
+							{{- if ne $workAgentRef.Ref $a.ID -}}
+								{{- if or (eq $workAgentRef.Category "") (eq $workAgentRef.Category "autor") -}}
+									{{- $otherAuthors = append $otherAuthors $workAgentRef.Ref -}}
+								{{- else if eq $workAgentRef.Category "übersetzer" -}}
+									{{- $otherTranslators = append $otherTranslators $workAgentRef.Ref -}}
+								{{- else if eq $workAgentRef.Category "herausgeber" -}}
+									{{- $otherEditors = append $otherEditors $workAgentRef.Ref -}}
+								{{- end -}}
+							{{- end -}}
+						{{- end -}}
+
+						{{- /* Display other associated persons before the work citation */ -}}
+						{{- $hasAssociatedPersons := or (gt (len $otherAuthors) 0) (gt (len $otherTranslators) 0) (gt (len $otherEditors) 0) -}}
+						{{- if $hasAssociatedPersons -}}
+							{{ "mit " }}
+							{{- range $i, $authorID := $otherAuthors -}}
+								{{- if gt $i 0 }}, {{ end }}
+								{{- $agent := GetAgent $authorID -}}
+								{{- if and $agent (gt (len $agent.Names) 0) -}}
+									<a href="/akteure/{{ $authorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>
+								{{- end -}}
+							{{- end -}}
+							{{- /* Display translators with (Übers.) */ -}}
+							{{- range $i, $translatorID := $otherTranslators -}}
+								{{- if or (gt (len $otherAuthors) 0) (gt $i 0) }}, {{ end }}
+								{{- $agent := GetAgent $translatorID -}}
+								{{- if and $agent (gt (len $agent.Names) 0) -}}
+									<a href="/akteure/{{ $translatorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a> (Übers.)
+								{{- end -}}
+							{{- end -}}
+							{{- /* Display editors with (Hrsg.) */ -}}
+							{{- range $i, $editorID := $otherEditors -}}
+								{{- if or (gt (len $otherAuthors) 0) (gt (len $otherTranslators) 0) (gt $i 0) }}, {{ end }}
+								{{- $agent := GetAgent $editorID -}}
+								{{- if and $agent (gt (len $agent.Names) 0) -}}
+									<a href="/akteure/{{ $editorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a> (Hrsg.)
+								{{- end -}}
+							{{- end -}}
+							: {{ end -}}
+
+						{{- /* Check current person's role in this work for display after citation */ -}}
 						{{- $personRole := "" -}}
 						{{- range $workAgentRef := $w.Item.AgentRefs -}}
 							{{- if eq $workAgentRef.Ref $a.ID -}}

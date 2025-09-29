@@ -759,3 +759,154 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 });
+
+/**
+ * SearchBar - Web component for the main search functionality
+ * Encapsulates search input, loading indicator, reset button, and all related behavior
+ */
+class SearchBar extends HTMLElement {
+	constructor() {
+		super();
+		this.htmxRequestListeners = [];
+		this.htmxAfterSwapListener = null;
+	}
+
+	connectedCallback() {
+		this.createSearchBar();
+		this.setupEventListeners();
+	}
+
+	disconnectedCallback() {
+		// Clean up all event listeners
+		this.cleanup();
+	}
+
+	createSearchBar() {
+		this.innerHTML = `
+			<div class="relative">
+				<input
+					type="search"
+					name="q"
+					id="search"
+					placeholder="Suche"
+					autocomplete="off"
+					class="px-2.5 py-1.5 border w-full bg-white pr-10"
+					hx-get="/suche/?noCache=true"
+					hx-trigger="input changed delay:200ms, keyup[key=='Enter']"
+					hx-select="main"
+					hx-target="main"
+					hx-indicator="#search-loading" />
+				<div
+					id="search-loading"
+					class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 p-1 htmx-indicator">
+					<i class="ri-loader-4-line text-lg animate-spin"></i>
+				</div>
+				<button
+					id="search-reset"
+					type="button"
+					class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer hidden hover:bg-gray-100 rounded"
+					title="Suche schließen">
+					<i class="ri-close-line text-lg"></i>
+				</button>
+			</div>
+		`;
+	}
+
+	setupEventListeners() {
+		const searchInput = this.querySelector('#search');
+		const resetButton = this.querySelector('#search-reset');
+		const loadingIndicator = this.querySelector('#search-loading');
+
+		if (!searchInput || !resetButton) return;
+
+		// Store the current URL to detect changes
+		this.currentURL = window.location.pathname;
+
+		// Function to toggle reset button visibility
+		const toggleResetButton = () => {
+			if (searchInput.value.trim() !== '') {
+				resetButton.classList.remove('hidden');
+			} else {
+				resetButton.classList.add('hidden');
+			}
+		};
+
+		// Check initial state (in case of page refresh with existing search)
+		toggleResetButton();
+
+		// Show/hide reset button as user types
+		searchInput.addEventListener('input', toggleResetButton);
+
+		// Handle reset button click
+		resetButton.addEventListener('click', () => {
+			searchInput.value = '';
+			resetButton.classList.add('hidden');
+
+			// Trigger the same HTMX behavior that happens when manually clearing the field
+			// This will automatically navigate back to the previous page
+			searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+			// Focus back on search input
+			searchInput.focus();
+		});
+
+		// Handle HTMX request lifecycle - hide reset button during loading
+		if (loadingIndicator) {
+			// Hide reset button when loading starts
+			const beforeRequestHandler = (event) => {
+				if (event.detail.elt === searchInput) {
+					resetButton.style.display = 'none';
+				}
+			};
+
+			// Show reset button when loading ends (if there's still text)
+			const afterRequestHandler = (event) => {
+				if (event.detail.elt === searchInput) {
+					resetButton.style.display = '';
+					toggleResetButton();
+				}
+			};
+
+			document.body.addEventListener('htmx:beforeRequest', beforeRequestHandler);
+			document.body.addEventListener('htmx:afterRequest', afterRequestHandler);
+
+			// Store references for cleanup
+			this.htmxRequestListeners.push(
+				{ event: 'htmx:beforeRequest', handler: beforeRequestHandler },
+				{ event: 'htmx:afterRequest', handler: afterRequestHandler }
+			);
+		}
+
+		// Simple click listener to clear search when any link is clicked
+		this.linkClickHandler = (event) => {
+			const clickedElement = event.target;
+			const link = clickedElement.closest('a[href]');
+
+			// If a link was clicked and it has an href, clear the search
+			if (link && link.getAttribute('href') && searchInput.value.trim() !== '') {
+				searchInput.value = '';
+				resetButton.classList.add('hidden');
+			}
+		};
+
+		// Listen for clicks on the entire document
+		document.addEventListener('click', this.linkClickHandler);
+	}
+
+	cleanup() {
+		// Remove HTMX request listeners
+		this.htmxRequestListeners.forEach(({ event, handler }) => {
+			document.body.removeEventListener(event, handler);
+		});
+		this.htmxRequestListeners = [];
+
+		// Remove link click listener
+		if (this.linkClickHandler) {
+			document.removeEventListener('click', this.linkClickHandler);
+			this.linkClickHandler = null;
+		}
+	}
+}
+
+// Register the custom element
+customElements.define("search-bar", SearchBar);
