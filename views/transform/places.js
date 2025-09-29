@@ -140,7 +140,6 @@ export class PlaceAccordion extends HTMLElement {
 	connectedCallback() {
 		this.setupAccordion();
 		this.setupEventListeners();
-		this.updateBorders();
 		this.setupMapEventListeners();
 		this.setupHoverEvents();
 	}
@@ -160,26 +159,12 @@ export class PlaceAccordion extends HTMLElement {
 	}
 
 	setupAccordion() {
-		// Add chevron icon if not already present
-		if (!this.querySelector(".accordion-chevron")) {
-			const chevron = document.createElement("i");
-			chevron.className =
-				"ri-chevron-down-line accordion-chevron transition-transform duration-200 text-slate-400";
-
-			// Find the badge and insert chevron before it
-			const badge = this.querySelector('[class*="bg-slate-100"]');
-			if (badge) {
-				badge.parentNode.insertBefore(chevron, badge);
-			}
-		}
-
-		// Create content container if not exists
 		if (!this.querySelector("[data-content]")) {
 			const placeId = this.getAttribute("data-place-id");
 			const contentContainer = document.createElement("div");
 			contentContainer.setAttribute("data-content", "");
 			contentContainer.className =
-				"accordion-content overflow-hidden transition-all duration-300 max-h-0";
+				"accordion-content overflow-hidden transition-all duration-300 max-h-0 border-b border-slate-200";
 
 			// Add HTMX attributes to override body defaults
 			contentContainer.setAttribute("hx-get", `/ort/fragment/${placeId}`);
@@ -272,8 +257,6 @@ export class PlaceAccordion extends HTMLElement {
 		if (this.isLoading) return;
 
 		this.isExpanded = true;
-		this.updateChevron();
-		this.updateBorders();
 
 		const contentContainer = this.querySelector("[data-content]");
 		if (!contentContainer) return;
@@ -289,8 +272,6 @@ export class PlaceAccordion extends HTMLElement {
 
 	collapse() {
 		this.isExpanded = false;
-		this.updateChevron();
-		this.updateBorders();
 
 		const contentContainer = this.querySelector("[data-content]");
 		if (contentContainer) {
@@ -329,33 +310,6 @@ export class PlaceAccordion extends HTMLElement {
 
 		// Trigger the HTMX request
 		htmx.trigger(contentContainer, "load-content");
-	}
-
-	updateChevron() {
-		const chevron = this.querySelector(".accordion-chevron");
-		if (chevron) {
-			if (this.isExpanded) {
-				chevron.style.transform = "rotate(180deg)";
-			} else {
-				chevron.style.transform = "rotate(0deg)";
-			}
-		}
-	}
-
-	updateBorders() {
-		if (this.isExpanded) {
-			// When expanded: remove border from header, add border to whole component
-			this.classList.add("border-b", "border-slate-100");
-		} else {
-			// When collapsed: add border to component (for separation between items)
-			this.classList.add("border-b", "border-slate-100");
-		}
-
-		// Remove border from last item if it's the last child
-		const isLastChild = !this.nextElementSibling;
-		if (isLastChild) {
-			this.classList.remove("border-b");
-		}
 	}
 }
 
@@ -525,7 +479,8 @@ export class PlacesMap extends HTMLElement {
 					circle.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))");
 					circle.style.cursor = "pointer";
 					circle.style.pointerEvents = "all";
-					circle.style.transition = "r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease";
+					circle.style.transition =
+						"r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease";
 
 					// Add hover effects for white dots
 					circle.addEventListener("mouseenter", () => {
@@ -664,7 +619,6 @@ export class PlacesMap extends HTMLElement {
 		placeContainers.forEach((container) => {
 			this.intersectionObserver.observe(container);
 		});
-
 	}
 
 	setPointActive(circle) {
@@ -700,7 +654,6 @@ export class PlacesMap extends HTMLElement {
 		if (this.isNewPopupBlocked(placeId)) {
 			return;
 		}
-
 
 		if (this.tooltip && tooltipText) {
 			// Set tooltip content and position

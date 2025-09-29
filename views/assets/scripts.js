@@ -194,7 +194,7 @@ class F extends HTMLElement {
     this.innerHTML = `
             <button
                 id="filter-toggle"
-                class="mr-2 text-lg border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
+                class="mr-2 text-lg border px-4 h-full bg-white hover:bg-slate-200 transition-colors cursor-pointer"
                 title="Schnellfilter öffnen/schließen">
                 <i class="ri-filter-2-line"></i> <div class="inline-block text-lg">Schnellauswahl</div>
             </button>
@@ -269,7 +269,7 @@ class j extends HTMLElement {
         month: "2-digit",
         year: "numeric"
       });
-      return `${e} (${i})`;
+      return `${e} - ${i}`;
     }
     return e;
   }
@@ -281,35 +281,35 @@ class j extends HTMLElement {
   }
   createMenu() {
     this.innerHTML = `
-            <div>
+            <div class="h-full relative">
                 <button
-                    class="ml-2 text-2xl border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
+                    class="ml-2 text-2xl border px-4 h-full bg-white hover:bg-slate-200 transition-colors cursor-pointer"
                     id="menu-toggle">
                     <i class="ri-menu-line"></i>
                 </button>
-                <div id="menu-dropdown" class="hidden absolute bg-slate-50 px-5 py-3 z-50">
-                    <div>
-                        <div>Übersicht nach</div>
-                        <div class="ml-2 flex flex-col gap-y-2 mt-2">
+                <div id="menu-dropdown" class="hidden absolute bg-white py-2 z-50 top-[115%] right-0 shadow-sm">
+                    <div class="px-5">
+                        <div class="whitespace-nowrap">Übersicht nach</div>
+                        <div class="ml-2 flex flex-col gap-y-2 mt-2 whitespace-nowrap">
                             <a href="/">Jahrgängen</a>
-                            <a href="/akteure/a">Personen &amp; Werke</a>
+                            <a href="/akteure/a">Personen &amp; Werken</a>
                             <a href="/kategorie/">Betragsarten</a>
                             <a href="/ort/">Orten</a>
                         </div>
                     </div>
-                    <div class="border-t border-slate-300 pt-2 mt-2">
+                    <div class="border-t border-slate-300 pt-2 mt-2 px-5">
                         <div class="flex flex-col gap-y-2">
                             <a href="/edition/">Geschichte & Edition der KGPZ</a>
                             <a href="/zitation/">Zitation</a>
                             <a href="/kontakt/">Kontakt</a>
                         </div>
-                        <div class="mt-3 pt-2 border-t border-slate-200 text-xs text-slate-600">
-                            <a href="${this.gitUrl || "https://github.com/Theodor-Springmann-Stiftung/KGPZ.git"}" target="_blank" class="flex items-center gap-1 hover:text-slate-800">
-                                <i class="ri-git-branch-line"></i>
-                                <span>${this.formatCommitInfo()}</span>
-                            </a>
-                        </div>
                     </div>
+										<div class="mt-3 pt-2 border-t border-slate-200 text-xs text-slate-600 px-2 text-centeer vertical-align-middle">
+											<i class="ri-git-branch-line"></i>
+											<a href="${this.gitUrl || "https://github.com/Theodor-Springmann-Stiftung/KGPZ.git"}" target="_blank" class="hover:text-slate-800">
+												<span>Commit ${this.formatCommitInfo()}</span>
+											</a>
+										</div>
                 </div>
             </div>
         `;
@@ -356,18 +356,23 @@ class j extends HTMLElement {
 customElements.define("navigation-menu", j);
 document.addEventListener("DOMContentLoaded", function() {
   document.addEventListener("click", function(a) {
-    const e = a.target.closest('a[href^="/akteure/"], a[href^="/ort/"]'), t = document.getElementById("filter-container");
+    const e = a.target.closest(
+      'a[href^="/akteure/"], a[href^="/ort/"], a[href^="/kategorie/"]'
+    ), t = document.getElementById("filter-container");
     if (e && t && t.contains(e)) {
-      const i = new CustomEvent("quickfilter:selection", {
+      let i;
+      const n = e.getAttribute("href");
+      n.startsWith("/akteure/") ? i = "person" : n.startsWith("/ort/") ? i = "place" : n.startsWith("/kategorie/") && (i = "category");
+      const s = new CustomEvent("quickfilter:selection", {
         detail: {
-          type: e.getAttribute("href").startsWith("/akteure/") ? "person" : "place",
+          type: i,
           source: "quickfilter",
-          id: e.getAttribute("href").split("/").pop(),
-          url: e.getAttribute("href")
+          id: n.split("/").pop(),
+          url: n
         },
         bubbles: !0
       });
-      document.dispatchEvent(i);
+      document.dispatchEvent(s);
     }
   });
 });
@@ -548,7 +553,7 @@ class _ extends HTMLElement {
   }
 }
 customElements.define("akteure-scrollspy", _);
-class K extends HTMLElement {
+class W extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.placeCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -600,12 +605,12 @@ class K extends HTMLElement {
     this.countElement && (t === "" ? this.countElement.textContent = `Alle Orte (${this.originalCount})` : e === 0 ? this.countElement.textContent = `Keine Orte gefunden für "${t}"` : this.countElement.textContent = `${e} von ${this.originalCount} Orten`);
   }
 }
-class W extends HTMLElement {
+class K extends HTMLElement {
   constructor() {
     super(), this.isExpanded = !1, this.isLoading = !1, this.hasLoaded = !1, this.boundHandleClick = this.handleClick.bind(this), this.boundHandleMapClick = this.handleMapClick.bind(this), this.boundHandleHeadingHover = this.handleHeadingHover.bind(this), this.boundHandleHeadingLeave = this.handleHeadingLeave.bind(this);
   }
   connectedCallback() {
-    this.setupAccordion(), this.setupEventListeners(), this.updateBorders(), this.setupMapEventListeners(), this.setupHoverEvents();
+    this.setupAccordion(), this.setupEventListeners(), this.setupMapEventListeners(), this.setupHoverEvents();
   }
   disconnectedCallback() {
     this.cleanupEventListeners(), this.cleanupMapEventListeners();
@@ -614,15 +619,9 @@ class W extends HTMLElement {
     document.removeEventListener("place-map-clicked", this.boundHandleMapClick), this.removeEventListener("mouseenter", this.boundHandleHeadingHover), this.removeEventListener("mouseleave", this.boundHandleHeadingLeave);
   }
   setupAccordion() {
-    if (!this.querySelector(".accordion-chevron")) {
-      const e = document.createElement("i");
-      e.className = "ri-chevron-down-line accordion-chevron transition-transform duration-200 text-slate-400";
-      const t = this.querySelector('[class*="bg-slate-100"]');
-      t && t.parentNode.insertBefore(e, t);
-    }
     if (!this.querySelector("[data-content]")) {
       const e = this.getAttribute("data-place-id"), t = document.createElement("div");
-      t.setAttribute("data-content", ""), t.className = "accordion-content overflow-hidden transition-all duration-300 max-h-0", t.setAttribute("hx-get", `/ort/fragment/${e}`), t.setAttribute("hx-trigger", "load-content"), t.setAttribute("hx-swap", "innerHTML"), t.setAttribute("hx-target", "this"), t.setAttribute("hx-select", ".place-fragment-content"), t.setAttribute("hx-boost", "false"), this.appendChild(t);
+      t.setAttribute("data-content", ""), t.className = "accordion-content overflow-hidden transition-all duration-300 max-h-0 border-b border-slate-200", t.setAttribute("hx-get", `/ort/fragment/${e}`), t.setAttribute("hx-trigger", "load-content"), t.setAttribute("hx-swap", "innerHTML"), t.setAttribute("hx-target", "this"), t.setAttribute("hx-select", ".place-fragment-content"), t.setAttribute("hx-boost", "false"), this.appendChild(t);
     }
   }
   setupEventListeners() {
@@ -672,12 +671,12 @@ class W extends HTMLElement {
   }
   expand() {
     if (this.isLoading) return;
-    this.isExpanded = !0, this.updateChevron(), this.updateBorders();
+    this.isExpanded = !0;
     const e = this.querySelector("[data-content]");
     e && (this.hasLoaded ? e.style.maxHeight = e.scrollHeight + "px" : this.loadContent());
   }
   collapse() {
-    this.isExpanded = !1, this.updateChevron(), this.updateBorders();
+    this.isExpanded = !1;
     const e = this.querySelector("[data-content]");
     e && (e.style.maxHeight = "0px");
   }
@@ -693,13 +692,6 @@ class W extends HTMLElement {
       this.isLoading = !1, e.innerHTML = '<div class="p-4 text-center text-red-500">Fehler beim Laden</div>', e.removeEventListener("htmx:responseError", i);
     };
     e.addEventListener("htmx:afterRequest", t), e.addEventListener("htmx:responseError", i), htmx.trigger(e, "load-content");
-  }
-  updateChevron() {
-    const e = this.querySelector(".accordion-chevron");
-    e && (this.isExpanded ? e.style.transform = "rotate(180deg)" : e.style.transform = "rotate(0deg)");
-  }
-  updateBorders() {
-    this.isExpanded ? this.classList.add("border-b", "border-slate-100") : this.classList.add("border-b", "border-slate-100"), !this.nextElementSibling && this.classList.remove("border-b");
   }
 }
 class G extends HTMLElement {
@@ -983,8 +975,8 @@ class Y extends HTMLElement {
     this.tooltip.style.left = `${i}px`, this.tooltip.style.top = `${n}px`;
   }
 }
-customElements.define("places-filter", K);
-customElements.define("place-accordion", W);
+customElements.define("places-filter", W);
+customElements.define("place-accordion", K);
 customElements.define("places-map", G);
 customElements.define("places-map-single", Y);
 class Z extends HTMLElement {
@@ -1457,17 +1449,29 @@ class J extends HTMLElement {
 customElements.define("scroll-to-top-button", J);
 class U extends HTMLElement {
   constructor() {
-    super(), this.pageObserver = null, this.pageContainers = /* @__PURE__ */ new Map(), this.singlePageViewerActive = !1, this.singlePageViewerCurrentPage = null, this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this);
+    super(), this.pageObserver = null, this.pageContainers = /* @__PURE__ */ new Map(), this.singlePageViewerActive = !1, this.singlePageViewerCurrentPage = null, this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this), this.eventListenersAttached = !1;
   }
   connectedCallback() {
-    this.setupScrollspy(), this.setupSinglePageViewerDetection();
+    requestAnimationFrame(() => {
+      this.setupScrollspy(), this.setupSinglePageViewerDetection();
+    });
   }
   disconnectedCallback() {
     this.cleanup();
   }
   setupScrollspy() {
     const e = document.querySelectorAll(".newspaper-page-container[data-page-container]");
-    e.length !== 0 && (e.forEach((t) => {
+    if (e.length === 0) {
+      setTimeout(() => {
+        const t = document.querySelectorAll(".newspaper-page-container[data-page-container]");
+        t.length > 0 && this.initializeScrollspy(t);
+      }, 100);
+      return;
+    }
+    this.initializeScrollspy(e);
+  }
+  initializeScrollspy(e) {
+    this.pageObserver && this.pageObserver.disconnect(), this.pageContainers.clear(), e.forEach((t) => {
       const i = t.getAttribute("data-page-container"), n = t.hasAttribute("data-beilage"), s = this.findInhaltsEntriesForPage(i, n);
       s.length > 0 && this.pageContainers.set(i, {
         container: t,
@@ -1492,7 +1496,7 @@ class U extends HTMLElement {
       this.pageObserver.observe(t);
     }), this.pageContainers.forEach((t) => {
       this.updateEntriesState(t);
-    }));
+    });
   }
   findInhaltsEntriesForPage(e, t = !1) {
     const i = t ? `[data-page-container="${e}"][data-beilage="true"]` : `[data-page-container="${e}"]:not([data-beilage])`, n = this.querySelector(i);
@@ -1552,7 +1556,7 @@ class U extends HTMLElement {
     n && this.scrollEntryIntoView(n);
   }
   setupSinglePageViewerDetection() {
-    document.addEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.checkSinglePageViewerState();
+    this.eventListenersAttached || (document.addEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.addEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.eventListenersAttached = !0), this.checkSinglePageViewerState();
   }
   handleSinglePageViewer(e) {
     var t;
@@ -1571,7 +1575,7 @@ class U extends HTMLElement {
     return o / r >= 0.5;
   }
   cleanup() {
-    this.pageObserver && (this.pageObserver.disconnect(), this.pageObserver = null), document.removeEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.pageContainers.clear();
+    this.pageObserver && (this.pageObserver.disconnect(), this.pageObserver = null), this.eventListenersAttached && (document.removeEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.eventListenersAttached = !1), this.pageContainers.clear();
   }
 }
 customElements.define("inhaltsverzeichnis-scrollspy", U);

@@ -1,46 +1,43 @@
 {{ $y := .model.Year }}
 
-<div class="mt-6 w-full">
-	<div class="mx-auto flex flex-row gap-x-4 w-fit items-end leading-none">
-		{{ range $year := .model.AvailableYears }}
-			<a
-				href="/jahrgang/{{ $year }}"
-				class="no-underline leading-none !m-0 !p-0
-				{{ if eq $year $y }}text-2xl font-bold pointer-events-none" aria-current="page{{ end }}"
-				>{{ $year }}</a
-			>
-		{{ end }}
-	</div>
-</div>
-
-<div class="grid grid-cols-11 gap-x-2 gap-y-4 pt-8">
-	{{ range $index, $month := .model.Issues }}
-
-		<!-- Month Header -->
-		<div class="col-span-1 text-right py-1 px-2.5">
-			{{ $first := index $month 0 }}
-			<h2 class="text-lg">{{ (MonthName $first.Datum.When.Month) }}</h2>
-		</div>
-
-		<!-- Issues -->
-		<div class="col-span-10 grid grid-cols-subgrid">
-			{{ range $issue := $month }}
-				<div class="col-span-1 bg-slate-100 px-2 py-1.5">
-					{{ $date := $issue.Datum.When }}
-					<a class="no-underline!" href="/{{ $y }}/{{ $issue.Number.No }}">
-						<div class="">
-							{{ $issue.Number.No }}
-						</div>
-
-						<div class="">
-							<div class="inline-block font-bold font-variant-small-caps pr-1">
-								{{ (WeekdayName $date.Weekday).Short }}
-							</div>
-							<div class="inline-block">{{ $date.Day }}.{{ index $date.Month }}.</div>
-						</div>
-					</a>
-				</div>
+<div class="bg-slate-50 rounded p-6 mt-6">
+	<!-- Year Navigation -->
+	<div class="mb-6 pb-4 border-b border-slate-200">
+		<div class="mx-auto flex flex-row flex-wrap gap-x-6 gap-y-3 w-fit items-end leading-none justify-center">
+			{{ range $year := .model.AvailableYears }}
+				{{ if eq $year $y }}
+					<span class="no-underline leading-none !m-0 !p-0 text-3xl font-bold text-red-600 pointer-events-none" aria-current="true">{{ $year }}</span>
+				{{ else }}
+					<a href="/jahrgang/{{ $year }}" class="no-underline leading-none !m-0 !p-0 text-xl font-medium text-slate-700 hover:text-red-600 transition-colors">{{ $year }}</a>
+				{{ end }}
 			{{ end }}
 		</div>
-	{{ end }}
+	</div>
+
+	<!-- Issues Grid -->
+	<div class="grid grid-cols-11 gap-x-2 gap-y-4">
+		{{ range $index, $month := .model.Issues }}
+
+			<!-- Month Header -->
+			<div class="col-span-1 text-right py-2 px-3">
+				{{ $first := index $month 0 }}
+				<h2 class="text-lg font-bold text-slate-700">{{ (MonthName $first.Datum.When.Month) }}</h2>
+			</div>
+
+			<!-- Issues -->
+			<div class="col-span-10 grid grid-cols-subgrid gap-2">
+				{{ range $issue := $month }}
+					<div class="col-span-1">
+						{{ $date := $issue.Datum.When }}
+						<a class="no-underline block bg-white rounded border border-slate-100 px-3 py-2 hover:bg-slate-50 hover:border-slate-200 transition-colors duration-200" href="/{{ $y }}/{{ $issue.Number.No }}">
+							<div class="flex justify-between items-center">
+								<span class="font-bold text-slate-800">{{ $issue.Number.No }}</span>
+								<span class="text-sm text-slate-600"><span class="font-normal font-variant-small-caps">{{ (WeekdayName $date.Weekday).Short }}</span> {{ $date.Day }}.{{ index $date.Month }}.</span>
+							</div>
+						</a>
+					</div>
+				{{ end }}
+			</div>
+		{{ end }}
+	</div>
 </div>

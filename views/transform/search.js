@@ -418,7 +418,7 @@ class SchnellauswahlButton extends HTMLElement {
 		this.innerHTML = `
             <button
                 id="filter-toggle"
-                class="mr-2 text-lg border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
+                class="mr-2 text-lg border px-4 h-full bg-white hover:bg-slate-200 transition-colors cursor-pointer"
                 title="Schnellfilter öffnen/schließen">
                 <i class="ri-filter-2-line"></i> <div class="inline-block text-lg">Schnellauswahl</div>
             </button>
@@ -543,36 +543,36 @@ class NavigationMenu extends HTMLElement {
 	}
 
 	static get observedAttributes() {
-		return ['git-commit', 'git-date', 'git-url'];
+		return ["git-commit", "git-date", "git-url"];
 	}
 
 	get gitCommit() {
-		return this.getAttribute('git-commit');
+		return this.getAttribute("git-commit");
 	}
 
 	get gitDate() {
-		return this.getAttribute('git-date');
+		return this.getAttribute("git-date");
 	}
 
 	get gitUrl() {
-		return this.getAttribute('git-url');
+		return this.getAttribute("git-url");
 	}
 
 	formatCommitInfo() {
 		if (!this.gitCommit) {
-			return 'Keine Commit-Info';
+			return "Keine Commit-Info";
 		}
 
 		const shortCommit = this.gitCommit.substring(0, 7);
 
 		if (this.gitDate) {
 			const date = new Date(this.gitDate);
-			const formattedDate = date.toLocaleDateString('de-DE', {
-				day: '2-digit',
-				month: '2-digit',
-				year: 'numeric'
+			const formattedDate = date.toLocaleDateString("de-DE", {
+				day: "2-digit",
+				month: "2-digit",
+				year: "numeric",
 			});
-			return `${shortCommit} (${formattedDate})`;
+			return `${shortCommit} - ${formattedDate}`;
 		}
 
 		return shortCommit;
@@ -590,35 +590,35 @@ class NavigationMenu extends HTMLElement {
 
 	createMenu() {
 		this.innerHTML = `
-            <div>
+            <div class="h-full relative">
                 <button
-                    class="ml-2 text-2xl border px-4 h-full hover:bg-slate-200 transition-colors cursor-pointer"
+                    class="ml-2 text-2xl border px-4 h-full bg-white hover:bg-slate-200 transition-colors cursor-pointer"
                     id="menu-toggle">
                     <i class="ri-menu-line"></i>
                 </button>
-                <div id="menu-dropdown" class="hidden absolute bg-slate-50 px-5 py-3 z-50">
-                    <div>
-                        <div>Übersicht nach</div>
-                        <div class="ml-2 flex flex-col gap-y-2 mt-2">
+                <div id="menu-dropdown" class="hidden absolute bg-white py-2 z-50 top-[115%] right-0 shadow-sm">
+                    <div class="px-5">
+                        <div class="whitespace-nowrap">Übersicht nach</div>
+                        <div class="ml-2 flex flex-col gap-y-2 mt-2 whitespace-nowrap">
                             <a href="/">Jahrgängen</a>
-                            <a href="/akteure/a">Personen &amp; Werke</a>
+                            <a href="/akteure/a">Personen &amp; Werken</a>
                             <a href="/kategorie/">Betragsarten</a>
                             <a href="/ort/">Orten</a>
                         </div>
                     </div>
-                    <div class="border-t border-slate-300 pt-2 mt-2">
+                    <div class="border-t border-slate-300 pt-2 mt-2 px-5">
                         <div class="flex flex-col gap-y-2">
                             <a href="/edition/">Geschichte & Edition der KGPZ</a>
                             <a href="/zitation/">Zitation</a>
                             <a href="/kontakt/">Kontakt</a>
                         </div>
-                        <div class="mt-3 pt-2 border-t border-slate-200 text-xs text-slate-600">
-                            <a href="${this.gitUrl || 'https://github.com/Theodor-Springmann-Stiftung/KGPZ.git'}" target="_blank" class="flex items-center gap-1 hover:text-slate-800">
-                                <i class="ri-git-branch-line"></i>
-                                <span>${this.formatCommitInfo()}</span>
-                            </a>
-                        </div>
                     </div>
+										<div class="mt-3 pt-2 border-t border-slate-200 text-xs text-slate-600 px-2 text-centeer vertical-align-middle">
+											<i class="ri-git-branch-line"></i>
+											<a href="${this.gitUrl || "https://github.com/Theodor-Springmann-Stiftung/KGPZ.git"}" target="_blank" class="hover:text-slate-800">
+												<span>Commit ${this.formatCommitInfo()}</span>
+											</a>
+										</div>
                 </div>
             </div>
         `;
@@ -721,23 +721,36 @@ customElements.define("navigation-menu", NavigationMenu);
 
 /**
  * Global event handler for quickfilter selections
- * Dispatches custom events when users select persons or places from quickfilter
+ * Dispatches custom events when users select persons, places, or categories from quickfilter
  */
 document.addEventListener("DOMContentLoaded", function () {
-	// Add event delegation for person and place links in quickfilter
+	// Add event delegation for person, place, and category links in quickfilter
 	document.addEventListener("click", function (event) {
-		// Check if the clicked element is a person or place link within the quickfilter
-		const quickfilterTarget = event.target.closest('a[href^="/akteure/"], a[href^="/ort/"]');
+		// Check if the clicked element is a person, place, or category link within the quickfilter
+		const quickfilterTarget = event.target.closest(
+			'a[href^="/akteure/"], a[href^="/ort/"], a[href^="/kategorie/"]',
+		);
 		const filterContainer = document.getElementById("filter-container");
 
 		if (quickfilterTarget && filterContainer && filterContainer.contains(quickfilterTarget)) {
+			// Determine the type based on the URL
+			let type;
+			const href = quickfilterTarget.getAttribute("href");
+			if (href.startsWith("/akteure/")) {
+				type = "person";
+			} else if (href.startsWith("/ort/")) {
+				type = "place";
+			} else if (href.startsWith("/kategorie/")) {
+				type = "category";
+			}
+
 			// Dispatch custom event to notify components
 			const selectionEvent = new CustomEvent("quickfilter:selection", {
 				detail: {
-					type: quickfilterTarget.getAttribute("href").startsWith("/akteure/") ? "person" : "place",
+					type: type,
 					source: "quickfilter",
-					id: quickfilterTarget.getAttribute("href").split("/").pop(),
-					url: quickfilterTarget.getAttribute("href"),
+					id: href.split("/").pop(),
+					url: href,
 				},
 				bubbles: true,
 			});

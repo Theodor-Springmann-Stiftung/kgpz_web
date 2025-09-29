@@ -9,6 +9,7 @@
         "ShowPlaceTags" true|false
         "UseColonFormat" true|false
         "ShowContinuation" true|false
+        "LongForm" true|false
     ) }}
 
     Parameters:
@@ -18,6 +19,7 @@
     - ShowPlaceTags: Whether to show place tags (default: true)
     - UseColonFormat: Use colon format instead of "mit" for place view (default: false)
     - ShowContinuation: Show continuation prefixes (default: true for issue mode)
+    - LongForm: Whether to show annotations in a new line after the piece (default: false)
 */ -}}
 
 {{- $pieceInput := .Piece -}}
@@ -30,6 +32,8 @@
 {{- if eq $useColonFormat nil -}}{{ $useColonFormat = false }}{{- end -}}
 {{- $showContinuation := .ShowContinuation -}}
 {{- if eq $showContinuation nil -}}{{ $showContinuation = (eq $displayMode "issue") }}{{- end -}}
+{{- $longForm := .LongForm -}}
+{{- if eq $longForm nil -}}{{ $longForm = false }}{{- end -}}
 
 {{- /* Handle different piece types: viewmodels.PieceByIssue vs xmlmodels.Piece */ -}}
 {{- $piece := $pieceInput -}}

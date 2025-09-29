@@ -1,0 +1,62 @@
+{{- /*
+    Shared Page Action Buttons Component
+    Action buttons for page sharing, citation, and enlargement
+
+    Usage: {{ template "_page_action_buttons" (dict
+        "PageNumber" $pageNumber
+        "IsBeilage" $isBeilage
+        "PartNumber" $partNumber
+        "ImageElement" $imageElement
+        "ButtonSize" "small|medium"
+        "ShowZoom" true|false
+    ) }}
+
+    Parameters:
+    - PageNumber: The page number
+    - IsBeilage: Whether this is a Beilage page (default: false)
+    - PartNumber: Part number for piece view (optional)
+    - ImageElement: CSS selector for the image element to enlarge (e.g., ".piece-page-image")
+    - ButtonSize: "small" for 6x6, "medium" for larger buttons (default: "small")
+    - ShowZoom: Whether to show the zoom button (default: true)
+*/ -}}
+
+{{- $pageNumber := .PageNumber -}}
+{{- $isBeilage := .IsBeilage -}}
+{{- if eq $isBeilage nil -}}{{ $isBeilage = false }}{{- end -}}
+{{- $partNumber := .PartNumber -}}
+{{- $imageElement := .ImageElement -}}
+{{- if not $imageElement -}}{{ $imageElement = ".newspaper-page-image, .piece-page-image" }}{{- end -}}
+{{- $buttonSize := .ButtonSize -}}
+{{- if not $buttonSize -}}{{ $buttonSize = "small" }}{{- end -}}
+{{- $showZoom := .ShowZoom -}}
+{{- if eq $showZoom nil -}}{{ $showZoom = true }}{{- end -}}
+
+{{- $sizeClasses := "w-6 h-6" -}}
+{{- $iconSize := "text-xs" -}}
+{{- if eq $buttonSize "medium" -}}
+    {{- $sizeClasses = "w-8 h-8" -}}
+    {{- $iconSize = "text-sm" -}}
+{{- end -}}
+
+<!-- Share Link Button -->
+<button onclick="copyPagePermalink('{{ $pageNumber }}', this{{ if $isBeilage }}, true{{ end }})"
+        class="{{ $sizeClasses }} bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+        title="Link zu Seite {{ $pageNumber }} kopieren">
+    <i class="ri-share-line {{ $iconSize }}"></i>
+</button>
+
+<!-- Citation Button -->
+<button onclick="generatePageCitation('{{ $pageNumber }}', this)"
+        class="{{ $sizeClasses }} bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+        title="Zitation für Seite {{ $pageNumber }} generieren">
+    <i class="ri-file-text-line {{ $iconSize }}"></i>
+</button>
+
+<!-- Zoom/Enlarge Button -->
+{{ if $showZoom }}
+<button onclick="enlargePage(document.querySelector('{{ $imageElement }}'), {{ $pageNumber }}, false{{ if $partNumber }}, {{ $partNumber }}{{ end }})"
+        class="{{ $sizeClasses }} bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer"
+        title="Seite {{ $pageNumber }} vergrößern">
+    <i class="ri-zoom-in-line {{ $iconSize }}"></i>
+</button>
+{{ end }}

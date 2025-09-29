@@ -1,133 +1,400 @@
 {{ $model := .model }}
 
-
-<div
-	id="results"
-	class="pt-4 grid grid-flow-row-dense gap-x-8 gap-y-10 grid-cols-4 [&>div]:bg-slate-100
-	[&>div]:px-4 [&>div]:py-3">
-	<div class="col-span-1 searchresultcontainer">
-		<h3>Personen</h3>
-		{{ if $model.Agents.Items }}
-			{{ range $i, $agent := $model.Agents.Items }}
-				{{ $gnd := GetGND $agent.GND }}
-				<div class="pt-1">
-					{{- index $agent.Names 0 -}}
-				</div>
-				{{ if $gnd }}
-					<div>
-						{{- if and $gnd.DateOfBirth $gnd.DateOfDeath -}}
-							<div>
-								{{- if $gnd.DateOfBirth -}}
-									{{- HRDateYear (index $gnd.DateOfBirth 0) -}}
-								{{- else -}}
-									[?]
-								{{- end -}}
-								&thinsp;&ndash;&thinsp;
-								{{- if $gnd.DateOfDeath -}}
-									{{- HRDateYear (index $gnd.DateOfDeath 0) -}}
-								{{- else -}}
-									[?]
-								{{- end -}}
-							</div>
-						{{- end -}}
-					</div>
-				{{ end }}
-			{{ end }}
-		{{ else }}
-			<div class="pt-1">Keine Personen gefunden.</div>
-		{{ end }}
-	</div>
-
-	<div class="col-span-1 searchresultcontainer">
-		<h3>Orte</h3>
-		{{ if $model.Places.Items }}
-			{{ range $i, $place := $model.Places.Items }}
-				<div class="pt-1">
-					{{- index $place.Names 0 -}}
-				</div>
-			{{ end }}
-		{{ else }}
-			<div class="pt-1">Keine Orte gefunden.</div>
-		{{ end }}
-	</div>
-
-	<div class="col-span-1 searchresultcontainer">
-		<h3>Kategorien</h3>
-		{{ if $model.Categories.Items }}
-			{{ range $i, $category := $model.Categories.Items }}
-				<div class="pt-1">
-					{{- index $category.Names 0 -}}
-				</div>
-			{{ end }}
-		{{ else }}
-			<div class="pt-1">Keine Kategorien gefunden.</div>
-		{{ end }}
-	</div>
-
-	<div class="col-span-1 searchresultcontainer">
-		<h3>Ausgaben</h3>
-		{{ if $model.Issues.Items }}
-			{{ range $i, $issue := $model.Issues.Items }}
-				<div class="pt-1">
-					KGPZ
-					{{ $issue.Datum.When.Year }}/{{ $issue.Number.No }}
-					({{ HRDateShort
-						$issue.Datum.When.String
-					}})
-				</div>
-			{{ end }}
-		{{ else }}
-			<div class="pt-1">Keine Ausgaben gefunden.</div>
-		{{ end }}
-	</div>
-
-	<div class="col-span-2 searchresultcontainer">
-		<h3>Werke</h3>
-		{{ if $model.Works.Items }}
-			{{ range $i, $w := $model.Works.Items }}
-				<div class="pt-1">
-					{{- if ne (len $w.Citation.InnerXML ) 0 -}}
-								<script type="application/xml" xslt-template="transform-citation" xslt-onload>
-									<xml>
-										{{- Safe $w.Citation.InnerXML -}}
-									</xml>
-								</script>
-					{{- end -}}
-					{{ range $_, $url := $w.URLs }}
-						<div>
-							<a href="{{ $url.Address }}" target="_blank">{{ $url.Chardata }}</a>
-						</div>
-					{{ end }}
-
-					{{ $pieces := LookupPieces $w }}
-					{{ if len $pieces }}
-						<div>
-							{{ range $_, $p := $pieces }}
-								{{- range $_, $i := $p.Item.IssueRefs -}}
-									<div>
-										{{ template "_citation" $i }}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+	<!-- Left Column: People, Places, Categories -->
+	<div class="space-y-6">
+		<!-- People -->
+		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
+			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+				<i class="ri-user-line"></i>
+				Personen
+				{{ if $model.Agents.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded">{{ len $model.Agents.Items }}</span>{{ end }}
+			</h3>
+			{{ if $model.Agents.Items }}
+				<div class="space-y-2">
+					{{ range $i, $agent := $model.Agents.Items }}
+						{{ $gnd := GetGND $agent.GND }}
+						<div class="border-b border-slate-100 last:border-b-0 pb-2 last:pb-0">
+							<a href="/akteure/{{ $agent.ID }}" class="font-medium text-slate-800 hover:text-red-600 no-underline">
+								{{- index $agent.Names 0 -}}
+							</a>
+							{{ if $gnd }}
+								{{ if and $gnd.DateOfBirth $gnd.DateOfDeath }}
+									<div class="text-sm text-slate-600">
+										{{- if $gnd.DateOfBirth -}}
+											{{- HRDateYear (index $gnd.DateOfBirth 0) -}}
+										{{- else -}}
+											[?]
+										{{- end -}}
+										&thinsp;&ndash;&thinsp;
+										{{- if $gnd.DateOfDeath -}}
+											{{- HRDateYear (index $gnd.DateOfDeath 0) -}}
+										{{- else -}}
+											[?]
+										{{- end -}}
 									</div>
-								{{- end -}}
+								{{ end }}
 							{{ end }}
 						</div>
 					{{ end }}
 				</div>
+			{{ else }}
+				<p class="text-slate-500 text-sm">Keine Personen gefunden.</p>
 			{{ end }}
-		{{ else }}
-			<div class="pt-1">Keine Werke gefunden.</div>
-		{{ end }}
+		</div>
+
+		<!-- Places -->
+		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
+			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+				<i class="ri-map-pin-line"></i>
+				Orte
+				{{ if $model.Places.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded">{{ len $model.Places.Items }}</span>{{ end }}
+			</h3>
+			{{ if $model.Places.Items }}
+				<div class="space-y-2">
+					{{ range $i, $place := $model.Places.Items }}
+						<div class="border-b border-slate-100 last:border-b-0 pb-2 last:pb-0">
+							<a href="/ort/{{ $place.ID }}" class="font-medium text-slate-800 hover:text-red-600 no-underline">
+								{{- index $place.Names 0 -}}
+							</a>
+						</div>
+					{{ end }}
+				</div>
+			{{ else }}
+				<p class="text-slate-500 text-sm">Keine Orte gefunden.</p>
+			{{ end }}
+		</div>
+
+		<!-- Categories -->
+		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
+			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+				<i class="ri-bookmark-line"></i>
+				Kategorien
+				{{ if $model.Categories.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded">{{ len $model.Categories.Items }}</span>{{ end }}
+			</h3>
+			{{ if $model.Categories.Items }}
+				<div class="space-y-2">
+					{{ range $i, $category := $model.Categories.Items }}
+						<div class="border-b border-slate-100 last:border-b-0 pb-2 last:pb-0">
+							<a href="/kategorie/{{ $category.ID }}" class="font-medium text-slate-800 hover:text-red-600 no-underline">
+								{{- index $category.Names 0 -}}
+							</a>
+						</div>
+					{{ end }}
+				</div>
+			{{ else }}
+				<p class="text-slate-500 text-sm">Keine Kategorien gefunden.</p>
+			{{ end }}
+		</div>
+
+		<!-- Issues -->
+		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
+			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+				<i class="ri-newspaper-line"></i>
+				Ausgaben
+				{{ if $model.Issues.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded">{{ len $model.Issues.Items }}</span>{{ end }}
+			</h3>
+			{{ if $model.Issues.Items }}
+				<div class="space-y-2">
+					{{ range $i, $issue := $model.Issues.Items }}
+						<div class="border-b border-slate-100 last:border-b-0 pb-2 last:pb-0">
+							<a href="/{{ $issue.Datum.When.Year }}/{{ $issue.Number.No }}" class="font-medium text-slate-800 hover:text-red-600 no-underline">
+								KGPZ {{ $issue.Datum.When.Year }}/{{ $issue.Number.No }}
+							</a>
+							<div class="text-sm text-slate-600">
+								{{ HRDateShort $issue.Datum.When.String }}
+							</div>
+						</div>
+					{{ end }}
+				</div>
+			{{ else }}
+				<p class="text-slate-500 text-sm">Keine Ausgaben gefunden.</p>
+			{{ end }}
+		</div>
 	</div>
 
-	<div class="col-span-2 searchresultcontainer">
-		<h3>Beiträge</h3>
-		{{ if $model.Pieces.Items }}
-			{{ range $i, $piece := $model.Pieces.Items }}
-				<div class="pt-1">
-					{{ $piece.String }}
+	<!-- Right Column: Works and Pieces -->
+	<div class="lg:col-span-2 space-y-6">
+		<!-- Works -->
+		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
+			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+				<i class="ri-book-line"></i>
+				<u class="decoration underline-offset-3">Werke</u>
+				{{ if $model.Works.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded ml-2">{{ len $model.Works.Items }}</span>{{ end }}
+			</h3>
+			{{ if $model.Works.Items }}
+				<div class="">
+					{{ range $i, $w := $model.Works.Items }}
+						<div class="mb-2 break-inside-avoid max-w-[95ch]">
+							{{- if ne (len $w.Citation.InnerXML ) 0 -}}
+								<div class="indent-6 mb-2">
+									{{- /* Show all work contributors with their roles */ -}}
+									{{- $workContributors := slice -}}
+									{{- range $workAgentRef := $w.AgentRefs -}}
+										{{- $agent := GetAgent $workAgentRef.Ref -}}
+										{{- if and $agent (gt (len $agent.Names) 0) -}}
+											{{- if eq $workAgentRef.Category "übersetzer" -}}
+												{{- $workContributors = append $workContributors (printf "<a href=\"/akteure/%s\" class=\"text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a> (Übers.)" $workAgentRef.Ref (index $agent.Names 0)) -}}
+											{{- else if eq $workAgentRef.Category "herausgeber" -}}
+												{{- $workContributors = append $workContributors (printf "<a href=\"/akteure/%s\" class=\"text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a> (Hrsg.)" $workAgentRef.Ref (index $agent.Names 0)) -}}
+											{{- else -}}
+												{{- $workContributors = append $workContributors (printf "<a href=\"/akteure/%s\" class=\"text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a>" $workAgentRef.Ref (index $agent.Names 0)) -}}
+											{{- end -}}
+										{{- end -}}
+									{{- end -}}
+									{{- range $index, $contributor := $workContributors -}}
+										{{- if gt $index 0 }}, {{ end }}{{ Safe $contributor }}
+									{{- end -}}
+									{{- if gt (len $workContributors) 0 }}: {{ end }}{{- Safe $w.Citation.HTML -}}
+									{{- range $_, $url := $w.URLs -}}
+										<span class="ml-1 whitespace-nowrap">
+											<a href="{{ $url.Address }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
+												{{ $url.Chardata }} <i class="ri-external-link-line text-xs"></i>
+											</a>
+										</span>
+									{{- end -}}
+								</div>
+							{{- end -}}
+
+							{{- /* Find all pieces that reference this work */ -}}
+							{{ $workPieces := LookupPieces $w }}
+							{{ if len $workPieces }}
+								<div class="">
+									{{- /* Group pieces by category + author combination */ -}}
+									{{- $pieceGroups := dict -}}
+									{{- range $_, $p := $workPieces -}}
+										{{- /* Get categories for this piece */ -}}
+										{{- $categoryFlags := GetCategoryFlags $p.Item -}}
+										{{- $categories := slice -}}
+										{{- if $categoryFlags.Rezension -}}
+											{{- $categories = append $categories "Rezension" -}}
+										{{- end -}}
+										{{- if $categoryFlags.Auszug -}}
+											{{- $categories = append $categories "Auszug" -}}
+										{{- end -}}
+										{{- if $categoryFlags.Theaterkritik -}}
+											{{- $categories = append $categories "Theaterkritik" -}}
+										{{- end -}}
+										{{- if $categoryFlags.Uebersetzung -}}
+											{{- $categories = append $categories "Übersetzung" -}}
+										{{- end -}}
+										{{- if $categoryFlags.Kommentar -}}
+											{{- $categories = append $categories "Kommentar" -}}
+										{{- end -}}
+										{{- if $categoryFlags.Replik -}}
+											{{- $categories = append $categories "Replik" -}}
+										{{- end -}}
+										{{- if $categoryFlags.Anzeige -}}
+											{{- $categories = append $categories "Anzeige" -}}
+										{{- end -}}
+										{{- if $categoryFlags.Provinienz -}}
+											{{- $categories = append $categories "Provinienz" -}}
+										{{- end -}}
+										{{- if eq (len $categories) 0 -}}
+											{{- $categories = append $categories "Beitrag" -}}
+										{{- end -}}
+
+										{{- /* Get authors, translators, and editors for this piece */ -}}
+										{{- $pieceAuthors := slice -}}
+										{{- $pieceTranslators := slice -}}
+										{{- $pieceEditors := slice -}}
+										{{- range $agentref := $p.Item.AgentRefs -}}
+											{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
+												{{- $pieceAuthors = append $pieceAuthors $agentref.Ref -}}
+											{{- else if eq $agentref.Category "übersetzer" -}}
+												{{- $pieceTranslators = append $pieceTranslators $agentref.Ref -}}
+											{{- else if eq $agentref.Category "herausgeber" -}}
+												{{- $pieceEditors = append $pieceEditors $agentref.Ref -}}
+											{{- end -}}
+										{{- end -}}
+										{{- $sortedAuthors := sortStrings $pieceAuthors -}}
+										{{- $sortedTranslators := sortStrings $pieceTranslators -}}
+										{{- $sortedEditors := sortStrings $pieceEditors -}}
+
+										{{- /* Create group key: categories + authors + translators + editors */ -}}
+										{{- $sortedCategories := sortStrings $categories -}}
+										{{- $groupKey := printf "%s|%s|%s|%s" (joinWithUnd $sortedCategories) (joinWithUnd $sortedAuthors) (joinWithUnd $sortedTranslators) (joinWithUnd $sortedEditors) -}}
+
+										{{- /* Add piece to group (check for duplicates by ID) */ -}}
+										{{- $existing := index $pieceGroups $groupKey -}}
+										{{- if $existing -}}
+											{{- /* Check if piece is already in group */ -}}
+											{{- $found := false -}}
+											{{- range $existingPiece := $existing -}}
+												{{- if eq $existingPiece.Item.ID $p.Item.ID -}}
+													{{- $found = true -}}
+												{{- end -}}
+											{{- end -}}
+											{{- if not $found -}}
+												{{- $pieceGroups = merge $pieceGroups (dict $groupKey (append $existing $p)) -}}
+											{{- end -}}
+										{{- else -}}
+											{{- $pieceGroups = merge $pieceGroups (dict $groupKey (slice $p)) -}}
+										{{- end -}}
+									{{- end -}}
+
+									{{- /* Display each group */ -}}
+									{{- range $groupKey, $groupPieces := $pieceGroups -}}
+										<div class="mb-1 text-gray-600">
+											{{- /* Extract categories, authors, translators, and editors from group key */ -}}
+											{{- $keyParts := split $groupKey "|" -}}
+											{{- $categoryName := index $keyParts 0 -}}
+											{{- $authorPart := index $keyParts 1 -}}
+											{{- $translatorPart := "" -}}
+											{{- if gt (len $keyParts) 2 -}}
+												{{- $translatorPart = index $keyParts 2 -}}
+											{{- end -}}
+											{{- $editorPart := "" -}}
+											{{- if gt (len $keyParts) 3 -}}
+												{{- $editorPart = index $keyParts 3 -}}
+											{{- end -}}
+
+											{{- /* Use plural if multiple pieces grouped together */ -}}
+											{{- $displayCategory := $categoryName -}}
+											{{- if gt (len $groupPieces) 1 -}}
+												{{- if eq $categoryName "Rezension" -}}
+													{{- $displayCategory = "Rezensionen" -}}
+												{{- else if eq $categoryName "Auszug" -}}
+													{{- $displayCategory = "Auszüge" -}}
+												{{- else if eq $categoryName "Theaterkritik" -}}
+													{{- $displayCategory = "Theaterkritiken" -}}
+												{{- else if eq $categoryName "Übersetzung" -}}
+													{{- $displayCategory = "Übersetzungen" -}}
+												{{- else if eq $categoryName "Kommentar" -}}
+													{{- $displayCategory = "Kommentare" -}}
+												{{- else if eq $categoryName "Replik" -}}
+													{{- $displayCategory = "Repliken" -}}
+												{{- else if eq $categoryName "Anzeige" -}}
+													{{- $displayCategory = "Anzeigen" -}}
+												{{- else if eq $categoryName "Beitrag" -}}
+													{{- $displayCategory = "Beiträge" -}}
+												{{- end -}}
+											{{- end -}}
+											{{ $displayCategory }}{{- if or (ne $authorPart "") (ne $translatorPart "") (ne $editorPart "") }} von {{ end }}
+											{{- /* Display authors */ -}}
+											{{- if ne $authorPart "" -}}
+												{{- range $i, $authorID := (split $authorPart " und ") -}}
+													{{- if gt $i 0 }} und {{ end }}
+													{{- $agent := GetAgent $authorID -}}
+													{{- if and $agent (gt (len $agent.Names) 0) -}}
+														<a href="/akteure/{{ $authorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>
+													{{- end -}}
+												{{- end -}}
+											{{- end -}}
+											{{- /* Display translators with (Übers.) suffix */ -}}
+											{{- if ne $translatorPart "" -}}
+												{{- if ne $authorPart "" }}, {{ end }}
+												{{- range $i, $translatorID := (split $translatorPart " und ") -}}
+													{{- if gt $i 0 }}, {{ end }}
+													{{- $agent := GetAgent $translatorID -}}
+													{{- if and $agent (gt (len $agent.Names) 0) -}}
+														<a href="/akteure/{{ $translatorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a> (Übers.)
+													{{- end -}}
+												{{- end -}}
+											{{- end -}}
+											{{- /* Display editors with (Hrsg.) suffix */ -}}
+											{{- if ne $editorPart "" -}}
+												{{- if or (ne $authorPart "") (ne $translatorPart "") }}, {{ end }}
+												{{- range $i, $editorID := (split $editorPart " und ") -}}
+													{{- if gt $i 0 }}, {{ end }}
+													{{- $agent := GetAgent $editorID -}}
+													{{- if and $agent (gt (len $agent.Names) 0) -}}
+														<a href="/akteure/{{ $editorID }}" class="text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a> (Hrsg.)
+													{{- end -}}
+												{{- end -}}
+											{{- end -}}:
+											{{- /* Show citations separated by commas */ -}}
+											{{ " " }}{{- range $pieceIndex, $p := $groupPieces -}}
+												{{- range $issueIndex, $issue := $p.Item.IssueRefs -}}
+													{{- if or (gt $pieceIndex 0) (gt $issueIndex 0) }}, {{ end -}}
+													<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>
+												{{- end -}}
+												{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+												{{- if gt (len $p.Item.IssueRefs) 1 -}}
+													{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200">
+														<i class="ri-file-copy-2-line text-xs"></i>
+														<a href="{{ GetPieceURL $p.Item.ID }}" class="">
+															Ganzer Beitrag
+														</a>
+													</div>
+												{{- end -}}
+											{{- end -}}
+										</div>
+									{{- end -}}
+								</div>
+							{{ end }}
+						</div>
+					{{ end }}
 				</div>
+			{{ else }}
+				<p class="text-slate-500 text-sm">Keine Werke gefunden.</p>
 			{{ end }}
-		{{ else }}
-			<div class="pt-1">Keine Beiträge gefunden.</div>
-		{{ end }}
+		</div>
+
+		<!-- Pieces -->
+		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
+			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+				<i class="ri-newspaper-line"></i>
+				<u class="decoration underline-offset-3">Beiträge</u>
+				{{ if $model.Pieces.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded ml-2">{{ len $model.Pieces.Items }}</span>{{ end }}
+			</h3>
+			{{ if $model.Pieces.Items }}
+				<div class="space-y-2">
+					{{- /* Group pieces by their own title/incipit, not by work being reviewed */ -}}
+					{{- $groupedPieces := dict -}}
+					{{- range $_, $piece := $model.Pieces.Items -}}
+						{{- $groupKey := "" -}}
+						{{- if $piece.Title -}}
+							{{- $groupKey = index $piece.Title 0 -}}
+						{{- else if $piece.Incipit -}}
+							{{- $groupKey = index $piece.Incipit 0 -}}
+						{{- else -}}
+							{{- $groupKey = printf "untitled-%s" $piece.ID -}}
+						{{- end -}}
+
+						{{- $existing := index $groupedPieces $groupKey -}}
+						{{- if $existing -}}
+							{{- $groupedPieces = merge $groupedPieces (dict $groupKey (append $existing $piece)) -}}
+						{{- else -}}
+							{{- $groupedPieces = merge $groupedPieces (dict $groupKey (slice $piece)) -}}
+						{{- end -}}
+					{{- end -}}
+
+					<div class="columns-2 gap-1 hyphens-auto">
+						{{- /* Display grouped pieces */ -}}
+						{{- range $groupKey, $groupedItems := $groupedPieces -}}
+							<div class="break-inside-avoid pl-4">
+								<div class="pb-1 indent-4">
+									{{- /* Use first piece for display text */ -}}
+									{{ template "_unified_piece_entry" (dict "Piece" (index $groupedItems 0) "DisplayMode" "search" "ShowPlaceTags" true "UseColonFormat" false "ShowContinuation" false) }}
+
+									{{- /* Show all citations from all pieces in this group inline with commas */ -}}
+									{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}
+										{{- range $issueIndex, $issue := $groupItem.IssueRefs -}}
+											{{- if or (gt $groupIndex 0) (gt $issueIndex 0) }}, {{ end -}}
+											<span class="text-blue-600 hover:text-blue-700 underline decoration-dotted hover:decoration-solid [&>a]:text-blue-600 [&>a:hover]:text-blue-700">{{- template "_citation" $issue -}}</span>{{- end -}}
+									{{- end -}}
+									{{- /* Add "Ganzer Beitrag" link if piece spans multiple issues */ -}}
+									{{- $firstGroupItem := index $groupedItems 0 -}}
+									{{- if gt (len $firstGroupItem.IssueRefs) 1 -}}
+										{{ " " }}<div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50
+										hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200
+										hover:border-blue-300 rounded text-xs font-medium transition-colors duration-200
+										indent-0">
+											<i class="ri-file-copy-2-line text-xs"></i>
+											<a href="{{ GetPieceURL $firstGroupItem.ID }}" class="">
+												Ganzer Beitrag
+											</a>
+										</div>
+									{{- end }}
+								</div>
+							</div>
+						{{- end -}}
+					</div>
+				</div>
+			{{ else }}
+				<p class="text-slate-500 text-sm">Keine Beiträge gefunden.</p>
+			{{ end }}
+		</div>
 	</div>
 </div>

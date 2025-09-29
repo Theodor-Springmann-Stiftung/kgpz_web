@@ -19,11 +19,15 @@ export class InhaltsverzeichnisScrollspy extends HTMLElement {
         this.singlePageViewerActive = false;
         this.singlePageViewerCurrentPage = null; // Track which page is currently viewed in single page mode
         this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this);
+        this.eventListenersAttached = false; // Track if global event listeners are attached
     }
 
     connectedCallback() {
-        this.setupScrollspy();
-        this.setupSinglePageViewerDetection();
+        // Use requestAnimationFrame to ensure DOM is fully settled after HTMX content swap
+        requestAnimationFrame(() => {
+            this.setupScrollspy();
+            this.setupSinglePageViewerDetection();
+        });
     }
 
     disconnectedCallback() {
@@ -35,8 +39,26 @@ export class InhaltsverzeichnisScrollspy extends HTMLElement {
         const newspaperPageContainers = document.querySelectorAll('.newspaper-page-container[data-page-container]');
 
         if (newspaperPageContainers.length === 0) {
-            return; // No page containers found
+            // No page containers found initially - retry after a short delay for HTMX content
+            setTimeout(() => {
+                const retryContainers = document.querySelectorAll('.newspaper-page-container[data-page-container]');
+                if (retryContainers.length > 0) {
+                    this.initializeScrollspy(retryContainers);
+                }
+            }, 100);
+            return;
         }
+
+        this.initializeScrollspy(newspaperPageContainers);
+    }
+
+    initializeScrollspy(newspaperPageContainers) {
+
+        // Clear existing state to prevent conflicts during HTMX navigation
+        if (this.pageObserver) {
+            this.pageObserver.disconnect();
+        }
+        this.pageContainers.clear();
 
         // Map page containers to their corresponding Inhaltsverzeichnis entries
         newspaperPageContainers.forEach(container => {
@@ -236,10 +258,13 @@ export class InhaltsverzeichnisScrollspy extends HTMLElement {
     }
 
     setupSinglePageViewerDetection() {
-        // Listen for single page viewer events
-        document.addEventListener('singlepageviewer:opened', this.boundHandleSinglePageViewer);
-        document.addEventListener('singlepageviewer:closed', this.boundHandleSinglePageViewer);
-        document.addEventListener('singlepageviewer:pagechanged', this.boundHandleSinglePageViewer);
+        // Only attach event listeners if not already attached
+        if (!this.eventListenersAttached) {
+            document.addEventListener('singlepageviewer:opened', this.boundHandleSinglePageViewer);
+            document.addEventListener('singlepageviewer:closed', this.boundHandleSinglePageViewer);
+            document.addEventListener('singlepageviewer:pagechanged', this.boundHandleSinglePageViewer);
+            this.eventListenersAttached = true;
+        }
 
         // Check initial state
         this.checkSinglePageViewerState();
@@ -302,9 +327,13 @@ export class InhaltsverzeichnisScrollspy extends HTMLElement {
             this.pageObserver = null;
         }
 
-        document.removeEventListener('singlepageviewer:opened', this.boundHandleSinglePageViewer);
-        document.removeEventListener('singlepageviewer:closed', this.boundHandleSinglePageViewer);
-        document.removeEventListener('singlepageviewer:pagechanged', this.boundHandleSinglePageViewer);
+        // Only remove event listeners if they were attached
+        if (this.eventListenersAttached) {
+            document.removeEventListener('singlepageviewer:opened', this.boundHandleSinglePageViewer);
+            document.removeEventListener('singlepageviewer:closed', this.boundHandleSinglePageViewer);
+            document.removeEventListener('singlepageviewer:pagechanged', this.boundHandleSinglePageViewer);
+            this.eventListenersAttached = false;
+        }
 
         this.pageContainers.clear();
     }

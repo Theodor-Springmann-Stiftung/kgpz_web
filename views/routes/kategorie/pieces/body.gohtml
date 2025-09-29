@@ -60,11 +60,6 @@
 						</div>
 					{{- end -}}
 
-					<p class="text-slate-600">
-						<span class="font-medium">{{ .model.PieceCount }}</span>
-						{{ if eq .model.PieceCount 1 }}Beitrag{{ else }}Beiträge{{ end }}
-						in der Kategorie „{{ index .model.Category.Names 0 }}" aus dem Jahr {{ .model.Year }}
-					</p>
 				</div>
 			</div>
 		</div>
@@ -77,8 +72,6 @@
 
 			{{- if .model.Pieces -}}
 				<div class="columns-2 gap-6 hyphens-auto">
-					<h3 class="font-bold font-serif text-slate-800 mb-1 break-inside-avoid">{{ .model.Year }}</h3>
-
 					{{- /* Group pieces by title within the year */ -}}
 					{{- $groupedPieces := dict -}}
 					{{- range $_, $p := .model.Pieces -}}
