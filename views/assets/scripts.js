@@ -2,7 +2,7 @@ document.body.addEventListener("htmx:configRequest", function(a) {
   let e = a.detail.elt;
   e.id === "search" && e.value === "" && (a.detail.parameters = {}, a.detail.path = window.location.pathname + window.location.search);
 });
-class $ extends HTMLElement {
+class R extends HTMLElement {
   constructor() {
     super();
   }
@@ -12,8 +12,8 @@ class $ extends HTMLElement {
   setupEventListeners() {
     const e = this.querySelector("#person-search"), t = this.querySelector("#authors-only"), i = this.querySelector("#all-persons"), n = this.querySelector("#authors-only-list");
     !e || !t || !i || !n || (e.addEventListener("input", (s) => {
-      const r = s.target.value.toLowerCase().trim();
-      this.filterPersons(r);
+      const o = s.target.value.toLowerCase().trim();
+      this.filterPersons(o);
     }), t.addEventListener("change", () => {
       this.togglePersonsList();
       const s = e.value.toLowerCase().trim();
@@ -29,42 +29,42 @@ class $ extends HTMLElement {
     if (!i)
       return;
     i.querySelectorAll(".person-item").forEach((s) => {
-      var c, h;
-      const r = ((c = s.querySelector(".person-name")) == null ? void 0 : c.textContent) || "", o = ((h = s.querySelector(".person-life")) == null ? void 0 : h.textContent) || "";
-      !e || r.toLowerCase().includes(e) || o.toLowerCase().includes(e) ? s.style.display = "block" : s.style.display = "none";
+      var c, u;
+      const o = ((c = s.querySelector(".person-name")) == null ? void 0 : c.textContent) || "", r = ((u = s.querySelector(".person-life")) == null ? void 0 : u.textContent) || "";
+      !e || o.toLowerCase().includes(e) || r.toLowerCase().includes(e) ? s.style.display = "block" : s.style.display = "none";
     });
   }
 }
-customElements.define("person-jump-filter", $);
-class O extends HTMLElement {
+customElements.define("person-jump-filter", R);
+class V extends HTMLElement {
   connectedCallback() {
     const e = this.querySelector("#place-search");
     e && e.addEventListener("input", (t) => {
       const i = t.target.value.toLowerCase().trim();
       this.querySelectorAll(".place-item").forEach((s) => {
         var l;
-        const r = ((l = s.querySelector(".place-name")) == null ? void 0 : l.textContent) || "", o = !i || r.toLowerCase().includes(i);
-        s.style.display = o ? "block" : "none";
+        const o = ((l = s.querySelector(".place-name")) == null ? void 0 : l.textContent) || "", r = !i || o.toLowerCase().includes(i);
+        s.style.display = r ? "block" : "none";
       });
     });
   }
 }
-customElements.define("place-jump-filter", O);
-class R extends HTMLElement {
+customElements.define("place-jump-filter", V);
+class D extends HTMLElement {
   connectedCallback() {
     const e = this.querySelector("#category-search");
     e && e.addEventListener("input", (t) => {
       const i = t.target.value.toLowerCase().trim();
       this.querySelectorAll(".category-item").forEach((s) => {
         var l;
-        const r = ((l = s.querySelector(".category-name")) == null ? void 0 : l.textContent) || "", o = !i || r.toLowerCase().includes(i);
-        s.style.display = o ? "block" : "none";
+        const o = ((l = s.querySelector(".category-name")) == null ? void 0 : l.textContent) || "", r = !i || o.toLowerCase().includes(i);
+        s.style.display = r ? "block" : "none";
       });
     });
   }
 }
-customElements.define("category-jump-filter", R);
-class V extends HTMLElement {
+customElements.define("category-jump-filter", D);
+class z extends HTMLElement {
   constructor() {
     super(), this.issuesByYear = {};
   }
@@ -87,21 +87,21 @@ class V extends HTMLElement {
     e.addEventListener("change", () => {
       this.updateIssueOptions(), this.updatePageInputState(), this.clearPageErrors();
     }), t && t.addEventListener("change", () => {
-      const o = e.value, l = t.value;
-      o && l && (window.location.href = `/${o}/${l}`);
+      const r = e.value, l = t.value;
+      r && l && (window.location.href = `/${r}/${l}`);
     }), i && i.addEventListener("change", () => {
-      const o = e.value, l = i.value;
-      o && l && (window.location.href = `/${o}/${l}`);
+      const r = e.value, l = i.value;
+      r && l && (window.location.href = `/${r}/${l}`);
     }), n && (n.addEventListener("input", () => {
       this.updatePageJumpButton(), this.clearPageErrors();
-    }), n.addEventListener("keydown", (o) => {
-      o.key === "Enter" && (o.preventDefault(), this.handlePageJump());
+    }), n.addEventListener("keydown", (r) => {
+      r.key === "Enter" && (r.preventDefault(), this.handlePageJump());
     })), s && s.addEventListener("click", () => {
       this.handlePageJump();
     });
-    const r = this.querySelector("#page-jump-form");
-    r && r.addEventListener("submit", (o) => {
-      o.preventDefault(), this.handlePageJump();
+    const o = this.querySelector("#page-jump-form");
+    o && o.addEventListener("submit", (r) => {
+      r.preventDefault(), this.handlePageJump();
     }), this.updateIssueOptions(), this.updatePageInputState(), this.updatePageJumpButton();
   }
   updateIssueOptions() {
@@ -109,14 +109,14 @@ class V extends HTMLElement {
     if (!e || !t || !i)
       return;
     const n = e.value, s = this.issuesByYear[n] || [];
-    t.innerHTML = '<option value="">Nr.</option>', i.innerHTML = '<option value="">Datum</option>', s.forEach((o) => {
+    t.innerHTML = '<option value="">Nr.</option>', i.innerHTML = '<option value="">Datum</option>', s.forEach((r) => {
       const l = document.createElement("option");
-      l.value = o.number, l.textContent = o.number, t.appendChild(l);
+      l.value = r.number, l.textContent = r.number, t.appendChild(l);
       const c = document.createElement("option");
-      c.value = o.number, c.textContent = `${o.date} [${o.number}]`, i.appendChild(c);
+      c.value = r.number, c.textContent = `${r.date} [${r.number}]`, i.appendChild(c);
     });
-    const r = s.length > 0 && n;
-    t.disabled = !r, i.disabled = !r;
+    const o = s.length > 0 && n;
+    t.disabled = !o, i.disabled = !o;
   }
   async handlePageJump() {
     const e = this.querySelector("#year-select"), t = this.querySelector("#page-input"), i = this.querySelector("#jump-errors");
@@ -128,32 +128,32 @@ class V extends HTMLElement {
       return;
     }
     try {
-      const r = new FormData();
-      r.append("year", n), r.append("page", s);
-      const o = await fetch("/jump", {
+      const o = new FormData();
+      o.append("year", n), o.append("page", s);
+      const r = await fetch("/jump", {
         method: "POST",
-        body: r,
+        body: o,
         redirect: "manual"
-      }), l = o.headers.get("HX-Redirect");
+      }), l = r.headers.get("HX-Redirect");
       if (l) {
         window.location.href = l;
         return;
       }
-      if (o.status === 302 || o.status === 301) {
-        const c = o.headers.get("Location");
+      if (r.status === 302 || r.status === 301) {
+        const c = r.headers.get("Location");
         if (c) {
           window.location.href = c;
           return;
         }
       }
-      if (o.ok)
+      if (r.ok)
         i && (i.innerHTML = "");
       else {
-        const c = await o.text();
+        const c = await r.text();
         i && (i.innerHTML = c);
       }
-    } catch (r) {
-      console.error("Page jump failed:", r), this.showError("Fehler beim Suchen der Seite.");
+    } catch (o) {
+      console.error("Page jump failed:", o), this.showError("Fehler beim Suchen der Seite.");
     }
   }
   showError(e) {
@@ -175,12 +175,12 @@ class V extends HTMLElement {
     const e = this.querySelector("#year-select"), t = this.querySelector("#page-input"), i = this.querySelector("#page-jump-btn");
     if (!e || !t || !i)
       return;
-    const n = e.value, s = t.value && t.value.trim(), r = n && s;
-    i.disabled = !r;
+    const n = e.value, s = t.value && t.value.trim(), o = n && s;
+    i.disabled = !o;
   }
 }
-customElements.define("year-jump-filter", V);
-class D extends HTMLElement {
+customElements.define("year-jump-filter", z);
+class F extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
   }
@@ -220,8 +220,8 @@ class D extends HTMLElement {
         swap: "innerHTML"
       }).then(() => {
         console.log("HTMX request completed"), document.querySelector("#filter-container .flex.justify-center");
-      }).catch((r) => {
-        console.log("HTMX request failed:", r);
+      }).catch((o) => {
+        console.log("HTMX request failed:", o);
       });
     } else
       this.hideFilter();
@@ -242,8 +242,8 @@ class D extends HTMLElement {
     this.isOpen && t && i && !t.contains(e.target) && !this.contains(e.target) && this.hideFilter();
   }
 }
-customElements.define("schnellauswahl-button", D);
-class z extends HTMLElement {
+customElements.define("schnellauswahl-button", F);
+class j extends HTMLElement {
   constructor() {
     super(), this.isOpen = !1;
   }
@@ -353,7 +353,7 @@ class z extends HTMLElement {
     this.isOpen && !this.contains(e.target) && this.hideMenu();
   }
 }
-customElements.define("navigation-menu", z);
+customElements.define("navigation-menu", j);
 document.addEventListener("DOMContentLoaded", function() {
   document.addEventListener("click", function(a) {
     const e = a.target.closest('a[href^="/akteure/"], a[href^="/ort/"]'), t = document.getElementById("filter-container");
@@ -371,13 +371,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 });
-const k = [];
+const T = [];
 document.addEventListener("DOMContentLoaded", () => {
-  H();
+  I();
 });
-const H = function() {
-  for (; k.length > 0; ) {
-    const a = k.shift();
+const I = function() {
+  for (; T.length > 0; ) {
+    const a = T.shift();
     try {
       a();
     } catch (e) {
@@ -385,7 +385,7 @@ const H = function() {
     }
   }
 };
-class F extends HTMLElement {
+class _ extends HTMLElement {
   constructor() {
     super(), this.scrollTimeout = null, this.clickHandlers = [], this.manualNavigation = !1, this.handleScroll = this.handleScroll.bind(this);
   }
@@ -434,14 +434,14 @@ class F extends HTMLElement {
     const e = document.getElementById("scrollspy-slider"), t = document.getElementById("scrollspy-nav");
     if (!e || !t || e.style.opacity === "0")
       return;
-    const i = t.getBoundingClientRect(), n = parseFloat(e.style.top), s = parseFloat(e.style.height), r = n + s, o = t.scrollTop, l = o + i.height;
-    if (r > l) {
-      const c = r - i.height + 20;
+    const i = t.getBoundingClientRect(), n = parseFloat(e.style.top), s = parseFloat(e.style.height), o = n + s, r = t.scrollTop, l = r + i.height;
+    if (o > l) {
+      const c = o - i.height + 20;
       t.scrollTo({
         top: c,
         behavior: "smooth"
       });
-    } else if (n < o) {
+    } else if (n < r) {
       const c = n - 20;
       t.scrollTo({
         top: Math.max(0, c),
@@ -456,21 +456,21 @@ class F extends HTMLElement {
     try {
       this.sections.forEach((n) => {
         if (!n || !n.getAttribute) return;
-        const s = n.getAttribute("id"), r = n.querySelector(".akteur-werke-section"), o = n.querySelector(".akteur-beitraege-section");
+        const s = n.getAttribute("id"), o = n.querySelector(".akteur-werke-section"), r = n.querySelector(".akteur-beitraege-section");
         let l = !1;
-        if (r) {
-          const c = r.getBoundingClientRect(), h = c.top < window.innerHeight, d = c.bottom > 0;
-          h && d && (l = !0);
+        if (o) {
+          const c = o.getBoundingClientRect(), u = c.top < window.innerHeight, d = c.bottom > 0;
+          u && d && (l = !0);
         }
-        if (o && !l) {
-          const c = o.getBoundingClientRect(), h = c.top < window.innerHeight, d = c.bottom > 0;
-          h && d && (l = !0);
+        if (r && !l) {
+          const c = r.getBoundingClientRect(), u = c.top < window.innerHeight, d = c.bottom > 0;
+          u && d && (l = !0);
         }
-        if (!r && !o) {
+        if (!o && !r) {
           const c = n.querySelector("div:first-child");
           if (c) {
-            const h = c.getBoundingClientRect(), d = h.top >= 0, u = h.bottom <= window.innerHeight;
-            d && u && (l = !0);
+            const u = c.getBoundingClientRect(), d = u.top >= 0, h = u.bottom <= window.innerHeight;
+            d && h && (l = !0);
           }
         }
         l && e.push(s);
@@ -485,13 +485,13 @@ class F extends HTMLElement {
       e.includes(s) && (n.classList.add("font-medium"), t.push(n));
     }), t.length > 0 && i) {
       const n = document.getElementById("scrollspy-nav"), s = n.getBoundingClientRect();
-      let r = 1 / 0, o = -1 / 0;
+      let o = 1 / 0, r = -1 / 0;
       t.forEach((c) => {
-        const h = c.getBoundingClientRect(), d = h.top - s.top + n.scrollTop, u = d + h.height;
-        r = Math.min(r, d), o = Math.max(o, u);
+        const u = c.getBoundingClientRect(), d = u.top - s.top + n.scrollTop, h = d + u.height;
+        o = Math.min(o, d), r = Math.max(r, h);
       });
-      let l = o - r;
-      i.style.top = `${r}px`, i.style.height = `${l}px`, i.style.opacity = "1", setTimeout(() => this.ensureMarkerVisibility(), 100);
+      let l = r - o;
+      i.style.top = `${o}px`, i.style.height = `${l}px`, i.style.opacity = "1", setTimeout(() => this.ensureMarkerVisibility(), 100);
     } else i && (i.style.opacity = "0");
     t.length > 0 && this.updateSidebarScroll(t);
   }
@@ -509,8 +509,8 @@ class F extends HTMLElement {
     if (i && (i.classList.add("font-medium"), t)) {
       const n = document.getElementById("scrollspy-nav");
       if (n) {
-        const s = n.getBoundingClientRect(), r = i.getBoundingClientRect(), o = r.top - s.top + n.scrollTop;
-        t.style.top = `${o}px`, t.style.height = `${r.height}px`, t.style.opacity = "1";
+        const s = n.getBoundingClientRect(), o = i.getBoundingClientRect(), r = o.top - s.top + n.scrollTop;
+        t.style.top = `${r}px`, t.style.height = `${o.height}px`, t.style.opacity = "1";
       }
     }
   }
@@ -524,11 +524,11 @@ class F extends HTMLElement {
       document.documentElement.clientHeight,
       document.documentElement.scrollHeight,
       document.documentElement.offsetHeight
-    ), s = window.innerHeight, r = n - s, o = r > 0 ? window.scrollY / r : 0, l = t.clientHeight, h = t.scrollHeight - l;
-    if (h > 0) {
-      const d = o * h, u = i.getBoundingClientRect(), p = t.getBoundingClientRect(), m = u.top - p.top + t.scrollTop, g = l / 2, w = m - g, x = 0.7, f = x * d + (1 - x) * w, v = Math.max(0, Math.min(h, f)), E = t.scrollTop;
-      Math.abs(v - E) > 10 && t.scrollTo({
-        top: v,
+    ), s = window.innerHeight, o = n - s, r = o > 0 ? window.scrollY / o : 0, l = t.clientHeight, u = t.scrollHeight - l;
+    if (u > 0) {
+      const d = r * u, h = i.getBoundingClientRect(), g = t.getBoundingClientRect(), p = h.top - g.top + t.scrollTop, m = l / 2, f = p - m, w = 0.7, b = w * d + (1 - w) * f, x = Math.max(0, Math.min(u, b)), E = t.scrollTop;
+      Math.abs(x - E) > 10 && t.scrollTo({
+        top: x,
         behavior: "smooth"
       });
     }
@@ -547,8 +547,8 @@ class F extends HTMLElement {
     e && (e.style.opacity = "0", e.style.height = "0"), this.sections = null, this.navLinks = null, this.clickHandlers = [], this.manualNavigation = !1;
   }
 }
-customElements.define("akteure-scrollspy", F);
-class j extends HTMLElement {
+customElements.define("akteure-scrollspy", _);
+class K extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.placeCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -592,15 +592,15 @@ class j extends HTMLElement {
     let i = 0;
     this.placeCards.forEach((n) => {
       var l, c;
-      const s = ((l = n.getAttribute("data-place-name")) == null ? void 0 : l.toLowerCase()) || "", r = ((c = n.getAttribute("data-modern-name")) == null ? void 0 : c.toLowerCase()) || "";
-      e === "" || s.includes(t) || r.includes(t) ? (n.style.display = "", i++) : n.style.display = "none";
+      const s = ((l = n.getAttribute("data-place-name")) == null ? void 0 : l.toLowerCase()) || "", o = ((c = n.getAttribute("data-modern-name")) == null ? void 0 : c.toLowerCase()) || "";
+      e === "" || s.includes(t) || o.includes(t) ? (n.style.display = "", i++) : n.style.display = "none";
     }), this.updateCountDisplay(i, e);
   }
   updateCountDisplay(e, t) {
     this.countElement && (t === "" ? this.countElement.textContent = `Alle Orte (${this.originalCount})` : e === 0 ? this.countElement.textContent = `Keine Orte gefunden für "${t}"` : this.countElement.textContent = `${e} von ${this.originalCount} Orten`);
   }
 }
-class _ extends HTMLElement {
+class W extends HTMLElement {
   constructor() {
     super(), this.isExpanded = !1, this.isLoading = !1, this.hasLoaded = !1, this.boundHandleClick = this.handleClick.bind(this), this.boundHandleMapClick = this.handleMapClick.bind(this), this.boundHandleHeadingHover = this.handleHeadingHover.bind(this), this.boundHandleHeadingLeave = this.handleHeadingLeave.bind(this);
   }
@@ -702,7 +702,7 @@ class _ extends HTMLElement {
     this.isExpanded ? this.classList.add("border-b", "border-slate-100") : this.classList.add("border-b", "border-slate-100"), !this.nextElementSibling && this.classList.remove("border-b");
   }
 }
-class K extends HTMLElement {
+class G extends HTMLElement {
   constructor() {
     super(), this.places = [], this.mapElement = null, this.pointsContainer = null, this.intersectionObserver = null, this.mapPoints = /* @__PURE__ */ new Map(), this.tooltip = null, this.showTimeout = null, this.hideTimeout = null, this.isTooltipVisible = !1, this.currentHoveredPlaceId = "", this.boundHandleHeadingHoverEvent = this.handleHeadingHoverEvent.bind(this);
   }
@@ -740,42 +740,54 @@ class K extends HTMLElement {
   initializeMap() {
     if (!this.places.length || !this.pointsContainer)
       return;
-    const e = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, t = { lon: 10, lat: 52 }, i = (s, r) => {
-      const h = t.lon * Math.PI / 180, d = t.lat * Math.PI / 180, u = r * Math.PI / 180, p = s * Math.PI / 180, m = Math.sqrt(
-        2 / (1 + Math.sin(d) * Math.sin(p) + Math.cos(d) * Math.cos(p) * Math.cos(u - h))
-      ), g = 6371e3 * m * Math.cos(p) * Math.sin(u - h), w = 6371e3 * m * (Math.cos(d) * Math.sin(p) - Math.sin(d) * Math.cos(p) * Math.cos(u - h)), x = g + 4321e3, f = w + 321e4, v = e.xmax - e.xmin, E = e.ymax - e.ymin, S = (x - e.xmin) / v * 100, C = (e.ymax - f) / E * 100;
-      return { x: S, y: C };
-    }, n = [];
-    this.places.forEach((s) => {
-      if (s.lat && s.lng) {
-        const r = parseFloat(s.lat), o = parseFloat(s.lng), l = i(r, o);
-        if (l.x >= 0 && l.x <= 100 && l.y >= 0 && l.y <= 100) {
-          n.push(l);
-          const c = document.createElement("div");
-          c.className = "map-point hidden", c.style.left = `${l.x}%`, c.style.top = `${l.y}%`, c.style.transformOrigin = "center";
-          const h = `${s.name}${s.toponymName && s.toponymName !== s.name ? ` (${s.toponymName})` : ""}`;
-          c.dataset.placeId = s.id, c.dataset.tooltipText = h, c.addEventListener("mouseenter", (d) => this.showTooltip(d)), c.addEventListener("mouseleave", () => this.hideTooltip()), c.addEventListener("mousemove", (d) => this.updateTooltipPosition(d)), c.addEventListener("click", (d) => this.scrollToPlace(d)), this.pointsContainer.appendChild(c), this.mapPoints.set(s.id, c);
+    const e = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    e.setAttribute("class", "absolute top-0 left-0 w-full h-full"), e.style.pointerEvents = "none", e.style.overflow = "visible", e.setAttribute("viewBox", "0 0 100 100"), e.setAttribute("preserveAspectRatio", "none");
+    const t = document.createElementNS("http://www.w3.org/2000/svg", "defs"), i = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
+    i.setAttribute("id", "redDotGradient"), i.setAttribute("cx", "30%"), i.setAttribute("cy", "30%"), i.setAttribute("r", "70%");
+    const n = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    n.setAttribute("offset", "0%"), n.setAttribute("stop-color", "#f56565");
+    const s = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    s.setAttribute("offset", "100%"), s.setAttribute("stop-color", "#e53e3e"), i.appendChild(n), i.appendChild(s), t.appendChild(i), e.appendChild(t), this.pointsContainer.appendChild(e);
+    const o = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, r = { lon: 10, lat: 52 }, l = (u, d) => {
+      const m = r.lon * Math.PI / 180, f = r.lat * Math.PI / 180, w = d * Math.PI / 180, b = u * Math.PI / 180, x = Math.sqrt(
+        2 / (1 + Math.sin(f) * Math.sin(b) + Math.cos(f) * Math.cos(b) * Math.cos(w - m))
+      ), E = 6371e3 * x * Math.cos(b) * Math.sin(w - m), S = 6371e3 * x * (Math.cos(f) * Math.sin(b) - Math.sin(f) * Math.cos(b) * Math.cos(w - m)), L = E + 4321e3, P = S + 321e4, C = o.xmax - o.xmin, v = o.ymax - o.ymin, $ = (L - o.xmin) / C * 100, O = (o.ymax - P) / v * 100;
+      return { x: $, y: O };
+    }, c = [];
+    this.places.forEach((u) => {
+      if (u.lat && u.lng) {
+        const d = parseFloat(u.lat), h = parseFloat(u.lng), g = l(d, h);
+        if (g.x >= 0 && g.x <= 100 && g.y >= 0 && g.y <= 100) {
+          c.push(g);
+          const p = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          p.setAttribute("cx", g.x.toString()), p.setAttribute("cy", g.y.toString()), p.setAttribute("r", "0.4"), p.setAttribute("fill", "white"), p.setAttribute("opacity", "0.7"), p.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))"), p.style.cursor = "pointer", p.style.pointerEvents = "all", p.style.transition = "r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease", p.addEventListener("mouseenter", () => {
+            p.getAttribute("fill") === "white" && (p.setAttribute("r", "0.6"), p.setAttribute("fill", "#f87171"), p.setAttribute("opacity", "1"));
+          }), p.addEventListener("mouseleave", () => {
+            p.getAttribute("fill") === "#f87171" && (p.setAttribute("r", "0.4"), p.setAttribute("fill", "white"), p.setAttribute("opacity", "0.7"));
+          });
+          const m = `${u.name}${u.toponymName && u.toponymName !== u.name ? ` (${u.toponymName})` : ""}`;
+          p.dataset.placeId = u.id, p.dataset.tooltipText = m, p.addEventListener("mouseenter", (f) => this.showTooltip(f)), p.addEventListener("mouseleave", () => this.hideTooltip()), p.addEventListener("mousemove", (f) => this.updateTooltipPosition(f)), p.addEventListener("click", (f) => this.scrollToPlace(f)), e.appendChild(p), this.mapPoints.set(u.id, p);
         }
       }
-    }), n.length > 0 && this.autoZoomToPoints(n);
+    }), c.length > 0 && this.autoZoomToPoints(c);
   }
   // Calculate bounding box of all points for the auto-zoom
   autoZoomToPoints(e) {
     let t = 100, i = 0, n = 100, s = 0;
-    e.forEach((y) => {
-      y.x < t && (t = y.x), y.x > i && (i = y.x), y.y < n && (n = y.y), y.y > s && (s = y.y);
+    e.forEach((v) => {
+      v.x < t && (t = v.x), v.x > i && (i = v.x), v.y < n && (n = v.y), v.y > s && (s = v.y);
     });
-    const r = 0.06, o = i - t, l = s - n, c = o * r, h = l * r, d = Math.max(0, t - c), u = Math.min(100, i + c), p = Math.max(0, n - h), m = Math.min(100, s + h), g = u - d, w = m - p, x = 5 / 7, f = g / w;
-    let v = { x: d, y: p, width: g, height: w };
-    if (f > x) {
-      const y = g / x;
-      v.y = p - (y - w) / 2, v.height = y;
+    const o = 0.06, r = i - t, l = s - n, c = r * o, u = l * o, d = Math.max(0, t - c), h = Math.min(100, i + c), g = Math.max(0, n - u), p = Math.min(100, s + u), m = h - d, f = p - g, w = 5 / 7, b = m / f;
+    let x = { x: d, y: g, width: m, height: f };
+    if (b > w) {
+      const v = m / w;
+      x.y = g - (v - f) / 2, x.height = v;
     } else {
-      const y = w * x;
-      v.x = d - (y - g) / 2, v.width = y;
+      const v = f * w;
+      x.x = d - (v - m) / 2, x.width = v;
     }
-    const E = 100 / v.width, S = -v.x, C = -v.y, T = `scale(${E}) translate(${S}%, ${C}%)`, P = this.querySelector(".transform-wrapper");
-    P && (P.style.transform = T);
+    const E = 100 / x.width, S = -x.x, L = -x.y, P = `scale(${E}) translate(${S}%, ${L}%)`, C = this.querySelector(".transform-wrapper");
+    C && (C.style.transform = P);
   }
   initializeScrollspy() {
     const e = document.querySelectorAll("place-accordion[data-place-id]");
@@ -799,10 +811,10 @@ class K extends HTMLElement {
     }));
   }
   setPointActive(e) {
-    e.className = "map-point absolute w-1.5 h-1.5 bg-red-500 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:bg-red-600 hover:z-30", e.style.border = "0.5px solid #b91c1c";
+    e.setAttribute("r", "0.8"), e.setAttribute("fill", "#dc2626"), e.setAttribute("stroke", "#b91c1c"), e.setAttribute("stroke-width", "0.12"), e.setAttribute("opacity", "1"), e.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))"), e.parentNode && e.parentNode.appendChild(e);
   }
   setPointInactive(e) {
-    e.className = "map-point absolute w-[0.18rem] h-[0.18rem] bg-white opacity-[0.7]  rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30 hover:opacity-[1.0]", e.style.border = "";
+    e.setAttribute("r", "0.4"), e.setAttribute("fill", "white"), e.setAttribute("stroke", "none"), e.setAttribute("opacity", "0.7"), e.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))");
   }
   showTooltip(e) {
     const t = e.target, i = t.dataset.tooltipText, n = t.dataset.placeId;
@@ -861,13 +873,23 @@ class K extends HTMLElement {
   }
   handleHeadingHoverEvent(e) {
     const { placeId: t, action: i } = e.detail, n = this.mapPoints.get(t);
-    n && (i === "show" ? (this.currentHoveredPlaceId = t, n.classList.remove("w-1", "h-1", "w-1.5", "h-1.5"), n.classList.add("w-2.5", "h-2.5"), n.style.zIndex = "25") : i === "hide" && (this.currentHoveredPlaceId = "", n.classList.remove("w-2.5", "h-2.5"), n.className.includes("bg-red-500") ? n.classList.add("w-1.5", "h-1.5") : n.classList.add("w-1", "h-1"), n.style.zIndex = ""));
+    if (n) {
+      if (i === "show") {
+        this.currentHoveredPlaceId = t;
+        const s = n.getAttribute("r");
+        n.setAttribute("data-original-radius", s), n.setAttribute("r", (parseFloat(s) * 1.7).toString()), n.setAttribute("filter", "none"), n.setAttribute("fill", "#dc2626"), n.setAttribute("stroke", "#b91c1c"), n.setAttribute("stroke-width", "0.24"), n.setAttribute("opacity", "1"), n.parentNode && n.parentNode.appendChild(n);
+      } else if (i === "hide") {
+        this.currentHoveredPlaceId = "";
+        const s = n.getAttribute("data-original-radius");
+        s && (n.setAttribute("r", s), n.removeAttribute("data-original-radius"), n.getAttribute("fill") === "white" ? (n.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))"), n.setAttribute("stroke", "none")) : (n.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))"), n.setAttribute("fill", "#dc2626"), n.setAttribute("stroke", "#b91c1c"), n.setAttribute("stroke-width", "0.12")));
+      }
+    }
   }
   disconnectedCallback() {
     this.intersectionObserver && (this.intersectionObserver.disconnect(), this.intersectionObserver = null), this.clearTimeouts(), document.removeEventListener("place-heading-hover", this.boundHandleHeadingHoverEvent), window.removeEventListener("scroll", this.boundHandleScroll), document.removeEventListener("scroll", this.boundHandleScroll);
   }
 }
-class W extends HTMLElement {
+class Y extends HTMLElement {
   constructor() {
     super(), this.place = null, this.mapElement = null, this.pointsContainer = null, this.tooltip = null;
   }
@@ -903,42 +925,50 @@ class W extends HTMLElement {
   initializeMap() {
     if (!this.place || !this.place.lat || !this.place.lng || !this.pointsContainer)
       return;
-    const e = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, t = { lon: 10, lat: 52 }, i = (o, l) => {
-      const u = t.lon * Math.PI / 180, p = t.lat * Math.PI / 180, m = l * Math.PI / 180, g = o * Math.PI / 180, w = Math.sqrt(
-        2 / (1 + Math.sin(p) * Math.sin(g) + Math.cos(p) * Math.cos(g) * Math.cos(m - u))
-      ), x = 6371e3 * w * Math.cos(g) * Math.sin(m - u), f = 6371e3 * w * (Math.cos(p) * Math.sin(g) - Math.sin(p) * Math.cos(g) * Math.cos(m - u)), v = x + 4321e3, E = f + 321e4, S = e.xmax - e.xmin, C = e.ymax - e.ymin, T = (v - e.xmin) / S * 100, P = (e.ymax - E) / C * 100;
-      return { x: T, y: P };
-    }, n = parseFloat(this.place.lat), s = parseFloat(this.place.lng), r = i(n, s);
-    if (r.x >= 0 && r.x <= 100 && r.y >= 0 && r.y <= 100) {
-      const o = document.createElement("div");
-      o.style.left = `${r.x}%`, o.style.top = `${r.y}%`, o.style.transformOrigin = "center", o.className = "absolute w-2 h-2 bg-red-500 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 z-20", o.style.border = "0.5px solid #b91c1c";
-      const l = `${this.place.name}${this.place.toponymName && this.place.toponymName !== this.place.name ? ` (${this.place.toponymName})` : ""}`;
-      o.dataset.tooltipText = l, o.addEventListener("mouseenter", (c) => this.showTooltip(c)), o.addEventListener("mouseleave", () => this.hideTooltip()), o.addEventListener("mousemove", (c) => this.updateTooltipPosition(c)), this.pointsContainer.appendChild(o), this.autoZoomToPoint(r);
+    const e = { xmin: 2555e3, ymin: 135e4, xmax: 7405e3, ymax: 55e5 }, t = { lon: 10, lat: 52 }, i = (r, l) => {
+      const h = t.lon * Math.PI / 180, g = t.lat * Math.PI / 180, p = l * Math.PI / 180, m = r * Math.PI / 180, f = Math.sqrt(
+        2 / (1 + Math.sin(g) * Math.sin(m) + Math.cos(g) * Math.cos(m) * Math.cos(p - h))
+      ), w = 6371e3 * f * Math.cos(m) * Math.sin(p - h), b = 6371e3 * f * (Math.cos(g) * Math.sin(m) - Math.sin(g) * Math.cos(m) * Math.cos(p - h)), x = w + 4321e3, E = b + 321e4, S = e.xmax - e.xmin, L = e.ymax - e.ymin, P = (x - e.xmin) / S * 100, C = (e.ymax - E) / L * 100;
+      return { x: P, y: C };
+    }, n = parseFloat(this.place.lat), s = parseFloat(this.place.lng), o = i(n, s);
+    if (o.x >= 0 && o.x <= 100 && o.y >= 0 && o.y <= 100) {
+      const r = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      r.setAttribute("class", "absolute top-0 left-0 w-full h-full"), r.style.pointerEvents = "none", r.style.overflow = "visible", r.setAttribute("viewBox", "0 0 100 100"), r.setAttribute("preserveAspectRatio", "none");
+      const l = document.createElementNS("http://www.w3.org/2000/svg", "defs"), c = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
+      c.setAttribute("id", "redDotGradientSingle"), c.setAttribute("cx", "30%"), c.setAttribute("cy", "30%"), c.setAttribute("r", "70%");
+      const u = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+      u.setAttribute("offset", "0%"), u.setAttribute("stop-color", "#f56565");
+      const d = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+      d.setAttribute("offset", "100%"), d.setAttribute("stop-color", "#e53e3e"), c.appendChild(u), c.appendChild(d), l.appendChild(c), r.appendChild(l), this.pointsContainer.appendChild(r);
+      const h = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      h.setAttribute("cx", o.x.toString()), h.setAttribute("cy", o.y.toString()), h.setAttribute("r", "0.8"), h.setAttribute("fill", "#dc2626"), h.setAttribute("stroke", "#b91c1c"), h.setAttribute("stroke-width", "0.05"), h.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))"), h.style.cursor = "pointer", h.style.pointerEvents = "all", h.style.transition = "r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease";
+      const g = `${this.place.name}${this.place.toponymName && this.place.toponymName !== this.place.name ? ` (${this.place.toponymName})` : ""}`;
+      h.dataset.tooltipText = g, h.addEventListener("mouseenter", (p) => this.showTooltip(p)), h.addEventListener("mouseleave", () => this.hideTooltip()), h.addEventListener("mousemove", (p) => this.updateTooltipPosition(p)), r.appendChild(h), this.autoZoomToPoint(o);
     }
   }
   autoZoomToPoint(e) {
-    let i = Math.max(0, e.x - 20), n = Math.min(100, e.x + 20), s = Math.max(0, e.y - 20), r = Math.min(100, e.y + 20), o = n - i, l = r - s;
-    const c = 5 / 7, h = o / l;
-    let d = { x: i, y: s, width: o, height: l };
-    if (h > c) {
-      const f = o / c;
-      d.y = s - (f - l) / 2, d.height = f;
+    let i = Math.max(0, e.x - 20), n = Math.min(100, e.x + 20), s = Math.max(0, e.y - 20), o = Math.min(100, e.y + 20), r = n - i, l = o - s;
+    const c = 5 / 7, u = r / l;
+    let d = { x: i, y: s, width: r, height: l };
+    if (u > c) {
+      const b = r / c;
+      d.y = s - (b - l) / 2, d.height = b;
     } else {
-      const f = l * c;
-      d.x = i - (f - o) / 2, d.width = f;
+      const b = l * c;
+      d.x = i - (b - r) / 2, d.width = b;
     }
     d.x < 0 && (d.width += d.x, d.x = 0), d.y < 0 && (d.height += d.y, d.y = 0), d.x + d.width > 100 && (d.width = 100 - d.x), d.y + d.height > 100 && (d.height = 100 - d.y);
-    const u = 30;
-    if (d.width < u) {
-      const f = (u - d.width) / 2;
-      d.x = Math.max(0, d.x - f), d.width = Math.min(u, 100 - d.x);
+    const h = 30;
+    if (d.width < h) {
+      const b = (h - d.width) / 2;
+      d.x = Math.max(0, d.x - b), d.width = Math.min(h, 100 - d.x);
     }
-    if (d.height < u) {
-      const f = (u - d.height) / 2;
-      d.y = Math.max(0, d.y - f), d.height = Math.min(u, 100 - d.y);
+    if (d.height < h) {
+      const b = (h - d.height) / 2;
+      d.y = Math.max(0, d.y - b), d.height = Math.min(h, 100 - d.y);
     }
-    const p = 100 / d.width, m = -d.x, g = -d.y, w = `scale(${p}) translate(${m}%, ${g}%)`, x = this.querySelector(".transform-wrapper");
-    x && (x.style.transform = w);
+    const g = 100 / d.width, p = -d.x, m = -d.y, f = `scale(${g}) translate(${p}%, ${m}%)`, w = this.querySelector(".transform-wrapper");
+    w && (w.style.transform = f);
   }
   showTooltip(e) {
     const i = e.target.dataset.tooltipText;
@@ -953,11 +983,11 @@ class W extends HTMLElement {
     this.tooltip.style.left = `${i}px`, this.tooltip.style.top = `${n}px`;
   }
 }
-customElements.define("places-filter", j);
-customElements.define("place-accordion", _);
-customElements.define("places-map", K);
-customElements.define("places-map-single", W);
-class Y extends HTMLElement {
+customElements.define("places-filter", K);
+customElements.define("place-accordion", W);
+customElements.define("places-map", G);
+customElements.define("places-map-single", Y);
+class Z extends HTMLElement {
   constructor() {
     super(), this.searchInput = null, this.itemCards = [], this.countElement = null, this.debounceTimer = null, this.originalCount = 0;
   }
@@ -1004,11 +1034,11 @@ class Y extends HTMLElement {
     const t = e.toLowerCase();
     let i = 0;
     this.itemCards.forEach((n) => {
-      var r;
+      var o;
       let s = e === "";
       if (!s) {
-        for (const o of this.searchAttributes)
-          if ((((r = n.getAttribute(o.trim())) == null ? void 0 : r.toLowerCase()) || "").includes(t)) {
+        for (const r of this.searchAttributes)
+          if ((((o = n.getAttribute(r.trim())) == null ? void 0 : o.toLowerCase()) || "").includes(t)) {
             s = !0;
             break;
           }
@@ -1020,8 +1050,8 @@ class Y extends HTMLElement {
     this.countElement && (t === "" ? this.countElement.style.display = "none" : (this.countElement.style.display = "", e === 0 ? this.countElement.textContent = "(0)" : this.countElement.textContent = `(${e})`));
   }
 }
-customElements.define("generic-filter", Y);
-class Z extends HTMLElement {
+customElements.define("generic-filter", Z);
+class X extends HTMLElement {
   constructor() {
     super(), this.resizeObserver = null;
   }
@@ -1147,26 +1177,26 @@ class Z extends HTMLElement {
       e.style.width = t, console.log("Updated sidebar width to:", t);
     }
   }
-  show(e, t, i, n = !1, s = 0, r = null, o = null, l = null) {
-    const c = this.querySelector("#single-page-image"), h = this.querySelector("#page-number"), d = this.querySelector("#page-icon");
-    this.querySelector("#page-indicator"), c.src = e, c.alt = t, this.currentPageNumber = i, this.currentIsBeilage = n, this.currentPartNumber = r;
-    let u;
+  show(e, t, i, n = !1, s = 0, o = null, r = null, l = null) {
+    const c = this.querySelector("#single-page-image"), u = this.querySelector("#page-number"), d = this.querySelector("#page-icon");
+    this.querySelector("#page-indicator"), c.src = e, c.alt = t, this.currentPageNumber = i, this.currentIsBeilage = n, this.currentPartNumber = o;
+    let h;
     if (l)
-      u = l;
+      h = l;
     else {
-      const m = this.getIssueContext(i);
-      u = m ? `${m}, ${i}` : `${i}`;
+      const p = this.getIssueContext(i);
+      h = p ? `${p}, ${i}` : `${i}`;
     }
-    if (h.innerHTML = u, s && i === s) {
-      h.style.position = "relative";
-      const m = h.querySelector(".target-page-dot");
-      m && m.remove();
-      const g = document.createElement("span");
-      g.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", g.title = "verlinkte Seite", h.appendChild(g);
+    if (u.innerHTML = h, s && i === s) {
+      u.style.position = "relative";
+      const p = u.querySelector(".target-page-dot");
+      p && p.remove();
+      const m = document.createElement("span");
+      m.className = "target-page-dot absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-10", m.title = "verlinkte Seite", u.appendChild(m);
     }
-    o ? o === "part-number" && r !== null ? d.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${r}. Teil</span>` : d.innerHTML = this.generateIconFromType(o) : d.innerHTML = this.generateFallbackIcon(i, n, r), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true");
-    const p = this.querySelector(".flex-1.overflow-auto");
-    p && (p.scrollTop = 0), document.body.style.overflow = "hidden", document.dispatchEvent(
+    r ? r === "part-number" && o !== null ? d.innerHTML = `<span class="part-number bg-slate-100 text-slate-800 font-bold px-1.5 py-0.5 rounded border border-slate-400 flex items-center justify-center">${o}. Teil</span>` : d.innerHTML = this.generateIconFromType(r) : d.innerHTML = this.generateFallbackIcon(i, n, o), this.updateNavigationButtons(), this.style.display = "block", this.setAttribute("active", "true");
+    const g = this.querySelector(".flex-1.overflow-auto");
+    g && (g.scrollTop = 0), document.body.style.overflow = "hidden", document.dispatchEvent(
       new CustomEvent("singlepageviewer:opened", {
         detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
       })
@@ -1258,15 +1288,15 @@ class Z extends HTMLElement {
       "for",
       this.currentIsBeilage ? "beilage" : "main"
     );
-    const i = t.map((o) => {
-      const l = o.getAttribute("data-page-container"), c = l ? parseInt(l) : null;
+    const i = t.map((r) => {
+      const l = r.getAttribute("data-page-container"), c = l ? parseInt(l) : null;
       return console.log("Container page:", l, "parsed:", c), c;
-    }).filter((o) => o !== null);
+    }).filter((r) => r !== null);
     console.log("All pages found:", i), console.log("Current page:", this.currentPageNumber);
     const n = i.indexOf(this.currentPageNumber);
     console.log("Current index:", n);
-    let s = null, r = null;
-    return n > 0 && (s = i[n - 1]), n < i.length - 1 && (r = i[n + 1]), console.log("Adjacent pages - prev:", s, "next:", r), { prevPage: s, nextPage: r };
+    let s = null, o = null;
+    return n > 0 && (s = i[n - 1]), n < i.length - 1 && (o = i[n + 1]), console.log("Adjacent pages - prev:", s, "next:", o), { prevPage: s, nextPage: o };
   }
   // Navigate to previous page
   goToPreviousPage() {
@@ -1288,14 +1318,14 @@ class Z extends HTMLElement {
       if (n) {
         let s = null;
         this.currentPartNumber !== null && (s = this.getPartNumberForPage(e));
-        let r = null, o = null;
-        r = i.getAttribute("data-page-icon-type"), i.querySelector(".part-number") && (r = "part-number");
+        let o = null, r = null;
+        o = i.getAttribute("data-page-icon-type"), i.querySelector(".part-number") && (o = "part-number");
         const c = i.querySelector(".page-indicator");
         if (c) {
-          const h = c.cloneNode(!0);
-          h.querySelectorAll("i").forEach((p) => p.remove()), h.querySelectorAll(
+          const u = c.cloneNode(!0);
+          u.querySelectorAll("i").forEach((g) => g.remove()), u.querySelectorAll(
             '[class*="target-page-dot"], .target-page-indicator'
-          ).forEach((p) => p.remove()), o = h.textContent.trim();
+          ).forEach((g) => g.remove()), r = u.textContent.trim();
         }
         this.show(
           n.src,
@@ -1304,8 +1334,8 @@ class Z extends HTMLElement {
           this.currentIsBeilage,
           0,
           s,
-          r,
-          o
+          o,
+          r
         ), document.dispatchEvent(
           new CustomEvent("singlepageviewer:pagechanged", {
             detail: { pageNumber: this.currentPageNumber, isBeilage: this.currentIsBeilage }
@@ -1335,8 +1365,8 @@ class Z extends HTMLElement {
   toggleSidebar() {
     const e = this.querySelector("#sidebar-spacer"), t = this.querySelector("#sidebar-toggle-btn"), i = t.querySelector("i"), n = e.style.width, s = n === "0px" || n === "0";
     if (console.log("Current state - isCollapsed:", s), console.log("Current width:", n), s) {
-      const r = this.detectSidebarWidth();
-      e.style.width = r, t.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-fold-line text-lg font-bold", t.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", r);
+      const o = this.detectSidebarWidth();
+      e.style.width = o, t.className = "w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-fold-line text-lg font-bold", t.title = "Inhaltsverzeichnis ausblenden", console.log("Expanding sidebar to:", o);
     } else
       e.style.width = "0px", t.className = "w-10 h-10 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 rounded flex items-center justify-center transition-colors duration-200 cursor-pointer", i.className = "ri-sidebar-unfold-line text-lg font-bold", t.title = "Inhaltsverzeichnis einblenden", console.log("Collapsing sidebar");
     console.log("New width:", e.style.width);
@@ -1345,16 +1375,16 @@ class Z extends HTMLElement {
   getIssueContext(e) {
     const t = window.location.pathname, i = t.includes("/beitrag/");
     if (i) {
-      const r = document.querySelector(`[data-page-container="${e}"]`);
-      if (r) {
-        const c = r.querySelector(".page-indicator");
+      const o = document.querySelector(`[data-page-container="${e}"]`);
+      if (o) {
+        const c = o.querySelector(".page-indicator");
         if (c) {
-          const h = c.textContent.trim(), d = h.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
+          const u = c.textContent.trim(), d = u.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s+Nr\.\s+\d+)/);
           if (d)
             return d[1];
-          const u = h.match(/(\d{4})\s+Nr\.\s+(\d+)/);
-          if (u)
-            return `${u[1]} Nr. ${u[2]}`;
+          const h = u.match(/(\d{4})\s+Nr\.\s+(\d+)/);
+          if (h)
+            return `${h[1]} Nr. ${h[2]}`;
         }
       }
       const l = document.title.match(/(\d{4}).*Nr\.\s*(\d+)/);
@@ -1367,14 +1397,14 @@ class Z extends HTMLElement {
       return i ? `${n[1]} Nr. ${n[2]}` : "";
     const s = document.querySelector(".page-indicator");
     if (s) {
-      const o = s.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
-      if (o)
-        return `${o[1]} Nr. ${o[2]}`;
+      const r = s.textContent.trim().match(/(\d{4})\s+Nr\.\s+(\d+)/);
+      if (r)
+        return `${r[1]} Nr. ${r[2]}`;
     }
     return "KGPZ";
   }
 }
-customElements.define("single-page-viewer", Z);
+customElements.define("single-page-viewer", X);
 document.body.addEventListener("htmx:beforeRequest", function(a) {
   const e = document.querySelector("single-page-viewer");
   e && e.style.display !== "none" && (console.log("Cleaning up single page viewer before HTMX navigation"), e.close());
@@ -1383,7 +1413,7 @@ window.addEventListener("beforeunload", function() {
   const a = document.querySelector("single-page-viewer");
   a && a.close();
 });
-class X extends HTMLElement {
+class J extends HTMLElement {
   constructor() {
     super(), this.isVisible = !1, this.scrollHandler = null, this.htmxAfterSwapHandler = null;
   }
@@ -1424,8 +1454,8 @@ class X extends HTMLElement {
     });
   }
 }
-customElements.define("scroll-to-top-button", X);
-class J extends HTMLElement {
+customElements.define("scroll-to-top-button", J);
+class U extends HTMLElement {
   constructor() {
     super(), this.pageObserver = null, this.pageContainers = /* @__PURE__ */ new Map(), this.singlePageViewerActive = !1, this.singlePageViewerCurrentPage = null, this.boundHandleSinglePageViewer = this.handleSinglePageViewer.bind(this);
   }
@@ -1450,8 +1480,8 @@ class J extends HTMLElement {
       t.forEach((i) => {
         const n = i.target.getAttribute("data-page-container"), s = this.pageContainers.get(n);
         if (s) {
-          const o = i.isIntersecting && i.intersectionRatio >= 0.5 || this.singlePageViewerActive ? "full" : "short";
-          s.state !== o ? (s.state = o, this.updateEntriesState(s)) : o === "full" && i.isIntersecting && i.intersectionRatio >= 0.5 && this.scrollPageIntoInhaltsverzeichnis(s);
+          const r = i.isIntersecting && i.intersectionRatio >= 0.5 || this.singlePageViewerActive ? "full" : "short";
+          s.state !== r ? (s.state = r, this.updateEntriesState(s)) : r === "full" && i.isIntersecting && i.intersectionRatio >= 0.5 && this.scrollPageIntoInhaltsverzeichnis(s);
         }
       });
     }, {
@@ -1478,15 +1508,15 @@ class J extends HTMLElement {
     }), this.highlightPageElements(e, !1));
   }
   highlightPageElements(e, t) {
-    var o;
+    var r;
     const i = e.container.getAttribute("data-page-container"), n = this.querySelector(`[data-page-number="${i}"]`);
-    (o = n == null ? void 0 : n.closest(".page-entry")) == null || o.querySelector(".icon-container");
+    (r = n == null ? void 0 : n.closest(".page-entry")) == null || r.querySelector(".icon-container");
     const s = n == null ? void 0 : n.closest(".page-entry");
     s && (t ? (s.classList.add("!border-l-red-500"), s.classList.remove("border-slate-300")) : (s.classList.remove("!border-l-red-500"), s.classList.add("border-slate-300")), t && this.scrollEntryIntoView(s));
-    const r = document.querySelector(`[data-page="${i}"].page-indicator`);
-    if (r) {
-      const l = r.querySelectorAll("i:not(.text-slate-400)");
-      t ? (r.classList.add("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.add("!text-red-600"))) : (r.classList.remove("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.remove("!text-red-600")));
+    const o = document.querySelector(`[data-page="${i}"].page-indicator`);
+    if (o) {
+      const l = o.querySelectorAll("i:not(.text-slate-400)");
+      t ? (o.classList.add("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.add("!text-red-600"))) : (o.classList.remove("!bg-red-50", "!text-red-600"), l.forEach((c) => c.classList.remove("!text-red-600")));
     }
   }
   scrollEntryIntoView(e) {
@@ -1508,11 +1538,11 @@ class J extends HTMLElement {
       });
       return;
     }
-    const r = t.getBoundingClientRect(), o = e.getBoundingClientRect();
-    if (!(o.top >= r.top && o.bottom <= r.bottom)) {
-      const c = t.scrollTop, h = o.top - r.top + c, d = r.height, u = o.height, p = h - (d - u) / 2;
+    const o = t.getBoundingClientRect(), r = e.getBoundingClientRect();
+    if (!(r.top >= o.top && r.bottom <= o.bottom)) {
+      const c = t.scrollTop, u = r.top - o.top + c, d = o.height, h = r.height, g = u - (d - h) / 2;
       t.scrollTo({
-        top: Math.max(0, p),
+        top: Math.max(0, g),
         behavior: "smooth"
       });
     }
@@ -1537,15 +1567,15 @@ class J extends HTMLElement {
     this.singlePageViewerActive = e !== null;
   }
   isPageContainerVisible(e) {
-    const t = e.getBoundingClientRect(), i = window.innerHeight, n = Math.max(t.top, 0), s = Math.min(t.bottom, i), r = Math.max(0, s - n), o = t.height;
-    return r / o >= 0.5;
+    const t = e.getBoundingClientRect(), i = window.innerHeight, n = Math.max(t.top, 0), s = Math.min(t.bottom, i), o = Math.max(0, s - n), r = t.height;
+    return o / r >= 0.5;
   }
   cleanup() {
     this.pageObserver && (this.pageObserver.disconnect(), this.pageObserver = null), document.removeEventListener("singlepageviewer:opened", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:closed", this.boundHandleSinglePageViewer), document.removeEventListener("singlepageviewer:pagechanged", this.boundHandleSinglePageViewer), this.pageContainers.clear();
   }
 }
-customElements.define("inhaltsverzeichnis-scrollspy", J);
-class G extends HTMLElement {
+customElements.define("inhaltsverzeichnis-scrollspy", U);
+class Q extends HTMLElement {
   constructor() {
     super(), this.innerHTML = `
             <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm">
@@ -1593,30 +1623,30 @@ class G extends HTMLElement {
     window.showErrorModal = (e) => this.show(e), window.closeErrorModal = () => this.close();
   }
 }
-customElements.define("error-modal", G);
+customElements.define("error-modal", Q);
 window.currentPageContainers = window.currentPageContainers || [];
 window.currentActiveIndex = window.currentActiveIndex || 0;
 window.pageObserver = window.pageObserver || null;
-function U(a, e, t, i = null) {
+function ee(a, e, t, i = null) {
   let n = document.querySelector("single-page-viewer");
   n || (n = document.createElement("single-page-viewer"), document.body.appendChild(n));
-  const s = a.closest('[data-beilage="true"]') !== null, r = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, o = a.closest(".newspaper-page-container, .piece-page-container");
+  const s = a.closest('[data-beilage="true"]') !== null, o = window.templateData && window.templateData.targetPage ? window.templateData.targetPage : 0, r = a.closest(".newspaper-page-container, .piece-page-container");
   let l = null, c = null;
-  if (o) {
-    l = o.getAttribute("data-page-icon-type"), o.querySelector(".part-number") && (l = "part-number");
-    const d = o.querySelector(".page-indicator");
+  if (r) {
+    l = r.getAttribute("data-page-icon-type"), r.querySelector(".part-number") && (l = "part-number");
+    const d = r.querySelector(".page-indicator");
     if (d) {
-      const u = d.cloneNode(!0);
-      u.querySelectorAll("i").forEach((g) => g.remove()), u.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((g) => g.remove()), c = u.textContent.trim();
+      const h = d.cloneNode(!0);
+      h.querySelectorAll("i").forEach((m) => m.remove()), h.querySelectorAll('[class*="target-page-dot"], .target-page-indicator').forEach((m) => m.remove()), c = h.textContent.trim();
     }
   }
-  n.show(a.src, a.alt, e, s, r, i, l, c);
+  n.show(a.src, a.alt, e, s, o, i, l, c);
 }
-function M() {
+function H() {
   document.getElementById("pageModal").classList.add("hidden");
 }
-function Q() {
-  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, L(), document.querySelector(".newspaper-page-container")) {
+function te() {
+  if (window.pageObserver && (window.pageObserver.disconnect(), window.pageObserver = null), window.currentPageContainers = Array.from(document.querySelectorAll(".newspaper-page-container")), window.currentActiveIndex = 0, k(), document.querySelector(".newspaper-page-container")) {
     let e = /* @__PURE__ */ new Set();
     window.pageObserver = new IntersectionObserver(
       (t) => {
@@ -1624,8 +1654,8 @@ function Q() {
           const n = window.currentPageContainers.indexOf(i.target);
           n !== -1 && (i.isIntersecting ? e.add(n) : e.delete(n));
         }), e.size > 0) {
-          const n = Array.from(e).sort((s, r) => s - r)[0];
-          n !== window.currentActiveIndex && (window.currentActiveIndex = n, L());
+          const n = Array.from(e).sort((s, o) => s - o)[0];
+          n !== window.currentActiveIndex && (window.currentActiveIndex = n, k());
         }
       },
       {
@@ -1636,13 +1666,13 @@ function Q() {
     });
   }
 }
-function ee() {
+function ie() {
   if (window.currentActiveIndex > 0) {
     let a = -1;
     const e = [];
     window.currentPageContainers.forEach((i, n) => {
-      const s = i.getBoundingClientRect(), r = window.innerHeight, o = Math.max(s.top, 0), l = Math.min(s.bottom, r), c = Math.max(0, l - o), h = s.height;
-      c / h >= 0.3 && e.push(n);
+      const s = i.getBoundingClientRect(), o = window.innerHeight, r = Math.max(s.top, 0), l = Math.min(s.bottom, o), c = Math.max(0, l - r), u = s.height;
+      c / u >= 0.3 && e.push(n);
     });
     const t = Math.min(...e);
     for (let i = t - 1; i >= 0; i--)
@@ -1653,17 +1683,17 @@ function ee() {
     a === -1 && t > 0 && (a = t - 1), a >= 0 && (window.currentActiveIndex = a, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
-      L();
+      k();
     }, 100));
   }
 }
-function te() {
+function ne() {
   if (window.currentActiveIndex < window.currentPageContainers.length - 1) {
     let a = -1;
     const e = [];
     window.currentPageContainers.forEach((i, n) => {
-      const s = i.getBoundingClientRect(), r = window.innerHeight, o = Math.max(s.top, 0), l = Math.min(s.bottom, r), c = Math.max(0, l - o), h = s.height;
-      c / h >= 0.3 && e.push(n);
+      const s = i.getBoundingClientRect(), o = window.innerHeight, r = Math.max(s.top, 0), l = Math.min(s.bottom, o), c = Math.max(0, l - r), u = s.height;
+      c / u >= 0.3 && e.push(n);
     });
     const t = Math.max(...e);
     for (let i = t + 1; i < window.currentPageContainers.length; i++)
@@ -1674,12 +1704,12 @@ function te() {
     a === -1 && t < window.currentPageContainers.length - 1 && (a = t + 1), a >= 0 && a < window.currentPageContainers.length && (window.currentActiveIndex = a, window.currentPageContainers[window.currentActiveIndex].scrollIntoView({
       block: "start"
     }), setTimeout(() => {
-      L();
+      k();
     }, 100));
   }
 }
-function ie() {
-  if (q()) {
+function se() {
+  if (M()) {
     const e = document.querySelector("#newspaper-content .newspaper-page-container");
     e && e.scrollIntoView({
       block: "start"
@@ -1698,11 +1728,11 @@ function ie() {
     }
   }
 }
-function q() {
+function M() {
   const a = [];
   window.currentPageContainers.forEach((e, t) => {
-    const i = e.getBoundingClientRect(), n = window.innerHeight, s = Math.max(i.top, 0), r = Math.min(i.bottom, n), o = Math.max(0, r - s), l = i.height;
-    o / l >= 0.3 && a.push(t);
+    const i = e.getBoundingClientRect(), n = window.innerHeight, s = Math.max(i.top, 0), o = Math.min(i.bottom, n), r = Math.max(0, o - s), l = i.height;
+    r / l >= 0.3 && a.push(t);
   });
   for (const e of a) {
     const t = window.currentPageContainers[e];
@@ -1711,14 +1741,14 @@ function q() {
   }
   return !1;
 }
-function L() {
+function k() {
   const a = document.getElementById("prevPageBtn"), e = document.getElementById("nextPageBtn"), t = document.getElementById("beilageBtn");
   if (a && (a.style.display = "flex", window.currentActiveIndex <= 0 ? (a.disabled = !0, a.classList.add("opacity-50", "cursor-not-allowed"), a.classList.remove("hover:bg-gray-200")) : (a.disabled = !1, a.classList.remove("opacity-50", "cursor-not-allowed"), a.classList.add("hover:bg-gray-200"))), e && (e.style.display = "flex", window.currentActiveIndex >= window.currentPageContainers.length - 1 ? (e.disabled = !0, e.classList.add("opacity-50", "cursor-not-allowed"), e.classList.remove("hover:bg-gray-200")) : (e.disabled = !1, e.classList.remove("opacity-50", "cursor-not-allowed"), e.classList.add("hover:bg-gray-200"))), t) {
-    const i = q(), n = t.querySelector("i");
+    const i = M(), n = t.querySelector("i");
     i ? (t.title = "Zur Hauptausgabe", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 border border-gray-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-file-text-line text-lg lg:text-xl")) : (t.title = "Zu Beilage", t.className = "w-14 h-10 lg:w-16 lg:h-12 px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 hover:text-amber-800 border border-amber-300 transition-colors duration-200 flex items-center justify-center cursor-pointer", n && (n.className = "ri-attachment-line text-lg lg:text-xl"));
   }
 }
-function ne() {
+function oe() {
   const a = document.getElementById("shareLinkBtn");
   let e = "";
   if (window.currentActiveIndex !== void 0 && window.currentPageContainers && window.currentPageContainers[window.currentActiveIndex]) {
@@ -1730,54 +1760,54 @@ function ne() {
     title: document.title,
     url: t
   }).catch((i) => {
-    I(t, a);
-  }) : I(t, a);
+    A(t, a);
+  }) : A(t, a);
 }
-function I(a, e) {
+function A(a, e) {
   if (navigator.clipboard)
     navigator.clipboard.writeText(a).then(() => {
-      b(e, "Link kopiert!");
+      y(e, "Link kopiert!");
     }).catch((t) => {
-      b(e, "Kopieren fehlgeschlagen");
+      y(e, "Kopieren fehlgeschlagen");
     });
   else {
     const t = document.createElement("textarea");
     t.value = a, document.body.appendChild(t), t.select();
     try {
       const i = document.execCommand("copy");
-      b(e, i ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      y(e, i ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      b(e, "Kopieren fehlgeschlagen");
+      y(e, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(t);
     }
   }
 }
-function se() {
+function re() {
   const a = document.getElementById("citationBtn"), e = document.title || "KGPZ";
   let t = window.location.origin + window.location.pathname;
   t.includes("#") && (t = t.split("#")[0]);
   const i = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), n = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${e}. Digital verfügbar unter: ${t} (Zugriff: ${i}).`;
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
-      b(a, "Zitation kopiert!");
+      y(a, "Zitation kopiert!");
     }).catch((s) => {
-      b(a, "Kopieren fehlgeschlagen");
+      y(a, "Kopieren fehlgeschlagen");
     });
   else {
     const s = document.createElement("textarea");
     s.value = n, document.body.appendChild(s), s.select();
     try {
-      const r = document.execCommand("copy");
-      b(a, r ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      const o = document.execCommand("copy");
+      y(a, o ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      b(a, "Kopieren fehlgeschlagen");
+      y(a, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(s);
     }
   }
 }
-function b(a, e) {
+function y(a, e) {
   const t = document.querySelector(".simple-popup");
   t && t.remove();
   const i = document.createElement("div");
@@ -1795,10 +1825,10 @@ function b(a, e) {
 		transition: opacity 0.2s ease;
 		white-space: nowrap;
 	`;
-  const n = a.getBoundingClientRect(), s = window.innerHeight, r = window.innerWidth;
-  let o = n.left - 10, l = n.bottom + 8;
-  const c = 120, h = 32;
-  o + c > r && (o = n.right - c + 10), l + h > s && (l = n.top - h - 8), i.style.left = Math.max(5, o) + "px", i.style.top = Math.max(5, l) + "px", document.body.appendChild(i), setTimeout(() => {
+  const n = a.getBoundingClientRect(), s = window.innerHeight, o = window.innerWidth;
+  let r = n.left - 10, l = n.bottom + 8;
+  const c = 120, u = 32;
+  r + c > o && (r = n.right - c + 10), l + u > s && (l = n.top - u - 8), i.style.left = Math.max(5, r) + "px", i.style.top = Math.max(5, l) + "px", document.body.appendChild(i), setTimeout(() => {
     i.style.opacity = "1";
   }, 10), setTimeout(() => {
     i.style.opacity = "0", setTimeout(() => {
@@ -1806,39 +1836,39 @@ function b(a, e) {
     }, 200);
   }, 2e3);
 }
-function oe(a, e, t = !1) {
+function ae(a, e, t = !1) {
   let i = "";
   if (t)
     i = window.location.origin + window.location.pathname + `#beilage-1-page-${a}`;
   else {
     const s = window.location.pathname.split("/");
     if (s.length >= 3) {
-      const r = s[1], o = s[2];
-      i = `${window.location.origin}/${r}/${o}/${a}`;
+      const o = s[1], r = s[2];
+      i = `${window.location.origin}/${o}/${r}/${a}`;
     } else
       i = window.location.origin + window.location.pathname + `/${a}`;
   }
   const n = i;
   if (navigator.clipboard)
     navigator.clipboard.writeText(n).then(() => {
-      b(e, "Link kopiert!");
+      y(e, "Link kopiert!");
     }).catch((s) => {
-      b(e, "Kopieren fehlgeschlagen");
+      y(e, "Kopieren fehlgeschlagen");
     });
   else {
     const s = document.createElement("textarea");
     s.value = n, document.body.appendChild(s), s.select();
     try {
-      const r = document.execCommand("copy");
-      b(e, r ? "Link kopiert!" : "Kopieren fehlgeschlagen");
+      const o = document.execCommand("copy");
+      y(e, o ? "Link kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      b(e, "Kopieren fehlgeschlagen");
+      y(e, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(s);
     }
   }
 }
-function re(a, e) {
+function le(a, e) {
   const t = document.title || "KGPZ", i = window.location.pathname.split("/");
   let n;
   if (i.length >= 3) {
@@ -1846,36 +1876,36 @@ function re(a, e) {
     n = `${window.location.origin}/${l}/${c}/${a}`;
   } else
     n = `${window.location.origin}${window.location.pathname}/${a}`;
-  const s = n, r = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), o = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${a}. Digital verfügbar unter: ${s} (Zugriff: ${r}).`;
+  const s = n, o = (/* @__PURE__ */ new Date()).toLocaleDateString("de-DE"), r = `Königsberger Gelehrte und Politische Zeitung (KGPZ). ${t}, Seite ${a}. Digital verfügbar unter: ${s} (Zugriff: ${o}).`;
   if (navigator.clipboard)
-    navigator.clipboard.writeText(o).then(() => {
-      b(e, "Zitation kopiert!");
+    navigator.clipboard.writeText(r).then(() => {
+      y(e, "Zitation kopiert!");
     }).catch((l) => {
-      b(e, "Kopieren fehlgeschlagen");
+      y(e, "Kopieren fehlgeschlagen");
     });
   else {
     const l = document.createElement("textarea");
-    l.value = o, document.body.appendChild(l), l.select();
+    l.value = r, document.body.appendChild(l), l.select();
     try {
       const c = document.execCommand("copy");
-      b(e, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
+      y(e, c ? "Zitation kopiert!" : "Kopieren fehlgeschlagen");
     } catch {
-      b(e, "Kopieren fehlgeschlagen");
+      y(e, "Kopieren fehlgeschlagen");
     } finally {
       document.body.removeChild(l);
     }
   }
 }
-function A() {
-  Q(), window.addEventListener("scroll", function() {
+function q() {
+  te(), window.addEventListener("scroll", function() {
     clearTimeout(window.scrollTimeout), window.scrollTimeout = setTimeout(() => {
-      L();
+      k();
     }, 50);
   }), document.addEventListener("keydown", function(a) {
-    a.key === "Escape" && M();
+    a.key === "Escape" && H();
   });
 }
-function B() {
+function N() {
   const a = window.location.pathname;
   document.querySelectorAll(".citation-link[data-citation-url]").forEach((t) => {
     const i = t.getAttribute("data-citation-url");
@@ -1883,16 +1913,16 @@ function B() {
     if (i === a)
       n = !0;
     else {
-      const s = a.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/), r = i.match(/^\/(\d{4})\/(\d+)$/);
-      if (s && r) {
-        const [, o, l, c] = s, [, h, d] = r;
-        o === h && l === d && (n = !0);
+      const s = a.match(/^\/(\d{4})\/(\d+)(?:\/(\d+))?$/), o = i.match(/^\/(\d{4})\/(\d+)$/);
+      if (s && o) {
+        const [, r, l, c] = s, [, u, d] = o;
+        r === u && l === d && (n = !0);
       }
     }
     n ? (t.classList.add("text-red-700", "pointer-events-none"), t.setAttribute("aria-current", "page")) : (t.classList.remove("text-red-700", "pointer-events-none"), t.removeAttribute("aria-current"));
   });
 }
-function N() {
+function B() {
   const a = window.location.pathname, e = document.body;
   e.classList.remove(
     "page-akteure",
@@ -1904,21 +1934,21 @@ function N() {
     "page-edition"
   ), a.includes("/akteure/") || a.includes("/autoren") ? e.classList.add("page-akteure") : a.match(/\/\d{4}\/\d+/) ? e.classList.add("page-ausgabe") : a.includes("/search") || a.includes("/suche") ? e.classList.add("page-search") : a.includes("/ort/") ? e.classList.add("page-ort") : a.includes("/kategorie/") ? e.classList.add("page-kategorie") : a.includes("/beitrag/") ? e.classList.add("page-piece") : a.includes("/edition") && e.classList.add("page-edition");
 }
-window.enlargePage = U;
-window.closeModal = M;
-window.scrollToPreviousPage = ee;
-window.scrollToNextPage = te;
-window.scrollToBeilage = ie;
-window.shareCurrentPage = ne;
-window.generateCitation = se;
-window.copyPagePermalink = oe;
-window.generatePageCitation = re;
-N();
+window.enlargePage = ee;
+window.closeModal = H;
+window.scrollToPreviousPage = ie;
+window.scrollToNextPage = ne;
+window.scrollToBeilage = se;
+window.shareCurrentPage = oe;
+window.generateCitation = re;
+window.copyPagePermalink = ae;
+window.generatePageCitation = le;
 B();
-document.querySelector(".newspaper-page-container") && A();
-let ae = function(a) {
-  N(), B(), H(), setTimeout(() => {
-    document.querySelector(".newspaper-page-container") && A();
+N();
+document.querySelector(".newspaper-page-container") && q();
+let ce = function(a) {
+  B(), N(), I(), setTimeout(() => {
+    document.querySelector(".newspaper-page-container") && q();
   }, 50);
 };
-document.body.addEventListener("htmx:afterSettle", ae);
+document.body.addEventListener("htmx:afterSettle", ce);

@@ -436,6 +436,39 @@ export class PlacesMap extends HTMLElement {
 			return;
 		}
 
+		// Create one large SVG overlay that matches the map size
+		const mapOverlaySvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		mapOverlaySvg.setAttribute("class", "absolute top-0 left-0 w-full h-full");
+		mapOverlaySvg.style.pointerEvents = "none"; // Let map interactions pass through
+		mapOverlaySvg.style.overflow = "visible";
+		mapOverlaySvg.setAttribute("viewBox", "0 0 100 100");
+		mapOverlaySvg.setAttribute("preserveAspectRatio", "none");
+
+		// Create defs element for gradients
+		const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+
+		// Create radial gradient for red dots
+		const redGradient = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
+		redGradient.setAttribute("id", "redDotGradient");
+		redGradient.setAttribute("cx", "30%");
+		redGradient.setAttribute("cy", "30%");
+		redGradient.setAttribute("r", "70%");
+
+		const stopLight = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+		stopLight.setAttribute("offset", "0%");
+		stopLight.setAttribute("stop-color", "#f56565"); // Slightly lighter red
+
+		const stopDark = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+		stopDark.setAttribute("offset", "100%");
+		stopDark.setAttribute("stop-color", "#e53e3e"); // Slightly darker red
+
+		redGradient.appendChild(stopLight);
+		redGradient.appendChild(stopDark);
+		defs.appendChild(redGradient);
+		mapOverlaySvg.appendChild(defs);
+
+		this.pointsContainer.appendChild(mapOverlaySvg);
+
 		// Map extent constants
 		const MAP_EXTENT_METERS = { xmin: 2555000, ymin: 1350000, xmax: 7405000, ymax: 5500000 };
 		const PROJECTION_CENTER = { lon: 10, lat: 52 };
@@ -470,7 +503,7 @@ export class PlacesMap extends HTMLElement {
 			return { x: xPercent, y: yPercent };
 		};
 
-		// Create points and track positions
+		// Create circles and track positions
 		const pointPositions = [];
 		this.places.forEach((place) => {
 			if (place.lat && place.lng) {
@@ -482,25 +515,49 @@ export class PlacesMap extends HTMLElement {
 				if (position.x >= 0 && position.x <= 100 && position.y >= 0 && position.y <= 100) {
 					pointPositions.push(position);
 
-					const point = document.createElement("div");
-					point.className = "map-point hidden";
-					point.style.left = `${position.x}%`;
-					point.style.top = `${position.y}%`;
-					point.style.transformOrigin = "center";
+					// Create circle element directly in the overlay SVG
+					const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+					circle.setAttribute("cx", position.x.toString());
+					circle.setAttribute("cy", position.y.toString());
+					circle.setAttribute("r", "0.4"); // Small radius in % units
+					circle.setAttribute("fill", "white");
+					circle.setAttribute("opacity", "0.7");
+					circle.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))");
+					circle.style.cursor = "pointer";
+					circle.style.pointerEvents = "all";
+					circle.style.transition = "r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease";
+
+					// Add hover effects for white dots
+					circle.addEventListener("mouseenter", () => {
+						if (circle.getAttribute("fill") === "white") {
+							circle.setAttribute("r", "0.6"); // Bigger on hover
+							circle.setAttribute("fill", "#f87171"); // Light red on hover
+							circle.setAttribute("opacity", "1");
+						}
+					});
+
+					circle.addEventListener("mouseleave", () => {
+						if (circle.getAttribute("fill") === "#f87171") {
+							circle.setAttribute("r", "0.4"); // Back to original size
+							circle.setAttribute("fill", "white"); // Back to white
+							circle.setAttribute("opacity", "0.7");
+						}
+					});
+
 					const tooltipText = `${place.name}${place.toponymName && place.toponymName !== place.name ? ` (${place.toponymName})` : ""}`;
-					point.dataset.placeId = place.id;
-					point.dataset.tooltipText = tooltipText;
+					circle.dataset.placeId = place.id;
+					circle.dataset.tooltipText = tooltipText;
 
 					// Add hover and click event listeners
-					point.addEventListener("mouseenter", (e) => this.showTooltip(e));
-					point.addEventListener("mouseleave", () => this.hideTooltip());
-					point.addEventListener("mousemove", (e) => this.updateTooltipPosition(e));
-					point.addEventListener("click", (e) => this.scrollToPlace(e));
+					circle.addEventListener("mouseenter", (e) => this.showTooltip(e));
+					circle.addEventListener("mouseleave", () => this.hideTooltip());
+					circle.addEventListener("mousemove", (e) => this.updateTooltipPosition(e));
+					circle.addEventListener("click", (e) => this.scrollToPlace(e));
 
-					this.pointsContainer.appendChild(point);
+					mapOverlaySvg.appendChild(circle);
 
-					// Store reference to point for scrollspy
-					this.mapPoints.set(place.id, point);
+					// Store reference to circle for scrollspy
+					this.mapPoints.set(place.id, circle);
 				}
 			}
 		});
@@ -610,18 +667,28 @@ export class PlacesMap extends HTMLElement {
 
 	}
 
-	setPointActive(point) {
-		// Active state: larger, full color, full opacity, higher z-index
-		point.className =
-			"map-point absolute w-1.5 h-1.5 bg-red-500 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 opacity-100 saturate-100 z-20 cursor-pointer hover:w-2 hover:h-2 hover:bg-red-600 hover:z-30";
-		point.style.border = "0.5px solid #b91c1c";
+	setPointActive(circle) {
+		// Active state: darker red circle with wider dark border and small shadow
+		circle.setAttribute("r", "0.8"); // Bigger radius in % units
+		circle.setAttribute("fill", "#dc2626");
+		circle.setAttribute("stroke", "#b91c1c");
+		circle.setAttribute("stroke-width", "0.12");
+		circle.setAttribute("opacity", "1");
+		circle.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))");
+		// Move to end of SVG to appear on top
+		if (circle.parentNode) {
+			circle.parentNode.appendChild(circle);
+		}
 	}
 
-	setPointInactive(point) {
-		// Inactive state: small light red dots, no border
-		point.className =
-			"map-point absolute w-[0.18rem] h-[0.18rem] bg-white opacity-[0.7]  rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 transition-all duration-300 z-10 cursor-pointer hover:w-1.5 hover:h-1.5 hover:bg-red-400 hover:z-30 hover:opacity-[1.0]";
-		point.style.border = "";
+	setPointInactive(circle) {
+		// Inactive state: small white circle
+		circle.setAttribute("r", "0.4"); // Small radius in % units
+		circle.setAttribute("fill", "white");
+		circle.setAttribute("stroke", "none");
+		circle.setAttribute("opacity", "0.7");
+		circle.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))");
+		// No need to reorder for inactive state
 	}
 
 	showTooltip(event) {
@@ -773,27 +840,45 @@ export class PlacesMap extends HTMLElement {
 			// Track the currently hovered place ID
 			this.currentHoveredPlaceId = placeId;
 
-			// Give the point a more visible highlight by making it larger immediately
-			mapPoint.classList.remove("w-1", "h-1", "w-1.5", "h-1.5");
-			mapPoint.classList.add("w-2.5", "h-2.5");
-			mapPoint.style.zIndex = "25";
+			// Give the circle a more visible highlight by enlarging it and adding border
+			const currentRadius = mapPoint.getAttribute("r");
+			mapPoint.setAttribute("data-original-radius", currentRadius);
+			mapPoint.setAttribute("r", (parseFloat(currentRadius) * 1.7).toString());
+			mapPoint.setAttribute("filter", "none");
+			// Make sure it's darker red with darker red border for highlighted points
+			mapPoint.setAttribute("fill", "#dc2626");
+			mapPoint.setAttribute("stroke", "#b91c1c");
+			mapPoint.setAttribute("stroke-width", "0.24");
+			mapPoint.setAttribute("opacity", "1");
+			// Move to end of SVG to appear on top when highlighted
+			if (mapPoint.parentNode) {
+				mapPoint.parentNode.appendChild(mapPoint);
+			}
 
 			// No tooltip when hovering over place titles - only visual feedback
 		} else if (action === "hide") {
 			// Clear the currently hovered place ID
 			this.currentHoveredPlaceId = "";
 
-			// Remove point highlight - restore original size based on current state
-			mapPoint.classList.remove("w-2.5", "h-2.5");
-			// Check if this point is currently active or inactive
-			if (mapPoint.className.includes("bg-red-500")) {
-				// Active point
-				mapPoint.classList.add("w-1.5", "h-1.5");
-			} else {
-				// Inactive point
-				mapPoint.classList.add("w-1", "h-1");
+			// Remove highlight - restore original circle size, shadow, and stroke
+			const originalRadius = mapPoint.getAttribute("data-original-radius");
+			if (originalRadius) {
+				mapPoint.setAttribute("r", originalRadius);
+				mapPoint.removeAttribute("data-original-radius");
+				// Restore original shadow and stroke based on circle state
+				const fill = mapPoint.getAttribute("fill");
+				if (fill === "white") {
+					// White inactive points: shadow but no stroke
+					mapPoint.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))");
+					mapPoint.setAttribute("stroke", "none");
+				} else {
+					// Red active points: small shadow and wider border with darker red
+					mapPoint.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))");
+					mapPoint.setAttribute("fill", "#dc2626");
+					mapPoint.setAttribute("stroke", "#b91c1c");
+					mapPoint.setAttribute("stroke-width", "0.12");
+				}
 			}
-			mapPoint.style.zIndex = ""; // Reset to default
 		}
 	}
 
@@ -915,24 +1000,61 @@ export class PlacesMapSingle extends HTMLElement {
 
 		// Only add point if it's within the visible map area
 		if (position.x >= 0 && position.x <= 100 && position.y >= 0 && position.y <= 100) {
-			const point = document.createElement("div");
-			point.style.left = `${position.x}%`;
-			point.style.top = `${position.y}%`;
-			point.style.transformOrigin = "center";
+			// Create one large SVG overlay that matches the map size
+			const mapOverlaySvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			mapOverlaySvg.setAttribute("class", "absolute top-0 left-0 w-full h-full");
+			mapOverlaySvg.style.pointerEvents = "none";
+			mapOverlaySvg.style.overflow = "visible";
+			mapOverlaySvg.setAttribute("viewBox", "0 0 100 100");
+			mapOverlaySvg.setAttribute("preserveAspectRatio", "none");
 
-			// Single highlighted point - moderately sized for zoomed view
-			point.className = "absolute w-2 h-2 bg-red-500 rounded-full shadow-sm -translate-x-1/2 -translate-y-1/2 z-20";
-			point.style.border = "0.5px solid #b91c1c";
+			// Create defs element for gradients
+			const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+
+			// Create radial gradient for red dots
+			const redGradient = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
+			redGradient.setAttribute("id", "redDotGradientSingle");
+			redGradient.setAttribute("cx", "30%");
+			redGradient.setAttribute("cy", "30%");
+			redGradient.setAttribute("r", "70%");
+
+			const stopLight = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+			stopLight.setAttribute("offset", "0%");
+			stopLight.setAttribute("stop-color", "#f56565"); // Slightly lighter red
+
+			const stopDark = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+			stopDark.setAttribute("offset", "100%");
+			stopDark.setAttribute("stop-color", "#e53e3e"); // Slightly darker red
+
+			redGradient.appendChild(stopLight);
+			redGradient.appendChild(stopDark);
+			defs.appendChild(redGradient);
+			mapOverlaySvg.appendChild(defs);
+
+			this.pointsContainer.appendChild(mapOverlaySvg);
+
+			// Create circle element directly in the overlay SVG
+			const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+			circle.setAttribute("cx", position.x.toString());
+			circle.setAttribute("cy", position.y.toString());
+			circle.setAttribute("r", "0.8"); // Larger radius for single place view
+			circle.setAttribute("fill", "#dc2626");
+			circle.setAttribute("stroke", "#b91c1c");
+			circle.setAttribute("stroke-width", "0.05");
+			circle.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))"); // Small shadow for red single place dot
+			circle.style.cursor = "pointer";
+			circle.style.pointerEvents = "all";
+			circle.style.transition = "r 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease";
 
 			const tooltipText = `${this.place.name}${this.place.toponymName && this.place.toponymName !== this.place.name ? ` (${this.place.toponymName})` : ""}`;
-			point.dataset.tooltipText = tooltipText;
+			circle.dataset.tooltipText = tooltipText;
 
 			// Add hover event listeners
-			point.addEventListener("mouseenter", (e) => this.showTooltip(e));
-			point.addEventListener("mouseleave", () => this.hideTooltip());
-			point.addEventListener("mousemove", (e) => this.updateTooltipPosition(e));
+			circle.addEventListener("mouseenter", (e) => this.showTooltip(e));
+			circle.addEventListener("mouseleave", () => this.hideTooltip());
+			circle.addEventListener("mousemove", (e) => this.updateTooltipPosition(e));
 
-			this.pointsContainer.appendChild(point);
+			mapOverlaySvg.appendChild(circle);
 
 			// Auto-zoom to the single point with some padding
 			this.autoZoomToPoint(position);
