@@ -799,7 +799,7 @@ class SearchBar extends HTMLElement {
 				<div
 					id="search-loading"
 					class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 p-1 htmx-indicator">
-					<i class="ri-loader-4-line text-lg animate-spin"></i>
+					<i class="ri-loader-4-line text-lg animate-spin search-loading-spin"></i>
 				</div>
 				<button
 					id="search-reset"
