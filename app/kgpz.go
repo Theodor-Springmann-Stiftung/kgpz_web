@@ -12,6 +12,7 @@ import (
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/geonames"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/gnd"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/pictures"
 	searchprovider "github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/search"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
@@ -64,6 +65,7 @@ type KGPZ struct {
 	Repo      *providers.GitProvider
 	GND       *gnd.GNDProvider
 	Geonames  *geonames.GeonamesProvider
+	Pictures  *pictures.PicturesProvider
 	Library   *xmlmodels.Library
 	Search    *searchprovider.SearchProvider
 
@@ -98,14 +100,15 @@ func (k *KGPZ) Pre(srv *fiber.App) error {
 	}
 
 	// Serve newspaper pictures from pictures directory
-	if _, err := os.Stat("pictures"); err == nil {
-		picturesFS := os.DirFS("pictures")
+	picturesPath := k.Config.Config.PicturesPath
+	if _, err := os.Stat(picturesPath); err == nil {
+		picturesFS := os.DirFS(picturesPath)
 		srv.Use(PICTURES_PREFIX, compress.New(compress.Config{
 			Level: compress.LevelBestSpeed,
 		}), etag.New(), helpers.StaticHandler(&picturesFS))
-		logging.Info("Serving newspaper pictures from pictures/ directory.")
+		logging.Info("Serving newspaper pictures from " + picturesPath + " directory.")
 	} else {
-		logging.Info("Pictures folder not found. Skipping picture serving.")
+		logging.Info("Pictures folder not found at " + picturesPath + ". Skipping picture serving.")
 	}
 
 	return nil
@@ -131,6 +134,9 @@ func (k *KGPZ) Init() error {
 	}
 	if err := k.initGeonames(); err != nil {
 		logging.Error(err, "Error reading Geonames-Cache. Continuing.")
+	}
+	if err := k.initPictures(); err != nil {
+		logging.Error(err, "Error scanning pictures directory. Continuing without pictures.")
 	}
 
 	if sp, err := searchprovider.NewSearchProvider(filepath.Join(k.Config.Config.BaseDIR, k.Config.SearchPath)); err != nil {
@@ -162,6 +168,11 @@ func (k *KGPZ) initGeonames() error {
 	return k.Geonames.ReadCache(filepath.Join(k.Config.BaseDIR, k.Config.GeoPath))
 }
 
+func (k *KGPZ) initPictures() error {
+	k.Pictures = pictures.NewPicturesProvider()
+	return k.Pictures.Scan(k.Config.Config.PicturesPath)
+}
+
 func (k *KGPZ) Routes(srv *fiber.App) error {
 	srv.Get("/", func(c *fiber.Ctx) error {
 		c.Redirect(INDEX_URL)
@@ -174,8 +185,8 @@ func (k *KGPZ) Routes(srv *fiber.App) error {
 	srv.Get(PLACE_OVERVIEW_URL, controllers.GetPlace(k.Library, k.Geonames))
 	srv.Get(CATEGORY_OVERVIEW_URL, controllers.GetCategory(k.Library))
 	srv.Get(AGENTS_OVERVIEW_URL, controllers.GetAgents(k.Library))
-	srv.Get(PIECE_PAGE_URL, controllers.GetPieceWithPage(k.Library))
-	srv.Get(PIECE_URL, controllers.GetPiece(k.Library))
+	srv.Get(PIECE_PAGE_URL, controllers.GetPieceWithPage(k.Library, k.Pictures))
+	srv.Get(PIECE_URL, controllers.GetPiece(k.Library, k.Pictures))
 
 	// Page jump routes for direct navigation
 	srv.Get(PAGE_JUMP_URL, controllers.GetPageJump(k.Library))
@@ -188,8 +199,8 @@ func (k *KGPZ) Routes(srv *fiber.App) error {
 	// This applies to all paths with two or three segments without a static prefix:
 	// Prob better to do /ausgabe/:year/:issue/:page? and /jahrgang/:year? respectively.
 	srv.Get(YEAR_OVERVIEW_URL, controllers.GetYear(k.Library))
-	srv.Get(ISSSUE_URL, controllers.GetIssue(k.Library))
-	srv.Get(ADDITIONS_URL, controllers.GetIssue(k.Library))
+	srv.Get(ISSSUE_URL, controllers.GetIssue(k.Library, k.Pictures))
+	srv.Get(ADDITIONS_URL, controllers.GetIssue(k.Library, k.Pictures))
 
 	srv.Get(EDITION_URL, controllers.Get(EDITION_URL))
 	srv.Get(PRIVACY_URL, controllers.Get(PRIVACY_URL))
@@ -620,6 +631,11 @@ func (k *KGPZ) Pull() {
 		logging.ObjDebug(&k.Repo, "Remote changed. Reparsing")
 		k.Serialize()
 		k.EnrichAndRebuildIndex()
+
+		// Rescan pictures after pull
+		if err := k.initPictures(); err != nil {
+			logging.Error(err, "Error rescanning pictures directory after pull.")
+		}
 
 		// Notify about git data update
 		if k.gitUpdateCallback != nil {

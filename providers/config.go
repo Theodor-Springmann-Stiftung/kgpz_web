@@ -20,6 +20,7 @@ const (
 	DEFAULT_GEO_CACHE_DIR    = "geo"
 	DEFAULT_SEARCH_CACHE_DIR = "search"
 	DEFAULT_IMG_DIR          = "data_bilder"
+	DEFAULT_PICTURES_DIR     = "pictures"
 
 	DEFAULT_PORT  = "8080"
 	DEFAULT_ADDR  = "localhost"
@@ -43,6 +44,7 @@ type Config struct {
 	GeoPath         string `json:"geo_path" envconfig:"GEO_PATH"`
 	SearchPath      string `json:"search_path" envconfig:"SEARCH_PATH"`
 	ImgPath         string `json:"img_path" envconfig:"IMG_PATH"`
+	PicturesPath    string `json:"pictures_path" envconfig:"PICTURES_PATH"`
 	WebHookEndpoint string `json:"webhook_endpoint" envconfig:"WEBHOOK_ENDPOINT"`
 	WebHookSecret   string `json:"webhook_secret" envconfig:"WEBHOOK_SECRET"`
 	Debug           bool   `json:"debug" envconfig:"DEBUG"`
@@ -132,6 +134,10 @@ func readDefaults(cfg *Config) *Config {
 
 	if strings.TrimSpace(cfg.SearchPath) == "" {
 		cfg.SearchPath = DEFAULT_SEARCH_CACHE_DIR
+	}
+
+	if strings.TrimSpace(cfg.PicturesPath) == "" {
+		cfg.PicturesPath = DEFAULT_PICTURES_DIR
 	}
 
 	return cfg

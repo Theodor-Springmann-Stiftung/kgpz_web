@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/pictures"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/viewmodels"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 	"github.com/gofiber/fiber/v2"
@@ -16,7 +17,7 @@ const (
 	MAXYEAR = 1779
 )
 
-func GetIssue(kgpz *xmlmodels.Library) fiber.Handler {
+func GetIssue(kgpz *xmlmodels.Library, pics *pictures.PicturesProvider) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		y := c.Params("year")
 		yi, err := strconv.Atoi(y)
@@ -67,7 +68,7 @@ func GetIssue(kgpz *xmlmodels.Library) fiber.Handler {
 			}
 		}
 
-		issue, err := viewmodels.NewSingleIssueView(yi, di, kgpz)
+		issue, err := viewmodels.NewSingleIssueView(yi, di, kgpz, pics)
 
 		if err != nil {
 			logging.Error(err, "Issue could not be found")

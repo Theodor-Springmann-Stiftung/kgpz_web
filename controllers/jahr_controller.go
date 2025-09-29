@@ -21,7 +21,7 @@ func GetYear(kgpz *xmlmodels.Library) fiber.Handler {
 
 		view, err := viewmodels.YearView(yi, kgpz)
 		if err != nil {
-			logging.ErrorDebug(err, "Keine Ausgaben für das Jahr "+y)
+			logging.Error(err, "Keine Ausgaben für das Jahr "+y)
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 

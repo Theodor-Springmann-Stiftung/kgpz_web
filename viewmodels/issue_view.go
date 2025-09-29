@@ -3,14 +3,13 @@ package viewmodels
 import (
 	"fmt"
 	"maps"
-	"os"
-	"path/filepath"
 	"slices"
 	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/functions"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/pictures"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 )
 
@@ -53,31 +52,14 @@ type IssuePage struct {
 	PageIcon    string // Icon type: "first", "last", "even", "odd"
 }
 
+// Deprecated: Use pictures.ImageFile from provider instead
+type ImageFile = pictures.ImageFile
+
 type IssueImages struct {
 	MainPages       []IssuePage
 	AdditionalPages map[int][]IssuePage // Beilage number -> pages
 	HasImages       bool
 }
-
-type ImageFile struct {
-	Year        int
-	Issue       int
-	Page        int
-	IsBeilage   bool
-	BeilageNo   int
-	Filename    string
-	Path        string        // Primary path (prefers WebP over JPEG)
-	PreviewPath string        // Path to compressed WebP version for layout views
-	JpegPath    string        // Path to JPEG version (for download button)
-}
-
-type ImageRegistry struct {
-	Files       []ImageFile
-	ByYearIssue map[string][]ImageFile // "year-issue" -> files
-	ByYearPage  map[string]ImageFile   // "year-page" -> file
-}
-
-var imageRegistry *ImageRegistry
 
 // TODO: Next & Prev
 type IssueVM struct {
@@ -90,7 +72,7 @@ type IssueVM struct {
 	HasBeilageButton bool // Whether to show beilage navigation button
 }
 
-func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
+func NewSingleIssueView(y, no int, lib *xmlmodels.Library, pics *pictures.PicturesProvider) (*IssueVM, error) {
 	lib.Issues.Lock()
 	var issue *xmlmodels.Issue = nil
 	var next *xmlmodels.Issue = nil
@@ -123,7 +105,7 @@ func NewSingleIssueView(y, no int, lib *xmlmodels.Library) (*IssueVM, error) {
 	slices.Sort(ppi.Pages)
 	slices.Sort(ppa.Pages)
 
-	images, err := LoadIssueImages(*issue)
+	images, err := LoadIssueImages(*issue, pics)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +134,7 @@ func PiecesForIssue(lib *xmlmodels.Library, issue xmlmodels.Issue) (PiecesByPage
 			if issueRef.Nr == issue.Number.No && issueRef.When.Year == year {
 				// DEBUG: Log piece details for specific issue
 				if year == 1771 && issue.Number.No == 29 {
-					fmt.Printf("DEBUG PiecesForIssue: Piece ID=%s, Von=%d, Bis=%d, Beilage=%d\n", piece.Identifier.ID, issueRef.Von, issueRef.Bis, issueRef.Beilage)
+					logging.Debug(fmt.Sprintf("PiecesForIssue: Piece ID=%s, Von=%d, Bis=%d, Beilage=%d", piece.Identifier.ID, issueRef.Von, issueRef.Bis, issueRef.Beilage))
 				}
 
 				// Add main entry on starting page
@@ -477,12 +459,7 @@ func determinePageIconForLayout(pageNum int) string {
 	return "odd"
 }
 
-func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
-	// Initialize registry if not already done
-	if err := initImageRegistry(); err != nil {
-		return IssueImages{}, err
-	}
-
+func LoadIssueImages(issue xmlmodels.Issue, pics *pictures.PicturesProvider) (IssueImages, error) {
 	year := issue.Datum.When.Year
 	issueNo := issue.Number.No
 
@@ -493,12 +470,11 @@ func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
 	}
 
 	// Get all image files for this year-issue combination
-	yearIssueKey := fmt.Sprintf("%d-%d", year, issueNo)
-	issueFiles := imageRegistry.ByYearIssue[yearIssueKey]
+	issueFiles := pics.GetByYearIssue(year, issueNo)
 
 	// Separate main pages from beilage pages
-	var mainFiles []ImageFile
-	var beilageFiles []ImageFile
+	var mainFiles []pictures.ImageFile
+	var beilageFiles []pictures.ImageFile
 
 	for _, file := range issueFiles {
 		if file.IsBeilage {
@@ -510,12 +486,13 @@ func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
 
 	// Create main pages - match with issue page range
 	for page := issue.Von; page <= issue.Bis; page++ {
-		var foundFile *ImageFile
+		var foundFile *pictures.ImageFile
 
 		// Look for a file that has this page number
 		for _, file := range mainFiles {
 			if file.Page == page {
-				foundFile = &file
+				fileCopy := file
+				foundFile = &fileCopy
 				break
 			}
 		}
@@ -590,162 +567,4 @@ func LoadIssueImages(issue xmlmodels.Issue) (IssueImages, error) {
 	}
 
 	return images, nil
-}
-
-func initImageRegistry() error {
-	if imageRegistry != nil {
-		return nil
-	}
-
-	imageRegistry = &ImageRegistry{
-		Files:       make([]ImageFile, 0),
-		ByYearIssue: make(map[string][]ImageFile),
-		ByYearPage:  make(map[string]ImageFile),
-	}
-
-	// Temporary map to collect all files by their base name (year-issue-page)
-	tempFiles := make(map[string]*ImageFile)
-
-	err := filepath.Walk("pictures", func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		filename := info.Name()
-		filenamelower := strings.ToLower(filename)
-
-		// Only process .jpg and .webp files (but skip preview files)
-		var nameWithoutExt string
-		var isWebP bool
-
-		if strings.HasSuffix(filenamelower, ".jpg") {
-			nameWithoutExt = strings.TrimSuffix(filename, ".jpg")
-			isWebP = false
-		} else if strings.HasSuffix(filenamelower, ".webp") && !strings.HasSuffix(filenamelower, "-preview.webp") {
-			nameWithoutExt = strings.TrimSuffix(filename, ".webp")
-			isWebP = true
-		} else {
-			return nil // Skip non-image files and preview files
-		}
-
-		parts := strings.Split(nameWithoutExt, "-")
-
-		// Need at least 3 parts: year-issue-page
-		if len(parts) != 3 {
-			return nil
-		}
-
-		// Parse year
-		year, err := strconv.Atoi(strings.TrimSpace(parts[0]))
-		if err != nil {
-			return nil
-		}
-
-		// Check if second part ends with 'b' (beilage)
-		issueStr := strings.TrimSpace(parts[1])
-		isBeilage := strings.HasSuffix(issueStr, "b")
-
-		if isBeilage {
-			issueStr = strings.TrimSuffix(issueStr, "b")
-		}
-
-		// Parse issue number
-		issue, err := strconv.Atoi(issueStr)
-		if err != nil {
-			return nil
-		}
-
-		// Parse page number
-		page, err := strconv.Atoi(strings.TrimSpace(parts[2]))
-		if err != nil {
-			return nil
-		}
-
-		// Create unique key for this image (handles both regular and beilage)
-		var uniqueKey string
-		if isBeilage {
-			uniqueKey = fmt.Sprintf("%d-%db-%d", year, issue, page)
-		} else {
-			uniqueKey = fmt.Sprintf("%d-%d-%d", year, issue, page)
-		}
-
-		// Get or create the ImageFile entry
-		imageFile, exists := tempFiles[uniqueKey]
-		if !exists {
-			imageFile = &ImageFile{
-				Year:      year,
-				Issue:     issue,
-				Page:      page,
-				IsBeilage: isBeilage,
-				BeilageNo: 1, // Default beilage number
-			}
-			tempFiles[uniqueKey] = imageFile
-		}
-
-		// Set paths based on file type
-		currentPath := fmt.Sprintf("/static/pictures/%s", path[9:]) // Remove "pictures/" prefix
-		if isWebP {
-			// WebP is the primary path for single page viewer
-			imageFile.Path = currentPath
-			imageFile.Filename = filename
-		} else {
-			// JPEG is the fallback path for download
-			imageFile.JpegPath = currentPath
-			// If no WebP path is set yet, use JPEG as primary
-			if imageFile.Path == "" {
-				imageFile.Path = currentPath
-				imageFile.Filename = filename
-			}
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return err
-	}
-
-	// Second pass: set PreviewPath for each ImageFile by checking for preview files
-	for _, imageFile := range tempFiles {
-		// Extract the base name from the filename to preserve original format
-		baseNameWithExt := imageFile.Filename
-		var baseName string
-
-		// Remove extension to get base name
-		if strings.HasSuffix(strings.ToLower(baseNameWithExt), ".webp") {
-			baseName = strings.TrimSuffix(baseNameWithExt, ".webp")
-		} else if strings.HasSuffix(strings.ToLower(baseNameWithExt), ".jpg") {
-			baseName = strings.TrimSuffix(baseNameWithExt, ".jpg")
-		} else {
-			baseName = baseNameWithExt
-		}
-
-		// Generate preview filename using the original base name format
-		previewFilename := baseName + "-preview.webp"
-
-		// Check if preview file exists
-		previewFullPath := filepath.Join("pictures", fmt.Sprintf("%d", imageFile.Year), previewFilename)
-		if _, err := os.Stat(previewFullPath); err == nil {
-			imageFile.PreviewPath = fmt.Sprintf("/static/pictures/%d/%s", imageFile.Year, previewFilename)
-		}
-	}
-
-	// Convert temp map to final registry structures
-	for _, imageFile := range tempFiles {
-		imageRegistry.Files = append(imageRegistry.Files, *imageFile)
-
-		yearIssueKey := fmt.Sprintf("%d-%d", imageFile.Year, imageFile.Issue)
-		imageRegistry.ByYearIssue[yearIssueKey] = append(imageRegistry.ByYearIssue[yearIssueKey], *imageFile)
-
-		if !imageFile.IsBeilage {
-			yearPageKey := fmt.Sprintf("%d-%d", imageFile.Year, imageFile.Page)
-			imageRegistry.ByYearPage[yearPageKey] = *imageFile
-		}
-	}
-
-	return nil
 }

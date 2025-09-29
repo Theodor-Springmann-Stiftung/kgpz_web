@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/pictures"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/viewmodels"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/xmlmodels"
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetPiece(kgpz *xmlmodels.Library) fiber.Handler {
+func GetPiece(kgpz *xmlmodels.Library, pics *pictures.PicturesProvider) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
@@ -25,7 +26,7 @@ func GetPiece(kgpz *xmlmodels.Library) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		pieceView, err := viewmodels.NewPieceView(*piece, kgpz)
+		pieceView, err := viewmodels.NewPieceView(*piece, kgpz, pics)
 		if err != nil {
 			logging.Error(err, "Piece view could not be created")
 			return c.SendStatus(fiber.StatusInternalServerError)
@@ -36,7 +37,7 @@ func GetPiece(kgpz *xmlmodels.Library) fiber.Handler {
 }
 
 // GetPieceWithPage handles piece URLs with optional page parameter: /beitrag/:id/:page?
-func GetPieceWithPage(kgpz *xmlmodels.Library) fiber.Handler {
+func GetPieceWithPage(kgpz *xmlmodels.Library, pics *pictures.PicturesProvider) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
@@ -86,7 +87,7 @@ func GetPieceWithPage(kgpz *xmlmodels.Library) fiber.Handler {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
-		pieceView, err := viewmodels.NewPieceView(*piece, kgpz)
+		pieceView, err := viewmodels.NewPieceView(*piece, kgpz, pics)
 		if err != nil {
 			logging.Error(err, "Piece view could not be created")
 			return c.SendStatus(fiber.StatusInternalServerError)
