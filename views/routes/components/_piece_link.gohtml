@@ -1,0 +1,49 @@
+{{- /*
+    Piece Link Component
+    Creates appropriate links to pieces/beiträge based on their structure
+
+    Usage: {{ template "_piece_link" (dict
+        "Piece" $piece
+        "DisplayMode" "search|akteure|place|kategorie|issue"
+        "ShowUnifiedEntry" true|false
+        "LongForm" true|false
+        "CurrentActorID" $currentActorID
+    ) }}
+
+    Parameters:
+    - Piece: The piece object to create links for
+    - DisplayMode: Context for formatting ("search", "akteure", "place", "kategorie", "issue")
+    - ShowUnifiedEntry: Whether to show the unified piece description (default: true)
+    - LongForm: Whether to use long form for unified entry (default: false for search only)
+    - CurrentActorID: ID of current actor (for akteure view context, optional)
+
+    Link Logic:
+    - Single-issue pieces: Link directly to the issue/page
+    - Multi-issue pieces: Link to /beitrag/{piece-id} endpoint
+    - Always wraps the unified piece entry in appropriate link(s)
+*/ -}}
+
+{{- $piece := .Piece -}}
+{{- $displayMode := .DisplayMode -}}
+{{- if not $displayMode -}}{{ $displayMode = "search" }}{{- end -}}
+{{- $showUnifiedEntry := .ShowUnifiedEntry -}}
+{{- if eq $showUnifiedEntry nil -}}{{ $showUnifiedEntry = true }}{{- end -}}
+{{- $longForm := .LongForm -}}
+{{- if eq $longForm nil -}}{{ $longForm = (eq $displayMode "search") }}{{- end -}}
+{{- $currentActorID := .CurrentActorID -}}
+
+{{- /* Determine if this is a multi-issue piece */ -}}
+{{- $isMultiIssue := gt (len $piece.IssueRefs) 1 -}}
+
+{{- /* Always show the unified entry without any link wrapper */ -}}
+{{- if $showUnifiedEntry -}}
+    {{ template "_unified_piece_entry" (dict
+        "Piece" $piece
+        "DisplayMode" $displayMode
+        "ShowPlaceTags" true
+        "UseColonFormat" (eq $displayMode "place")
+        "ShowContinuation" (eq $displayMode "issue")
+        "LongForm" $longForm
+        "CurrentActorID" $currentActorID
+    ) }}
+{{- end -}}

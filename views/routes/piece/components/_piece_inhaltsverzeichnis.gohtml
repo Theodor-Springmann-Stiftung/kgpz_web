@@ -19,7 +19,7 @@
 					<!-- Actual piece content description (larger) -->
 					<div class="mb-3">
 						<div class="text-base font-semibold text-slate-800 leading-snug">
-							{{ template "_unified_piece_entry" (dict "Piece" $firstPiece.PieceByIssue.Piece "DisplayMode" "piece" "ShowPlaceTags" true "UseColonFormat" false "ShowContinuation" true) }}
+							{{ template "_piece_link" (dict "Piece" $firstPiece.PieceByIssue "DisplayMode" "issue" "ShowUnifiedEntry" true "LongForm" false) }}
 						</div>
 					</div>
 				{{ end }}
@@ -88,7 +88,7 @@
 										{{ range $otherPiece := $pageEntry.OtherPieces }}
 											<div class="inhalts-entry py-1 px-0 bg-slate-50 rounded hover:bg-slate-100 transition-colors duration-200"
 												 data-page="{{ $pageEntry.PageNumber }}">
-												{{ template "_unified_piece_entry" (dict "Piece" $otherPiece.PieceByIssue.Piece "DisplayMode" "piece" "ShowPlaceTags" true "UseColonFormat" false "ShowContinuation" true) }}
+												{{ template "_piece_link" (dict "Piece" $otherPiece.PieceByIssue "DisplayMode" "issue" "ShowUnifiedEntry" true "LongForm" false) }}
 											</div>
 										{{ end }}
 									{{ else }}

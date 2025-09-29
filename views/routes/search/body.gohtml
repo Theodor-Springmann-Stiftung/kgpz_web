@@ -90,7 +90,7 @@
 		<!-- Issues -->
 		<div class="bg-white rounded p-4 shadow-sm border border-slate-200">
 			<h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
-				<i class="ri-newspaper-line"></i>
+				<i class="ri-calendar-line"></i>
 				Ausgaben
 				{{ if $model.Issues.Items }}<span class="text-sm font-normal bg-slate-100 px-2 py-0.5 rounded">{{ len $model.Issues.Items }}</span>{{ end }}
 			</h3>
@@ -365,8 +365,8 @@
 						{{- range $groupKey, $groupedItems := $groupedPieces -}}
 							<div class="break-inside-avoid pl-4">
 								<div class="pb-1 indent-4">
-									{{- /* Use first piece for display text */ -}}
-									{{ template "_unified_piece_entry" (dict "Piece" (index $groupedItems 0) "DisplayMode" "search" "ShowPlaceTags" true "UseColonFormat" false "ShowContinuation" false) }}
+									{{- /* Use first piece for display text with linking */ -}}
+									{{ template "_piece_link" (dict "Piece" (index $groupedItems 0) "DisplayMode" "search" "ShowUnifiedEntry" true "LongForm" true) }}
 
 									{{- /* Show all citations from all pieces in this group inline with commas */ -}}
 									{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}

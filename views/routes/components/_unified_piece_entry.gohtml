@@ -170,78 +170,28 @@
 	{{- /* Generate category-specific descriptions */ -}}
 
 	{{- if $categoryFlags.Rezension -}}
-		{{- /* Show authors, translators, and editors in prefix */ -}}
-		{{- if or (gt (len $authors) 0) (gt (len $translators) 0) (gt (len $editors) 0) -}}
-			{{- $hasCurrentActorAuthor := false -}}
-			{{- range $author := $authors -}}
-				{{- if eq $author.ID $currentActorID -}}
-					{{- $hasCurrentActorAuthor = true -}}
-				{{- end -}}
+		{{- /* Always show: Author(s), Rezension von: Work */ -}}
+		{{- Safe $fortsPrefix -}}
+		{{- $authorElements := slice -}}
+		{{- range $author := $authors -}}
+			{{- if or (not $currentActorID) (ne $author.ID $currentActorID) -}}
+				{{- $authorElements = append $authorElements (printf "<a href=\"/akteure/%s\" class=\"author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a>" $author.ID $author.Name) -}}
 			{{- end -}}
-			{{- $hasCurrentActorTranslator := false -}}
-			{{- range $translator := $translators -}}
-				{{- if eq $translator.ID $currentActorID -}}
-					{{- $hasCurrentActorTranslator = true -}}
-				{{- end -}}
-			{{- end -}}
-			{{- $hasCurrentActorEditor := false -}}
-			{{- range $editor := $editors -}}
-				{{- if eq $editor.ID $currentActorID -}}
-					{{- $hasCurrentActorEditor = true -}}
-				{{- end -}}
-			{{- end -}}
-			{{- /* Show other authors/translators/editors in prefix */ -}}
-			{{- if and $useColonFormat (or (not $hasCurrentActorAuthor) (not $hasCurrentActorTranslator) (not $hasCurrentActorEditor)) -}}
-				{{ Safe $fortsPrefix }}
-				{{- $authorElements := slice -}}
-				{{- range $author := $authors -}}
-					{{- if ne $author.ID $currentActorID -}}
-						{{- $authorElements = append $authorElements (printf "<a href=\"/akteure/%s\" class=\"author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a>" $author.ID $author.Name) -}}
-					{{- end -}}
-				{{- end -}}
-				{{- range $translator := $translators -}}
-					{{- if ne $translator.ID $currentActorID -}}
-						{{- $authorElements = append $authorElements (printf "<a href=\"/akteure/%s\" class=\"author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a> (Übers.)" $translator.ID $translator.Name) -}}
-					{{- end -}}
-				{{- end -}}
-				{{- range $editor := $editors -}}
-					{{- if ne $editor.ID $currentActorID -}}
-						{{- $authorElements = append $authorElements (printf "<a href=\"/akteure/%s\" class=\"author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a> (Hrsg.)" $editor.ID $editor.Name) -}}
-					{{- end -}}
-				{{- end -}}
-				{{- range $index, $element := $authorElements -}}
-					{{- if gt $index 0 }}, {{ end }}{{ Safe $element }}
-				{{- end -}}
-				{{- if gt (len $authorElements) 0 -}}{{ $colonPrefix }}{{- end -}}Rezension von:
-			{{- else if not $useColonFormat -}}
-				{{ Safe $fortsPrefix }}
-				{{- $authorElements := slice -}}
-				{{- range $author := $authors -}}
-					{{- if ne $author.ID $currentActorID -}}
-						{{- $authorElements = append $authorElements (printf "<a href=\"/akteure/%s\" class=\"author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a>" $author.ID $author.Name) -}}
-					{{- end -}}
-				{{- end -}}
-				{{- range $translator := $translators -}}
-					{{- if ne $translator.ID $currentActorID -}}
-						{{- $authorElements = append $authorElements (printf "<a href=\"/akteure/%s\" class=\"author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a> (Übers.)" $translator.ID $translator.Name) -}}
-					{{- end -}}
-				{{- end -}}
-				{{- range $editor := $editors -}}
-					{{- if ne $editor.ID $currentActorID -}}
-						{{- $authorElements = append $authorElements (printf "<a href=\"/akteure/%s\" class=\"author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a> (Hrsg.)" $editor.ID $editor.Name) -}}
-					{{- end -}}
-				{{- end -}}
-				{{- range $index, $element := $authorElements -}}
-					{{- if gt $index 0 }}, {{ end }}{{ Safe $element }}
-				{{- end -}}
-				{{- if gt (len $authorElements) 0 -}},{{- end -}}
-			{{- else -}}
-				{{ Safe $fortsPrefix }}Rezension von:
-			{{- end -}}
-		{{- else -}}
-			{{ Safe $fortsPrefix }}Rezension von:
 		{{- end -}}
-		<span class="review-format">
+		{{- range $translator := $translators -}}
+			{{- if or (not $currentActorID) (ne $translator.ID $currentActorID) -}}
+				{{- $authorElements = append $authorElements (printf "<a href=\"/akteure/%s\" class=\"author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a> (Übers.)" $translator.ID $translator.Name) -}}
+			{{- end -}}
+		{{- end -}}
+		{{- range $editor := $editors -}}
+			{{- if or (not $currentActorID) (ne $editor.ID $currentActorID) -}}
+				{{- $authorElements = append $authorElements (printf "<a href=\"/akteure/%s\" class=\"author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600\">%s</a> (Hrsg.)" $editor.ID $editor.Name) -}}
+			{{- end -}}
+		{{- end -}}
+		{{- range $index, $element := $authorElements -}}
+			{{- if gt $index 0 }}, {{ end }}{{ Safe $element }}
+		{{- end -}}
+		{{- if gt (len $authorElements) 0 -}}, {{- end }} Rezension von: <span class="review-format">{{- /* inline with space after colon */ -}}
 			{{ if or (gt (len $workAuthors) 0) (gt (len $workTranslators) 0) (gt (len $workEditors) 0) }}
 				{{- /* Display work authors */ -}}
 				{{- range $index, $author := $workAuthors -}}
@@ -280,42 +230,28 @@
 		>{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Weltnachrichten -}}
-		{{ Safe $fortsPrefix }}Politische Nachrichten aus aller Welt{{ Safe $placeTag }}
+		{{- Safe $fortsPrefix -}}Politische Nachrichten aus aller Welt{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.EinkommendeFremde -}}
 		{{- if $categoryFlags.Lokalnachrichten -}}
-			{{ Safe $fortsPrefix }}Lokale Meldungen über einreisende Fremde
+			{{- Safe $fortsPrefix -}}Lokale Meldungen über einreisende Fremde
 		{{- else if $categoryFlags.Nachruf -}}
-			{{ Safe $fortsPrefix }}Nachruf und Einreiseliste
+			{{- Safe $fortsPrefix -}}Nachruf und Einreiseliste
 		{{- else -}}
-			{{ Safe $fortsPrefix }}Einreiseliste
+			{{- Safe $fortsPrefix -}}Einreiseliste
 		{{- end -}}{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Wechselkurse -}}
-		{{ Safe $fortsPrefix }}Wechselkurse{{ Safe $placeTag }}
+		{{- Safe $fortsPrefix -}}Wechselkurse{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Buecher -}}
-		{{ Safe $fortsPrefix }}Bücheranzeigen{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
+		{{- Safe $fortsPrefix -}}Bücheranzeigen{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Lokalanzeigen -}}
-		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Nachruf }}
-			Todesanzeige
-		{{ else }}
-			Lokalanzeige
-		{{ end }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
+		{{- Safe $fortsPrefix -}}{{- if $categoryFlags.Nachruf -}}Todesanzeige{{- else -}}Lokalanzeige{{- end -}}{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Lokalnachrichten -}}
-		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Lotterie }}
-			Lotterienachrichten
-		{{ else if $categoryFlags.Nachruf }}
-			Nachrufe
-		{{ else if $categoryFlags.Theaterkritik }}
-			Theaternachrichten
-		{{ else if $categoryFlags.Panegyrik }}
-			Festlichkeiten
-		{{ else }}
-			Lokalnachrichten
-		{{ end }}{{ Safe $placeTag }}
+		{{- Safe $fortsPrefix -}}{{- if $categoryFlags.Lotterie -}}Lotterienachrichten{{- else if $categoryFlags.Nachruf -}}Nachrufe{{- else if $categoryFlags.Theaterkritik -}}Theaternachrichten{{- else if $categoryFlags.Panegyrik -}}Festlichkeiten{{- else -}}Lokalnachrichten{{- end -}}{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Gedicht -}}
 		{{- $authorFound := false -}}
@@ -324,11 +260,11 @@
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
 					{{- if and $useColonFormat (ne $agentref.Ref $currentActorID) -}}
-						{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{ $colonPrefix }}
+						{{- Safe $fortsPrefix -}}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{ $colonPrefix }}
 					{{- else if not $useColonFormat -}}
-						{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
+						{{- Safe $fortsPrefix -}}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
 					{{- else -}}
-						{{ Safe $fortsPrefix }}
+						{{- Safe $fortsPrefix -}}
 					{{- end -}}
 					{{ if $categoryFlags.Kommentar }}
 						Gedicht mit Kommentar
@@ -345,7 +281,7 @@
 			{{- end -}}
 		{{- end -}}
 		{{- if not $authorFound -}}
-			{{ Safe $fortsPrefix }}{{ if $categoryFlags.Kommentar }}
+			{{- Safe $fortsPrefix -}}{{ if $categoryFlags.Kommentar }}
 				Gedicht mit Kommentar
 			{{ else if $categoryFlags.Uebersetzung }}
 				Gedichtübersetzung
@@ -357,7 +293,7 @@
 		{{- end -}}
 
 	{{- else if $categoryFlags.Vorladung -}}
-		{{ Safe $fortsPrefix }}Gerichtliche Vorladung{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
+		{{- Safe $fortsPrefix -}}Gerichtliche Vorladung{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Aufsatz -}}
 		{{- $authorFound := false -}}
@@ -366,11 +302,11 @@
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
 					{{- if and $useColonFormat (ne $agentref.Ref $currentActorID) -}}
-						{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{ $colonPrefix }}
+						{{- Safe $fortsPrefix -}}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{ $colonPrefix }}
 					{{- else if not $useColonFormat -}}
-						{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
+						{{- Safe $fortsPrefix -}}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
 					{{- else -}}
-						{{ Safe $fortsPrefix }}
+						{{- Safe $fortsPrefix -}}
 					{{- end -}}
 					{{ if $categoryFlags.Replik }}
 						Erwiderung
@@ -391,7 +327,7 @@
 			{{- end -}}
 		{{- end -}}
 		{{- if not $authorFound -}}
-			{{ Safe $fortsPrefix }}{{ if $categoryFlags.Replik }}
+			{{- Safe $fortsPrefix -}}{{ if $categoryFlags.Replik }}
 				Erwiderung
 			{{ else if $categoryFlags.Uebersetzung }}
 				Übersetzung
@@ -407,13 +343,7 @@
 		{{- end -}}
 
 	{{- else if $categoryFlags.GelehrteNachrichten -}}
-		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Theaterkritik }}
-			Theaterkritik
-		{{ else if $categoryFlags.Kommentar }}
-			Gelehrter Kommentar
-		{{ else }}
-			Gelehrte Nachrichten
-		{{ end }}{{ Safe $placeTag }}
+		{{- Safe $fortsPrefix -}}{{- if $categoryFlags.Theaterkritik -}}Theaterkritik{{- else if $categoryFlags.Kommentar -}}Gelehrter Kommentar{{- else -}}Gelehrte Nachrichten{{- end -}}{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Theaterkritik -}}
 		{{- $authorFound := false -}}
@@ -422,11 +352,11 @@
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
 					{{- if and $useColonFormat (ne $agentref.Ref $currentActorID) -}}
-						{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{ $colonPrefix }}
+						{{- Safe $fortsPrefix -}}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>{{ $colonPrefix }}
 					{{- else if not $useColonFormat -}}
-						{{ Safe $fortsPrefix }}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
+						{{- Safe $fortsPrefix -}}<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>,
 					{{- else -}}
-						{{ Safe $fortsPrefix }}
+						{{- Safe $fortsPrefix -}}
 					{{- end -}}
 					Theaterkritik{{ if $workTitle }}
 						zu <em>{{ $workTitle }}</em>{{ if $workAuthorName }}
@@ -442,7 +372,7 @@
 			{{- end -}}
 		{{- end -}}
 		{{- if not $authorFound -}}
-			{{ Safe $fortsPrefix }}Theaterkritik{{ if $workTitle }}
+			{{- Safe $fortsPrefix -}}Theaterkritik{{ if $workTitle }}
 				zu <em>{{ $workTitle }}</em>{{ if $workAuthorName }}
 					von <a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>
 				{{ end }}
@@ -452,23 +382,13 @@
 		{{- end -}}
 
 	{{- else if $categoryFlags.Proklamation -}}
-		{{ Safe $fortsPrefix }}Amtliche Proklamation{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
+		{{- Safe $fortsPrefix -}}Amtliche Proklamation{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Ineigenersache -}}
-		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Kommentar }}
-			{{ if $categoryFlags.Nachtrag }}Ergänzender Kommentar{{ else }}Redaktioneller Kommentar{{ end }}
-		{{ else if $categoryFlags.Replik }}
-			Redaktionelle Stellungnahme
-		{{ else }}
-			Anmerkung der Redaktion
-		{{ end }}{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
+		{{- Safe $fortsPrefix -}}{{- if $categoryFlags.Kommentar -}}{{- if $categoryFlags.Nachtrag -}}Ergänzender Kommentar{{- else -}}Redaktioneller Kommentar{{- end -}}{{- else if $categoryFlags.Replik -}}Redaktionelle Stellungnahme{{- else -}}Anmerkung der Redaktion{{- end -}}{{ if $title }}: <em>{{ $title }}</em>{{ end }}{{ Safe $placeTag }}
 
 	{{- else if $categoryFlags.Brief -}}
-		{{ Safe $fortsPrefix }}{{ if $categoryFlags.Nachruf }}
-			Kondolenzbrief
-		{{ else }}
-			Leserbrief
-		{{ end }}
+		{{- Safe $fortsPrefix -}}{{- if $categoryFlags.Nachruf -}}Kondolenzbrief{{- else -}}Leserbrief{{- end -}}
 		{{- $authorFound := false -}}{{- range $agentref := $piece.AgentRefs -}}
 			{{- if (or (eq $agentref.Category "") (eq $agentref.Category "autor")) -}}
 				{{- $agent := GetAgent $agentref.Ref -}}{{- if and $agent (gt (len $agent.Names) 0) -}}
@@ -487,11 +407,10 @@
 				{{- $agent := GetAgent $agentref.Ref -}}
 				{{- if and $agent (gt (len $agent.Names) 0) -}}
 					{{- if not $obituaryPersonFound -}}
-						{{ Safe $fortsPrefix }}Nachruf auf
+						{{- Safe $fortsPrefix -}}Nachruf auf <a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>
 					{{- else -}}
-						,
+						, <a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>
 					{{- end -}}
-					<a href="/akteure/{{ $agentref.Ref }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ index $agent.Names 0 }}</a>
 					{{- $obituaryPersonFound = true -}}
 				{{- end -}}
 			{{- end -}}
@@ -521,7 +440,7 @@
 				{{- end -}}
 				{{- /* Show other authors/translators/editors in prefix */ -}}
 				{{- if and $useColonFormat (or (not $hasCurrentActorAuthor) (not $hasCurrentActorTranslator) (not $hasCurrentActorEditor)) -}}
-					{{ Safe $fortsPrefix }}
+					{{- Safe $fortsPrefix -}}
 					{{- $authorElements := slice -}}
 					{{- range $author := $authors -}}
 						{{- if ne $author.ID $currentActorID -}}
@@ -543,7 +462,7 @@
 					{{- end -}}
 					{{- if gt (len $authorElements) 0 -}}{{ $colonPrefix }}{{- end -}}
 				{{- else if not $useColonFormat -}}
-					{{ Safe $fortsPrefix }}
+					{{- Safe $fortsPrefix -}}
 					{{- $authorElements := slice -}}
 					{{- range $author := $authors -}}
 						{{- if ne $author.ID $currentActorID -}}
@@ -565,7 +484,7 @@
 					{{- end -}}
 					{{- if gt (len $authorElements) 0 -}}
 						{{- if $title }}: <em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-						{{ if and $title (not $categoryFlags.Uebersetzung) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
+						{{- if or (gt (len $authorElements) 0) (and $title (not $categoryFlags.Uebersetzung)) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 							<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 							class="work-title"
 							data-short-title="{{ $workTitle }}"
@@ -574,7 +493,7 @@
 						{{ end }}
 					{{- else -}}
 						{{- if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
-						{{ if and $title (not $categoryFlags.Uebersetzung) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
+						{{- if and $title (not $categoryFlags.Uebersetzung) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 							<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 							class="work-title"
 							data-short-title="{{ $workTitle }}"
@@ -583,7 +502,7 @@
 						{{ end }}
 					{{- end -}}{{ Safe $placeTag }}
 				{{- else -}}
-					{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
+					{{- Safe $fortsPrefix -}}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
 					{{ if and $title (not $categoryFlags.Uebersetzung) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 						<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 						class="work-title"
@@ -593,7 +512,7 @@
 					{{ end }}{{ Safe $placeTag }}
 				{{- end -}}
 			{{- else -}}
-				{{ Safe $fortsPrefix }}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
+				{{- Safe $fortsPrefix -}}{{ if $title }}<em>{{ $title }}</em>{{ end }}{{ if $workTitle }}
 					{{ if and $title (not $categoryFlags.Uebersetzung) }}, {{ end }}{{ if $categoryFlags.Uebersetzung }}Übersetzung aus:{{ else }}Auszug aus:{{ end }} {{ if $workAuthorName }}
 						<a href="/akteure/{{ $workAuthorID }}" class="author-link text-slate-700 hover:text-slate-900 underline decoration-slate-400 hover:decoration-slate-600">{{ $workAuthorName }}</a>, {{ end }}<em
 						class="work-title"
@@ -609,11 +528,11 @@
 	{{- end -}}
 </div>
 
-{{- if eq $displayMode "issue" -}}
-	{{- /* Only show annotations for issue view and non-continuation pieces */ -}}
-	{{- if not $isContinuation -}}
+{{- if or (eq $displayMode "issue") $longForm -}}
+	{{- /* Show annotations for issue view (non-continuation pieces) or long form mode */ -}}
+	{{- if or (and (eq $displayMode "issue") (not $isContinuation)) $longForm -}}
 		{{- range $annotation := $piece.AnnotationNote.Annotations -}}
-			<div class="italic text-sm mt-0.5 text-slate-600">
+			<div class="italic text-sm mt-0.5 text-slate-600 indent-0">
 				{{ Safe $annotation.HTML }}
 			</div>
 		{{- end -}}

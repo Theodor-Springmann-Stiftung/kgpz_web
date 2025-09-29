@@ -34,8 +34,8 @@
 			{{- range $groupKey, $groupedItems := $groupedPieces -}}
 				<div class="break-inside-avoid pl-4">
 					<div class="pb-1 indent-4">
-						{{- /* Use first piece for display text */ -}}
-						{{ template "_unified_piece_entry" (dict "Piece" (index $groupedItems 0).Item "CurrentActorID" $a.ID "DisplayMode" "akteure" "ShowPlaceTags" true "UseColonFormat" false "ShowContinuation" false) }}
+						{{- /* Use piece link component for consistent linking */ -}}
+						{{ template "_piece_link" (dict "Piece" (index $groupedItems 0).Item "DisplayMode" "akteure" "ShowUnifiedEntry" true "LongForm" false "CurrentActorID" $a.ID) }}
 
 						{{- /* Show all citations from all pieces in this group inline with commas */ -}}
 						{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}

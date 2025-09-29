@@ -141,8 +141,8 @@
 
 						{{- range $groupKey, $groupedItems := $groupedPieces -}}
 							<div class="pb-1 leading-relaxed">
-								{{- /* Use first piece for display text with colon format for places */ -}}
-								{{ template "_unified_piece_entry" (dict "Piece" (index $groupedItems 0) "CurrentActorID" "" "DisplayMode" "place" "ShowPlaceTags" false "UseColonFormat" true "ShowContinuation" false) }}
+								{{- /* Use piece link component for consistent linking with colon format for places */ -}}
+								{{ template "_piece_link" (dict "Piece" (index $groupedItems 0) "DisplayMode" "place" "ShowUnifiedEntry" true "LongForm" false) }}
 
 								{{- /* Show all citations from all pieces in this group inline with commas */ -}}
 								{{ " " }}{{- range $groupIndex, $groupItem := $groupedItems -}}

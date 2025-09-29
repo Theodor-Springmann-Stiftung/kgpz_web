@@ -59,7 +59,7 @@
 									style="{{ if $individualPiece.PieceByIssue.IsContinuation }}
 										display: none;
 									{{ end }}">
-									{{ template "_unified_piece_entry" (dict "Piece" $individualPiece.PieceByIssue "DisplayMode" "issue" "ShowPlaceTags" true "UseColonFormat" false "ShowContinuation" true) }}
+									{{ template "_piece_link" (dict "Piece" $individualPiece.PieceByIssue "DisplayMode" "issue" "ShowUnifiedEntry" true "LongForm" false) }}
 
 
 									<!-- Links zu anderen Teilen: -->
@@ -197,7 +197,7 @@
 									style="{{ if $individualPiece.PieceByIssue.IsContinuation }}
 										display: none;
 									{{ end }}">
-									{{ template "_unified_piece_entry" (dict "Piece" $individualPiece.PieceByIssue "DisplayMode" "issue" "ShowPlaceTags" true "UseColonFormat" false "ShowContinuation" true) }}
+									{{ template "_piece_link" (dict "Piece" $individualPiece.PieceByIssue "DisplayMode" "issue" "ShowUnifiedEntry" true "LongForm" false) }}
 
 
 									<!-- Links zu anderen Teilen: -->
