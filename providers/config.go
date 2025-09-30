@@ -50,6 +50,8 @@ type Config struct {
 	Debug           bool   `json:"debug" envconfig:"DEBUG"`
 	Watch           bool   `json:"watch" envconfig:"WATCH"`
 	LogData         bool   `json:"log_data" envconfig:"LOG_DATA"`
+	Environment     string `json:"environment" envconfig:"ENVIRONMENT"`
+	NoIndex         bool   `json:"no_index" envconfig:"NO_INDEX"`
 
 	Address string `json:"address" envconfig:"ADDRESS"`
 	Port    string `json:"port" envconfig:"PORT"`
@@ -138,6 +140,14 @@ func readDefaults(cfg *Config) *Config {
 
 	if strings.TrimSpace(cfg.PicturesPath) == "" {
 		cfg.PicturesPath = DEFAULT_PICTURES_DIR
+	}
+
+	if strings.TrimSpace(cfg.Environment) == "" {
+		if cfg.Debug {
+			cfg.Environment = "development"
+		} else {
+			cfg.Environment = "production"
+		}
 	}
 
 	return cfg

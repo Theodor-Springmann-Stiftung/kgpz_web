@@ -875,7 +875,7 @@ class Y extends HTMLElement {
     }));
   }
   setPointActive(e) {
-    e.setAttribute("r", "0.8"), e.setAttribute("fill", "#dc2626"), e.setAttribute("stroke", "#b91c1c"), e.setAttribute("stroke-width", "0.12"), e.setAttribute("opacity", "1"), e.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))"), e.parentNode && e.parentNode.appendChild(e);
+    e.setAttribute("r", "0.6"), e.setAttribute("fill", "#dc2626"), e.setAttribute("stroke", "#b91c1c"), e.setAttribute("stroke-width", "0.12"), e.setAttribute("opacity", "1"), e.setAttribute("filter", "drop-shadow(0 0.05 0.1 rgba(0,0,0,0.2))"), e.parentNode && e.parentNode.appendChild(e);
   }
   setPointInactive(e) {
     e.setAttribute("r", "0.4"), e.setAttribute("fill", "white"), e.setAttribute("stroke", "none"), e.setAttribute("opacity", "0.7"), e.setAttribute("filter", "drop-shadow(0 0.05 0.08 rgba(0,0,0,0.15))");

@@ -8,7 +8,9 @@ cache_gnd/
 data_bilder/
 /pictures/
 config.json
+config.staging.json
 out.log
 kgpz_web
 *.log
 *.out
+*.zip

@@ -1,0 +1,23 @@
+# Exclude pictures directory from Docker build context (21GB)
+pictures/
+
+# Exclude development files
+*.dev.json
+*.log
+.git/
+.gitignore
+README.md
+*.md
+
+# Exclude build artifacts
+node_modules/
+.npm/
+dist/
+build/
+
+# Exclude IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

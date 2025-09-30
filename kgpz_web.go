@@ -159,7 +159,16 @@ func Engine(kgpz *app.KGPZ, c *providers.ConfigProvider) *templating.Engine {
 	timestamp := time.Now().Unix()
 
 	// Add git commit information to global data
-	globals := fiber.Map{"isDev": c.Config.Debug, "name": "KGPZ", "lang": "de", "timestamp": timestamp}
+	isDev := c.Config.Environment == "development"
+	isStaging := c.Config.Environment == "staging"
+	globals := fiber.Map{
+		"isDev": isDev,
+		"isStaging": isStaging,
+		"noIndex": c.Config.NoIndex,
+		"name": "KGPZ",
+		"lang": "de",
+		"timestamp": timestamp,
+	}
 	if kgpz.Repo != nil {
 		globals["gitCommit"] = kgpz.Repo.Commit
 		globals["gitDate"] = kgpz.Repo.Date.Format("2006-01-02T15:04:05Z07:00")

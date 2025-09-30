@@ -3,7 +3,7 @@ services:
   web:
     build: .
     volumes:
-      - kgpz_data:/app/data_git
+      - kgpz_data:/app/data
     ports:
       - "8000:8080"
 

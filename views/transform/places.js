@@ -623,7 +623,7 @@ export class PlacesMap extends HTMLElement {
 
 	setPointActive(circle) {
 		// Active state: darker red circle with wider dark border and small shadow
-		circle.setAttribute("r", "0.8"); // Bigger radius in % units
+		circle.setAttribute("r", "0.6"); // Bigger radius in % units
 		circle.setAttribute("fill", "#dc2626");
 		circle.setAttribute("stroke", "#b91c1c");
 		circle.setAttribute("stroke-width", "0.12");

@@ -13,9 +13,9 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-QUALITY=95          # WebP quality (0-100) - very high for single page viewer
-COMPRESSION=1       # WebP compression level (0-6, lower = less compression, higher quality)
-PICTURES_DIR="pictures"
+QUALITY=88          # WebP quality (0-100) - high quality with good compression
+COMPRESSION=2       # WebP compression level (0-6, lower = less compression, higher quality)
+PICTURES_DIR="/app/data/pictures"
 
 # Check if cwebp is installed
 if ! command -v cwebp &> /dev/null; then
@@ -33,8 +33,8 @@ if [ ! -d "$PICTURES_DIR" ]; then
 fi
 
 echo -e "${BLUE}Generating high-quality WebP originals for single page viewer...${NC}"
-echo "Quality: $QUALITY% (near-lossless)"
-echo "Compression: $COMPRESSION (minimal compression for maximum quality)"
+echo "Quality: $QUALITY% (high quality with compression)"
+echo "Compression: $COMPRESSION (balanced compression for good quality)"
 echo ""
 
 # Counters

@@ -1,10 +1,14 @@
 <meta charset="UTF-8" />
+{{ if .noIndex }}
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+{{ end }}
 
 {{ block "head" . }}
 	<!-- Default Head elements -->
 {{ end }}
 
-{{ if .isDev }}
+{{ if or .isDev .isStaging }}
 	<link rel="icon" href="/assets/logo/dev_favicon.png" />
 {{ else }}
 	<link rel="icon" href="/assets/logo/favicon.png" />

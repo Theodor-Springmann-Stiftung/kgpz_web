@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 # Configuration
 QUALITY=75          # WebP quality (0-100)
 COMPRESSION=6       # WebP compression level (0-6, higher = better compression)
-PICTURES_DIR="pictures"
+PICTURES_DIR="/app/data/pictures"
 
 # Check if cwebp is installed
 if ! command -v cwebp &> /dev/null; then
@@ -42,7 +42,7 @@ fi
 echo -e "${GREEN}Generating WebP preview images...${NC}"
 echo "Quality: $QUALITY%"
 echo "Compression: $COMPRESSION"
-echo "Resize: 50% (for faster loading)"
+echo "Resize: 70% (for faster loading)"
 echo ""
 
 # Counters
@@ -70,13 +70,13 @@ process_file() {
         echo -e "${YELLOW}Overriding existing preview: $webp_file${NC}"
     fi
 
-    # Get image dimensions and calculate 50%
+    # Get image dimensions and calculate 70%
     dimensions=$(identify -ping -format "%w %h" "$jpg_file" 2>/dev/null)
     if [ $? -eq 0 ] && [ -n "$dimensions" ]; then
         width=$(echo $dimensions | cut -d' ' -f1)
         height=$(echo $dimensions | cut -d' ' -f2)
-        new_width=$((width / 2))
-        new_height=$((height / 2))
+        new_width=$((width * 70 / 100))
+        new_height=$((height * 70 / 100))
         resize_params="-resize $new_width $new_height"
         echo "Processing: $jpg_file -> $webp_file (${width}x${height} → ${new_width}x${new_height})"
     else
