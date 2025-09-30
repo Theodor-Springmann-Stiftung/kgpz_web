@@ -5,7 +5,7 @@ services:
     volumes:
       - kgpz_data:/app/data
     ports:
-      - "8000:8080"
+      - "8095:8095"
 
 volumes:
   kgpz_data:

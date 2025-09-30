@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY . .
 RUN go build
-EXPOSE 8082
+EXPOSE 8095
 
 CMD ["./lenz-web"]
 

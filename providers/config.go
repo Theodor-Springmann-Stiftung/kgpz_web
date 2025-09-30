@@ -21,7 +21,7 @@ const (
 	DEFAULT_SEARCH_CACHE_DIR = "search"
 	DEFAULT_PICTURES_DIR     = "pictures"
 
-	DEFAULT_PORT  = "8080"
+	DEFAULT_PORT  = "8095"
 	DEFAULT_ADDR  = "localhost"
 	DEFAULT_HTTPS = false
 
