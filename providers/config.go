@@ -19,7 +19,6 @@ const (
 	DEFAULT_GND_CACHE_DIR    = "gnd"
 	DEFAULT_GEO_CACHE_DIR    = "geo"
 	DEFAULT_SEARCH_CACHE_DIR = "search"
-	DEFAULT_IMG_DIR          = "data_bilder"
 	DEFAULT_PICTURES_DIR     = "pictures"
 
 	DEFAULT_PORT  = "8080"
@@ -43,7 +42,6 @@ type Config struct {
 	GNDPath         string `json:"gnd_path" envconfig:"GND_PATH"`
 	GeoPath         string `json:"geo_path" envconfig:"GEO_PATH"`
 	SearchPath      string `json:"search_path" envconfig:"SEARCH_PATH"`
-	ImgPath         string `json:"img_path" envconfig:"IMG_PATH"`
 	PicturesPath    string `json:"pictures_path" envconfig:"PICTURES_PATH"`
 	WebHookEndpoint string `json:"webhook_endpoint" envconfig:"WEBHOOK_ENDPOINT"`
 	WebHookSecret   string `json:"webhook_secret" envconfig:"WEBHOOK_SECRET"`
@@ -128,10 +126,6 @@ func readDefaults(cfg *Config) *Config {
 
 	if strings.TrimSpace(cfg.Port) == "" {
 		cfg.Port = DEFAULT_PORT
-	}
-
-	if strings.TrimSpace(cfg.ImgPath) == "" {
-		cfg.ImgPath = DEFAULT_IMG_DIR
 	}
 
 	if strings.TrimSpace(cfg.SearchPath) == "" {

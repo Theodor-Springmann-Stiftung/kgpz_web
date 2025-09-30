@@ -25,7 +25,6 @@ import (
 // It is meant to be constructed once and then used as a singleton.
 
 const (
-	IMG_PREFIX      = "/img/"
 	PICTURES_PREFIX = "/static/pictures/"
 
 	EDITION_URL  = "/edition/"
@@ -89,16 +88,6 @@ func NewKGPZ(config *providers.ConfigProvider) (*KGPZ, error) {
 }
 
 func (k *KGPZ) Pre(srv *fiber.App) error {
-	// Check if folder exists and if yes, serve image files from it
-	if _, err := os.Stat(k.Config.Config.ImgPath); err == nil {
-		fs := os.DirFS(k.Config.Config.ImgPath)
-		srv.Use(IMG_PREFIX, compress.New(compress.Config{
-			Level: compress.LevelBestSpeed,
-		}), etag.New(), helpers.StaticHandler(&fs))
-	} else {
-		logging.Info("Image folder not found. Skipping image serving.")
-	}
-
 	// Serve newspaper pictures from pictures directory
 	picturesPath := k.Config.Config.PicturesPath
 	if _, err := os.Stat(picturesPath); err == nil {
