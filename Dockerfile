@@ -5,5 +5,5 @@ COPY . .
 RUN go build
 EXPOSE 8095
 
-CMD ["./lenz-web"]
+CMD ["./kgpz_web"]
 
