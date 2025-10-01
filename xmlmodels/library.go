@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers/logging"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/providers/xmlprovider"
 )
 
@@ -53,6 +54,12 @@ func (l *Library) Parse(source xmlprovider.ParseSource, baseDir, commit string) 
 	// INFO: this lock prevents multiple parses from happening at the same time.
 	l.mu.Lock()
 	defer l.mu.Unlock()
+
+	if commit != "" {
+		logging.Info("Parsing XML from commit: " + commit)
+	} else {
+		logging.Info("Parsing XML from directory: " + baseDir)
+	}
 
 	wg := sync.WaitGroup{}
 	meta := xmlprovider.ParseMeta{
@@ -141,6 +148,11 @@ func (l *Library) Parse(source xmlprovider.ParseSource, baseDir, commit string) 
 
 	l.cleanup(meta)
 	l.Parses = append(l.Parses, meta)
+
+	// Log parsing statistics
+	logging.Info(fmt.Sprintf("Parse complete: %d agents, %d places, %d works, %d categories, %d issues, %d pieces",
+		len(l.Agents.Array), len(l.Places.Array), len(l.Works.Array),
+		len(l.Categories.Array), len(l.Issues.Array), len(l.Pieces.Array)))
 
 	var errors []string
 	if len(meta.FailedPaths) > 0 {

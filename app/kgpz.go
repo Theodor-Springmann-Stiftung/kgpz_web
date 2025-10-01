@@ -617,7 +617,7 @@ func (k *KGPZ) Pull() {
 	k.fsmu.Unlock()
 
 	if changed {
-		logging.ObjDebug(&k.Repo, "Remote changed. Reparsing")
+		logging.Info("Repository updated to commit: " + k.Repo.Commit + " (reparsing data)")
 		if err := k.Serialize(); err != nil {
 			logging.Error(err, "Error parsing XML after git pull. Using mixed old/new data.")
 		}
@@ -636,6 +636,8 @@ func (k *KGPZ) Pull() {
 				k.Config.Config.GitURL,
 			)
 		}
+	} else {
+		logging.Info("Repository up to date at commit: " + k.Repo.Commit)
 	}
 }
 
