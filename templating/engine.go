@@ -457,24 +457,6 @@ func (e *Engine) Load() error {
 	return nil
 }
 
-func (e *Engine) Reload() error {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
-		e.LayoutRegistry.Reset()
-	}()
-
-	go func() {
-		defer wg.Done()
-		e.TemplateRegistry.Reset()
-	}()
-
-	wg.Wait()
-	return nil
-}
-
 // INFO: fn is a function that returns either one value or two values, the second one being an error
 func (e *Engine) AddFunc(name string, fn interface{}) {
 	e.mu.Lock()

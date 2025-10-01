@@ -21,15 +21,19 @@ func GetIssue(kgpz *xmlmodels.Library, pics *pictures.PicturesProvider) fiber.Ha
 	return func(c *fiber.Ctx) error {
 		y := c.Params("year")
 		yi, err := strconv.Atoi(y)
-		if err != nil || yi < MINYEAR || yi > MAXYEAR {
-			logging.Error(err, "Year is not a valid number")
+		if err != nil {
+			return c.SendStatus(fiber.StatusNotFound)
+		}
+		if yi < MINYEAR || yi > MAXYEAR {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
 		d := c.Params("issue")
 		di, err := strconv.Atoi(d)
-		if err != nil || di < 1 {
-			logging.Error(err, "Issue is not a valid number")
+		if err != nil {
+			return c.SendStatus(fiber.StatusNotFound)
+		}
+		if di < 1 {
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 

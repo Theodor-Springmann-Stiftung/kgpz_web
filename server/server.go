@@ -195,11 +195,6 @@ func (s *Server) Kill() {
 	s.shutdown.Wait()
 }
 
-func (s *Server) Restart() {
-	s.Stop()
-	s.Start()
-}
-
 func (s *Server) runner(srv *fiber.App) {
 	s.running = make(chan bool)
 	s.shutdown = &sync.WaitGroup{}

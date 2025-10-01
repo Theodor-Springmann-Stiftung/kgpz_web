@@ -91,65 +91,6 @@ func Run(app *App) {
 		done <- true
 	}()
 
-	// INFO: hot reloading for poor people
-	if app.Config.Watch {
-		go func() {
-			_, routesexist := os.Stat(server.ROUTES_FILEPATH)
-			_, layoutexist := os.Stat(server.LAYOUT_FILEPATH)
-
-			if routesexist != nil && layoutexist != nil {
-				logging.Info("Routes or Layout folder does not exist. Watcher disabled.")
-				return
-			}
-
-			watcher, err := helpers.NewFileWatcher()
-			if err != nil {
-				return
-			}
-
-			watcher.Append(func(path string) {
-				logging.Info("File changed: ", path)
-				time.Sleep(200 * time.Millisecond)
-				engine := Engine(app.KGPZ, app.Config)
-				app.Server.ClearPre()
-				app.Server.AddPre(engine)
-				app.Server.Engine(engine)
-			})
-
-			if routesexist != nil {
-				err = watcher.RecursiveDir(server.ROUTES_FILEPATH)
-				if err != nil {
-					return
-				}
-			}
-
-			if layoutexist != nil {
-				err = watcher.RecursiveDir(server.LAYOUT_FILEPATH)
-				if err != nil {
-					return
-				}
-			}
-		}()
-
-	}
-
-	// Interactive listening for input
-	// if k.IsDebug() {
-	// 	go func() {
-	// 		for {
-	// 			var input string
-	// 			fmt.Scanln(&input)
-	// 			if input == "r" {
-	// 				s.Restart()
-	// 			} else if input == "p" {
-	// 				k.Pull()
-	// 			} else if input == "q" {
-	// 				sigs <- os.Signal(syscall.SIGTERM)
-	// 			}
-	// 		}
-	// 	}()
-	// }
-	//
 	<-done
 }
 

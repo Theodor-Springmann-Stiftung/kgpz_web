@@ -46,7 +46,6 @@ type Config struct {
 	WebHookEndpoint string `json:"webhook_endpoint" envconfig:"WEBHOOK_ENDPOINT"`
 	WebHookSecret   string `json:"webhook_secret" envconfig:"WEBHOOK_SECRET"`
 	Debug           bool   `json:"debug" envconfig:"DEBUG"`
-	Watch           bool   `json:"watch" envconfig:"WATCH"`
 	LogData         bool   `json:"log_data" envconfig:"LOG_DATA"`
 	Environment     string `json:"environment" envconfig:"ENVIRONMENT"`
 	NoIndex         bool   `json:"no_index" envconfig:"NO_INDEX"`
