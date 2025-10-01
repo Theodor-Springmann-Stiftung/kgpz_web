@@ -618,7 +618,9 @@ func (k *KGPZ) Pull() {
 
 	if changed {
 		logging.ObjDebug(&k.Repo, "Remote changed. Reparsing")
-		k.Serialize()
+		if err := k.Serialize(); err != nil {
+			logging.Error(err, "Error parsing XML after git pull. Using mixed old/new data.")
+		}
 		k.EnrichAndRebuildIndex()
 
 		// Rescan pictures after pull

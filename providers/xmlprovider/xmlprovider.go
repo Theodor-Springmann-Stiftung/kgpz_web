@@ -1,7 +1,9 @@
 package xmlprovider
 
 import (
+	"fmt"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -96,12 +98,18 @@ func (p *XMLProvider[T]) Serialize(dataholder XMLRootElement[T], path string, la
 func (p *XMLProvider[T]) Cleanup(latest ParseMeta) {
 	todelete := make([]string, 0)
 	toappend := make([]*T, 0)
+	staleDataBySource := make(map[string][]string)
+
 	p.Infos.Range(func(key, value interface{}) bool {
 		info := value.(ItemInfo)
 		if !info.Parse.Equals(latest) {
 			if !latest.Failed(info.Source) {
 				todelete = append(todelete, key.(string))
 			} else {
+				// Keep old data because the file failed to parse
+				keyStr := key.(string)
+				staleDataBySource[info.Source] = append(staleDataBySource[info.Source], keyStr)
+
 				item, ok := p.Items.Load(key)
 				if ok {
 					i := item.(*T)
@@ -113,6 +121,11 @@ func (p *XMLProvider[T]) Cleanup(latest ParseMeta) {
 		}
 		return true
 	})
+
+	// Log stale data that is being kept
+	for source, ids := range staleDataBySource {
+		logging.Error(nil, "Keeping stale data from failed parse: "+source+" ("+fmt.Sprint(len(ids))+" items: "+strings.Join(ids, ", ")+")")
+	}
 
 	for _, key := range todelete {
 		p.Infos.Delete(key)
