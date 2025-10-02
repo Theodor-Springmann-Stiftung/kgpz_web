@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -104,6 +105,19 @@ func (k *KGPZ) Pre(srv *fiber.App) error {
 }
 
 func (k *KGPZ) Init() error {
+	// Ensure base directory exists before initializing any providers
+	if info, err := os.Stat(k.Config.Config.BaseDIR); os.IsNotExist(err) {
+		logging.Info("Base directory does not exist. Creating: " + k.Config.Config.BaseDIR)
+		if err := os.MkdirAll(k.Config.Config.BaseDIR, 0755); err != nil {
+			return err
+		}
+		logging.Info("Base directory created successfully: " + k.Config.Config.BaseDIR)
+	} else if err != nil {
+		return err
+	} else if !info.IsDir() {
+		return fmt.Errorf("Base directory path exists but is not a directory: %s", k.Config.Config.BaseDIR)
+	}
+
 	if gp, err := providers.NewGitProvider(
 		k.Config.Config.GitURL,
 		filepath.Join(k.Config.Config.BaseDIR, k.Config.Config.GITPath),
