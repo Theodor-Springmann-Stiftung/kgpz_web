@@ -5,13 +5,13 @@ services:
       - kgpz_staging_data:/app/data
     expose:
       - "8095"
-		networks:
-			- caddynet
+    networks:
+      - caddynet
 
 volumes:
   kgpz_staging_data:
     external: true
 
 networks:
-	caddynet:
-		external: true
+  caddynet:
+    external: true
