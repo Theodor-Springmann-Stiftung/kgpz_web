@@ -8,7 +8,7 @@
 			<!-- Compact header for 2xl+ screens -->
 			<div class="px-3 pb-4 border-b border-gray-200 bg-slate-50 rounded-t py-8">
 				{{ if eq .Search "autoren" }}
-					<h2 class="text-2xl font-bold font-serif text-gray-900 mb-1">Autor:innen</h2>
+					<h2 class="text-2xl font-bold font-serif text-gray-900 mb-1">Beiträger</h2>
 					<p class="text-base text-gray-600 mb-3">Personen, die Beiträge in der Zeitung verfasst haben</p>
 				{{ else }}
 					<h2 class="text-2xl font-bold font-serif text-gray-900 mb-1">Personen</h2>
@@ -27,7 +27,7 @@
 						       hx-target="main"
 									 hx-swap="innerHTML show:window:top focus-scroll:false"
 						       hx-push-url="true">
-						<span class="ml-2 text-base text-gray-700">Nur Autor:innen anzeigen</span>
+						<span class="ml-2 text-base text-gray-700">Nur Beiträger anzeigen</span>
 					</label>
 
 					<!-- Scroll to top button -->
