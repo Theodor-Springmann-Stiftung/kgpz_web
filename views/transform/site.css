@@ -253,7 +253,7 @@ body.page-edition::before {
 
 @layer components {
 	html {
-		font-size: 17px;
+		font-size: clamp(13px, 1vw + 0.5rem, 16px);
 	}
 
 	body {
@@ -317,30 +317,10 @@ body.page-edition::before {
 
 	.single-page .newspaper-page-image {
 		width: auto;
-		height: 750px;
+		height: clamp(600px, 50vh, 900px);
+		max-height: 90vh;
 		object-fit: contain;
 		max-width: 100%;
-	}
-
-	/* Larger screens */
-	@media (min-width: 1280px) {
-		.single-page .newspaper-page-image {
-			height: 900px;
-		}
-	}
-
-	/* Very wide screens */
-	@media (min-width: 1536px) {
-		.single-page .newspaper-page-image {
-			height: 1050px;
-		}
-	}
-
-	/* Mobile constraints */
-	@media (max-width: 640px) {
-		.single-page .newspaper-page-image {
-			height: 600px;
-		}
 	}
 
 	/* Navigation button hover styles */
