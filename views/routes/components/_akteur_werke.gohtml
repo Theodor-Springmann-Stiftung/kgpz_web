@@ -20,7 +20,7 @@
 		{{ range $_, $w := $works }}
 			<div class="mb-2 break-inside-avoid max-w-[95ch]">
 				{{- if ne (len $w.Item.Citation.InnerXML ) 0 -}}
-					<div class="indent-6">
+					<div class="ml-4 -indent-4">
 						{{- /* Get other associated persons for this work */ -}}
 						{{- $otherAuthors := slice -}}
 						{{- $otherTranslators := slice -}}
@@ -100,7 +100,7 @@
 							{{- $categoryFlags := GetCategoryFlags $p.Item -}}
 							{{- $categories := slice -}}
 							{{- if $categoryFlags.Rezension -}}
-								{{- $categories = append $categories "Rezension" -}}
+								{{- $categories = append $categories "Rezensiert" -}}
 							{{- end -}}
 							{{- if $categoryFlags.Auszug -}}
 								{{- $categories = append $categories "Auszug" -}}
@@ -168,7 +168,7 @@
 
 						{{- /* Display each group */ -}}
 						{{- range $groupKey, $groupPieces := $pieceGroups -}}
-							<div class="mb-1 text-gray-600">
+							<div class="ml-4 mb-1 text-gray-600">
 								{{- /* Extract categories, authors, translators, and editors from group key */ -}}
 								{{- $keyParts := split $groupKey "|" -}}
 								{{- $categoryName := index $keyParts 0 -}}
@@ -185,7 +185,7 @@
 								{{- /* Use plural if multiple pieces grouped together */ -}}
 								{{- $displayCategory := $categoryName -}}
 								{{- if gt (len $groupPieces) 1 -}}
-									{{- if eq $categoryName "Rezension" -}}
+									{{- if eq $categoryName "Rezensiert" -}}
 										{{- $displayCategory = "Rezensionen" -}}
 									{{- else if eq $categoryName "Auszug" -}}
 										{{- $displayCategory = "Auszüge" -}}

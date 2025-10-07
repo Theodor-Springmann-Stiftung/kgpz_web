@@ -602,7 +602,7 @@ class NavigationMenu extends HTMLElement {
                         <div class="ml-2 flex flex-col gap-y-2 mt-2 whitespace-nowrap">
                             <a href="/">Jahrgängen</a>
                             <a href="/akteure/a">Personen &amp; Werken</a>
-                            <a href="/kategorie/">Betragsarten</a>
+                            <a href="/kategorie/">Beitragsarten</a>
                             <a href="/ort/">Orten</a>
                         </div>
                     </div>
@@ -813,9 +813,9 @@ class SearchBar extends HTMLElement {
 	}
 
 	setupEventListeners() {
-		const searchInput = this.querySelector('#search');
-		const resetButton = this.querySelector('#search-reset');
-		const loadingIndicator = this.querySelector('#search-loading');
+		const searchInput = this.querySelector("#search");
+		const resetButton = this.querySelector("#search-reset");
+		const loadingIndicator = this.querySelector("#search-loading");
 
 		if (!searchInput || !resetButton) return;
 
@@ -824,10 +824,10 @@ class SearchBar extends HTMLElement {
 
 		// Function to toggle reset button visibility
 		const toggleResetButton = () => {
-			if (searchInput.value.trim() !== '') {
-				resetButton.classList.remove('hidden');
+			if (searchInput.value.trim() !== "") {
+				resetButton.classList.remove("hidden");
 			} else {
-				resetButton.classList.add('hidden');
+				resetButton.classList.add("hidden");
 			}
 		};
 
@@ -835,16 +835,16 @@ class SearchBar extends HTMLElement {
 		toggleResetButton();
 
 		// Show/hide reset button as user types
-		searchInput.addEventListener('input', toggleResetButton);
+		searchInput.addEventListener("input", toggleResetButton);
 
 		// Handle reset button click
-		resetButton.addEventListener('click', () => {
-			searchInput.value = '';
-			resetButton.classList.add('hidden');
+		resetButton.addEventListener("click", () => {
+			searchInput.value = "";
+			resetButton.classList.add("hidden");
 
 			// Trigger the same HTMX behavior that happens when manually clearing the field
 			// This will automatically navigate back to the previous page
-			searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+			searchInput.dispatchEvent(new Event("input", { bubbles: true }));
 
 			// Focus back on search input
 			searchInput.focus();
@@ -855,42 +855,42 @@ class SearchBar extends HTMLElement {
 			// Hide reset button when loading starts
 			const beforeRequestHandler = (event) => {
 				if (event.detail.elt === searchInput) {
-					resetButton.style.display = 'none';
+					resetButton.style.display = "none";
 				}
 			};
 
 			// Show reset button when loading ends (if there's still text)
 			const afterRequestHandler = (event) => {
 				if (event.detail.elt === searchInput) {
-					resetButton.style.display = '';
+					resetButton.style.display = "";
 					toggleResetButton();
 				}
 			};
 
-			document.body.addEventListener('htmx:beforeRequest', beforeRequestHandler);
-			document.body.addEventListener('htmx:afterRequest', afterRequestHandler);
+			document.body.addEventListener("htmx:beforeRequest", beforeRequestHandler);
+			document.body.addEventListener("htmx:afterRequest", afterRequestHandler);
 
 			// Store references for cleanup
 			this.htmxRequestListeners.push(
-				{ event: 'htmx:beforeRequest', handler: beforeRequestHandler },
-				{ event: 'htmx:afterRequest', handler: afterRequestHandler }
+				{ event: "htmx:beforeRequest", handler: beforeRequestHandler },
+				{ event: "htmx:afterRequest", handler: afterRequestHandler },
 			);
 		}
 
 		// Simple click listener to clear search when any link is clicked
 		this.linkClickHandler = (event) => {
 			const clickedElement = event.target;
-			const link = clickedElement.closest('a[href]');
+			const link = clickedElement.closest("a[href]");
 
 			// If a link was clicked and it has an href, clear the search
-			if (link && link.getAttribute('href') && searchInput.value.trim() !== '') {
-				searchInput.value = '';
-				resetButton.classList.add('hidden');
+			if (link && link.getAttribute("href") && searchInput.value.trim() !== "") {
+				searchInput.value = "";
+				resetButton.classList.add("hidden");
 			}
 		};
 
 		// Listen for clicks on the entire document
-		document.addEventListener('click', this.linkClickHandler);
+		document.addEventListener("click", this.linkClickHandler);
 	}
 
 	cleanup() {
@@ -902,7 +902,7 @@ class SearchBar extends HTMLElement {
 
 		// Remove link click listener
 		if (this.linkClickHandler) {
-			document.removeEventListener('click', this.linkClickHandler);
+			document.removeEventListener("click", this.linkClickHandler);
 			this.linkClickHandler = null;
 		}
 	}

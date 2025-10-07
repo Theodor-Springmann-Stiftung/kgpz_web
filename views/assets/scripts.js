@@ -293,7 +293,7 @@ class j extends HTMLElement {
                         <div class="ml-2 flex flex-col gap-y-2 mt-2 whitespace-nowrap">
                             <a href="/">Jahrgängen</a>
                             <a href="/akteure/a">Personen &amp; Werken</a>
-                            <a href="/kategorie/">Betragsarten</a>
+                            <a href="/kategorie/">Beitragsarten</a>
                             <a href="/ort/">Orten</a>
                         </div>
                     </div>
