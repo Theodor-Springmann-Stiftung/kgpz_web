@@ -253,7 +253,7 @@ body.page-edition::before {
 
 @layer components {
 	html {
-		font-size: clamp(12px, calc(13px + (100vw - 1500px) / 100), 17px);
+		font-size: clamp(11px, calc(12px + (100vw - 1500px) / 100), 17px);
 	}
 
 	body {
