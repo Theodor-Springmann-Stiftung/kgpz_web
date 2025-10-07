@@ -3,9 +3,9 @@
 	{{- $agents := .Agents -}}
 	{{- $sorted := .Sorted -}}
 
-	<div class="hidden lg:block w-96 flex-shrink-0">
+	<div class="hidden md:block w-96 flex-shrink-0">
 		<div class="sticky top-0 max-h-screen flex flex-col">
-			<!-- Compact header for lg+ screens -->
+			<!-- Compact header for md+ screens -->
 			<div class="px-3 pb-4 border-b border-gray-200 bg-slate-50 rounded-t py-8">
 				{{ if eq .Search "autoren" }}
 					<h2 class="text-2xl font-bold font-serif text-gray-900 mb-1">Beiträger</h2>
