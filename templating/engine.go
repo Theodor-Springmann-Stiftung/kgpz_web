@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
-	"maps"
 	"reflect"
 	"strings"
 	"sync"
