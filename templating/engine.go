@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"maps"
 	"reflect"
 	"strings"
 	"sync"
@@ -473,17 +474,18 @@ func (e *Engine) AddFuncs(funcs map[string]interface{}) {
 }
 
 func (e *Engine) Render(out io.Writer, path string, data interface{}, layout ...string) error {
-	// TODO: check if a reload is needed if files on disk have changed
-	ld := data.(fiber.Map)
-	gd := e.GlobalData
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	d := data.(fiber.Map)
 	if e.GlobalData != nil {
-		for k, v := range ld {
-			gd[k] = v
+		for k, v := range e.GlobalData {
+			if _, ok := d[k]; !ok {
+				d[k] = v
+			}
 		}
 	}
 
-	e.mu.Lock()
-	defer e.mu.Unlock()
 	var l *template.Template
 	if len(layout) == 0 {
 		lay, err := e.LayoutRegistry.Default(&e.FuncMap)
@@ -517,7 +519,7 @@ func (e *Engine) Render(out io.Writer, path string, data interface{}, layout ...
 		return err
 	}
 
-	err = lay.Execute(out, gd)
+	err = lay.Execute(out, d)
 	if err != nil {
 		return err
 	}
