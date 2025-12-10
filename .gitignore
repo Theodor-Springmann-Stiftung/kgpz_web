@@ -14,3 +14,4 @@ kgpz_web
 *.log
 *.out
 *.zip
+.env
