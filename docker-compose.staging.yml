@@ -1,6 +1,7 @@
 services:
   kgpzstaging:
     build: .
+    user: "1000:1000"
     volumes:
       - ./cache:/app/data/cache
       - ./pictures:/app/data/pictures

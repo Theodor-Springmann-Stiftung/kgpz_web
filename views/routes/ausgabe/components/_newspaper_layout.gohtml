@@ -1,5 +1,6 @@
 {{ $model := .model }}
 {{ $images := $model.Images }}
+{{ $hasMainPages := gt (len $images.MainPages) 0 }}
 
 <div class="space-y-8 h-full relative" id="newspaper-content">
 	<!-- Main Issue Pages -->
@@ -17,7 +18,7 @@
 	<!-- Beilage Pages -->
 	{{ range $beilageNum, $beilagePages := $images.AdditionalPages }}
 		{{ if $beilagePages }}
-			<div class="mt-12 pt-8">
+			<div class="{{ if $hasMainPages }}mt-12 pt-8{{ end }}">
 				<!-- Header for beilage -->
 				<div id="beilage" class="flex items-center gap-3 mb-6 bg-amber-50 px-4 py-3 rounded border border-amber-200">
 					<i class="ri-attachment-line text-2xl text-amber-600"></i>

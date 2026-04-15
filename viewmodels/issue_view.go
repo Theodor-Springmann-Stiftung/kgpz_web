@@ -483,46 +483,48 @@ func LoadIssueImages(issue xmlmodels.Issue, pics *pictures.PicturesProvider) (Is
 		}
 	}
 
-	// Create main pages - match with issue page range
-	for page := issue.Von; page <= issue.Bis; page++ {
-		var foundFile *pictures.ImageFile
+	// Create main pages only when the issue has a valid main-page range.
+	if issue.Von > 0 && issue.Bis >= issue.Von {
+		for page := issue.Von; page <= issue.Bis; page++ {
+			var foundFile *pictures.ImageFile
 
-		// Look for a file that has this page number
-		for _, file := range mainFiles {
-			if file.Page == page {
-				fileCopy := file
-				foundFile = &fileCopy
-				break
+			// Look for a file that has this page number
+			for _, file := range mainFiles {
+				if file.Page == page {
+					fileCopy := file
+					foundFile = &fileCopy
+					break
+				}
 			}
-		}
 
-		if foundFile != nil {
-			images.HasImages = true
-			// Use preview path if available, otherwise fallback to original
-			previewPath := foundFile.PreviewPath
-			if previewPath == "" {
-				previewPath = foundFile.Path
+			if foundFile != nil {
+				images.HasImages = true
+				// Use preview path if available, otherwise fallback to original
+				previewPath := foundFile.PreviewPath
+				if previewPath == "" {
+					previewPath = foundFile.Path
+				}
+				// Use original source path if available, otherwise fallback to primary
+				downloadPath := foundFile.DownloadPath
+				if downloadPath == "" {
+					downloadPath = foundFile.Path
+				}
+				images.MainPages = append(images.MainPages, IssuePage{
+					PageNumber:   page,
+					ImagePath:    foundFile.Path,
+					PreviewPath:  previewPath,
+					DownloadPath: downloadPath,
+					Available:    true,
+				})
+			} else {
+				images.MainPages = append(images.MainPages, IssuePage{
+					PageNumber:   page,
+					ImagePath:    "",
+					PreviewPath:  "",
+					DownloadPath: "",
+					Available:    false,
+				})
 			}
-			// Use original source path if available, otherwise fallback to primary
-			downloadPath := foundFile.DownloadPath
-			if downloadPath == "" {
-				downloadPath = foundFile.Path
-			}
-			images.MainPages = append(images.MainPages, IssuePage{
-				PageNumber:   page,
-				ImagePath:    foundFile.Path,
-				PreviewPath:  previewPath,
-				DownloadPath: downloadPath,
-				Available:    true,
-			})
-		} else {
-			images.MainPages = append(images.MainPages, IssuePage{
-				PageNumber:   page,
-				ImagePath:    "",
-				PreviewPath:  "",
-				DownloadPath: "",
-				Available:    false,
-			})
 		}
 	}
 
