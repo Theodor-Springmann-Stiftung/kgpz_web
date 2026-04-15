@@ -2,13 +2,10 @@ services:
   kgpzstaging:
     build: .
     volumes:
-      - kgpz_staging_data:/app/data
+      - ./cache:/app/data/cache
+      - ./pictures:/app/data/pictures
     networks:
       - caddynet
-
-volumes:
-  kgpz_staging_data:
-    external: true
 
 networks:
   caddynet:
