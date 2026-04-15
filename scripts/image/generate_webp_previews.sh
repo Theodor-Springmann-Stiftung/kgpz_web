@@ -2,7 +2,7 @@
 
 # Script to generate WebP preview images from existing JPEG files
 # Resizes images to 50% and applies high compression for fast layout loading
-# Usage: ./scripts/generate_webp_previews.sh
+# Usage: ./scripts/image/generate_webp_previews.sh [pictures_dir]
 
 # Colors for output
 RED='\033[0;31m'
@@ -13,14 +13,12 @@ NC='\033[0m' # No Color
 # Configuration
 QUALITY=75          # WebP quality (0-100)
 COMPRESSION=6       # WebP compression level (0-6, higher = better compression)
-PICTURES_DIR="/app/data/pictures"
+DEFAULT_PICTURES_DIR="/app/data/pictures"
+PICTURES_DIR="${1:-$DEFAULT_PICTURES_DIR}"
 
-# Check if cwebp is installed
-if ! command -v cwebp &> /dev/null; then
-    echo -e "${RED}Error: cwebp is not installed. Please install WebP tools:${NC}"
-    echo "  Ubuntu/Debian: sudo apt-get install webp"
-    echo "  macOS: brew install webp"
-    echo "  CentOS/RHEL: sudo yum install libwebp-tools"
+# Check if ImageMagick is installed
+if ! command -v magick &> /dev/null; then
+    echo -e "${RED}Error: ImageMagick is not installed or 'magick' is unavailable.${NC}"
     exit 1
 fi
 
@@ -86,22 +84,37 @@ process_file() {
     fi
 
     # Convert to WebP
-    if cwebp -q "$QUALITY" -m "$COMPRESSION" $resize_params "$jpg_file" -o "$webp_file" 2>/dev/null; then
-        # Check file sizes
-        jpg_size=$(stat -f%z "$jpg_file" 2>/dev/null || stat -c%s "$jpg_file" 2>/dev/null)
-        webp_size=$(stat -f%z "$webp_file" 2>/dev/null || stat -c%s "$webp_file" 2>/dev/null)
-
-        if [ -n "$jpg_size" ] && [ -n "$webp_size" ]; then
-            reduction=$(( (jpg_size - webp_size) * 100 / jpg_size ))
-            echo -e "${GREEN}  ✓ Success! Size reduction: ${reduction}%${NC}"
+    if [ -n "$resize_params" ]; then
+        if magick "$jpg_file" \
+            -resize "${new_width}x${new_height}" \
+            -quality "$QUALITY" \
+            -define webp:method="$COMPRESSION" \
+            "$webp_file" 2>/dev/null; then
+            :
         else
-            echo -e "${GREEN}  ✓ Success!${NC}"
+            echo -e "${RED}  ✗ Failed to convert $jpg_file${NC}"
+            return 1
         fi
-        return 0
+    elif magick "$jpg_file" \
+        -quality "$QUALITY" \
+        -define webp:method="$COMPRESSION" \
+        "$webp_file" 2>/dev/null; then
+        :
     else
         echo -e "${RED}  ✗ Failed to convert $jpg_file${NC}"
         return 1
     fi
+    # Check file sizes
+    jpg_size=$(stat -f%z "$jpg_file" 2>/dev/null || stat -c%s "$jpg_file" 2>/dev/null)
+    webp_size=$(stat -f%z "$webp_file" 2>/dev/null || stat -c%s "$webp_file" 2>/dev/null)
+
+    if [ -n "$jpg_size" ] && [ -n "$webp_size" ]; then
+        reduction=$(( (jpg_size - webp_size) * 100 / jpg_size ))
+        echo -e "${GREEN}  ✓ Success! Size reduction: ${reduction}%${NC}"
+    else
+        echo -e "${GREEN}  ✓ Success!${NC}"
+    fi
+    return 0
 }
 
 # Export the function and variables for parallel execution

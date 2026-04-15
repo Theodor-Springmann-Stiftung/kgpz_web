@@ -11,6 +11,7 @@ README.md
 
 # Exclude build artifacts
 node_modules/
+views/node_modules/
 .npm/
 dist/
 build/

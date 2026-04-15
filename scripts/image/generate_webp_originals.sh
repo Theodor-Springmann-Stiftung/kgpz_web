@@ -3,7 +3,7 @@
 # Script to generate high-quality WebP versions of original JPEG files
 # These will be used for the single page viewer (enlarged view)
 # Overwrites existing WebP files for fresh conversion
-# Usage: ./scripts/generate_webp_originals.sh
+# Usage: ./scripts/image/generate_webp_originals.sh [pictures_dir]
 
 # Colors for output
 RED='\033[0;31m'
@@ -15,14 +15,12 @@ NC='\033[0m' # No Color
 # Configuration
 QUALITY=88          # WebP quality (0-100) - high quality with good compression
 COMPRESSION=2       # WebP compression level (0-6, lower = less compression, higher quality)
-PICTURES_DIR="/app/data/pictures"
+DEFAULT_PICTURES_DIR="/app/data/pictures"
+PICTURES_DIR="${1:-$DEFAULT_PICTURES_DIR}"
 
-# Check if cwebp is installed
-if ! command -v cwebp &> /dev/null; then
-    echo -e "${RED}Error: cwebp is not installed. Please install WebP tools:${NC}"
-    echo "  Ubuntu/Debian: sudo apt-get install webp"
-    echo "  macOS: brew install webp"
-    echo "  CentOS/RHEL: sudo yum install libwebp-tools"
+# Check if ImageMagick is installed
+if ! command -v magick &> /dev/null; then
+    echo -e "${RED}Error: ImageMagick is not installed or 'magick' is unavailable.${NC}"
     exit 1
 fi
 
@@ -65,7 +63,10 @@ process_file() {
     # Convert to high-quality WebP
     echo "Processing: $jpg_file -> $webp_file"
 
-    if cwebp -q "$QUALITY" -m "$COMPRESSION" -alpha_cleanup "$jpg_file" -o "$webp_file" 2>/dev/null; then
+    if magick "$jpg_file" \
+        -quality "$QUALITY" \
+        -define webp:method="$COMPRESSION" \
+        "$webp_file" 2>/dev/null; then
         # Check file sizes
         jpg_size=$(stat -f%z "$jpg_file" 2>/dev/null || stat -c%s "$jpg_file" 2>/dev/null)
         webp_size=$(stat -f%z "$webp_file" 2>/dev/null || stat -c%s "$webp_file" 2>/dev/null)

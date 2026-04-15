@@ -3,10 +3,19 @@ services:
     build: .
     volumes:
       - kgpz_staging_data:/app/data
+    depends_on:
+      preprocess-pictures:
+        condition: service_completed_successfully
     expose:
       - "8095"
     networks:
       - caddynet
+
+  preprocess-pictures:
+    build: .
+    volumes:
+      - kgpz_staging_data:/app/data
+    command: ["./scripts/image/preprocess_pictures.sh", "/app/data/pictures"]
 
 volumes:
   kgpz_staging_data:

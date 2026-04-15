@@ -15,3 +15,4 @@ kgpz_web
 *.out
 *.zip
 .env
+.codex
