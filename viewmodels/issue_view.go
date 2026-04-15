@@ -40,16 +40,16 @@ type IndividualPiecesByPage struct {
 }
 
 type IssuePage struct {
-	PageNumber  int
-	ImagePath   string // Full-quality image path (prefers WebP over JPEG)
-	PreviewPath string // Compressed WebP path for layout views
-	JpegPath    string // JPEG path for download button
-	Available   bool
-	GridColumn  int    // 1 or 2 for left/right positioning
-	GridRow     int    // Row number in grid
-	HasHeader   bool   // Whether this page has a double-spread header
-	HeaderText  string // Text for double-spread header
-	PageIcon    string // Icon type: "first", "last", "even", "odd"
+	PageNumber   int
+	ImagePath    string // Full-quality image path (prefers WebP over source formats)
+	PreviewPath  string // Compressed WebP path for layout views
+	DownloadPath string // Original source path for download button
+	Available    bool
+	GridColumn   int    // 1 or 2 for left/right positioning
+	GridRow      int    // Row number in grid
+	HasHeader    bool   // Whether this page has a double-spread header
+	HeaderText   string // Text for double-spread header
+	PageIcon     string // Icon type: "first", "last", "even", "odd"
 }
 
 // Deprecated: Use pictures.ImageFile from provider instead
@@ -266,7 +266,6 @@ func CreateIndividualPagesWithMetadata(pieces PiecesByPage, lib *xmlmodels.Libra
 	// Process each page individually
 	for _, page := range pieces.Pages {
 		pageItems := pieces.Items[page]
-
 
 		// Sort pieces according to the ordering rules
 		sortedPageItems := sortPiecesOnPage(pageItems, page)
@@ -504,25 +503,25 @@ func LoadIssueImages(issue xmlmodels.Issue, pics *pictures.PicturesProvider) (Is
 			if previewPath == "" {
 				previewPath = foundFile.Path
 			}
-			// Use JPEG path if available, otherwise fallback to primary
-			jpegPath := foundFile.JpegPath
-			if jpegPath == "" {
-				jpegPath = foundFile.Path
+			// Use original source path if available, otherwise fallback to primary
+			downloadPath := foundFile.DownloadPath
+			if downloadPath == "" {
+				downloadPath = foundFile.Path
 			}
 			images.MainPages = append(images.MainPages, IssuePage{
-				PageNumber:  page,
-				ImagePath:   foundFile.Path,
-				PreviewPath: previewPath,
-				JpegPath:    jpegPath,
-				Available:   true,
+				PageNumber:   page,
+				ImagePath:    foundFile.Path,
+				PreviewPath:  previewPath,
+				DownloadPath: downloadPath,
+				Available:    true,
 			})
 		} else {
 			images.MainPages = append(images.MainPages, IssuePage{
-				PageNumber:  page,
-				ImagePath:   "",
-				PreviewPath: "",
-				JpegPath:    "",
-				Available:   false,
+				PageNumber:   page,
+				ImagePath:    "",
+				PreviewPath:  "",
+				DownloadPath: "",
+				Available:    false,
 			})
 		}
 	}
@@ -539,17 +538,17 @@ func LoadIssueImages(issue xmlmodels.Issue, pics *pictures.PicturesProvider) (Is
 			if previewPath == "" {
 				previewPath = file.Path
 			}
-			// Use JPEG path if available, otherwise fallback to primary
-			jpegPath := file.JpegPath
-			if jpegPath == "" {
-				jpegPath = file.Path
+			// Use original source path if available, otherwise fallback to primary
+			downloadPath := file.DownloadPath
+			if downloadPath == "" {
+				downloadPath = file.Path
 			}
 			beilagePages = append(beilagePages, IssuePage{
-				PageNumber:  file.Page,
-				ImagePath:   file.Path,
-				PreviewPath: previewPath,
-				JpegPath:    jpegPath,
-				Available:   true,
+				PageNumber:   file.Page,
+				ImagePath:    file.Path,
+				PreviewPath:  previewPath,
+				DownloadPath: downloadPath,
+				Available:    true,
 			})
 		}
 

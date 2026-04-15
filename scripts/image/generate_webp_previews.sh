@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to generate WebP preview images from existing JPEG files
+# Script to generate WebP preview images from source image files
 # Resizes images to 50% and applies high compression for fast layout loading
 # Usage: ./scripts/image/generate_webp_previews.sh [pictures_dir]
 
@@ -48,18 +48,18 @@ processed=0
 skipped=0
 errors=0
 
-# Function to process a single file
+# Function to process a single source image
 process_file() {
-    local jpg_file="$1"
+    local source_file="$1"
 
     # Skip if already a preview file
-    if [[ "$jpg_file" =~ -preview\.(jpg|jpeg)$ ]]; then
+    if [[ "$source_file" =~ -preview\.(jpg|jpeg|tif|tiff)$ ]]; then
         return 0
     fi
 
     # Generate output filename
-    dir=$(dirname "$jpg_file")
-    filename=$(basename "$jpg_file")
+    dir=$(dirname "$source_file")
+    filename=$(basename "$source_file")
     name_no_ext="${filename%.*}"
     webp_file="$dir/${name_no_ext}-preview.webp"
 
@@ -69,47 +69,47 @@ process_file() {
     fi
 
     # Get image dimensions and calculate 70%
-    dimensions=$(identify -ping -format "%w %h" "$jpg_file" 2>/dev/null)
+    dimensions=$(identify -ping -format "%w %h" "$source_file" 2>/dev/null)
     if [ $? -eq 0 ] && [ -n "$dimensions" ]; then
         width=$(echo $dimensions | cut -d' ' -f1)
         height=$(echo $dimensions | cut -d' ' -f2)
         new_width=$((width * 70 / 100))
         new_height=$((height * 70 / 100))
         resize_params="-resize $new_width $new_height"
-        echo "Processing: $jpg_file -> $webp_file (${width}x${height} → ${new_width}x${new_height})"
+        echo "Processing: $source_file -> $webp_file (${width}x${height} → ${new_width}x${new_height})"
     else
         # Fallback: no resizing if we can't get dimensions
         resize_params=""
-        echo "Processing: $jpg_file -> $webp_file (no resize - couldn't get dimensions)"
+        echo "Processing: $source_file -> $webp_file (no resize - couldn't get dimensions)"
     fi
 
     # Convert to WebP
     if [ -n "$resize_params" ]; then
-        if magick "$jpg_file" \
+        if magick "$source_file" \
             -resize "${new_width}x${new_height}" \
             -quality "$QUALITY" \
             -define webp:method="$COMPRESSION" \
             "$webp_file" 2>/dev/null; then
             :
         else
-            echo -e "${RED}  ✗ Failed to convert $jpg_file${NC}"
+            echo -e "${RED}  ✗ Failed to convert $source_file${NC}"
             return 1
         fi
-    elif magick "$jpg_file" \
+    elif magick "$source_file" \
         -quality "$QUALITY" \
         -define webp:method="$COMPRESSION" \
         "$webp_file" 2>/dev/null; then
         :
     else
-        echo -e "${RED}  ✗ Failed to convert $jpg_file${NC}"
+        echo -e "${RED}  ✗ Failed to convert $source_file${NC}"
         return 1
     fi
     # Check file sizes
-    jpg_size=$(stat -f%z "$jpg_file" 2>/dev/null || stat -c%s "$jpg_file" 2>/dev/null)
+    source_size=$(stat -f%z "$source_file" 2>/dev/null || stat -c%s "$source_file" 2>/dev/null)
     webp_size=$(stat -f%z "$webp_file" 2>/dev/null || stat -c%s "$webp_file" 2>/dev/null)
 
-    if [ -n "$jpg_size" ] && [ -n "$webp_size" ]; then
-        reduction=$(( (jpg_size - webp_size) * 100 / jpg_size ))
+    if [ -n "$source_size" ] && [ -n "$webp_size" ]; then
+        reduction=$(( (source_size - webp_size) * 100 / source_size ))
         echo -e "${GREEN}  ✓ Success! Size reduction: ${reduction}%${NC}"
     else
         echo -e "${GREEN}  ✓ Success!${NC}"
@@ -128,16 +128,16 @@ PARALLEL_JOBS=$((CPU_CORES))
 echo "Using $PARALLEL_JOBS parallel jobs (detected $CPU_CORES CPU cores)"
 echo ""
 
-# Find all JPG files and process them in parallel
-find "$PICTURES_DIR" -type f \( -name "*.jpg" -o -name "*.jpeg" \) | \
-    grep -v -E '\-preview\.(jpg|jpeg)$' | \
+# Find all supported source files and process them in parallel
+find "$PICTURES_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.tif" -o -iname "*.tiff" \) | \
+    grep -vi -E '\-preview\.(jpg|jpeg|tif|tiff)$' | \
     xargs -n 1 -P "$PARALLEL_JOBS" -I {} bash -c 'process_file "$@"' _ {}
 
 # Wait for all background processes to complete
 wait
 
 # Count actual results
-total_files=$(find "$PICTURES_DIR" -type f \( -name "*.jpg" -o -name "*.jpeg" \) | grep -v -E '\-preview\.(jpg|jpeg)$' | wc -l)
+total_files=$(find "$PICTURES_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.tif" -o -iname "*.tiff" \) | grep -vi -E '\-preview\.(jpg|jpeg|tif|tiff)$' | wc -l)
 preview_files=$(find "$PICTURES_DIR" -type f -name "*-preview.webp" | wc -l)
 processed=$preview_files
 skipped=0
@@ -160,4 +160,4 @@ fi
 echo ""
 echo "To see space savings, run:"
 echo "  find $PICTURES_DIR -name '*-preview.webp' -exec du -ch {} + | tail -1"
-echo "  find $PICTURES_DIR -name '*.jpg' -exec du -ch {} + | tail -1"
+echo "  find $PICTURES_DIR -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.tif' -o -iname '*.tiff' \\) -exec du -ch {} + | tail -1"

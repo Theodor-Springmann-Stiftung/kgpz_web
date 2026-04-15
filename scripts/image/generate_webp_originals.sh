@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to generate high-quality WebP versions of original JPEG files
+# Script to generate high-quality WebP versions of source image files
 # These will be used for the single page viewer (enlarged view)
 # Overwrites existing WebP files for fresh conversion
 # Usage: ./scripts/image/generate_webp_originals.sh [pictures_dir]
@@ -40,18 +40,18 @@ processed=0
 skipped=0
 errors=0
 
-# Function to process a single file
+# Function to process a single source image
 process_file() {
-    local jpg_file="$1"
+    local source_file="$1"
 
     # Skip if already a preview file
-    if [[ "$jpg_file" =~ -preview\.(jpg|jpeg)$ ]]; then
+    if [[ "$source_file" =~ -preview\.(jpg|jpeg|tif|tiff)$ ]]; then
         return 0
     fi
 
     # Generate output filename
-    dir=$(dirname "$jpg_file")
-    filename=$(basename "$jpg_file")
+    dir=$(dirname "$source_file")
+    filename=$(basename "$source_file")
     name_no_ext="${filename%.*}"
     webp_file="$dir/${name_no_ext}.webp"
 
@@ -61,22 +61,22 @@ process_file() {
     fi
 
     # Convert to high-quality WebP
-    echo "Processing: $jpg_file -> $webp_file"
+    echo "Processing: $source_file -> $webp_file"
 
-    if magick "$jpg_file" \
+    if magick "$source_file" \
         -quality "$QUALITY" \
         -define webp:method="$COMPRESSION" \
         "$webp_file" 2>/dev/null; then
         # Check file sizes
-        jpg_size=$(stat -f%z "$jpg_file" 2>/dev/null || stat -c%s "$jpg_file" 2>/dev/null)
+        source_size=$(stat -f%z "$source_file" 2>/dev/null || stat -c%s "$source_file" 2>/dev/null)
         webp_size=$(stat -f%z "$webp_file" 2>/dev/null || stat -c%s "$webp_file" 2>/dev/null)
 
-        if [ -n "$jpg_size" ] && [ -n "$webp_size" ]; then
-            if [ "$webp_size" -lt "$jpg_size" ]; then
-                reduction=$(( (jpg_size - webp_size) * 100 / jpg_size ))
+        if [ -n "$source_size" ] && [ -n "$webp_size" ]; then
+            if [ "$webp_size" -lt "$source_size" ]; then
+                reduction=$(( (source_size - webp_size) * 100 / source_size ))
                 echo -e "${GREEN}  ✓ Success! Size reduction: ${reduction}%${NC}"
             else
-                increase=$(( (webp_size - jpg_size) * 100 / jpg_size ))
+                increase=$(( (webp_size - source_size) * 100 / source_size ))
                 echo -e "${GREEN}  ✓ Success! Size increase: ${increase}% (expected for high quality)${NC}"
             fi
         else
@@ -84,7 +84,7 @@ process_file() {
         fi
         return 0
     else
-        echo -e "${RED}  ✗ Failed to convert $jpg_file${NC}"
+        echo -e "${RED}  ✗ Failed to convert $source_file${NC}"
         return 1
     fi
 }
@@ -100,16 +100,16 @@ PARALLEL_JOBS=$((CPU_CORES))
 echo "Using $PARALLEL_JOBS parallel jobs (detected $CPU_CORES CPU cores)"
 echo ""
 
-# Find all JPG files and process them in parallel
-find "$PICTURES_DIR" -type f \( -name "*.jpg" -o -name "*.jpeg" \) | \
-    grep -v -E '\-preview\.(jpg|jpeg)$' | \
+# Find all supported source files and process them in parallel
+find "$PICTURES_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.tif" -o -iname "*.tiff" \) | \
+    grep -vi -E '\-preview\.(jpg|jpeg|tif|tiff)$' | \
     xargs -n 1 -P "$PARALLEL_JOBS" -I {} bash -c 'process_file "$@"' _ {}
 
 # Wait for all background processes to complete
 wait
 
 # Count actual results
-total_files=$(find "$PICTURES_DIR" -type f \( -name "*.jpg" -o -name "*.jpeg" \) | grep -v -E '\-preview\.(jpg|jpeg)$' | wc -l)
+total_files=$(find "$PICTURES_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.tif" -o -iname "*.tiff" \) | grep -vi -E '\-preview\.(jpg|jpeg|tif|tiff)$' | wc -l)
 webp_files=$(find "$PICTURES_DIR" -type f -name "*.webp" ! -name "*-preview.webp" | wc -l)
 processed=$webp_files
 skipped=0
@@ -132,17 +132,17 @@ fi
 echo ""
 echo -e "${BLUE}=== File Structure ===${NC}"
 echo "After running this script, you'll have:"
-echo "  original.jpg         -> Original JPEG file (fallback)"
+echo "  original.<ext>       -> Original source file (download target)"
 echo "  original.webp        -> High-quality WebP (single page viewer)"
 echo "  original-preview.webp -> Compressed WebP (layout views)"
 echo ""
 echo "The backend will prefer .webp files for the single page viewer,"
-echo "falling back to .jpg if WebP is not available."
+echo "falling back to the original source file if WebP is not available."
 
 # Calculate total space impact (optional)
 echo ""
 echo -e "${BLUE}=== Space Analysis ===${NC}"
 echo "To analyze space usage:"
-echo "  Original JPEGs: find $PICTURES_DIR -name '*.jpg' -exec du -ch {} + | tail -1"
+echo "  Original sources: find $PICTURES_DIR -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.tif' -o -iname '*.tiff' \\) -exec du -ch {} + | tail -1"
 echo "  WebP originals: find $PICTURES_DIR -name '*.webp' ! -name '*-preview.webp' -exec du -ch {} + | tail -1"
 echo "  WebP previews:  find $PICTURES_DIR -name '*-preview.webp' -exec du -ch {} + | tail -1"

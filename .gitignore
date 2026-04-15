@@ -1,4 +1,5 @@
 KGPZ/
+__pycache__
 tmp/
 bin/
 data_git/

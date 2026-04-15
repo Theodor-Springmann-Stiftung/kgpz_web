@@ -13,9 +13,9 @@ type PiecePageEntry struct {
 	PageNumber     int
 	IssueYear      int
 	IssueNumber    int
-	ImagePath      string // Full-quality image path (prefers WebP over JPEG)
+	ImagePath      string // Full-quality image path (prefers WebP over source formats)
 	PreviewPath    string // Compressed WebP path for layout views
-	JpegPath       string // JPEG path for download button
+	DownloadPath   string // Original source path for download button
 	IsContinuation bool
 	IssueContext   string // "1764 Nr. 37" for display
 	Available      bool
@@ -100,8 +100,8 @@ func NewPieceView(piece xmlmodels.Piece, lib *xmlmodels.Library, pics *pictures.
 				PartNumber:     partIndex + 1,              // Part number (1-based)
 			}
 
-			// Get actual image path, preview path, and JPEG path from provider
-			pageEntry.ImagePath, pageEntry.PreviewPath, pageEntry.JpegPath = getImagePathsFromProvider(pics, issueRef.When.Year, issueRef.Nr, pageNum, issueRef.Beilage > 0)
+			// Get actual image path, preview path, and download path from provider.
+			pageEntry.ImagePath, pageEntry.PreviewPath, pageEntry.DownloadPath = getImagePathsFromProvider(pics, issueRef.When.Year, issueRef.Nr, pageNum, issueRef.Beilage > 0)
 
 			pvm.AllPages = append(pvm.AllPages, pageEntry)
 		}
@@ -139,12 +139,12 @@ func (pvm *PieceVM) loadImages(pics *pictures.PicturesProvider) error {
 	for i, pageEntry := range pvm.AllPages {
 		// Create IssuePage for template compatibility
 		issuePage := IssuePage{
-			PageNumber:  pageEntry.PageNumber,
-			ImagePath:   pageEntry.ImagePath,
-			PreviewPath: pageEntry.PreviewPath,
-			JpegPath:    pageEntry.JpegPath,
-			Available:   true,     // Assume available for now
-			PageIcon:    "single", // Simplified icon for piece view
+			PageNumber:   pageEntry.PageNumber,
+			ImagePath:    pageEntry.ImagePath,
+			PreviewPath:  pageEntry.PreviewPath,
+			DownloadPath: pageEntry.DownloadPath,
+			Available:    true,     // Assume available for now
+			PageIcon:     "single", // Simplified icon for piece view
 		}
 
 		// Check if image actually exists using the provider
@@ -212,7 +212,7 @@ func (pvm *PieceVM) createContinuousPages(lib *xmlmodels.Library) error {
 	return nil
 }
 
-// getImagePathsFromProvider gets image paths: primary (WebP preferred), preview (compressed), and JPEG, handling both regular and Beilage pages
+// getImagePathsFromProvider gets image paths: primary (WebP preferred), preview (compressed), and download, handling both regular and Beilage pages.
 func getImagePathsFromProvider(pics *pictures.PicturesProvider, year, issue, page int, isBeilage bool) (string, string, string) {
 	// Get image file from provider
 	imageFile, exists := pics.GetByYearIssuePage(year, issue, page, isBeilage)
@@ -231,11 +231,11 @@ func getImagePathsFromProvider(pics *pictures.PicturesProvider, year, issue, pag
 	if previewPath == "" {
 		previewPath = imageFile.Path // Fallback to original if no preview
 	}
-	jpegPath := imageFile.JpegPath
-	if jpegPath == "" {
-		jpegPath = imageFile.Path // Fallback to primary if no separate JPEG
+	downloadPath := imageFile.DownloadPath
+	if downloadPath == "" {
+		downloadPath = imageFile.Path // Fallback to primary if no separate source path
 	}
-	return imageFile.Path, previewPath, jpegPath
+	return imageFile.Path, previewPath, downloadPath
 }
 
 // populateOtherPieces finds and populates other pieces that appear on the same pages as this piece
@@ -433,4 +433,3 @@ func equalPlaceRefs(a, b []xmlmodels.PlaceRef) bool {
 	}
 	return true
 }
-

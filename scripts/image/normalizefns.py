@@ -8,9 +8,10 @@ YEAR_DIR_PATTERN = re.compile(r".*?(\d{4})$")
 FILENAME_PATTERN = re.compile(
     r"([0-9]+[a-zA-Z]*|[a-zA-Z]*[0-9]*)-"
     r"([0-9]+[a-zA-Z]*|[a-zA-Z]*[0-9]*)-"
-    r"([0-9]+[a-zA-Z]*|[a-zA-Z]*[0-9]*)\.jpg$",
+    r"([0-9]+[a-zA-Z]*|[a-zA-Z]*[0-9]*)(\.(?:jpg|jpeg|tif|tiff))$",
     re.IGNORECASE,
 )
+SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".tif", ".tiff"}
 
 
 def normalize_segment(segment):
@@ -22,8 +23,9 @@ def normalize_filename(filename):
     if not match:
         return filename
 
-    normalized_segments = [normalize_segment(segment) for segment in match.groups()]
-    return "-".join(normalized_segments) + ".jpg"
+    normalized_segments = [normalize_segment(segment) for segment in match.groups()[:3]]
+    extension = match.group(4).lower()
+    return "-".join(normalized_segments) + extension
 
 
 def normalize_year_directories(base_dir):
@@ -53,7 +55,8 @@ def normalize_year_directories(base_dir):
 def normalize_filenames_recursively(base_dir):
     for root, _, files in os.walk(base_dir):
         for filename in files:
-            if not filename.lower().endswith(".jpg"):
+            _, extension = os.path.splitext(filename)
+            if extension.lower() not in SUPPORTED_EXTENSIONS:
                 continue
 
             old_path = os.path.join(root, filename)

@@ -11,15 +11,15 @@ import (
 
 // ImageFile represents a single image file with its metadata
 type ImageFile struct {
-	Year        int
-	Issue       int
-	Page        int
-	IsBeilage   bool
-	BeilageNo   int
-	Filename    string
-	Path        string // Primary path (prefers WebP over JPEG)
-	PreviewPath string // Path to compressed WebP version for layout views
-	JpegPath    string // Path to JPEG version (for download button)
+	Year         int
+	Issue        int
+	Page         int
+	IsBeilage    bool
+	BeilageNo    int
+	Filename     string
+	Path         string // Primary path (prefers WebP over source formats)
+	PreviewPath  string // Path to compressed WebP version for layout views
+	DownloadPath string // Path to the original source file for downloads
 }
 
 // imageRegistry holds all image files organized by different keys for fast lookup
@@ -68,12 +68,12 @@ func (p *PicturesProvider) Scan(path string) error {
 		filename := info.Name()
 		filenamelower := strings.ToLower(filename)
 
-		// Only process .jpg and .webp files (but skip preview files)
+		// Only process supported source formats and .webp files (but skip preview files)
 		var nameWithoutExt string
 		var isWebP bool
 
-		if strings.HasSuffix(filenamelower, ".jpg") {
-			nameWithoutExt = strings.TrimSuffix(filename, ".jpg")
+		if ext, ok := getSourceExtension(filename); ok {
+			nameWithoutExt = strings.TrimSuffix(filename, ext)
 			isWebP = false
 		} else if strings.HasSuffix(filenamelower, ".webp") && !strings.HasSuffix(filenamelower, "-preview.webp") {
 			nameWithoutExt = strings.TrimSuffix(filename, ".webp")
@@ -143,8 +143,8 @@ func (p *PicturesProvider) Scan(path string) error {
 			imageFile.Path = currentPath
 			imageFile.Filename = filename
 		} else {
-			// JPEG is the fallback path for download
-			imageFile.JpegPath = currentPath
+			// Source formats are used for download; prefer WebP as primary if available.
+			imageFile.DownloadPath = currentPath
 			// If no WebP path is set yet, use JPEG as primary
 			if imageFile.Path == "" {
 				imageFile.Path = currentPath
@@ -168,8 +168,8 @@ func (p *PicturesProvider) Scan(path string) error {
 		// Remove extension to get base name
 		if strings.HasSuffix(strings.ToLower(baseNameWithExt), ".webp") {
 			baseName = strings.TrimSuffix(baseNameWithExt, ".webp")
-		} else if strings.HasSuffix(strings.ToLower(baseNameWithExt), ".jpg") {
-			baseName = strings.TrimSuffix(baseNameWithExt, ".jpg")
+		} else if ext, ok := getSourceExtension(baseNameWithExt); ok {
+			baseName = strings.TrimSuffix(baseNameWithExt, ext)
 		} else {
 			baseName = baseNameWithExt
 		}
@@ -199,6 +199,22 @@ func (p *PicturesProvider) Scan(path string) error {
 
 	p.registry = registry
 	return nil
+}
+
+func getSourceExtension(filename string) (string, bool) {
+	lower := strings.ToLower(filename)
+	switch {
+	case strings.HasSuffix(lower, ".jpeg"):
+		return filename[len(filename)-5:], true
+	case strings.HasSuffix(lower, ".tiff"):
+		return filename[len(filename)-5:], true
+	case strings.HasSuffix(lower, ".jpg"):
+		return filename[len(filename)-4:], true
+	case strings.HasSuffix(lower, ".tif"):
+		return filename[len(filename)-4:], true
+	default:
+		return "", false
+	}
 }
 
 // GetByYearIssuePage returns an image file for a specific year, issue, and page
