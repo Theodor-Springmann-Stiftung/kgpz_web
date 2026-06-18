@@ -3,6 +3,7 @@ package xmlmodels
 import (
 	"fmt"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -74,74 +75,122 @@ func (l *Library) Parse(source xmlprovider.ParseSource, baseDir, commit string) 
 
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
+		defer func() {
+			if r := recover(); r != nil {
+				logging.Error(fmt.Errorf("panic: %v\n%s", r, string(debug.Stack())), "panic while parsing places")
+				metamu.Lock()
+				meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, PLACES_PATH))
+				metamu.Unlock()
+			}
+		}()
 		err := l.Places.Serialize(&PlaceRoot{}, filepath.Join(meta.BaseDir, PLACES_PATH), meta)
 		if err != nil {
 			metamu.Lock()
 			meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, PLACES_PATH))
 			metamu.Unlock()
 		}
-		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
+		defer func() {
+			if r := recover(); r != nil {
+				logging.Error(fmt.Errorf("panic: %v\n%s", r, string(debug.Stack())), "panic while parsing agents")
+				metamu.Lock()
+				meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, AGENTS_PATH))
+				metamu.Unlock()
+			}
+		}()
 		err := l.Agents.Serialize(&AgentRoot{}, filepath.Join(meta.BaseDir, AGENTS_PATH), meta)
 		if err != nil {
 			metamu.Lock()
 			meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, AGENTS_PATH))
 			metamu.Unlock()
 		}
-		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
+		defer func() {
+			if r := recover(); r != nil {
+				logging.Error(fmt.Errorf("panic: %v\n%s", r, string(debug.Stack())), "panic while parsing categories")
+				metamu.Lock()
+				meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, CATEGORIES_PATH))
+				metamu.Unlock()
+			}
+		}()
 		err := l.Categories.Serialize(&CategoryRoot{}, filepath.Join(meta.BaseDir, CATEGORIES_PATH), meta)
 		if err != nil {
 			metamu.Lock()
 			meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, CATEGORIES_PATH))
 			metamu.Unlock()
 		}
-		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
+		defer func() {
+			if r := recover(); r != nil {
+				logging.Error(fmt.Errorf("panic: %v\n%s", r, string(debug.Stack())), "panic while parsing works")
+				metamu.Lock()
+				meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, WORKS_PATH))
+				metamu.Unlock()
+			}
+		}()
 		err := l.Works.Serialize(&WorkRoot{}, filepath.Join(meta.BaseDir, WORKS_PATH), meta)
 		if err != nil {
 			metamu.Lock()
 			meta.FailedPaths = append(meta.FailedPaths, filepath.Join(meta.BaseDir, WORKS_PATH))
 			metamu.Unlock()
 		}
-		wg.Done()
 	}()
 
 	issuepaths, _ := xmlprovider.XMLFilesForPath(filepath.Join(meta.BaseDir, ISSUES_DIR))
 	for _, path := range issuepaths {
 		wg.Add(1)
-		go func() {
-			err := l.Issues.Serialize(&IssueRoot{}, path, meta)
+		go func(p string) {
+			defer wg.Done()
+			defer func() {
+				if r := recover(); r != nil {
+					logging.Error(fmt.Errorf("panic: %v\n%s", r, string(debug.Stack())), "panic while parsing issue file")
+					metamu.Lock()
+					meta.FailedPaths = append(meta.FailedPaths, p)
+					metamu.Unlock()
+				}
+			}()
+			err := l.Issues.Serialize(&IssueRoot{}, p, meta)
 			if err != nil {
 				metamu.Lock()
-				meta.FailedPaths = append(meta.FailedPaths, path)
+				meta.FailedPaths = append(meta.FailedPaths, p)
 				metamu.Unlock()
 			}
-			wg.Done()
-		}()
+		}(path)
 	}
 
 	piecepaths, _ := xmlprovider.XMLFilesForPath(filepath.Join(meta.BaseDir, PIECES_DIR))
 	for _, path := range piecepaths {
 		wg.Add(1)
-		go func() {
-			err := l.Pieces.Serialize(&PieceRoot{}, path, meta)
+		go func(p string) {
+			defer wg.Done()
+			defer func() {
+				if r := recover(); r != nil {
+					logging.Error(fmt.Errorf("panic: %v\n%s", r, string(debug.Stack())), "panic while parsing piece file")
+					metamu.Lock()
+					meta.FailedPaths = append(meta.FailedPaths, p)
+					metamu.Unlock()
+				}
+			}()
+			err := l.Pieces.Serialize(&PieceRoot{}, p, meta)
 			if err != nil {
 				metamu.Lock()
-				meta.FailedPaths = append(meta.FailedPaths, path)
+				meta.FailedPaths = append(meta.FailedPaths, p)
 				metamu.Unlock()
 			}
-			wg.Done()
-		}()
+		}(path)
 	}
 
 	wg.Wait()

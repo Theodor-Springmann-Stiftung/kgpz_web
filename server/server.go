@@ -1,6 +1,9 @@
 package server
 
 import (
+	"fmt"
+	"log/slog"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -12,7 +15,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/compress"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/storage/memory/v2"
 )
@@ -32,6 +34,45 @@ const (
 	ROUTES_FILEPATH = "./views/routes"
 	LAYOUT_FILEPATH = "./views/layouts"
 )
+
+func errorHandler(c *fiber.Ctx, err error) error {
+	code := fiber.StatusInternalServerError
+	if e, ok := err.(*fiber.Error); ok {
+		code = e.Code
+	}
+
+	if code >= 500 {
+		logging.Error(err, fmt.Sprintf("request error: %s %s -> %d", c.Method(), c.Path(), code))
+	}
+
+	return c.Status(code).SendString(err.Error())
+}
+
+func requestLogger() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		path := c.Path()
+		if strings.HasPrefix(path, "/assets") ||
+			strings.HasPrefix(path, "/static/pictures/") ||
+			strings.HasPrefix(path, "/img/") {
+			return c.Next()
+		}
+
+		start := time.Now()
+		err := c.Next()
+		duration := time.Since(start)
+
+		status := c.Response().StatusCode()
+		slog.Info("request",
+			slog.String("method", c.Method()),
+			slog.String("path", path),
+			slog.Int("status", status),
+			slog.Duration("duration", duration),
+			slog.String("ip", c.IP()),
+			slog.String("user_agent", string(c.Request().Header.UserAgent())),
+		)
+		return err
+	}
+}
 
 // INFO: Server is a meta-package that handles the current router, which it starts in a goroutine.
 // The router must be able to restart itself, if the data validation fails, so we subscribe to a channel on the app,
@@ -90,7 +131,6 @@ func (s *Server) ClearPre() {
 	s.premuxproviders = []PreMuxProvider{}
 }
 
-// TODO: There is no error handler
 func (s *Server) Start() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -111,8 +151,7 @@ func (s *Server) Start() {
 
 		// EnablePrintRoutes: s.Config.Debug,
 
-		// TODO: Error handler, which sadly, is global:
-		ErrorHandler: fiber.DefaultErrorHandler,
+		ErrorHandler: errorHandler,
 
 		// WARNING: The app must be run in a console, since this uses environment variables:
 		// It is not trivial to turn this on, since we need to mark goroutines that must be started only once.
@@ -135,11 +174,14 @@ func (s *Server) Start() {
 		}
 	}
 
-	if s.Config.Debug {
-		srv.Use(logger.New())
-	}
+	srv.Use(recover.New(recover.Config{
+		EnableStackTrace: true,
+		StackTraceHandler: func(c *fiber.Ctx, e interface{}) {
+			logging.Error(nil, fmt.Sprintf("panic: %v\n%s", e, string(debug.Stack())))
+		},
+	}))
 
-	srv.Use(recover.New())
+	srv.Use(requestLogger())
 
 	// Add compression middleware for HTML responses (non-static routes)
 	srv.Use(compress.New(compress.Config{

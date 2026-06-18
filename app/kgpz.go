@@ -1,11 +1,15 @@
 package app
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/controllers"
 	"github.com/Theodor-Springmann-Stiftung/kgpz_web/helpers"
@@ -60,14 +64,22 @@ type KGPZ struct {
 	// So we need to prevent concurrent pulls and serializations
 	// This is what fsmu is for. IT IS NOT FOR SETTING Config, Repo. GND or Library.
 	// Those are only set once during initalization and construction.
-	fsmu      sync.Mutex
-	Config    *providers.ConfigProvider
-	Repo      *providers.GitProvider
-	GND       *gnd.GNDProvider
-	Geonames  *geonames.GeonamesProvider
-	Pictures  *pictures.PicturesProvider
-	Library   *xmlmodels.Library
-	Search    *searchprovider.SearchProvider
+	fsmu           sync.Mutex
+	pullMu         sync.Mutex
+	pullInProgress atomic.Bool
+	pullStart      time.Time
+	pullEnd        time.Time
+	pullError      string
+	parseStart     time.Time
+	parseEnd       time.Time
+	parseError     string
+	Config         *providers.ConfigProvider
+	Repo           *providers.GitProvider
+	GND            *gnd.GNDProvider
+	Geonames       *geonames.GeonamesProvider
+	Pictures       *pictures.PicturesProvider
+	Library        *xmlmodels.Library
+	Search         *searchprovider.SearchProvider
 
 	// Callback for when git data is updated
 	gitUpdateCallback GitUpdateCallback
@@ -149,7 +161,7 @@ func (k *KGPZ) Init() error {
 	}
 
 	k.Enrich()
-	go k.Pull()
+	go k.pullWithGuard()
 	err := k.Search.LoadIndeces()
 	if err != nil {
 		logging.Error(err, "Error loading search indeces.")
@@ -605,8 +617,8 @@ func (k *KGPZ) Serialize() error {
 	return err
 }
 
-func (k *KGPZ) IsDebug() bool {
-	return k.Config.Debug
+func (k *KGPZ) IsPullInProgress() bool {
+	return k.pullInProgress.Load()
 }
 
 func (k *KGPZ) GetWebHookSecret() string {
@@ -619,39 +631,116 @@ func (k *KGPZ) SetGitUpdateCallback(callback GitUpdateCallback) {
 }
 
 func (k *KGPZ) Pull() {
+	k.pullWithGuard()
+}
+
+func (k *KGPZ) pullWithGuard() {
+	if k.pullInProgress.Load() {
+		logging.Info("Pull skipped: pull already in progress")
+		return
+	}
+	if !k.pullMu.TryLock() {
+		logging.Info("Pull skipped: could not acquire pull lock")
+		return
+	}
+	defer k.pullMu.Unlock()
+	k.pull(context.Background())
+}
+
+func (k *KGPZ) pull(ctx context.Context) {
 	if k.Repo == nil {
 		return
 	}
 
+	k.pullInProgress.Store(true)
+	k.pullStart = time.Now()
+	k.pullEnd = time.Time{}
+	k.pullError = ""
+	defer func() {
+		k.pullEnd = time.Now()
+		k.pullInProgress.Store(false)
+	}()
+
 	logging.Info("Pulling Repository...")
 
+	pullCtx, pullCancel := context.WithTimeout(ctx, 30*time.Second)
+	defer pullCancel()
+
 	k.fsmu.Lock()
-	err, changed := k.Repo.Pull()
-	logging.Error(err, "Error pulling GitProvider")
+	var err error
+	var changed bool
+	done := make(chan struct{})
+	go func() {
+		err, changed = k.Repo.Pull()
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-pullCtx.Done():
+		err = fmt.Errorf("git pull timed out after 30s")
+	}
 	k.fsmu.Unlock()
 
-	if changed {
-		logging.Info("Repository updated to commit: " + k.Repo.Commit + " (reparsing data)")
+	if err != nil {
+		k.pullError = err.Error()
+		logging.Error(err, "Error pulling GitProvider")
+		return
+	}
+
+	if !changed {
+		logging.Info("Repository up to date at commit: " + k.Repo.Commit)
+		return
+	}
+
+	logging.Info("Repository updated to commit: " + k.Repo.Commit + " (reparsing data)")
+
+	cycleCtx, cycleCancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cycleCancel()
+
+	k.parseStart = time.Now()
+	k.parseEnd = time.Time{}
+	k.parseError = ""
+	parseDone := make(chan struct{})
+	go func() {
+		defer close(parseDone)
 		if err := k.Serialize(); err != nil {
+			k.parseError = err.Error()
 			logging.Error(err, "Error parsing XML after git pull. Using mixed old/new data.")
 		}
+	}()
+	select {
+	case <-parseDone:
+		k.parseEnd = time.Now()
+	case <-cycleCtx.Done():
+		k.parseError = "parse cycle timed out after 2m"
+		logging.Error(errors.New(k.parseError), "Error parsing XML after git pull")
+		return
+	}
+
+	enrichDone := make(chan struct{})
+	go func() {
+		defer close(enrichDone)
 		k.EnrichAndRebuildIndex()
+	}()
+	select {
+	case <-enrichDone:
+	case <-cycleCtx.Done():
+		logging.Error(fmt.Errorf("enrich/reindex cycle timed out after 2m"), "Error enriching/reindexing after git pull")
+		return
+	}
 
-		// Rescan pictures after pull
-		if err := k.initPictures(); err != nil {
-			logging.Error(err, "Error rescanning pictures directory after pull.")
-		}
+	// Rescan pictures after pull
+	if err := k.initPictures(); err != nil {
+		logging.Error(err, "Error rescanning pictures directory after pull.")
+	}
 
-		// Notify about git data update
-		if k.gitUpdateCallback != nil {
-			k.gitUpdateCallback(
-				k.Repo.Commit,
-				k.Repo.Date.Format("2006-01-02T15:04:05Z07:00"),
-				k.Config.Config.GitURL,
-			)
-		}
-	} else {
-		logging.Info("Repository up to date at commit: " + k.Repo.Commit)
+	// Notify about git data update
+	if k.gitUpdateCallback != nil {
+		k.gitUpdateCallback(
+			k.Repo.Commit,
+			k.Repo.Date.Format("2006-01-02T15:04:05Z07:00"),
+			k.Config.Config.GitURL,
+		)
 	}
 }
 

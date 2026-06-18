@@ -42,9 +42,9 @@ type ParseMessage struct {
 
 func (pm ParseMessage) String() string {
 	if pm.Object != "" {
-		return fmt.Sprintf("%s: %s\n%s\n%s", pm.XMLType, pm.XMLPath, pm.Object, pm.Message)
+		return fmt.Sprintf("%v: %s\n%s\n%s", pm.XMLType, pm.XMLPath, pm.Object, pm.Message)
 	}
-	return fmt.Sprintf("%s: %s\n%s", pm.XMLType, pm.XMLPath, pm.Message)
+	return fmt.Sprintf("%v: %s\n%s", pm.XMLType, pm.XMLPath, pm.Message)
 }
 
 type ParseLogger struct {
@@ -95,7 +95,7 @@ func (pl *ParseLogger) Start() {
 				}
 			}
 
-			if pl.ParseInfo == nil && pl.ParseInfo == nil && pl.ParseObjects == nil {
+			if pl.ParseInfo == nil && pl.ParseErrors == nil && pl.ParseObjects == nil {
 				break
 			}
 		}
